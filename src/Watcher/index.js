@@ -1,6 +1,7 @@
 const chokidar = require('chokidar')
 const Env = use('Env')
 const path = require('path')
+const fs = require('fs')
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i)
 
 module.exports = class Watcher {
@@ -24,9 +25,24 @@ module.exports = class Watcher {
     })
   }
 
+  changedRunningLock (type, pathname) {
+    const object = {}
+    object.event = type === 'add' || type === 'change' ? 'change' : 'unlink'
+    if (object.event === 'change') {
+      object.content = fs.readFileSync(pathname).toString()
+    }
+    Object.keys(this.folders['running.lock']).map( socketid => {
+      console.log(`${socketid} emit event running.lock with`, object)
+      this.folders['running.lock'][socketid].emit(`folder_running.lock`, object)
+    })
+  }
+
   fireChange(type) {
     const self = this
     return pathname => {
+      if (path.join(Env.get('COMMAND_FILES_PATH'), 'running.lock') === pathname) {
+        return this.changedRunningLock(type, pathname)
+      }
       console.log(`Event ${type} fired on file ${pathname}`)
 
       const file = path.parse(pathname)

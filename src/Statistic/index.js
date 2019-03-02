@@ -39,12 +39,13 @@ module.exports = class Statistic {
     return await fs.writeFile(this._path, data, 'utf8')
   }
 
-  write( path, { missed, matched, missmatched } ) {
+  write( path, { missed, matched, missmatched, table } ) {
     this._data[path] = {
       calculated: true,
       missed,
       matched, 
-      missmatched
+      missmatched,
+      table
     }
   }
 }

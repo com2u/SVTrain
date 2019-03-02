@@ -24,8 +24,46 @@ const CONST_PATHS = {
   root: Env.get('ROOT_PATH'),
   running: 'running.lock',
   commands: Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning')),
-  commandNames: ['train', 'validate', 'test', 'export'],
+  commandNames: ['train', 'validate', 'test', 'export', 'stop'],
   ignoreFiles: ['.DS_Store']
+}
+
+/**
+ * Build statistic table for subfolders from directory
+ * @param {String} dir Path to directory where subfolders are placed
+ * @param {Array<String>} subfolders Array of subfolders names
+ * @returns {Object} Statistic table
+ */
+const buildSubfolderTable = async (dir, subfolders) => {
+  if (subfolders.length === 0) return false
+  const table = {}
+  // build a table for subfolders
+  await Promise.all(
+    subfolders.map(async subfolder => {
+      table[subfolder] = {}
+      await Promise.all(
+        subfolders.map(async anotherSubfolder => {
+          table[subfolder][anotherSubfolder] = {
+            all: 0,
+            exclude: 0
+          }
+          const flist = await fs.readdir(path.join(dir, anotherSubfolder))
+          await Promise.all(
+            flist.map(async fileFromSF => {
+              const fileFromSF_lstat = await fs.lstat(path.join(dir, anotherSubfolder, fileFromSF))
+              if (fileFromSF_lstat.isFile() && fileFromSF.toLowerCase().includes(subfolder.toLowerCase())) {
+                table[subfolder][anotherSubfolder].all += 1
+                if (!fileFromSF.includes('!')) {
+                  table[subfolder][anotherSubfolder].exclude += 1
+                }
+              }
+            })
+          )
+        })
+      )
+    })
+  )
+  return table
 }
 
 class ExplorerController {
@@ -132,7 +170,12 @@ class ExplorerController {
   async state() {
     const dir = Env.get('COMMAND_FILES_PATH')
     const runningFile = path.join( dir, CONST_PATHS.running )
-    return fs.existsSync(runningFile)
+    try {
+      return fs.existsSync(runningFile) ? fs.readFileSync(runningFile) : false
+    } catch (e) {
+      console.log(e)
+      return null
+    }
   }
 
   /*
@@ -288,11 +331,13 @@ class ExplorerController {
       dirs.map( async dir => {
         let dirname = path.basename(dir)
         let files = await fs.readdir(dir)
+        const subfolders = []
         dirsObject[dir] = {
           missed: 0,
           matched: 0,
           missmatched: 0
         }
+        // count matches | missmatches
         await Promise.all(
           files.map( async f => {
             let filepath = path.join( dir, f )
@@ -305,8 +350,17 @@ class ExplorerController {
                 missedFiles.push(filepath)
               }
             }
+            if (lstat.isDirectory()) {
+              subfolders.push(f)
+            }
           }) // end of map function for all files
         ) // end of promise for all files
+
+        try {
+          dirsObject[dir].table = await buildSubfolderTable(dir, subfolders)
+        } catch (e) {
+          console.log(e)
+        }
       }) // end map function for all dirs
     ) // end of promise for all dirs
 
