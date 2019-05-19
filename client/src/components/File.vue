@@ -1,5 +1,9 @@
 <template>
-  <div class="file-explorer-item" v-bind:style="{ width: size + 'px' }" v-bind:id="file.path" v-bind:class="{ selected: file.selected }">
+  <div 
+    class="file-explorer-item" 
+    v-bind:style="{ width: size + 'px' }" 
+    v-bind:id="file.path" 
+    v-bind:class="{ cursor: file.cursor, selected: file.selected }">
     <template v-if="file.deleted || file.changed">
       {{ file.deleted ? "File deleted" : "File changed" }}
     </template>
@@ -8,7 +12,7 @@
         <template v-if="file.image">
           <img 
             v-bind:src="file.serverPath" 
-            class="file-explorer-preview" v-bind:style="{width: size + 'px', height: size + 'px' }">
+            class="file-explorer-preview" v-bind:style="{width: size-15 + 'px', height: size-15 + 'px' }">
         </template>
         <template v-else>
           <v-icon name="file" scale=2></v-icon>
@@ -45,9 +49,12 @@ export default {
   overflow: hidden;
   height: auto;
   word-wrap:break-word;
-  padding: 10px;
+  padding: 5px;
   &.selected {
     background: rgb(180, 191, 255)
+  }
+  &.cursor {
+    border: 3px solid gray;
   }
   .file-explorer-file-name {
     font-size: 12px;

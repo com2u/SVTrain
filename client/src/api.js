@@ -10,7 +10,13 @@ const urls = {
   calculateStatistic: `${baseurl}calculateStatistic`,
   moveFiles: `${baseurl}moveFiles`,
   deleteFiles: `${baseurl}deleteFiles`,
-  getParentDirectory: dir => `${baseurl}getParent?dir=${dir}`
+  getParentDirectory: dir => `${baseurl}getParent?dir=${dir}`,
+  saveFile: `${baseurl}saveFile`,
+  checkFolder: folder => `${baseurl}checkFolder?folder=${folder}`,
+  getSubfolders: folder => `${baseurl}getSubfolders?folder=${folder}`,
+  createFolder: `${baseurl}createFolder`,
+  getWorkspace: `${baseurl}getWorkspace`,
+  setWorkspace: `${baseurl}setWorkspace`
 }
 
 export default {
@@ -50,5 +56,30 @@ export default {
 
   calculateStatistic: async() => {
     return (await axios.get(urls.calculateStatistic)).data
+  },
+
+  saveFile: async (path, data) => {
+    console.log(path, data)
+    return (await axios.post(urls.saveFile, { path, data })).data
+  },
+
+  checkFolder: async (path) => {
+    return (await axios.get(urls.checkFolder(path))).data
+  },
+
+  getSubfolders: async (folder) => {
+    return (await axios.get(urls.getSubfolders(folder))).data
+  },
+
+  createFolder: async (folder, name) => {
+    return (await axios.post(urls.createFolder, { folder, name })).data
+  },
+
+  getWorkspace: async () => {
+    return (await axios.get(urls.getWorkspace)).data
+  },
+
+  setWorkspace: async (workspace) => {
+    return (await axios.post(urls.setWorkspace, { workspace })).data
   }
 }

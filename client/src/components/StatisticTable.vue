@@ -1,6 +1,9 @@
 <template>
   <div>
     <div>
+      <span>Statistic for <b>{{ folder }}</b></span>
+    </div>
+    <div>
       <input type="radio" name="view" v-model="valuesView" id="absoluteView" value="absolute">
       <label for="absoluteView">Absolute Numbers</label>
       <input type="radio" name="view" v-model="valuesView" id="percentageView" value="percentage">
@@ -44,7 +47,8 @@
 <script>
 export default {
   props: [
-    'table'
+    'table',
+    'folder'
   ],
   data () {
     return {

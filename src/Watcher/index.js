@@ -36,12 +36,26 @@ module.exports = class Watcher {
       this.folders['running.lock'][socketid].emit(`folder_running.lock`, object)
     })
   }
+  changedWorkspace (type, pathname) {
+    const object = {}
+    object.event = type === 'add' || type === 'change' ? 'change' : 'unlink'
+    if (object.event === 'change') {
+      object.content = fs.readFileSync(pathname).toString()
+    }
+    Object.keys(this.folders['workspace.bat']).map( socketid => {
+      console.log(`${socketid} emit event workspace.bat with`, object)
+      this.folders['workspace.bat'][socketid].emit(`folder_workspace.bat`, object)
+    })
+  }
 
   fireChange(type) {
     const self = this
     return pathname => {
       if (path.join(Env.get('COMMAND_FILES_PATH'), 'running.lock') === pathname) {
         return this.changedRunningLock(type, pathname)
+      }
+      if (path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat') === pathname) {
+        return this.changedWorkspace(type, pathname)
       }
       console.log(`Event ${type} fired on file ${pathname}`)
 

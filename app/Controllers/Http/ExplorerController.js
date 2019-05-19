@@ -23,8 +23,9 @@ const FTYPES = {
 const CONST_PATHS = {
   root: Env.get('ROOT_PATH'),
   running: 'running.lock',
+  workspace: 'workspace.bat',
   commands: Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning')),
-  commandNames: ['train', 'validate', 'test', 'export', 'stop'],
+  commandNames: ['train', 'validate', 'test', 'export', 'stop', 'ExportImages'],
   ignoreFiles: ['.DS_Store']
 }
 
@@ -179,6 +180,34 @@ class ExplorerController {
   }
 
   /*
+    GET /getWorkspace
+
+    Returns the content of file workspace.bat
+  */
+  async getWorkspace() {
+    const dir = Env.get('COMMAND_FILES_PATH')
+    const workspaceFile = path.join( dir, CONST_PATHS.workspace )
+    try {
+      return fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile) : false
+    } catch (e) {
+      console.log(e)
+      return null
+    }
+  }
+
+  /*
+  POST /setWorkspace
+
+  Set the workspace
+  */
+  async setWorkspace({ request }) {
+    const { workspace } = request.post()
+    const workspaceFile = path.join( Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace )
+    const newWorkspace = path.join(CONST_PATHS.root, workspace )
+    return fs.writeFile(workspaceFile, newWorkspace)
+  }
+
+  /*
     POST /deleteFiles
 
     Except the JSON-object with property "files" with format:
@@ -278,6 +307,88 @@ class ExplorerController {
     }    
 
     return result
+  }
+
+  /*
+    POST /saveFile
+    save file specified in "path" parameter with "data" content
+  */
+  async saveFile({ request }) {
+    const { path, data } = request.post()
+
+    if ( !path ) throw new Error('The "path" parameter is needed')
+
+    if ( !accessToFile(CONST_PATHS.root, path) ) {
+      console.log(`Access denied for saving for file ${path}`)
+      throw new Error(`Access denied for saving for file ${path}`)
+    }
+
+    return fs.writeFileSync(path, data)
+  }
+
+  /*
+    GET /getSubfolders
+    returns an array with subfolders of a specific folder
+  */
+  async getSubfolders({ request }) {
+    let { folder } = request.get()
+    if (folder === 'root') folder = CONST_PATHS.root
+    const result = []
+
+    if ( !folder ) throw new Error('The "folder" parameter is needed')
+
+    if ( !accessToFile(CONST_PATHS.root, folder) ) {
+      console.log(`Access denied for gettings subfolders for folder ${folder}`)
+      throw new Error(`Access denied for read directory ${folder}`)
+    }
+
+    const files = await fs
+    .readdir(folder)
+
+    for ( let i = 0; i < files.length; ++i ) {
+      const f = files[i]
+      const lstat = await fs
+      .lstat( path.join( folder, f) )
+      if ( lstat.isDirectory() ) {
+        result.push(f)
+      }
+    }    
+
+    return result
+  }
+
+  /*
+    GET /checkFolder
+    returns a status of a specific folder: ok, not_found, access_denied
+  */
+  async checkFolder({ request }) {
+    const { folder } = request.get()
+    if ( !folder ) throw new Error('The "folder" parameter is needed')
+    if ( !accessToFile(CONST_PATHS.root, folder)) {
+      return 'access_denied'
+    }
+    const isExist = await fs.exists(folder)
+    if (!isExist) {
+      return 'not_found'
+    }
+    return 'ok'
+  }
+
+  /*
+    POST /createFolder
+    creates a new directory with specified name in a specified folder
+  */
+  async createFolder({ request }) {
+    const { name, folder } = request.post()
+    if (!folder || !name) throw new Error('Parameters name and folder are needed')
+    if (!accessToFile(CONST_PATHS.root, folder)) {
+      throw new Error(`You haven\'t access to ${folder} directory`)
+    }
+    if (!fs.existsSync(folder)) {
+      throw new Error(`The directory ${folder} doesn't exist`)
+    }
+    console.log(path.join(folder, name))
+    return fs.mkdir(path.join(folder, name))
   }
 
   /*

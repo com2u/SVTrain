@@ -1,6 +1,7 @@
 import Main from './pages/Main.vue'
 import Explorer from './pages/Explorer.vue'
 import Statistic from './pages/Statistic.vue'
+import StatisticOverview from './pages/StatisticOverview.vue'
 
 const routes = [
   {
@@ -18,6 +19,12 @@ const routes = [
     name: 'statistic',
     path: '/statistic/',
     component: Statistic
+  },
+  {
+    name: 'statistic-overview',
+    path: '/statistic-overview',
+    component: StatisticOverview,
+    props: route => ({ dir: route.query.dir })
   }
 ]
 
