@@ -541,6 +541,7 @@ export default {
         data[fieldname] = data[fieldname] ? parseFloat(data[fieldname]) : data[fieldname]
       })
       await api.saveFile(this.file.path, JSON.stringify(data, null, 2))
+      this.$emit('saved')
     }
   },
   created () {

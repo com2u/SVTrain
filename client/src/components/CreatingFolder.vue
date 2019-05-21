@@ -3,6 +3,7 @@
     id="creating-folder-modal"
     title="Create a folder"
     ok-title="Create"
+    ref="modal"
     v-on:ok="createFolder"
     v-on:hidden="handleHidden"
     v-on:shown="handleShown"
@@ -15,7 +16,7 @@
         :invalid-feedback="'Name is required'"
         :state="isValid"
       >
-        <b-form-input id="folder-name" v-model="name" :state="isValid" trim/>
+        <b-form-input id="folder-name" v-on:keyup.enter="handleEnter" v-model="name" :state="isValid" trim/>
       </b-form-group>
     </b-form>
   </b-modal>
@@ -31,7 +32,8 @@ export default {
   },
   data () {
     return {
-      name: null
+      name: null,
+      modal: null
     }
   },
   computed: {
@@ -44,10 +46,16 @@ export default {
       await api.createFolder(this.path, this.name)
       this.name = null
     },
+    async handleEnter () {
+      this.createFolder()
+      this.$refs.modal.hide()
+      console.log(this.$refs.modal)
+    },
     handleHidden (evt) {
       this.$emit('hidden', evt)
     },
     handleShown (evt) {
+      this.$el.querySelector('#folder-name').focus()
       this.$emit('shown', evt)
     }
   }

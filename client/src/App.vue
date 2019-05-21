@@ -8,8 +8,14 @@ export default {
 
 
 <template>
-  <div>
+  <div class="maxheight">
     <router-view>
     </router-view>
   </div>
 </template>
+
+<style lang="scss">
+html, body, .maxheight {
+  height: 100%;
+}
+</style>

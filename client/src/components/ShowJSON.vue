@@ -36,6 +36,7 @@ export default {
     async submit () {
       if (!this.isValidJSON) alert('There are should be a valid JSON string in the input!')
       await api.saveFile(this.file.path, this.content)
+      this.$emit('saved')
     }
   },
   computed: {

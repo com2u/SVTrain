@@ -1,12 +1,18 @@
 <template>
-  <div>
+  <b-modal 
+    hide-footer
+    size="lg"
+    ref="modal"
+    v-on:hidden="onHidden"
+    v-on:shown="onShown"
+  >
     <ShowImage v-if="fileType===types.image" v-bind:file="file"/>
-    <ShowJSON v-if="fileType===types.json" v-bind:file="file"/>
-    <ShowTFSettings v-if="fileType===types.tfsettings" v-bind:file="file"/>
+    <ShowJSON v-if="fileType===types.json" v-on:saved="closeModal" v-bind:file="file"/>
+    <ShowTFSettings v-if="fileType===types.tfsettings" v-on:saved="closeModal" v-bind:file="file"/>
     <div v-if="fileType===types.unsupported">
       Files with that type aren't supported
     </div>
-  </div>
+  </b-modal>
 </template>
 
 <script>
@@ -22,12 +28,29 @@ export default {
   components: { ShowImage, ShowJSON, ShowTFSettings },
   data () {
     return {
+      modal: null,
       types: {
         image: 'image',
         json: 'json',
         tfsettings: 'tfsettings',
         unsupported: 'unsupported'
       }
+    }
+  },
+  methods: {
+    show () {
+      this.$refs.modal.show()
+    },
+    onShown (e) {
+      console.log('show file shown')
+      this.$emit('shown', e)
+    },
+    onHidden (e) {
+      console.log('show file hidden')
+      this.$emit('hidden', e)
+    },
+    closeModal () {
+      this.$refs.modal.hide()
     }
   },
   computed: {

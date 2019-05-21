@@ -14,6 +14,9 @@
             v-bind:src="file.serverPath" 
             class="file-explorer-preview" v-bind:style="{width: size-15 + 'px', height: size-15 + 'px' }">
         </template>
+        <template v-else-if="file.name.toLowerCase() === 'tfsettings.json'">
+          <v-icon name="cogs" class="text-primary" scale="2"/>
+        </template>
         <template v-else>
           <v-icon name="file" scale=2></v-icon>
         </template>

@@ -8,101 +8,98 @@
     v-on:keyup.self.left.exact.prevent="cursor('left')"
     v-on:keyup.self.right.exact.prevent="cursor('right')"
     v-on:keyup.self.enter.exact.prevent="openCurrentFile()"
-    v-on:keyup.self.up.exact.prevent="cursor('up')">
-    <div 
-      class='next-folders'
-      v-bind:style="{ width: `${rightSideWidth}px` }"
-      v-bind:class="{ disable: selectedFiles.length === 0 }">
+    v-on:keyup.self.up.exact.prevent="cursor('up')"
+  >
+    <window-splitting ref="WindowSplitting">
+      <template v-slot:side>
+        <div class="right-side-section">
+          <div class="section-item">
+            <span v-if="status !== null">
+              <font v-if="status" color=red>Status: {{status}}%</font>
+              <font v-else>Status: idle</font>
+            </span>
+            <span v-else>
+              Status: no info
+            </span>
+          </div>
+          <div class="section-item">
+            Set file size (in pixels): <input type="number" v-model="fileSize">
+          </div>
+        </div>
 
-      <div class="right-side-section">
-        <div class="section-item">
-          <span v-if="status !== null">
-            <font v-if="status" color=red>Status: {{status}}%</font>
-            <font v-else>Status: idle</font>
+        <div class="right-side-section" v-if="statistic.calculated">
+          <button 
+            v-bind:disabled="isLoading.statistic"
+            v-on:click="calculateStatistic()">
+            Statistics{{ isLoading.statistic ? ' (loading...)' : ''}}
+          </button><br>
+          <span v-if="!statistic.table">
+            Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}
           </span>
-          <span v-else>
-            Status: no info
-          </span>
+          <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>
+          <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">
+            <statistic-table 
+              v-on:folderselected="selectFolder"
+              v-bind:folder="path"
+              v-bind:table="statistic.table"/>
+          </b-collapse>
         </div>
-        <div class="section-item">
-          Set file size (in pixels): <input type="number" v-model="fileSize">
+        <div v-else class="right-side-section">
+          Statistic didn't calculated
         </div>
-      </div>
+        
+        <div class="right-side-section">
+          Selected files count: {{ selectedFiles.length }}<br><br>
+          <div v-if="selectedFiles.length > 0">
+            <a href="javascript:void(0)" v-on:click="deleteFiles()">Delete files</a> <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
+            Move files to the next folders <span v-if="isLoading.moving"><v-icon name="spinner"></v-icon> (Moving...)</span>:
+            <ul style="list-style: none">
+              <li v-for="f in nextFolders" v-bind:key="f.path">
+                <v-icon name="folder"></v-icon> <a href="javascript:void(0)" v-on:click="moveFiles(f.path)">{{f.name}}</a>
+              </li>
+            </ul>
+          </div>
+          <div v-else>
+            (select one or more files for show control buttons)
+          </div>
+        </div>
+      </template>
+      <template v-slot:main>
+        <div class="header">
+          <router-link to="/">To main screen</router-link>
+          | <b>{{ openedPath }}</b>
+        </div>
+        <div class="file-explorer-grid bottom-border">
+          <new-folder-button v-b-modal.creating-folder-modal/>
+          <file
+            v-for = "file in folder.folders"
+            v-bind:file="file"
+            v-on:click.native="goToTheFolder(file)"
+            v-bind:key="file.path">
+          </file>
+        </div>
+        <div class="file-explorer-grid" v-infinite-scroll="loadMore">
+          <file 
+            v-bind:id="`file_${file.path}`"
+            v-for="file in screenFiles" 
+            v-bind:file="file"
+            v-on:click.native="setCursorAndSelect(file, $event)"
+            v-on:dblclick.native="openFile(file)"
+            v-bind:key="file.path"
+            v-bind:size="fileSize">
+          </file>
+        </div>
+      </template>
+    </window-splitting>
 
-      <div class="right-side-section" v-if="statistic.calculated">
-        <button 
-          v-bind:disabled="isLoading.statistic"
-          v-on:click="calculateStatistic()">
-          Statistics{{ isLoading.statistic ? ' (loading...)' : ''}}
-        </button><br>
-        <span v-if="!statistic.table">
-          Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}
-        </span>
-        <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>
-        <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">
-          <statistic-table 
-            v-on:folderselected="selectFolder"
-            v-bind:folder="path"
-            v-bind:table="statistic.table"/>
-        </b-collapse>
-      </div>
-      <div v-else class="right-side-section">
-        Statistic didn't calculated
-      </div>
-      
-      <div class="right-side-section">
-        Selected files count: {{ selectedFiles.length }}<br><br>
-        <div v-if="selectedFiles.length > 0">
-          <a href="javascript:void(0)" v-on:click="deleteFiles()">Delete files</a> <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
-          Move files to the next folders <span v-if="isLoading.moving"><v-icon name="spinner"></v-icon> (Moving...)</span>:
-          <ul style="list-style: none">
-            <li v-for="f in nextFolders" v-bind:key="f.path">
-              <v-icon name="folder"></v-icon> <a href="javascript:void(0)" v-on:click="moveFiles(f.path)">{{f.name}}</a>
-            </li>
-          </ul>
-        </div>
-        <div v-else>
-          (select one or more files for show control buttons)
-        </div>
-      </div>
-    </div>
-    <div class='file-container' v-bind:style="{ width: `calc(100% - ${rightSideWidth+10}px)` }">
-      <div class="header">
-        <router-link to="/">To main screen</router-link>
-        | <b>{{ openedPath }}</b>
-        <div>
-          <b-button variant="link" v-b-modal.creating-folder-modal>Create new folder</b-button>
-        </div>
-      </div>
-      <div class="file-explorer-grid bottom-border">
-        <file
-          v-for = "file in folder.folders"
-          v-bind:file="file"
-          v-on:click.native="goToTheFolder(file)"
-          v-bind:key="file.path">
-        </file>
-      </div>
-      <div class="file-explorer-grid" v-infinite-scroll="loadMore">
-        <file 
-          v-bind:id="`file_${file.path}`"
-          v-for="file in screenFiles" 
-          v-bind:file="file"
-          v-on:click.native="setCursorAndSelect(file, $event)"
-          v-on:dblclick.native="openFile(file)"
-          v-bind:key="file.path"
-          v-bind:size="fileSize">
-        </file>
-      </div>
-    </div>
-
-    <b-modal 
-      hide-footer
-      size="lg"
-      v-on:hidden="onCloseModal"
-      v-on:shown="onOpenModal"
-      ref="FileViewing">
-      <show-file v-if="viewingFile" v-bind:file="viewingFile"/>
-    </b-modal>
+      <show-file 
+        ref="FileViewing"
+        v-if="viewingFile"
+        v-bind:file="viewingFile"
+        v-on:shown="onOpenModal"
+        v-on:hidden="onCloseModal"
+      />
+    <!-- </b-modal> -->
     <creating-folder
       v-on:shown="onOpenModal"
       v-on:hidden="onCloseModal"
@@ -118,6 +115,8 @@ import socket from '../socket'
 import StatisticTable from './StatisticTable.vue'
 import ShowFile from './ShowFile.vue'
 import CreatingFolder from './CreatingFolder.vue'
+import NewFolderButton from './NewFolderButton.vue'
+import WindowSplitting from './WindowSplitting.vue'
 
 export default {
   props: [
@@ -127,7 +126,9 @@ export default {
     File,
     StatisticTable,
     ShowFile,
-    CreatingFolder
+    CreatingFolder,
+    NewFolderButton,
+    WindowSplitting
   },
   data: () => ({
     isLoading: {
@@ -137,7 +138,6 @@ export default {
     },
     status: null,
     viewingFile: null,
-    rightSideWidth: 250,
     statisticShown: false,
     fileSize: 100,
     page: 0,
@@ -170,12 +170,12 @@ export default {
     openCurrentFile () {
       const fileInFocus = this.screenFiles.find(f => f.cursor)
       this.viewingFile = fileInFocus
-      this.$refs.FileViewing.show()
+      this.$nextTick(() => this.$refs.FileViewing.show())
     },
     openFile (file) {
       console.log(file)
       this.viewingFile = file
-      this.$refs.FileViewing.show()
+      this.$nextTick(() => this.$refs.FileViewing.show())
     },
     async calculateStatistic () {
       this.isLoading.statistic = true
@@ -195,12 +195,10 @@ export default {
       this.openedPath = openedPath
     },
     statisticExpanded () {
-      this.rightSideWidth = 550
-      this.statisticShown = true
+      this.$refs.WindowSplitting.expand()
     },
     statisticHidden () {
-      this.rightSideWidth = 250
-      this.statisticShown = false
+      this.$refs.WindowSplitting.shrink()
     },
     setCursorAndSelect (file, $event) {
       const currentCursorFile = this.screenFiles.find(f => f.cursor)
@@ -563,6 +561,9 @@ function preventDefaultScrolling (e) {
 </script>
 
 <style lang="scss">
+#keyupevents {
+  outline: none;
+}
 .file-container {
   width: calc(100% - 250px);
 }
