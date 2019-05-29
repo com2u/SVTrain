@@ -16,3 +16,5 @@ database/development.sqlite
 .idea
 
 statistic.data
+
+npm-debug.log

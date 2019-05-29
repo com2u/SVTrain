@@ -32,7 +32,6 @@
           element-id="classes"
           v-bind:only-existing-tags="true"
           v-bind:typeahead="true"
-          v-on:tags-updated="validateClasses"
           v-bind:existing-tags="existing_classes"
           v-model="fields.classes"/>
         <b-button variant="link" v-on:click="loadSubfoldersForClasses">Load subfolders</b-button>
