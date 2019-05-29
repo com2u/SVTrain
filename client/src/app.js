@@ -6,7 +6,6 @@ import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon.vue'
 import App from './App.vue'
 import routes from './routes'
-import socket from './socket'
 import infiniteScroll from 'vue-infinite-scroll'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
@@ -19,7 +18,6 @@ const router = new VueRouter({routes})
 Vue.use(VueRouter)
 Vue.component('v-icon', Icon)
 Vue.component('tags-input', VoerroTagsInput);
-socket.init()
 
 // window.addEventListener("keydown", function(e) {
 //   // space and arrow keys

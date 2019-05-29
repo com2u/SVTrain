@@ -1,8 +1,13 @@
 <script>
+import socket from './socket'
+
 export default {
   data: () => ({
     message: 'important message'
-  })
+  }),
+  async beforeCreate () {
+    await socket.init()
+  }
 }
 </script>
 

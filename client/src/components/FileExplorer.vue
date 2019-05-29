@@ -457,6 +457,7 @@ export default {
     fileChanged: function () {
       const self = this
       return (file) => {
+        console.log(file)
         if ( file.event === 'add' && file.type === 'file' ) {
           file.selected = false
           self.folder.files.push(file)

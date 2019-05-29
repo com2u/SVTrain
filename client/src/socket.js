@@ -1,7 +1,7 @@
 import Ws from '@adonisjs/websocket-client'
 
 export default {
-  init: function () {
+  init: async function () {
     this.ws = Ws('ws://127.0.0.1:3333')
     this.ws.connect()
     this.ws.on('open', () => {
@@ -12,14 +12,19 @@ export default {
     })
     this.ws.on('error', error => {
       console.log('ws error: ', error)
-    })
+    })    
     this.explorer = this.ws.subscribe('explorer')
     this.listeners = {}
-    this.explorer.on('ready', () => {
-      console.log(`Connected to channel explorer`)
-    })
-    this.explorer.on('error', error => {
-      console.log('error on explorer: ', error)
+    const self = this
+    return new Promise((resolve, reject) => {
+      self.explorer.on('ready', () => {
+        console.log(`Connected to channel explorer`)
+        resolve()
+      })
+      self.explorer.on('error', error => {
+        console.log('error on explorer: ', error)
+        reject()
+      })
     })
   },
 

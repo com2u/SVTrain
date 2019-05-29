@@ -50,7 +50,7 @@
       <li v-for="command in commands" v-bind:key="command">
         <b-button
           v-bind:variant="command === 'stop' ? 'danger' : 'success'"
-          v-bind:disabled="isLoading[command] || command === 'stop' && !running || command !== 'stop' && running"
+          v-bind:disabled="!!isLoading[command] || command === 'stop' && !running || command !== 'stop' && !!running"
           v-on:click="runCommand(command)">
           <v-icon v-bind:name="command === 'stop' ? 'stop' : 'play'"/> Run {{command}}.bat
         </b-button>
@@ -126,18 +126,19 @@ export default {
     this.checkWorkspace()
     this.subfolders = await api.getSubfolders('root')
     socket.subscibeForFolder('running.lock', data => {
-      console.log(data)
+      console.log('running.lock: ', data)
       if (data.event === 'unlink') this.running = false
       if (data.event === 'change') this.running = data.content
     })
     socket.subscibeForFolder('workspace.bat', data => {
-      console.log(data)
+      console.log('workspace.bat: ', data)
       if (data.event === 'unlink') this.workspace = false
       if (data.event === 'change') this.workspace = data.content
     })
   },
   beforeDestroy: async function () {
     socket.unsubscribeForFolder('running.lock')
+    // socket.unsubscribeForFolder('workspace.bat')
   }
 }
 </script>

@@ -399,7 +399,7 @@ export default {
       },
       fields: {
         max_train_steps: 0,
-        classes: ['Boden', 'Bubble', 'HUio'],
+        classes: [],
         model_dir: '',
         path_to_dataset_training: '',
         path_to_dataset_validation: '',
@@ -483,9 +483,10 @@ export default {
     validateMaxTrainSteps () {
       this.errors.max_train_steps = this.validateInteger(this.fields.max_train_steps)
     },
-    validateClasses () {
+    async validateClasses () {
+      const supportedClasses = await api.getSubfolders(getFolder(this.file.path))
       const bad = this.fields.classes.find(el => {
-        return !Object.keys(this.existing_classes).includes(el)
+        return !supportedClasses.includes(el)
       })
       this.errors.classes = bad ? `Unsupported element ${bad}` : null
     },
