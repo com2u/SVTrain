@@ -51,16 +51,20 @@ module.exports = class Watcher {
   fireChange(type) {
     const self = this
     return pathname => {
-      if (path.join(Env.get('COMMAND_FILES_PATH'), 'running.lock') === pathname) {
+      console.log('\x1b[31m')
+      console.log(path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat'))
+      console.log(pathname)
+      console.log('\x1b[0m')
+      if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'running.lock')) === path.normalize(pathname)) {
         return this.changedRunningLock(type, pathname)
       }
-      if (path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat') === pathname) {
+      if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat')) === path.normalize(pathname)) {
         return this.changedWorkspace(type, pathname)
       }
       console.log(`Event ${type} fired on file ${pathname}`)
 
       const file = path.parse(pathname)
-      const dir = file.dir
+      let dir = file.dir
       const filename = file.base
       const filetype = type === 'addDir' || type === 'unlinkDir' ? 'folder' : 'file'
       let eventType = null
@@ -81,6 +85,7 @@ module.exports = class Watcher {
         break
       }
 
+      if (!/\/$/.test(dir)) dir = `${dir}/`
       if ( self.folders[dir] ) {
         Object.keys(self.folders[dir]).map( socketid => {
           self.folders[dir][socketid].emit(`folder_${dir}`, {
