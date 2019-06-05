@@ -119,6 +119,7 @@ export default {
     },
     async setWorkspace (folder) {
       await api.setWorkspace(folder)
+      
     }
   },
   created: async function () {
@@ -138,7 +139,7 @@ export default {
   },
   beforeDestroy: async function () {
     socket.unsubscribeForFolder('running.lock')
-    // socket.unsubscribeForFolder('workspace.bat')
+    socket.unsubscribeForFolder('workspace.bat')
   }
 }
 </script>

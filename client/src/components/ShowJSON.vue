@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="file">
     <b-form v-on:submit.prevent>
       <b-form-textarea rows="10" v-on:state="isValidJSON" ref="textarea" v-model="content">
       </b-form-textarea>
@@ -24,8 +24,7 @@ export default {
   },
   data () {
     return {
-      content: '',
-      textareaElement: null
+      content: ''
     }
   },
   methods: {

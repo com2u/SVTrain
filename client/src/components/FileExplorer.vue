@@ -460,6 +460,7 @@ export default {
         console.log(file)
         if ( file.event === 'add' && file.type === 'file' ) {
           file.selected = false
+          file.serverPath = this.staticServer+file.relativePath
           self.folder.files.push(file)
           if ( self.page === self.page_count ) {
             self.screenFiles.push(file)

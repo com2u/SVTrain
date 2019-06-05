@@ -3,10 +3,18 @@ const Env = use('Env')
 const Statistic = use('Statistic')
 const path = require('path')
 const recursive = require('../../../src/recursive')
-const { promisify } = use('Helpers')
-const fs = promisify( require('fs') )
-const { execFile } = promisify(require('child_process'))
+const { promisify } = require('util')
+const fs = require('fs')
+const execFile = promisify(require('child_process').execFile)
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i)
+const readdir = promisify(fs.readdir)
+const lstat = promisify(fs.lstat)
+const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
+const unlink = promisify(fs.unlink)
+const rename = promisify(fs.rename)
+const exists = promisify(fs.exists)
+const mkdir = promisify(fs.mkdir)
 
 // if file is landing under root directory
 // prevent access to that file
@@ -48,10 +56,10 @@ const buildSubfolderTable = async (dir, subfolders) => {
             all: 0,
             exclude: 0
           }
-          const flist = await fs.readdir(path.join(dir, anotherSubfolder))
+          const flist = await readdir(path.join(dir, anotherSubfolder))
           await Promise.all(
             flist.map(async fileFromSF => {
-              const fileFromSF_lstat = await fs.lstat(path.join(dir, anotherSubfolder, fileFromSF))
+              const fileFromSF_lstat = await lstat(path.join(dir, anotherSubfolder, fileFromSF))
               if (fileFromSF_lstat.isFile() && fileFromSF.toLowerCase().includes(subfolder.toLowerCase())) {
                 table[subfolder][anotherSubfolder].all += 1
                 if (!fileFromSF.includes('!')) {
@@ -94,8 +102,7 @@ class ExplorerController {
     if ( !accessToFile(CONST_PATHS.root, dir) ) throw new Error('Access denied')
     const result = {}
 
-    const files = await fs
-    .readdir(dir)
+    const files = await readdir(dir)
 
     result.folders = []
     result.files = []
@@ -103,31 +110,29 @@ class ExplorerController {
 
     for ( let i = 0; i < files.length; ++i ) {
       const f = files[i]
-      const lstat = await fs
-      .lstat( path.join( dir, f) )
+      const flstat = await lstat( path.join( dir, f) )
       if (f)
-      if ( lstat.isDirectory() ) {
-        result.folders.push({
-          path: path.join( dir, f ),
-          name: f,
-          type: FTYPES.folder,
-          image: false,
-          match: false
-        })
-      } else if ( lstat.isFile() ) {
-        result.files.push({
-          path: path.join( dir, f),
-          relativePath: path.relative(CONST_PATHS.root, path.join(dir,f)),
-          name: f,
-          type: FTYPES.file,
-          image: regexpForImages.test(f),
-          match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length-1].toLowerCase()) > -1
-        })
-      } else {
-        console.log(`File ${f} in the directory ${dir} nor file neither directory.`)
-      }
+        if ( flstat.isDirectory() ) {
+          result.folders.push({
+            path: path.join( dir, f ),
+            name: f,
+            type: FTYPES.folder,
+            image: false,
+            match: false
+          })
+        } else if ( flstat.isFile() ) {
+          result.files.push({
+            path: path.join( dir, f),
+            relativePath: path.relative(CONST_PATHS.root, path.join(dir,f)),
+            name: f,
+            type: FTYPES.file,
+            image: regexpForImages.test(f),
+            match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length-1].toLowerCase()) > -1
+          })
+        } else {
+          console.log(`File ${f} in the directory ${dir} nor file neither directory.`)
+        }
     }
-
     return result
   }
 
@@ -204,7 +209,8 @@ class ExplorerController {
     const { workspace } = request.post()
     const workspaceFile = path.join( Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace )
     const newWorkspace = path.join(CONST_PATHS.root, workspace )
-    return fs.writeFile(workspaceFile, newWorkspace)
+    await writeFile(workspaceFile, newWorkspace)
+    return true
   }
 
   /*
@@ -226,7 +232,7 @@ class ExplorerController {
     .filter( f => accessToFile(CONST_PATHS.root, f) )
     
     await Promise.all(
-      files.map( async f => await fs.unlink(f) )
+      files.map( async f => await unlink(f) )
     )
     return files
   }
@@ -254,7 +260,7 @@ class ExplorerController {
     
     await Promise.all(
       files.map( 
-        async f => await fs.rename( 
+        async f => await rename( 
           f,
           path.join( destination, path.basename(f) )
         )
@@ -291,14 +297,12 @@ class ExplorerController {
       throw new Error(`Access denied for read directory ${parentDirectory}`)
     }
 
-    const files = await fs
-    .readdir(parentDirectory)
+    const files = await readdir(parentDirectory)
 
     for ( let i = 0; i < files.length; ++i ) {
       const f = files[i]
-      const lstat = await fs
-      .lstat( path.join( parentDirectory, f) )
-      if ( lstat.isDirectory() ) {
+      const flstat = await lstat( path.join( parentDirectory, f) )
+      if ( flstat.isDirectory() ) {
         result.push({
           path: path.join( parentDirectory, f) ,
           name: f
@@ -342,14 +346,12 @@ class ExplorerController {
       throw new Error(`Access denied for read directory ${folder}`)
     }
 
-    const files = await fs
-    .readdir(folder)
+    const files = await readdir(folder)
 
     for ( let i = 0; i < files.length; ++i ) {
       const f = files[i]
-      const lstat = await fs
-      .lstat( path.join( folder, f) )
-      if ( lstat.isDirectory() ) {
+      const flstat = await lstat( path.join( folder, f) )
+      if ( flstat.isDirectory() ) {
         result.push(f)
       }
     }    
@@ -367,7 +369,7 @@ class ExplorerController {
     if ( !accessToFile(CONST_PATHS.root, folder)) {
       return 'access_denied'
     }
-    const isExist = await fs.exists(folder)
+    const isExist = await exists(folder)
     if (!isExist) {
       return 'not_found'
     }
@@ -388,7 +390,8 @@ class ExplorerController {
       throw new Error(`The directory ${folder} doesn't exist`)
     }
     console.log(path.join(folder, name))
-    return fs.mkdir(path.join(folder, name))
+    await fs.mkdir(path.join(folder, name))
+    return true
   }
 
   /*
@@ -441,7 +444,7 @@ class ExplorerController {
     await Promise.all(
       dirs.map( async dir => {
         let dirname = path.basename(dir)
-        let files = await fs.readdir(dir)
+        let files = await readdir(dir)
         const subfolders = []
         dirsObject[dir] = {
           missed: 0,
@@ -452,7 +455,7 @@ class ExplorerController {
         await Promise.all(
           files.map( async f => {
             let filepath = path.join( dir, f )
-            const lstat = await fs.lstat(filepath)
+            const lstat = await lstat(filepath)
             if ( lstat.isFile() && !CONST_PATHS.ignoreFiles.includes(f) ) {
               if ( f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
                 dirsObject[dir].matched++

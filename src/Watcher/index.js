@@ -31,6 +31,7 @@ module.exports = class Watcher {
     if (object.event === 'change') {
       object.content = fs.readFileSync(pathname).toString()
     }
+    if (!this.folders['running.lock']) return
     Object.keys(this.folders['running.lock']).map( socketid => {
       console.log(`${socketid} emit event running.lock with`, object)
       this.folders['running.lock'][socketid].emit(`folder_running.lock`, object)
@@ -42,6 +43,7 @@ module.exports = class Watcher {
     if (object.event === 'change') {
       object.content = fs.readFileSync(pathname).toString()
     }
+    if (!this.folders['workspace.bat']) return
     Object.keys(this.folders['workspace.bat']).map( socketid => {
       console.log(`${socketid} emit event workspace.bat with`, object)
       this.folders['workspace.bat'][socketid].emit(`folder_workspace.bat`, object)
@@ -51,10 +53,6 @@ module.exports = class Watcher {
   fireChange(type) {
     const self = this
     return pathname => {
-      console.log('\x1b[31m')
-      console.log(path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat'))
-      console.log(pathname)
-      console.log('\x1b[0m')
       if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'running.lock')) === path.normalize(pathname)) {
         return this.changedRunningLock(type, pathname)
       }
@@ -85,13 +83,18 @@ module.exports = class Watcher {
         break
       }
 
-      if (!/\/$/.test(dir)) dir = `${dir}/`
-      if ( self.folders[dir] ) {
-        Object.keys(self.folders[dir]).map( socketid => {
-          self.folders[dir][socketid].emit(`folder_${dir}`, {
+      let dir2 = ''
+      if (!/\/$/.test(dir)) dir2 = `${dir}/`
+      if (/\/#/.test(dir)) dir2 = dir.slice(0, dir.length - 2)
+      const folders = self.folders[dir] || self.folders[dir2]
+      if (!self.folders[dir]) dir = dir2
+      if ( folders ) {
+        Object.keys(folders).map( socketid => {
+          folders[socketid].emit(`folder_${dir}`, {
             path: pathname,
             name: filename,
             match: filename.indexOf(pathname.split(path.sep)[pathname.split(path.sep).length-1]) > -1,
+            relativePath: path.relative(Env.get('ROOT_PATH'), pathname),
             type: filetype,
             image: regexpForImages.test(filename),
             event: eventType
