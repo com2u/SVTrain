@@ -105,6 +105,11 @@ module.exports = class Watcher {
   }
 
   init() {
+    const isChildOf = (child, parent) => {
+      if (child === parent) return false
+      const parentTokens = parent.split(path.sep).filter(i => i.length)
+      return parentTokens.every((t, i) => child.split(path.sep)[i] === t)
+    }
     this.watcher = chokidar.watch( 
       Env.get('ROOT_PATH'),
       {
@@ -112,6 +117,10 @@ module.exports = class Watcher {
         persistent: true
       }
     )
+    if (!isChildOf(Env.get('COMMAND_FILES_PATH'), Env.get('ROOT_PATH'))) {
+      console.log('Add command files for watching')
+      this.watcher.add(Env.get('COMMAND_FILES_PATH'))
+    }
 
     this.watcher.on('add', this.fireChange('add'))
     this.watcher.on('change', this.fireChange('change'))
