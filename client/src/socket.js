@@ -41,5 +41,9 @@ export default {
     try { this.explorer.off(`folder_${path}`, this.listeners[path]) }
     catch(e) { console.log('error on adonis ws client: ', e)}
     delete this.listeners[path]
+  },
+
+  isConnected: function () {
+    return this.isConnected
   }
 } 
