@@ -11,6 +11,7 @@ class ExplorerController {
 
     this.socket.on('close', () => {
       Watcher.deleteSocket(this.id)
+      console.log(`Socket ${this.id} disconnected`)
     })
     this.socket.on('error', () => {
       Watcher.deleteSocket(this.id)

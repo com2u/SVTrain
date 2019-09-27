@@ -390,7 +390,7 @@ class ExplorerController {
       throw new Error(`The directory ${folder} doesn't exist`)
     }
     console.log(path.join(folder, name))
-    await fs.mkdir(path.join(folder, name))
+    await mkdir(path.join(folder, name))
     return true
   }
 
@@ -435,6 +435,7 @@ class ExplorerController {
     Run process for calculate statistic for each folder
   */
   async calculate() {
+    try {
     const missedFiles = []
     const dirsObject = {}
     const ignoreFunc = (_, lstat) => !lstat.isDirectory()
@@ -455,8 +456,8 @@ class ExplorerController {
         await Promise.all(
           files.map( async f => {
             let filepath = path.join( dir, f )
-            const lstat = await lstat(filepath)
-            if ( lstat.isFile() && !CONST_PATHS.ignoreFiles.includes(f) ) {
+            const stats = await lstat(filepath)
+            if ( stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f) ) {
               if ( f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
                 dirsObject[dir].matched++
               } else {
@@ -464,7 +465,7 @@ class ExplorerController {
                 missedFiles.push(filepath)
               }
             }
-            if (lstat.isDirectory()) {
+            if (stats.isDirectory()) {
               subfolders.push(f)
             }
           }) // end of map function for all files
@@ -487,6 +488,10 @@ class ExplorerController {
     })
 
     await Statistic.save()
+    } catch(e) {
+      console.log(e)
+      throw e
+    }
   }
 }
 

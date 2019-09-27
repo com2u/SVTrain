@@ -12,15 +12,25 @@ module.exports = class Watcher {
   }
 
   subscribeForFolder(path, id, socket) {
+    // delete from previous pathes
+    Object.keys(this.folders).map( path => {
+      if ( this.folders[path][id] && Date.now() - this.folders[path][id].subscribedTime > 1000 ) {
+        // console.log(`socket ${id} deleted from ${path}`)
+        delete this.folders[path][id]
+      }
+    })
+
+    // subscribe for current
     if ( !this.folders[path] ) this.folders[path] = {}
+    socket.subscribedTime = Date.now()
     this.folders[path][id] = socket
   }
 
   deleteSocket( id ) {
-    const self = this
-    Object.keys(self.folders).map( path => {
-      if ( self.folders[path][id] ) {
-        delete self.folders[path][id]
+    Object.keys(this.folders).map( path => {
+      if ( this.folders[path][id] ) {
+        // console.log(`socket ${id} deleted from ${path}`)
+        delete this.folders[path][id]
       }
     })
   }

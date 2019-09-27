@@ -31,7 +31,7 @@
           <button 
             v-bind:disabled="isLoading.statistic"
             v-on:click="calculateStatistic()">
-            Statistics{{ isLoading.statistic ? ' (loading...)' : ''}}
+            Calculate statistic{{ isLoading.statistic ? ' (loading...)' : ''}}
           </button><br>
           <span v-if="!statistic.table">
             Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}
@@ -146,7 +146,7 @@ export default {
     staticServer: 'http://localhost:2929/',
     path: null,
     openedPath: null,
-    showStatistic: false,
+    statisticShown: false,
     moveDestination: null,
     nextFolders: [],
     statistic: {
@@ -196,9 +196,11 @@ export default {
     },
     statisticExpanded () {
       this.$refs.WindowSplitting.expand()
+      this.statisticShown = true
     },
     statisticHidden () {
       this.$refs.WindowSplitting.shrink()
+      this.statisticShown = false
     },
     setCursorAndSelect (file, $event) {
       const currentCursorFile = this.screenFiles.find(f => f.cursor)
@@ -362,7 +364,7 @@ export default {
         f.cursor = false
         return f 
       }).filter(f => {
-        console.log(f.name, this.filter.exclude, this.filter.include)
+        //console.log(f.name, this.filter.exclude, this.filter.include)
         let excludeFactor = true
         let includeFactor = true
         if (this.filter.exclude) {

@@ -16,7 +16,7 @@
         :invalid-feedback="'Name is required'"
         :state="isValid"
       >
-        <b-form-input id="folder-name" v-on:keyup.enter="handleEnter" v-model="name" :state="isValid" trim/>
+        <b-form-input ref="folderName" v-on:keyup.enter="handleEnter" v-model="name" :state="isValid" trim/>
       </b-form-group>
     </b-form>
   </b-modal>
@@ -55,7 +55,7 @@ export default {
       this.$emit('hidden', evt)
     },
     handleShown (evt) {
-      this.$el.querySelector('#folder-name').focus()
+      this.$refs.folderName.focus()
       this.$emit('shown', evt)
     }
   }
