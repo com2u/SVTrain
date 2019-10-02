@@ -101,6 +101,7 @@
       />
     <!-- </b-modal> -->
     <creating-folder
+      @folderCreated="onFolderCreated"
       v-on:shown="onOpenModal"
       v-on:hidden="onCloseModal"
       v-bind:path="openedPath || path"
@@ -345,6 +346,9 @@ export default {
       this.statistic.missmatched = missmatched
       this.statistic.table = table
       console.log('statistic table: ', this.statistic.table)
+    },
+    onFolderCreated () {
+      this.loadFiles(this.openedPath)
     },
     loadFiles: async function (path) {
       // clear old files

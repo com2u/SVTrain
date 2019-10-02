@@ -36,6 +36,15 @@ export default {
     this.listeners[path] = callback
   },
 
+  subscribe (channel, callback) {
+    this.explorer.on(channel, callback)
+    this.listeners[channel] = callback
+  },
+  unsubscribe (channel, callback) {
+    this.explorer.off(channel, callback)
+    delete this.listeners[channel]
+  },
+
   unsubscribeForFolder: function (path) {
     console.log(`Unsibscribe for folder ${path}`)
     try { this.explorer.off(`folder_${path}`, this.listeners[path]) }

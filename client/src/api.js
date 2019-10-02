@@ -16,7 +16,8 @@ const urls = {
   getSubfolders: folder => `${baseurl}getSubfolders?folder=${folder}`,
   createFolder: `${baseurl}createFolder`,
   getWorkspace: `${baseurl}getWorkspace`,
-  setWorkspace: `${baseurl}setWorkspace`
+  setWorkspace: `${baseurl}setWorkspace`,
+  getLastLogs: `${baseurl}getLastLogs`,
 }
 
 export default {
@@ -81,5 +82,8 @@ export default {
 
   setWorkspace: async (workspace) => {
     return (await axios.post(urls.setWorkspace, { workspace })).data
+  },
+  getLastLogs: async () => {
+    return (await axios.get(urls.getLastLogs)).data
   }
 }

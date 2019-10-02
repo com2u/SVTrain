@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2>SVTrain V0.3</h2>
+    <h2>SVTrain V0.4</h2>
     <ul class="main-menu">
       <li>
         Running status:
@@ -55,6 +55,12 @@
           <v-icon v-bind:name="command === 'stop' ? 'stop' : 'play'"/> Run {{command}}.bat
         </b-button>
         <span v-if="isLoading[command]">Running...</span>
+        <span
+          v-if="logs[command] && logs[command].lastLine"
+          class="alert alert-info mt-1"
+          @click="openLogsFor(command)">
+            <b>[LOG]</b>: {{ logs[command].lastLine }}
+        </span>
       </li>
     </ul>
   </div>
@@ -79,6 +85,7 @@ export default {
     running: null,
     workspace: null,
     checkInterval: 750,
+    logs: {},
     commands: [
       'train',
       'test',
@@ -120,11 +127,15 @@ export default {
     async setWorkspace (folder) {
       await api.setWorkspace(folder)
       
+    },
+    openLogsFor(command) {
+      window.open(`/logs/${command}`)
     }
   },
   created: async function () {
     this.checkStatus()
     this.checkWorkspace()
+    this.logs = await api.getLastLogs()
     this.subfolders = await api.getSubfolders('root')
     socket.subscibeForFolder('running.lock', data => {
       console.log('running.lock: ', data)
@@ -135,6 +146,14 @@ export default {
       console.log('workspace.bat: ', data)
       if (data.event === 'unlink') this.workspace = false
       if (data.event === 'change') this.workspace = data.content
+    })
+
+    socket.subscribe('logfile', (obj) => {
+      Object.keys(this.logs).forEach(fileName => {
+        if (this.logs[fileName].path === obj.pathname) {
+          this.logs[fileName].lastLine = obj.lastLine
+        }
+      })
     })
   },
   beforeDestroy: async function () {
@@ -150,6 +169,9 @@ export default {
   li {
     margin-top: 10px;
     margin-bottom: 10px;
+  }
+  .alert {
+    cursor: pointer;
   }
 }
 </style>

@@ -3,6 +3,7 @@ const Env = use('Env')
 const path = require('path')
 const fs = require('fs')
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i)
+const readLastLines = require('read-last-lines')
 
 module.exports = class Watcher {
   constructor() {
@@ -59,6 +60,19 @@ module.exports = class Watcher {
       this.folders['workspace.bat'][socketid].emit(`folder_workspace.bat`, object)
     })
   }
+  
+  async changeBatFileLog(type, pathname) {
+    let object = {
+      lastLine: '',
+      pathname
+    }
+    if (!this.folders['running.lock']) return
+    if (type !== 'change' && type !== 'add') return;
+    object.lastLine = await readLastLines.read(pathname, 1)
+    Object.keys(this.folders['running.lock']).map( socketid => {
+      this.folders['running.lock'][socketid].emit(`logfile`, object)
+    })
+  }
 
   fireChange(type) {
     const self = this
@@ -68,6 +82,11 @@ module.exports = class Watcher {
       }
       if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat')) === path.normalize(pathname)) {
         return this.changedWorkspace(type, pathname)
+      }
+      const batFiles = ['train', 'test', 'validate', 'export', 'ExportImages', 'stop']
+      const normalizeBatFiles = batFiles.map(f => path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`)))
+      if (normalizeBatFiles.includes(path.normalize(pathname))) {
+        return this.changeBatFileLog(type, pathname)
       }
       console.log(`Event ${type} fired on file ${pathname}`)
 
@@ -121,7 +140,7 @@ module.exports = class Watcher {
       return parentTokens.every((t, i) => child.split(path.sep)[i] === t)
     }
     this.watcher = chokidar.watch( 
-      Env.get('ROOT_PATH'),
+      Env.get('COMMAND_FILES_PATH'),
       {
         ignoreInitial: true,
         persistent: true

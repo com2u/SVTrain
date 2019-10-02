@@ -48,6 +48,7 @@ export default {
     },
     async handleEnter () {
       this.createFolder()
+      this.$emit('folderCreated')
       this.$refs.modal.hide()
       console.log(this.$refs.modal)
     },

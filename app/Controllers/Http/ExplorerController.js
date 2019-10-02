@@ -15,6 +15,7 @@ const unlink = promisify(fs.unlink)
 const rename = promisify(fs.rename)
 const exists = promisify(fs.exists)
 const mkdir = promisify(fs.mkdir)
+const readLastLines = require('read-last-lines')
 
 // if file is landing under root directory
 // prevent access to that file
@@ -492,6 +493,44 @@ class ExplorerController {
       console.log(e)
       throw e
     }
+  }
+
+  async getLastLogs () {
+    try {
+    const logs = {
+      train: {},
+      test: {},
+      validate: {},
+      export: {},
+      stop: {},
+      ExportImages: {}
+    }
+    Object.keys(logs).forEach(f => {
+      let filePath = path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`)
+      logs[f].path = filePath
+      logs[f].lastLine = ''
+    })
+
+    await Promise.all(Object.keys(logs).map(async fileName => {
+      let lastLine = ''
+      try {
+        lastLine = (await readLastLines.read(logs[fileName].path, 1))
+      } catch(e) {console.log(e)}
+      logs[fileName].lastLine = lastLine
+    }))
+
+    return logs
+    } catch(e) {
+      console.log(e)
+    }
+  }
+
+  async logsFor ({request, response}) {
+    let file = request.params.file
+    const stream = fs.createReadStream(path.join(Env.get('COMMAND_FILES_PATH'), `${file}.log`))
+    response.implicitEnd = false
+    response.response.setHeader('Content-type', 'text/plain; charset=utf-8')
+    stream.pipe(response.response)
   }
 }
 
