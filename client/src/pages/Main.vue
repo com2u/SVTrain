@@ -57,9 +57,9 @@
         <span v-if="isLoading[command]">Running...</span>
         <span
           v-if="logs[command] && logs[command].lastLine"
-          class="alert alert-info mt-1"
+          class="log-line"
           @click="openLogsFor(command)">
-            <b>[LOG]</b>: {{ logs[command].lastLine }}
+            {{ logs[command].lastLine }}
         </span>
       </li>
     </ul>
@@ -172,6 +172,13 @@ export default {
   }
   .alert {
     cursor: pointer;
+  }
+  .log-line {
+    cursor: pointer;
+    text-decoration: underline;
+    &:hover {
+      text-decoration: none;
+    }
   }
 }
 </style>
