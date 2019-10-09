@@ -68,7 +68,7 @@ module.exports = class Watcher {
     }
     if (!this.folders['running.lock']) return
     if (type !== 'change' && type !== 'add') return;
-    object.lastLine = await readLastLines.read(pathname, 1)
+    object.lastLine = await readLastLines.read(pathname, 2)
     Object.keys(this.folders['running.lock']).map( socketid => {
       this.folders['running.lock'][socketid].emit(`logfile`, object)
     })

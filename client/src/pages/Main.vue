@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2>SVTrain V0.4</h2>
+    <h2>SVTrain V0.5</h2>
     <ul class="main-menu">
       <li>
         Running status:
@@ -49,18 +49,20 @@
 
       <li v-for="command in commands" v-bind:key="command">
         <b-button
+          style="float: left"
           v-bind:variant="command === 'stop' ? 'danger' : 'success'"
           v-bind:disabled="!!isLoading[command] || command === 'stop' && !running || command !== 'stop' && !!running"
           v-on:click="runCommand(command)">
           <v-icon v-bind:name="command === 'stop' ? 'stop' : 'play'"/> Run {{command}}.bat
         </b-button>
         <span v-if="isLoading[command]">Running...</span>
-        <span
+        <pre
+          style="padding-left: 10px"
           v-if="logs[command] && logs[command].lastLine"
           class="log-line"
-          @click="openLogsFor(command)">
-            {{ logs[command].lastLine }}
-        </span>
+          @click="openLogsFor(command)"
+          v-html="logs[command].lastLine" />
+        <div style="clear: both"/>
       </li>
     </ul>
   </div>

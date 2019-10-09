@@ -514,7 +514,7 @@ class ExplorerController {
     await Promise.all(Object.keys(logs).map(async fileName => {
       let lastLine = ''
       try {
-        lastLine = (await readLastLines.read(logs[fileName].path, 1))
+        lastLine = (await readLastLines.read(logs[fileName].path, 2))
       } catch(e) {console.log(e)}
       logs[fileName].lastLine = lastLine
     }))
