@@ -83,11 +83,11 @@ module.exports = class Watcher {
       if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat')) === path.normalize(pathname)) {
         return this.changedWorkspace(type, pathname)
       }
-      const batFiles = ['train', 'test', 'validate', 'export', 'ExportImages', 'stop']
-      const normalizeBatFiles = batFiles.map(f => path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`)))
-      if (normalizeBatFiles.includes(path.normalize(pathname))) {
-        return this.changeBatFileLog(type, pathname)
-      }
+      // const batFiles = ['train', 'test', 'validate', 'export', 'ExportImages', 'stop']
+      // const normalizeBatFiles = batFiles.map(f => path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`)))
+      // if (normalizeBatFiles.includes(path.normalize(pathname))) {
+        // return this.changeBatFileLog(type, pathname)
+      // }
       console.log(`Event ${type} fired on file ${pathname}`)
 
       const file = path.parse(pathname)
@@ -159,5 +159,35 @@ module.exports = class Watcher {
     this.watcher.on('ready', () => {
       console.log('Watcher is ready to send events')
     })
+
+    const updateLogList = [
+      'train',
+      'test',
+      'validate',
+      'export',
+      'ExportImages',
+      'stop'
+    ]
+    let interval = setInterval(async () => {
+      if (!this.folders['running.lock']) return
+
+      let lastLines = await Promise.all(updateLogList.map(async fileType => {
+        let line = null
+        try {
+          line = await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), `${fileType}.log`), 2)
+        } catch(e) {
+          return null
+        }
+        return {
+          file: fileType,
+          lastLine: line
+        }
+      }))
+      lastLines = lastLines.filter(o => o !== null)
+      Object.keys(this.folders['running.lock']).map( socketid => {
+        console.log('sent ', lastLines)
+        this.folders['running.lock'][socketid].emit(`logfile`, lastLines)
+      })
+    }, 1000)
   }
 }

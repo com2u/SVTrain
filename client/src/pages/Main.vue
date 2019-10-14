@@ -151,10 +151,8 @@ export default {
     })
 
     socket.subscribe('logfile', (obj) => {
-      Object.keys(this.logs).forEach(fileName => {
-        if (this.logs[fileName].path === obj.pathname) {
-          this.logs[fileName].lastLine = obj.lastLine
-        }
+      obj.forEach((o) => {
+        this.logs[o.file].lastLine = o.lastLine
       })
     })
   },
