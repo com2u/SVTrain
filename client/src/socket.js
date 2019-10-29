@@ -3,7 +3,7 @@ import Ws from '@adonisjs/websocket-client'
 export default {
   init: async function () {
     return new Promise((resolve, reject) => {
-      this.ws = Ws('ws://127.0.0.1:3333')
+      this.ws = Ws(null, { query: { sessionToken: localStorage.getItem('sessionToken') }})
       this.ws.connect()
       this.ws.on('open', () => {
         console.log('Connect open')

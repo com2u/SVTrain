@@ -1,6 +1,6 @@
 {
   "name": "adonis-fullstack-app",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "adonis-version": "4.1.0",
   "description": "The fullstack application boilerplate for Adonisjs",
   "main": "index.js",
@@ -28,10 +28,12 @@
     "@adonisjs/shield": "^1.0.8",
     "@adonisjs/websocket": "^1.0.11",
     "chokidar": "^2.1.1",
+    "password-hash": "^1.2.2",
     "read-last-lines": "^1.7.1",
     "recursive-readdir": "^2.2.2",
     "static-server": "^2.2.1",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "uuid4": "^1.1.4"
   },
   "devDependencies": {},
   "autoload": {

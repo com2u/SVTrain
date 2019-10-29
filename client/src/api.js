@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseurl = `http://localhost:3333/`
+const baseurl = `https://localhost:3333/`
 const urls = {
   getFiles: dir => `${baseurl}getFiles?dir=${dir}`,
   getRunningState: `${baseurl}getState`,
@@ -18,6 +18,7 @@ const urls = {
   getWorkspace: `${baseurl}getWorkspace`,
   setWorkspace: `${baseurl}setWorkspace`,
   getLastLogs: `${baseurl}getLastLogs`,
+  login: `${baseurl}login`
 }
 
 export default {
@@ -85,5 +86,32 @@ export default {
   },
   getLastLogs: async () => {
     return (await axios.get(urls.getLastLogs)).data
+  },
+  login: async (login, password) => {
+    let response = null
+    console.log('aga')
+    try {
+      response = await axios.post(urls.login, { login, password })
+      return response.data
+    } catch(e) {
+      console.log(e.toString())
+      if (e.toString().includes('401')) {
+        throw new Error('Invalid login or password (401)')
+      }
+      throw e
+    }
+  },
+
+  setSessionToken: token => {
+    axios.defaults.headers.common['Authorization'] = token
   }
 }
+
+axios.interceptors.response.use(function (response) {
+  return response
+}, function (error) {
+  if (error.toString().includes('401')) {
+    window.location.href = '#/login'
+  }
+  return Promise.reject(error)
+})

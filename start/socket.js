@@ -15,4 +15,4 @@
 
 const Ws = use('Ws')
 
-Ws.channel('explorer', 'ExplorerController')
+Ws.channel('explorer', 'ExplorerController').middleware(['auth'])

@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2>SVTrain V0.5</h2>
+    <h2>SVTrain V0.6</h2>
     <ul class="main-menu">
       <li>
         Running status:
@@ -65,6 +65,9 @@
         <div style="clear: both"/>
       </li>
     </ul>
+    <hr>
+    <p>Active session for user <b>{{sessionUser}}</b> <b-button variant="link" @click="logout">Delete session and logout</b-button></p>
+    
   </div>
 </template>
 
@@ -95,7 +98,8 @@ export default {
       'export',
       'ExportImages',
       'stop'
-    ]
+    ],
+    sessionUser: ''
   }),
   methods: {
     checkStatus: async function () {
@@ -131,10 +135,16 @@ export default {
       
     },
     openLogsFor(command) {
-      window.open(`/logs/${command}`)
+      window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`)
+    },
+    logout () {
+      localStorage.removeItem('sessionToken')
+      api.setSessionToken('')
+      this.$router.push({ name: 'LoginPage' })
     }
   },
   created: async function () {
+    this.sessionUser = localStorage.getItem('sessionUser')
     this.checkStatus()
     this.checkWorkspace()
     this.logs = await api.getLastLogs()

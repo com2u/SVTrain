@@ -16,5 +16,8 @@ database/development.sqlite
 .idea
 
 statistic.data
+users.json
+sessions.json
+ssl/*
 
 npm-debug.log
