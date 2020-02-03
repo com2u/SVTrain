@@ -16,6 +16,7 @@ const rename = promisify(fs.rename)
 const exists = promisify(fs.exists)
 const mkdir = promisify(fs.mkdir)
 const readLastLines = require('read-last-lines')
+const config = require('../../../config/index')
 
 // if file is landing under root directory
 // prevent access to that file
@@ -227,11 +228,11 @@ class ExplorerController {
   */
   async delete({ request }) {
     let { files } = request.post()
-    
+
     // skip files with no access
     files = files
     .filter( f => accessToFile(CONST_PATHS.root, f) )
-    
+
     await Promise.all(
       files.map( async f => await unlink(f) )
     )
@@ -258,17 +259,17 @@ class ExplorerController {
     .filter(
       f => accessToFile(CONST_PATHS.root, f)
     )
-    
+
     await Promise.all(
-      files.map( 
-        async f => await rename( 
+      files.map(
+        async f => await rename(
           f,
           path.join( destination, path.basename(f) )
         )
       )
     )
 
-    return files.map( 
+    return files.map(
       f => path.join(destination, path.basename(f))
     )
   }
@@ -309,7 +310,7 @@ class ExplorerController {
           name: f
         })
       }
-    }    
+    }
 
     return result
   }
@@ -355,7 +356,7 @@ class ExplorerController {
       if ( flstat.isDirectory() ) {
         result.push(f)
       }
-    }    
+    }
 
     return result
   }
@@ -442,7 +443,7 @@ class ExplorerController {
     const ignoreFunc = (_, lstat) => !lstat.isDirectory()
     const dirs = await recursive(CONST_PATHS.root, [ignoreFunc])
     dirs.unshift(CONST_PATHS.root)
-    
+
     await Promise.all(
       dirs.map( async dir => {
         let dirname = path.basename(dir)
@@ -531,6 +532,10 @@ class ExplorerController {
     response.implicitEnd = false
     response.response.setHeader('Content-type', 'text/plain; charset=utf-8')
     stream.pipe(response.response)
+  }
+
+  async getConfig ({request, response}) {
+    response.json(config)
   }
 }
 

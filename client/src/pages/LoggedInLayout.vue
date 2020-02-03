@@ -13,6 +13,12 @@ export default {
       this.$router.push({ name: 'LoginPage' })
     } else {
       api.setSessionToken(sessionToken)
+      api.getConfig()
+      .then(data => {
+        console.log('Config data: ', data)
+        this.$store.dispatch('setConfig', data)
+      })
+
     }
   }
 }

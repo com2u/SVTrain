@@ -1,15 +1,15 @@
 <template>
   <div class="main-wrapper" v-on:mousemove="onMouseMoveOnWrapper" v-on:mouseup="onMouseUpOnWrapper">
-    <div class="main-side">
+    <div class="main-side" :style="{paddingRight: `${displayedWidth + 10}px`}">
       <slot name="main"/>
     </div>
     <div
       class="border"
-      v-bind:style="{ right: `${sideWidth + 10}px` }"
+      v-bind:style="{ right: `${displayedWidth + 10}px` }"
       v-on:mousedown="onMouseDownOnBorder"
       v-on:mouseup.prevent="onMouseUpOnBorder"
     />
-    <div ref="side" class="expand-side" v-bind:style="{ width: `${sideWidth}px` }">
+    <div ref="side" class="expand-side" v-bind:style="{ width: `${displayedWidth}px` }">
       <slot name="side"/>
     </div>
   </div>
@@ -19,10 +19,23 @@
 export default {
   data () {
     return {
-      originalSideWidth: 250,
-      sideWidth: 250,
+      originalSideWidth: null,
+      sideWidth: null,
       resizing: false,
       originalPageX: null
+    }
+  },
+  computed: {
+    configSideWidth() {
+      const config = this.$store.state.config
+      if (config.rightMenu && config.rightMenu.width) {
+        this.sideWidth = config.rightMenu.width
+        return config.rightMenu.width
+      }
+      return 250
+    },
+    displayedWidth() {
+      return this.sideWidth || this.configSideWidth
     }
   },
   methods: {
@@ -62,11 +75,10 @@ export default {
   width: 100%;
   min-height: 100%;
   .main-side {
-    padding-right: 260px;
     min-height: 100%;
   }
   .expand-side {
-    position: absolute;
+    position: fixed;
     top: 0px;
     right: 0px;
     background: #fff;
