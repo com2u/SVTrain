@@ -1,6 +1,6 @@
 import 'babel-polyfill'
 import Vue from 'vue'
-import BootstrapVue from 'bootstrap-vue'
+import {BootstrapVueIcons, BootstrapVue} from 'bootstrap-vue'
 import VueRouter from 'vue-router'
 import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon.vue'
@@ -14,6 +14,7 @@ import store from './store'
 
 Vue.use(infiniteScroll)
 Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 
 const router = new VueRouter({routes})
 Vue.use(VueRouter)

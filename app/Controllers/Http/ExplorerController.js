@@ -16,7 +16,10 @@ const rename = promisify(fs.rename)
 const exists = promisify(fs.exists)
 const mkdir = promisify(fs.mkdir)
 const readLastLines = require('read-last-lines')
-const config = require('../../../config/index')
+const config = require('../../../config/ui')
+
+const logger = require('../../../logger')
+
 
 // if file is landing under root directory
 // prevent access to that file
@@ -228,15 +231,16 @@ class ExplorerController {
   */
   async delete({ request }) {
     let { files } = request.post()
+    const destination = Env.get('DELETED_FILES_PATH', 'Deleted_files')
 
-    // skip files with no access
-    files = files
-    .filter( f => accessToFile(CONST_PATHS.root, f) )
+    // Create delete directory if not exist
+    if (!fs.existsSync(destination)){
+      fs.mkdirSync(destination);
+    }
 
-    await Promise.all(
-      files.map( async f => await unlink(f) )
-    )
-    return files
+    const user = request.currentUser
+    const response = await this.moveFiles(files, destination, user, true)
+    return response
   }
 
   /*
@@ -249,16 +253,21 @@ class ExplorerController {
   */
   async move({ request }) {
     let { files, destination } = request.post()
+    const response = await this.moveFiles(files, destination)
+    return response
+  }
 
+  async moveFiles(files, destination, user, isDelete= false) {
     if ( !accessToFile(CONST_PATHS.root, destination) ) {
       throw new Error(`Access denied to the directory ${destination}`)
     }
 
     // skip files with no access
     files = files
-    .filter(
-      f => accessToFile(CONST_PATHS.root, f)
-    )
+      .filter(
+        f => accessToFile(CONST_PATHS.root, f)
+      )
+
 
     await Promise.all(
       files.map(
@@ -268,6 +277,15 @@ class ExplorerController {
         )
       )
     )
+    if (isDelete) {
+      for (const file of files) {
+        logger.info(`User ${user} has deleted file: "${file}"`)
+      }
+    } else {
+      for (const file of files) {
+        logger.info(`User ${user} has move file "${file}" to "${path.join(destination, path.basename(f))}"`)
+      }
+    }
 
     return files.map(
       f => path.join(destination, path.basename(f))
@@ -393,6 +411,7 @@ class ExplorerController {
     }
     console.log(path.join(folder, name))
     await mkdir(path.join(folder, name))
+    logger.info(`User ${request.currentUser} has created new folder "${path.join(folder, name)}"`)
     return true
   }
 
