@@ -83,22 +83,32 @@
           </file>
         </div>
         <div class="pagination-group">
-          <b-button variant="primary" size="sm" @click="backward()"><b-icon icon="chevron-left"></b-icon> Backward</b-button>
-          <b-button variant="primary" size="sm" @click="forward()">Forward <b-icon icon="chevron-right"></b-icon></b-button>
+          <b-alert v-if="forwardOnly" show variant="warning">FORWARD ONLY mode is enable</b-alert>
+          <b-button
+            v-else
+            variant="primary"
+            size="sm"
+            @click="backward()">
+            <b-icon icon="chevron-left"></b-icon>
+            Backward
+          </b-button>
+          <b-button variant="primary" size="sm" @click="forward()">Forward
+            <b-icon icon="chevron-right"></b-icon>
+          </b-button>
 
-          <div style="padding-top: 10px">
-            <b-pagination
-              v-model="page"
-              :total-rows="folder.total_file"
-              :per-page="perPage"
-              size="md"
-              first-text="First"
-              prev-text="Prev"
-              next-text="Next"
-              last-text="Last"
-              @change="onPageChange"
-            ></b-pagination>
-          </div>
+          <!--          <div style="padding-top: 10px">-->
+          <!--            <b-pagination-->
+          <!--              v-model="page"-->
+          <!--              :total-rows="folder.total_file"-->
+          <!--              :per-page="perPage"-->
+          <!--              size="md"-->
+          <!--              first-text="First"-->
+          <!--              prev-text="Prev"-->
+          <!--              next-text="Next"-->
+          <!--              last-text="Last"-->
+          <!--              @change="onPageChange"-->
+          <!--            ></b-pagination>-->
+          <!--          </div>-->
         </div>
         <div class="file-explorer-grid">
           <file
@@ -169,7 +179,6 @@
       staticServer: 'http://localhost:2929/',
       path: null,
       openedPath: null,
-      statisticShown: false,
       moveDestination: null,
       nextFolders: [],
       statistic: {
@@ -204,6 +213,9 @@
           return config.filePerPage
         }
         return 0
+      },
+      forwardOnly() {
+        return this.$store.state.config.forwardOnly
       }
     },
     watch: {
@@ -507,10 +519,22 @@
       },
 
       forward() {
-        if (this.page < this.page_count) {
-          this.page = this.page + 1
-          this.calculatePage(this.page)
+        if (!this.forwardOnly) {
+          if (this.page < this.page_count) {
+            this.page = this.page + 1
+            this.calculatePage(this.page)
+          }
+        } else {
+          this.onForwardOnly()
         }
+      },
+
+      async onForwardOnly() {
+        console.log('forward only')
+        const selected = this.selectedFiles.map(f => f.path)
+        const notSelected = this.screenFiles.filter(f => !selected.includes(f.path)).map(f => f.path)
+        await api.doForwardOnly(selected, notSelected)
+        this.loadFiles(this.path)
       },
 
       goToTheFolder: async function (file) {

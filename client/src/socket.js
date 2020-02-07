@@ -24,16 +24,20 @@ export default {
       this.ws.on('error', error => {
         console.log('ws error: ', error)
         reject(error)
-      })    
+      })
 
     })
   },
 
   subscibeForFolder: function (path, callback) {
     console.log(`Subcribe for folder ${path}`)
-    this.explorer.emit('subscribeForFolder', { path })
-    this.explorer.on(`folder_${path}`, callback)
-    this.listeners[path] = callback
+    if (this.explorer) {
+      this.explorer.emit('subscribeForFolder', { path })
+      this.explorer.on(`folder_${path}`, callback)
+    }
+    if (this.listeners) {
+      this.listeners[path] = callback
+    }
   },
 
   subscribe (channel, callback) {
@@ -49,10 +53,12 @@ export default {
     console.log(`Unsibscribe for folder ${path}`)
     try { this.explorer.off(`folder_${path}`, this.listeners[path]) }
     catch(e) { console.log('error on adonis ws client: ', e)}
-    delete this.listeners[path]
+    if (this.listeners) {
+      delete this.listeners[path]
+    }
   },
 
   isConnected: function () {
     return this.isConnected
   }
-} 
+}
