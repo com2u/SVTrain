@@ -1,6 +1,6 @@
 import 'babel-polyfill'
 import Vue from 'vue'
-import BootstrapVue from 'bootstrap-vue'
+import {BootstrapVueIcons, BootstrapVue} from 'bootstrap-vue'
 import VueRouter from 'vue-router'
 import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon.vue'
@@ -10,9 +10,11 @@ import infiniteScroll from 'vue-infinite-scroll'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
 import VoerroTagsInput from '@voerro/vue-tagsinput';
+import store from './store'
 
 Vue.use(infiniteScroll)
 Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 
 const router = new VueRouter({routes})
 Vue.use(VueRouter)
@@ -26,8 +28,10 @@ Vue.component('tags-input', VoerroTagsInput);
 //   }
 // }, false);
 
+
 new Vue({
   router,
+  store,
   el: '#app',
   render: h => h(App)
 })

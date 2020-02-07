@@ -1,8 +1,8 @@
 <template>
-  <div 
-    class="file-explorer-item" 
-    v-bind:style="{ width: size + 'px' }" 
-    v-bind:id="file.path" 
+  <div
+    class="file-explorer-item"
+    v-bind:style="{ width: size + 'px' }"
+    v-bind:id="file.path"
     v-bind:class="{ cursor: file.cursor, selected: file.selected }">
     <template v-if="file.deleted || file.changed">
       {{ file.deleted ? "File deleted" : "File changed" }}
@@ -10,8 +10,8 @@
     <template v-else>
       <template v-if="file.type === 'file'">
         <template v-if="file.image">
-          <img 
-            v-bind:src="file.serverPath" 
+          <img
+            v-bind:src="file.serverPath"
             class="file-explorer-preview" v-bind:style="{width: size-15 + 'px', height: size-15 + 'px' }">
         </template>
         <template v-else-if="file.name.toLowerCase() === 'tfsettings.json'">
@@ -26,7 +26,8 @@
       </template>
     </template>
     <span
-      v-bind:class="{ 
+      v-if="showFileName"
+      v-bind:class="{
         missmatched: !file.match && file.image,
         matched: file.match && file.image,
         other: !file.image
@@ -42,7 +43,13 @@ export default {
   props: [
     'file',
     'size'
-  ]
+  ],
+  computed: {
+    showFileName() {
+      const config = this.$store.state.config
+      return !!config.showFileName
+    }
+  }
 }
 </script>
 

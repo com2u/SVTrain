@@ -18,7 +18,9 @@ const urls = {
   getWorkspace: `${baseurl}getWorkspace`,
   setWorkspace: `${baseurl}setWorkspace`,
   getLastLogs: `${baseurl}getLastLogs`,
-  login: `${baseurl}login`
+  login: `${baseurl}login`,
+  getConfig: `${baseurl}config`,
+  forwardOnly: `${baseurl}forward-only`,
 }
 
 export default {
@@ -30,15 +32,15 @@ export default {
     return (await axios.get(urls.getParentDirectory(path))).data
   },
 
-  getNextFolders: async(path) => {
+  getNextFolders: async (path) => {
     return (await axios.get(urls.getNextFolders(path))).data
   },
 
-  getStatistic: async(path) => {
+  getStatistic: async (path) => {
     return (await axios.get(urls.getStatistic(path))).data
   },
 
-  getRunningState: async() => {
+  getRunningState: async () => {
     return (await axios.get(urls.getRunningState)).data
   },
 
@@ -48,21 +50,21 @@ export default {
 
   // files array like ["/path/to/file1", "/path/to/file2"]
   deleteFiles: async (files) => {
-    return (await axios.post(urls.deleteFiles, { files })).data
+    return (await axios.post(urls.deleteFiles, {files})).data
   },
 
   // files array like [{ file: "/path/to/file", moveTo: "/path/to/folder" }]
-  moveFiles: async(files, destination) => {
-    return (await axios.post(urls.moveFiles, { files, destination })).data
+  moveFiles: async (files, destination) => {
+    return (await axios.post(urls.moveFiles, {files, destination})).data
   },
 
-  calculateStatistic: async() => {
+  calculateStatistic: async () => {
     return (await axios.get(urls.calculateStatistic)).data
   },
 
   saveFile: async (path, data) => {
     console.log(path, data)
-    return (await axios.post(urls.saveFile, { path, data })).data
+    return (await axios.post(urls.saveFile, {path, data})).data
   },
 
   checkFolder: async (path) => {
@@ -74,7 +76,7 @@ export default {
   },
 
   createFolder: async (folder, name) => {
-    return (await axios.post(urls.createFolder, { folder, name })).data
+    return (await axios.post(urls.createFolder, {folder, name})).data
   },
 
   getWorkspace: async () => {
@@ -82,7 +84,7 @@ export default {
   },
 
   setWorkspace: async (workspace) => {
-    return (await axios.post(urls.setWorkspace, { workspace })).data
+    return (await axios.post(urls.setWorkspace, {workspace})).data
   },
   getLastLogs: async () => {
     return (await axios.get(urls.getLastLogs)).data
@@ -91,9 +93,9 @@ export default {
     let response = null
     console.log('aga')
     try {
-      response = await axios.post(urls.login, { login, password })
+      response = await axios.post(urls.login, {login, password})
       return response.data
-    } catch(e) {
+    } catch (e) {
       console.log(e.toString())
       if (e.toString().includes('401')) {
         throw new Error('Invalid login or password (401)')
@@ -104,6 +106,14 @@ export default {
 
   setSessionToken: token => {
     axios.defaults.headers.common['Authorization'] = token
+  },
+
+  getConfig: async () => {
+    return (await axios.get(urls.getConfig)).data
+  },
+
+  doForwardOnly: async (selectedFiles, notSelectedFiles) => {
+    return (await axios.post(urls.forwardOnly, {selectedFiles, notSelectedFiles})).data
   }
 }
 

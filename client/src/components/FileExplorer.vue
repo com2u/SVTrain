@@ -28,17 +28,18 @@
         </div>
 
         <div class="right-side-section" v-if="statistic.calculated">
-          <button 
+          <button
             v-bind:disabled="isLoading.statistic"
             v-on:click="calculateStatistic()">
             Calculate statistic{{ isLoading.statistic ? ' (loading...)' : ''}}
-          </button><br>
+          </button>
+          <br>
           <span v-if="!statistic.table">
             Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}
           </span>
           <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>
           <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">
-            <statistic-table 
+            <statistic-table
               v-on:folderselected="selectFolder"
               v-bind:folder="path"
               v-bind:table="statistic.table"/>
@@ -47,15 +48,18 @@
         <div v-else class="right-side-section">
           Statistic didn't calculated
         </div>
-        
+
         <div class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0">
-            <a href="javascript:void(0)" v-on:click="deleteFiles()">Delete files</a> <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
-            Move files to the next folders <span v-if="isLoading.moving"><v-icon name="spinner"></v-icon> (Moving...)</span>:
+            <a href="javascript:void(0)" v-on:click="deleteFiles()" :style="{fontSize: fontSize}">Delete files</a>
+            <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
+            Move files to the next folders <span v-if="isLoading.moving"><v-icon
+            name="spinner"></v-icon> (Moving...)</span>:
             <ul style="list-style: none">
               <li v-for="f in nextFolders" v-bind:key="f.path">
-                <v-icon name="folder"></v-icon> <a href="javascript:void(0)" v-on:click="moveFiles(f.path)">{{f.name}}</a>
+                <v-icon name="folder"></v-icon>
+                <a href="javascript:void(0)" v-on:click="moveFiles(f.path)" :style="{fontSize: fontSize}">{{f.name}}</a>
               </li>
             </ul>
           </div>
@@ -72,16 +76,44 @@
         <div class="file-explorer-grid bottom-border">
           <new-folder-button v-b-modal.creating-folder-modal/>
           <file
-            v-for = "file in folder.folders"
+            v-for="file in folder.folders"
             v-bind:file="file"
             v-on:click.native="goToTheFolder(file)"
             v-bind:key="file.path">
           </file>
         </div>
-        <div class="file-explorer-grid" v-infinite-scroll="loadMore">
-          <file 
+        <div class="pagination-group">
+          <b-alert v-if="forwardOnly" show variant="warning">FORWARD ONLY mode is enable</b-alert>
+          <b-button
+            v-else
+            variant="primary"
+            size="sm"
+            @click="backward()">
+            <b-icon icon="chevron-left"></b-icon>
+            Backward
+          </b-button>
+          <b-button variant="primary" size="sm" @click="forward()">Forward
+            <b-icon icon="chevron-right"></b-icon>
+          </b-button>
+
+          <!--          <div style="padding-top: 10px">-->
+          <!--            <b-pagination-->
+          <!--              v-model="page"-->
+          <!--              :total-rows="folder.total_file"-->
+          <!--              :per-page="perPage"-->
+          <!--              size="md"-->
+          <!--              first-text="First"-->
+          <!--              prev-text="Prev"-->
+          <!--              next-text="Next"-->
+          <!--              last-text="Last"-->
+          <!--              @change="onPageChange"-->
+          <!--            ></b-pagination>-->
+          <!--          </div>-->
+        </div>
+        <div class="file-explorer-grid">
+          <file
             v-bind:id="`file_${file.path}`"
-            v-for="file in screenFiles" 
+            v-for="file in screenFiles"
             v-bind:file="file"
             v-on:click.native="setCursorAndSelect(file, $event)"
             v-on:dblclick.native="openFile(file)"
@@ -92,13 +124,13 @@
       </template>
     </window-splitting>
 
-      <show-file 
-        ref="FileViewing"
-        v-if="viewingFile"
-        v-bind:file="viewingFile"
-        v-on:shown="onOpenModal"
-        v-on:hidden="onCloseModal"
-      />
+    <show-file
+      ref="FileViewing"
+      v-if="viewingFile"
+      v-bind:file="viewingFile"
+      v-on:shown="onOpenModal"
+      v-on:hidden="onCloseModal"
+    />
     <!-- </b-modal> -->
     <creating-folder
       @folderCreated="onFolderCreated"
@@ -110,501 +142,591 @@
 </template>
 
 <script>
-import File from './File.vue'
-import api from '../api'
-import socket from '../socket'
-import StatisticTable from './StatisticTable.vue'
-import ShowFile from './ShowFile.vue'
-import CreatingFolder from './CreatingFolder.vue'
-import NewFolderButton from './NewFolderButton.vue'
-import WindowSplitting from './WindowSplitting.vue'
+  import File from './File.vue'
+  import api from '../api'
+  import socket from '../socket'
+  import StatisticTable from './StatisticTable.vue'
+  import ShowFile from './ShowFile.vue'
+  import CreatingFolder from './CreatingFolder.vue'
+  import NewFolderButton from './NewFolderButton.vue'
+  import WindowSplitting from './WindowSplitting.vue'
 
-export default {
-  props: [
-    'dir'
-  ],
-  components: {
-    File,
-    StatisticTable,
-    ShowFile,
-    CreatingFolder,
-    NewFolderButton,
-    WindowSplitting
-  },
-  data: () => ({
-    isLoading: {
-      deleting: false,
-      moving: false,
-      statistic: false,
+  export default {
+    props: [
+      'dir'
+    ],
+    components: {
+      File,
+      StatisticTable,
+      ShowFile,
+      CreatingFolder,
+      NewFolderButton,
+      WindowSplitting
     },
-    status: null,
-    viewingFile: null,
-    statisticShown: false,
-    fileSize: 100,
-    page: 0,
-    page_count: null,
-    page_size: 100,
-    staticServer: 'http://localhost:2929/',
-    path: null,
-    openedPath: null,
-    statisticShown: false,
-    moveDestination: null,
-    nextFolders: [],
-    statistic: {
-      calculated: false,
-      matched: null,
-      missed: null,
-      missmatched: null,
-      table: null
-    },
-    lastSelectedFileIndex: null,
-    screenFiles: [],
-    folder: {
-      files: [],
-      folders: []
-    },
-    createdFolders: [],
-    selectedFiles: [],
-    filter: {}
-  }),
-  methods: {
-    openCurrentFile () {
-      const fileInFocus = this.screenFiles.find(f => f.cursor)
-      this.viewingFile = fileInFocus
-      this.$nextTick(() => this.$refs.FileViewing.show())
-    },
-    openFile (file) {
-      console.log(file)
-      this.viewingFile = file
-      this.$nextTick(() => this.$refs.FileViewing.show())
-    },
-    async calculateStatistic () {
-      this.isLoading.statistic = true
-      try { await api.calculateStatistic() }
-      catch (e) { alert('An error occurred!') }
-      await this.loadStatistic(this.path)
-      this.isLoading.statistic = false
-    },
-    async selectFolder({ folder, filter }) {
-      const folderFromArray = this.createdFolders.find(f => f.name === folder)
-      const openedPath = folderFromArray.path
-      console.log(folderFromArray)
-      this.filter = filter || {}
-      socket.unsubscribeForFolder(this.openedPath)
-      await this.loadFiles(folderFromArray.path)
-      socket.subscibeForFolder(openedPath, this.fileChanged())
-      this.openedPath = openedPath
-    },
-    statisticExpanded () {
-      this.$refs.WindowSplitting.expand()
-      this.statisticShown = true
-    },
-    statisticHidden () {
-      this.$refs.WindowSplitting.shrink()
-      this.statisticShown = false
-    },
-    setCursorAndSelect (file, $event) {
-      const currentCursorFile = this.screenFiles.find(f => f.cursor)
-      if (currentCursorFile) currentCursorFile.cursor = false
-      file.cursor = true
-      if ($event.shiftKey) {
-        this.selectCurrent(true)
-      } else {
-        this.toggleSelect(file)
-      }
-    },
-    /**
-     * Scroll browser page to focused image
-     * @param {Number} focusFileIndex - Index of file with focus
-     */
-    scrollToFocusFile (focusFileIndex) {
-      const focusedFile = this.screenFiles[focusFileIndex]
-      const element = document.getElementById(`file_${focusedFile.path}`)
-      const windowHeight = window.innerHeight
-      const elementHeight = element.getBoundingClientRect().top - element.getBoundingClientRect().bottom
-      if (element) {
-        element.scrollIntoView(false)
-        window.scrollBy(0, Math.floor(windowHeight / 2) + elementHeight)
-      }
-    },
-    /**
-     * Move cursor with "up", "right", "down" and "left" directions
-     * Call method scrollToFocusFile if cursor was moved
-     * @param {String} to - Direction to move cursor
-     */
-    cursor (to) {
-      console.log('cursor to', to)
-      const fileInFocusIndex = this.screenFiles.findIndex(f => f.cursor)
-      let nextFileFocusIndex = null
-      if (fileInFocusIndex === -1) {
-        this.screenFiles[0].cursor = true
-        return
-      }
-
-      let fileInFocusCoords = null
-      switch (to) {
-        case 'right':
-          if (fileInFocusIndex + 1 < this.screenFiles.length) {
-            nextFileFocusIndex = fileInFocusIndex + 1
-          }
-          break
-        case 'left':
-          if (fileInFocusIndex > 0) {
-            nextFileFocusIndex = fileInFocusIndex - 1
-          }
-          break
-        case 'down':
-          fileInFocusCoords = document
-            .getElementById(`file_${this.screenFiles[fileInFocusIndex].path}`)
-            .getBoundingClientRect()
-          for (let i = fileInFocusIndex + 1; i < this.screenFiles.length; ++i) {
-            const nextFileCoords = document
-              .getElementById(`file_${this.screenFiles[i].path}`)
-              .getBoundingClientRect()
-            if (fileInFocusCoords.x === nextFileCoords.x) {
-              nextFileFocusIndex = i
-              break
-            }
-          }
-          break
-        case 'up':
-          fileInFocusCoords = document
-            .getElementById(`file_${this.screenFiles[fileInFocusIndex].path}`)
-            .getBoundingClientRect()
-          for (let i = fileInFocusIndex - 1; i >= 0; --i) {
-            const nextFileCoords = document
-              .getElementById(`file_${this.screenFiles[i].path}`)
-              .getBoundingClientRect()
-            if (fileInFocusCoords.left === nextFileCoords.left) {
-              nextFileFocusIndex = i
-              break
-            }
-          }
-          break
-      }
-
-      if (nextFileFocusIndex || nextFileFocusIndex === 0) {
-        this.screenFiles[fileInFocusIndex].cursor = false
-        this.screenFiles[nextFileFocusIndex].cursor = true
-        this.scrollToFocusFile(nextFileFocusIndex)
-      }
-    },
-    selectCurrent (selectAll) {
-      console.log('Select all: ', selectAll)
-      const fileInFocusIndex = this.screenFiles.findIndex(f => f.cursor)
-      if (fileInFocusIndex === -1) return
-      this.toggleSelect(this.screenFiles[fileInFocusIndex], true)
-      if (selectAll && (this.lastSelectedFileIndex || this.lastSelectedFileIndex === 0)) {
-        const different = fileInFocusIndex - this.lastSelectedFileIndex
-        const beginFrom = Math.sign(different) > 0 ? this.lastSelectedFileIndex + 1 : fileInFocusIndex + 1
-        const endWith = Math.sign(different) > 0 ? fileInFocusIndex - 1 : this.lastSelectedFileIndex - 1
-        console.log(beginFrom, endWith, 'kokoko')
-        for (let i = beginFrom; i <= endWith; ++i) {
-          this.toggleSelect(this.screenFiles[i], true)
+    data: () => ({
+      isLoading: {
+        deleting: false,
+        moving: false,
+        statistic: false,
+      },
+      status: null,
+      viewingFile: null,
+      statisticShown: false,
+      fileSize: 100,
+      page: 0,
+      page_count: null,
+      perPage: 10,
+      staticServer: 'http://localhost:2929/',
+      path: null,
+      openedPath: null,
+      moveDestination: null,
+      nextFolders: [],
+      statistic: {
+        calculated: false,
+        matched: null,
+        missed: null,
+        missmatched: null,
+        table: null
+      },
+      lastSelectedFileIndex: null,
+      screenFiles: [],
+      folder: {
+        files: [],
+        folders: [],
+        total_file: 0
+      },
+      createdFolders: [],
+      selectedFiles: [],
+      filter: {}
+    }),
+    computed: {
+      fontSize() {
+        const config = this.$store.state.config
+        if (config.rightMenu && config.rightMenu.fontSize) {
+          return config.rightMenu.fontSize
         }
-        this.lastSelectedFileIndex = null
-      }
-      if (!selectAll) {
-        this.lastSelectedFileIndex = fileInFocusIndex
+        return '1rem'
+      },
+      configFilePerPage() {
+        const config = this.$store.state.config
+        if (Number.isInteger(config.filePerPage) && config.filePerPage >= 0) {
+          return config.filePerPage
+        }
+        return 0
+      },
+      forwardOnly() {
+        return this.$store.state.config.forwardOnly
       }
     },
-    selected: () => {
-      console.log('selected')
+    watch: {
+      configFilePerPage(newVal) {
+        if (this.configFilePerPage) {
+          this.perPage = this.configFilePerPage
+        } else {
+          this.perPage = 100
+        }
+        this.calculatePage(this.page)
+      }
     },
-    toggleSelect: function (file, doNotUpdateLastSelectedFileIndex) {
-      console.log(`File ${file.path} ${ file.selected ? 'unselected' : 'selected' }`)
-      file.selected = !file.selected
-      if ( file.selected ) {
-        this.selectedFiles.push(file)
-      } else {
-        let index = -1
-        for ( let i = 0; i < this.selectedFiles.length; ++i ) {
-          if ( this.selectedFiles[i].path === file.path ) {
-            index = i
+    methods: {
+      openCurrentFile() {
+        const fileInFocus = this.screenFiles.find(f => f.cursor)
+        this.viewingFile = fileInFocus
+        this.$nextTick(() => this.$refs.FileViewing.show())
+      },
+      openFile(file) {
+        console.log(file)
+        this.viewingFile = file
+        this.$nextTick(() => this.$refs.FileViewing.show())
+      },
+      async calculateStatistic() {
+        this.isLoading.statistic = true
+        try {
+          await api.calculateStatistic()
+        } catch (e) {
+          alert('An error occurred!')
+        }
+        await this.loadStatistic(this.path)
+        this.isLoading.statistic = false
+      },
+      async selectFolder({folder, filter}) {
+        const folderFromArray = this.createdFolders.find(f => f.name === folder)
+        const openedPath = folderFromArray.path
+        console.log(folderFromArray)
+        this.filter = filter || {}
+        socket.unsubscribeForFolder(this.openedPath)
+        await this.loadFiles(folderFromArray.path)
+        socket.subscibeForFolder(openedPath, this.fileChanged())
+        this.openedPath = openedPath
+      },
+      statisticExpanded() {
+        this.$refs.WindowSplitting.expand()
+        this.statisticShown = true
+      },
+      statisticHidden() {
+        this.$refs.WindowSplitting.shrink()
+        this.statisticShown = false
+      },
+      setCursorAndSelect(file, $event) {
+        const currentCursorFile = this.screenFiles.find(f => f.cursor)
+        if (currentCursorFile) currentCursorFile.cursor = false
+        file.cursor = true
+        if ($event.shiftKey) {
+          this.selectCurrent(true)
+        } else {
+          this.toggleSelect(file)
+        }
+      },
+      /**
+       * Scroll browser page to focused image
+       * @param {Number} focusFileIndex - Index of file with focus
+       */
+      scrollToFocusFile(focusFileIndex) {
+        const focusedFile = this.screenFiles[focusFileIndex]
+        const element = document.getElementById(`file_${focusedFile.path}`)
+        const windowHeight = window.innerHeight
+        const elementHeight = element.getBoundingClientRect().top - element.getBoundingClientRect().bottom
+        if (element) {
+          element.scrollIntoView(false)
+          window.scrollBy(0, Math.floor(windowHeight / 2) + elementHeight)
+        }
+      },
+      /**
+       * Move cursor with "up", "right", "down" and "left" directions
+       * Call method scrollToFocusFile if cursor was moved
+       * @param {String} to - Direction to move cursor
+       */
+      cursor(to) {
+        console.log('cursor to', to)
+        const fileInFocusIndex = this.screenFiles.findIndex(f => f.cursor)
+        let nextFileFocusIndex = null
+        if (fileInFocusIndex === -1) {
+          this.screenFiles[0].cursor = true
+          return
+        }
+
+        let fileInFocusCoords = null
+        switch (to) {
+          case 'right':
+            if (fileInFocusIndex + 1 < this.screenFiles.length) {
+              nextFileFocusIndex = fileInFocusIndex + 1
+            }
             break
+          case 'left':
+            if (fileInFocusIndex > 0) {
+              nextFileFocusIndex = fileInFocusIndex - 1
+            }
+            break
+          case 'down':
+            fileInFocusCoords = document
+              .getElementById(`file_${this.screenFiles[fileInFocusIndex].path}`)
+              .getBoundingClientRect()
+            for (let i = fileInFocusIndex + 1; i < this.screenFiles.length; ++i) {
+              const nextFileCoords = document
+                .getElementById(`file_${this.screenFiles[i].path}`)
+                .getBoundingClientRect()
+              if (fileInFocusCoords.x === nextFileCoords.x) {
+                nextFileFocusIndex = i
+                break
+              }
+            }
+            break
+          case 'up':
+            fileInFocusCoords = document
+              .getElementById(`file_${this.screenFiles[fileInFocusIndex].path}`)
+              .getBoundingClientRect()
+            for (let i = fileInFocusIndex - 1; i >= 0; --i) {
+              const nextFileCoords = document
+                .getElementById(`file_${this.screenFiles[i].path}`)
+                .getBoundingClientRect()
+              if (fileInFocusCoords.left === nextFileCoords.left) {
+                nextFileFocusIndex = i
+                break
+              }
+            }
+            break
+        }
+
+        if (nextFileFocusIndex || nextFileFocusIndex === 0) {
+          this.screenFiles[fileInFocusIndex].cursor = false
+          this.screenFiles[nextFileFocusIndex].cursor = true
+          this.scrollToFocusFile(nextFileFocusIndex)
+        }
+      },
+      selectCurrent(selectAll) {
+        console.log('Select all: ', selectAll)
+        const fileInFocusIndex = this.screenFiles.findIndex(f => f.cursor)
+        if (fileInFocusIndex === -1) return
+        this.toggleSelect(this.screenFiles[fileInFocusIndex], true)
+        if (selectAll && (this.lastSelectedFileIndex || this.lastSelectedFileIndex === 0)) {
+          const different = fileInFocusIndex - this.lastSelectedFileIndex
+          const beginFrom = Math.sign(different) > 0 ? this.lastSelectedFileIndex + 1 : fileInFocusIndex + 1
+          const endWith = Math.sign(different) > 0 ? fileInFocusIndex - 1 : this.lastSelectedFileIndex - 1
+          console.log(beginFrom, endWith, 'kokoko')
+          for (let i = beginFrom; i <= endWith; ++i) {
+            this.toggleSelect(this.screenFiles[i], true)
+          }
+          this.lastSelectedFileIndex = null
+        }
+        if (!selectAll) {
+          this.lastSelectedFileIndex = fileInFocusIndex
+        }
+      },
+      selected: () => {
+        console.log('selected')
+      },
+      toggleSelect: function (file, doNotUpdateLastSelectedFileIndex) {
+        console.log(`File ${file.path} ${file.selected ? 'unselected' : 'selected'}`)
+        file.selected = !file.selected
+        if (file.selected) {
+          this.selectedFiles.push(file)
+        } else {
+          let index = -1
+          for (let i = 0; i < this.selectedFiles.length; ++i) {
+            if (this.selectedFiles[i].path === file.path) {
+              index = i
+              break
+            }
+          }
+          if (index > -1) {
+            this.selectedFiles.splice(index, 1)
           }
         }
-        if ( index > -1 ) {
-          this.selectedFiles.splice(index, 1)
+        if (!doNotUpdateLastSelectedFileIndex) {
+          this.lastSelectedFileIndex = this.screenFiles.findIndex(f => f.path === file.path)
         }
-      }
-      if (!doNotUpdateLastSelectedFileIndex) {
-        this.lastSelectedFileIndex = this.screenFiles.findIndex(f => f.path === file.path)
-      }
-    },
-    loadStatistic: async function (path) {
-      const {
-        matched,
-        missed,
-        missmatched,
-        calculated,
-        table
-      } = await api.getStatistic(path)
-      this.statistic.calculated = calculated
-      this.statistic.matched = matched
-      this.statistic.missed = missed
-      this.statistic.missmatched = missmatched
-      this.statistic.table = table
-      console.log('statistic table: ', this.statistic.table)
-    },
-    onFolderCreated () {
-      this.loadFiles(this.openedPath)
-    },
-    loadFiles: async function (path) {
-      // clear old files
-      this.folder.files = []
-      this.folder.folders = []
-      this.screenFiles = []
-      this.selectedFiles = []
+      },
+      loadStatistic: async function (path) {
+        const {
+          matched,
+          missed,
+          missmatched,
+          calculated,
+          table
+        } = await api.getStatistic(path)
+        this.statistic.calculated = calculated
+        this.statistic.matched = matched
+        this.statistic.missed = missed
+        this.statistic.missmatched = missmatched
+        this.statistic.table = table
+        console.log('statistic table: ', this.statistic.table)
+      },
+      onFolderCreated() {
+        this.loadFiles(this.openedPath)
+      },
+      loadFiles: async function (path) {
+        // clear old files
+        this.folder.files = []
+        this.folder.folders = []
+        this.screenFiles = []
+        this.selectedFiles = []
 
-      // load data
-      const content = await api.getFiles(path)
-      
-      // prepare files
-      this.folder.files = content.files.map( f => { 
-        f.type ='file'
-        f.selected = false
-        f.serverPath = this.staticServer+f.relativePath
-        f.cursor = false
-        return f 
-      }).filter(f => {
-        //console.log(f.name, this.filter.exclude, this.filter.include)
-        let excludeFactor = true
-        let includeFactor = true
-        if (this.filter.exclude) {
-          if (f.name.toLowerCase().includes(this.filter.exclude.toLowerCase())) {
-            excludeFactor = false
+        // load data
+        const content = await api.getFiles(path)
+
+        // prepare files
+        this.folder.files = content.files.map(f => {
+          f.type = 'file'
+          f.selected = false
+          f.serverPath = this.staticServer + f.relativePath
+          f.cursor = false
+          return f
+        }).filter(f => {
+          //console.log(f.name, this.filter.exclude, this.filter.include)
+          let excludeFactor = true
+          let includeFactor = true
+          if (this.filter.exclude) {
+            if (f.name.toLowerCase().includes(this.filter.exclude.toLowerCase())) {
+              excludeFactor = false
+            }
           }
-        }
-        if (this.filter.include) {
-          if (f.name.toLowerCase().includes(this.filter.include.toLowerCase())) {
-            includeFactor = true
-          } else {
-            includeFactor = false
+          if (this.filter.include) {
+            if (f.name.toLowerCase().includes(this.filter.include.toLowerCase())) {
+              includeFactor = true
+            } else {
+              includeFactor = false
+            }
           }
-        }
-        return includeFactor && excludeFactor
-      })
-
-      // prepare folders
-      this.folder.folders = content.folders.map( f => { 
-        f.type='folder';
-        f.selected = false
-        return f 
-      })
-
-      // add parent dir to folder list
-      const parentDir = await api.getParent(path)
-      if ( parentDir.access )
-        this.folder.folders.unshift({
-          path: parentDir.path,
-          name: '../',
-          type: 'folder'
+          return includeFactor && excludeFactor
         })
 
-      // prepare next folder for move
-      this.nextFolders = await api.getNextFolders(path)
+        this.folder.total_file = this.folder.files.length
 
-      // prepare to show page
-      this.page = 0
-      this.page_count = Math.floor( this.folder.files.length / this.page_size )
-      this.addPage(this.page)
+        // prepare folders
+        this.folder.folders = content.folders.map(f => {
+          f.type = 'folder';
+          f.selected = false
+          return f
+        })
 
-      return {
-        currentPath: content.path
-      }
-    },
-    addPage: function (p) {
-      const startImage = p * this.page_size
-      const finishImage = startImage + this.page_size
-      for ( let i = startImage; i < finishImage; ++i ) {
-        if ( i >= this.folder.files.length ) return
-        this.screenFiles.push( this.folder.files[i] )
-      }
-    },
-    loadMore: function () {
-      if ( this.folder.files.length === 0 ) return
-      if ( this.page >= this.page_count ) return
-      this.page++
-      this.addPage(this.page)
-    },
-    goToTheFolder: async function (file) {
-      if (file.path === this.path) {
-        socket.unsubscribeForFolder(this.openedPath)
-        socket.subscibeForFolder(this.path, this.fileChanged())
-        this.openedPath = this.path
-        this.filter = {}
-        await this.loadFiles(this.path)
-        return
-      }
-      if (this.statisticShown && file.path.length > this.path.length) {
-        return await this.selectFolder({ folder: file.name, filter: {}})
-      }
-      this.$router.push({ name: 'explorer', query: { dir: file.path }})
-    },
-    deleteFiles: async function () {
-      if ( this.selectedFiles.length === 0 ) return
-      console.log(`Delete files`)
-      this.isLoading.deleting = true
-      await api.deleteFiles(this.selectedFiles.map(f => f.path))
-      this.isLoading.deleting = false
-      // delete that files from folder
-      // await this.loadFiles(this.path)
-    },
-    moveFiles: async function (dest) {
-      if ( this.selectedFiles.length === 0 ) return
-      if ( this.nextFolders.length === 0 ) return
-      this.isLoading.moving = true
-      await api.moveFiles(this.selectedFiles.map( f => f.path), dest)
-      this.isLoading.moving = false
-      //move files
-      // await this.loadFiles(this.path)
-    },
-    fileChanged: function () {
-      const self = this
-      return (file) => {
-        console.log(file)
-        if ( file.event === 'add' && file.type === 'file' ) {
-          file.selected = false
-          file.serverPath = this.staticServer+file.relativePath
-          self.folder.files.push(file)
-          if ( self.page === self.page_count ) {
-            self.screenFiles.push(file)
-          }
-        } else if ( file.event === 'add' && file.type === 'folder' ) {
-          file.selected = false
-          self.folder.folders.push(file)
-        } else if ( file.event === 'remove' && file.type === 'folder' ) {
-          let index = -1
-          for (let i = 0; i < self.folder.folders.length; i++) {
-            if (self.folder.folders[i].path === file.path) {
-              index = i
-              break
-            }
-          }
-          if (index > -1) self.folder.folders.splice(index, 1)
-        } else if ( file.event === 'remove' && file.type === 'file' ) {
-          let index = -1
-          for( let i = 0; i < self.folder.files.length; i++) {
-            if (self.folder.files[i].path === file.path ) {
-              index = i
-              break
-            }
-          }
-          if ( index > -1 ) self.folder.files.splice(index, 1)
+        // add parent dir to folder list
+        const parentDir = await api.getParent(path)
+        if (parentDir.access)
+          this.folder.folders.unshift({
+            path: parentDir.path,
+            name: '../',
+            type: 'folder'
+          })
 
-          index = -1
-          for( let i = 0; i < self.selectedFiles.length; i++) {
-            if (self.selectedFiles[i].path === file.path ) {
-              index = i
-              break
-            }
-          }
-          if ( index > -1 ) self.selectedFiles.splice(index, 1)  
-          
-          index = -1
-          for( let i = 0; i < self.screenFiles.length; i++) {
-            if (self.screenFiles[i].path === file.path ) {
-              index = i
-              break
-            }
-          }
-          if ( index > -1 ) self.screenFiles.splice(index, 1) 
+        // prepare next folder for move
+        this.nextFolders = await api.getNextFolders(path)
+
+        // prepare to show page
+        if (!this.page) {
+          this.page = 1
         }
+
+        if (!this.configFilePerPage) {
+          this.perPage = this.folder.files.length
+        } else {
+          this.perPage = this.configFilePerPage
+        }
+        this.page_count = Math.ceil(this.folder.files.length / this.perPage)
+        if (this.page > this.page_count) {
+          this.page = this.page_count
+        }
+
+        this.calculatePage(this.page)
+
+        return {
+          currentPath: content.path
+        }
+      },
+
+      calculatePage(page) {
+        if (!this.perPage) {
+          this.screenFiles = [...this.folder.files]
+        } else {
+          this.screenFiles = this.folder.files.slice((page - 1) * this.perPage, page * this.perPage)
+        }
+        if (this.screenFiles.length) {
+          this.screenFiles = this.screenFiles.map(f => {
+            f.cursor = false
+            return f
+          })
+          this.screenFiles[0].cursor = true
+        }
+      },
+      onPageChange(page) {
+        this.page = page
+        this.calculatePage(page)
+      },
+      backward() {
+        if (this.page > 1) {
+          this.page = this.page - 1
+          this.calculatePage(this.page)
+        }
+      },
+
+      forward() {
+        if (!this.forwardOnly) {
+          if (this.page < this.page_count) {
+            this.page = this.page + 1
+            this.calculatePage(this.page)
+          }
+        } else {
+          this.onForwardOnly()
+        }
+      },
+
+      async onForwardOnly() {
+        console.log('forward only')
+        const selected = this.selectedFiles.map(f => f.path)
+        const notSelected = this.screenFiles.filter(f => !selected.includes(f.path)).map(f => f.path)
+        await api.doForwardOnly(selected, notSelected)
+        this.loadFiles(this.path)
+      },
+
+      goToTheFolder: async function (file) {
+        if (file.path === this.path) {
+          socket.unsubscribeForFolder(this.openedPath)
+          socket.subscibeForFolder(this.path, this.fileChanged())
+          this.openedPath = this.path
+          this.filter = {}
+          await this.loadFiles(this.path)
+          return
+        }
+        if (this.statisticShown && file.path.length > this.path.length) {
+          return await this.selectFolder({folder: file.name, filter: {}})
+        }
+        this.$router.push({name: 'explorer', query: {dir: file.path}})
+      },
+      deleteFiles: async function () {
+        if (this.selectedFiles.length === 0) return
+        console.log(`Delete files`)
+        this.isLoading.deleting = true
+        await api.deleteFiles(this.selectedFiles.map(f => f.path))
+        this.isLoading.deleting = false
+        // delete that files from folder
+        await this.loadFiles(this.path)
+      },
+      moveFiles: async function (dest) {
+        if (this.selectedFiles.length === 0) return
+        if (this.nextFolders.length === 0) return
+        this.isLoading.moving = true
+        await api.moveFiles(this.selectedFiles.map(f => f.path), dest)
+        this.isLoading.moving = false
+        //move files
+        // await this.loadFiles(this.path)
+      },
+      fileChanged: function () {
+        const self = this
+        return (file) => {
+          console.log(file)
+          if (file.event === 'add' && file.type === 'file') {
+            file.selected = false
+            file.serverPath = this.staticServer + file.relativePath
+            self.folder.files.push(file)
+            if (self.page === self.page_count) {
+              self.screenFiles.push(file)
+            }
+          } else if (file.event === 'add' && file.type === 'folder') {
+            file.selected = false
+            self.folder.folders.push(file)
+          } else if (file.event === 'remove' && file.type === 'folder') {
+            let index = -1
+            for (let i = 0; i < self.folder.folders.length; i++) {
+              if (self.folder.folders[i].path === file.path) {
+                index = i
+                break
+              }
+            }
+            if (index > -1) self.folder.folders.splice(index, 1)
+          } else if (file.event === 'remove' && file.type === 'file') {
+            let index = -1
+            for (let i = 0; i < self.folder.files.length; i++) {
+              if (self.folder.files[i].path === file.path) {
+                index = i
+                break
+              }
+            }
+            if (index > -1) self.folder.files.splice(index, 1)
+
+            index = -1
+            for (let i = 0; i < self.selectedFiles.length; i++) {
+              if (self.selectedFiles[i].path === file.path) {
+                index = i
+                break
+              }
+            }
+            if (index > -1) self.selectedFiles.splice(index, 1)
+
+            index = -1
+            for (let i = 0; i < self.screenFiles.length; i++) {
+              if (self.screenFiles[i].path === file.path) {
+                index = i
+                break
+              }
+            }
+            if (index > -1) self.screenFiles.splice(index, 1)
+          }
+        }
+      },
+      setFocusOnFiles() {
+        console.log('set focus on files')
+        window.document.getElementById('keyupevents').focus()
+      },
+      enablePreventingScrolling() {
+        window.addEventListener('keydown', preventDefaultScrolling, false)
+      },
+      disablePreventingScrolling() {
+        window.removeEventListener('keydown', preventDefaultScrolling)
+      },
+      onOpenModal() {
+        this.disablePreventingScrolling()
+      },
+      onCloseModal() {
+        this.setFocusOnFiles()
+        this.enablePreventingScrolling()
       }
     },
-    setFocusOnFiles () {
-      console.log('set focus on files')
-      window.document.getElementById('keyupevents').focus()
-    },
-    enablePreventingScrolling () {
-      window.addEventListener('keydown', preventDefaultScrolling, false)
-    },
-    disablePreventingScrolling () {
-      window.removeEventListener('keydown', preventDefaultScrolling)
-    },
-    onOpenModal () {
-      this.disablePreventingScrolling()
-    },
-    onCloseModal () {
+    created: async function () {
+      this.perPage = this.configFilePerPage
+      const {currentPath} = await this.loadFiles(this.dir || null)
+      this.createdFolders = this.folder.folders
+      await this.loadStatistic(this.dir || currentPath || this.path || null)
+
+      // set current path if he hasn't defined
+      this.path = currentPath
+      this.openedPath = currentPath
+
+      // subscribe for that folder
+      socket.subscibeForFolder(this.path, this.fileChanged())
+
+      // set focus on keyupevents
       this.setFocusOnFiles()
+
+      // get status
+      this.status = await api.getRunningState()
+      socket.subscibeForFolder('running.lock', data => {
+        if (data.event === 'change') this.status = data.content
+        if (data.event === 'unlink') this.status = false
+      })
       this.enablePreventingScrolling()
+    },
+    beforeDestroy: function () {
+      socket.unsubscribeForFolder(this.path)
+      socket.unsubscribeForFolder('running.lock')
     }
-  },
-  created: async function () {
-    const { currentPath } = await this.loadFiles(this.dir || null)
-    this.createdFolders = this.folder.folders
-    await this.loadStatistic( this.dir || currentPath || this.path || null )
-
-    // set current path if he hasn't defined
-    this.path = currentPath
-    this.openedPath = currentPath
-
-    // subscribe for that folder
-    socket.subscibeForFolder(this.path, this.fileChanged())
-
-    // set focus on keyupevents
-    this.setFocusOnFiles()
-
-    // get status
-    this.status = await api.getRunningState()
-    socket.subscibeForFolder('running.lock', data => {
-      if (data.event === 'change') this.status = data.content
-      if (data.event === 'unlink') this.status = false
-    })
-    this.enablePreventingScrolling()
-  },
-  beforeDestroy: function () {
-    socket.unsubscribeForFolder(this.path)
-    socket.unsubscribeForFolder('running.lock')
   }
-}
 
-function preventDefaultScrolling (e) {
-  // space and arrow keys
-  if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+  function preventDefaultScrolling(e) {
+    // space and arrow keys
+    if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
       e.preventDefault();
+    }
   }
-}
 </script>
 
 <style lang="scss">
-#keyupevents {
-  outline: none;
-}
-.file-container {
-  width: calc(100% - 250px);
-}
-.next-folders {
-  height: 100%;
-  overflow-y: auto;
-  width: 240px;
-  position: fixed;
-  top: 10px;
-  right: 0px
-}
-.right-side-section {
-  margin-top: 10px;
-  border: 1px solid black;
-  padding: 5px;
-}
-.file-explorer-grid {
-  display: flex;
-  flex-wrap: wrap;
-}
-.file-explorer-controls {
-  svg { 
-    cursor: pointer; 
+  #keyupevents {
+    outline: none;
   }
-  &.disable {
-    color: silver;
+
+  .file-container {
+    width: calc(100% - 250px);
+  }
+
+  .next-folders {
+    height: 100%;
+    overflow-y: auto;
+    width: 240px;
+    position: fixed;
+    top: 10px;
+    right: 0px
+  }
+
+  .right-side-section {
+    margin-top: 10px;
+    border: 1px solid black;
+    padding: 5px;
+  }
+
+  .file-explorer-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .file-explorer-controls {
     svg {
-      cursor: default;
+      cursor: pointer;
+    }
+
+    &.disable {
+      color: silver;
+
+      svg {
+        cursor: default;
+      }
     }
   }
-}
-.bottom-border {
-  border-bottom: 1px dashed silver;
-}
+
+  .bottom-border {
+    border-bottom: 1px dashed silver;
+  }
+
+  .pagination-group {
+    padding: 5px;
+  }
 </style>
 
