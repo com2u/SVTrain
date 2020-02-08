@@ -8,5 +8,5 @@ module.exports = {
   // Number of file display per page
   filePerPage: 5,
 
-  showFileName: false
+  showFileName: true
 }
