@@ -21,3 +21,6 @@ sessions.json
 ssl/*
 
 npm-debug.log
+
+# Activity log
+SVTrain.log

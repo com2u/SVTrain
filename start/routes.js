@@ -38,3 +38,4 @@ Route.get('/logs/:file', 'ExplorerController.logsFor').middleware('auth')
 Route.post('/login', 'LoginController.login')
 
 Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
+Route.post('/forward-only', 'ExplorerController.doForwardOnly').middleware('auth')

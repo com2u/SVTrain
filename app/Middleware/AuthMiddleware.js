@@ -28,6 +28,7 @@ class AuthMiddleware {
       return
     }
     console.log('authorized')
+    request.currentUser = sessions[sessionToken].login
     await next()
   }
 
