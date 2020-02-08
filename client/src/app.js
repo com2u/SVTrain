@@ -10,6 +10,7 @@ import infiniteScroll from 'vue-infinite-scroll'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
 import VoerroTagsInput from '@voerro/vue-tagsinput';
+import store from './store'
 
 Vue.use(infiniteScroll)
 Vue.use(BootstrapVue)
@@ -26,8 +27,10 @@ Vue.component('tags-input', VoerroTagsInput);
 //   }
 // }, false);
 
+
 new Vue({
   router,
+  store,
   el: '#app',
   render: h => h(App)
 })

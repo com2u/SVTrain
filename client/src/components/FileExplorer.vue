@@ -28,7 +28,7 @@
         </div>
 
         <div class="right-side-section" v-if="statistic.calculated">
-          <button 
+          <button
             v-bind:disabled="isLoading.statistic"
             v-on:click="calculateStatistic()">
             Calculate statistic{{ isLoading.statistic ? ' (loading...)' : ''}}
@@ -38,7 +38,7 @@
           </span>
           <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>
           <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">
-            <statistic-table 
+            <statistic-table
               v-on:folderselected="selectFolder"
               v-bind:folder="path"
               v-bind:table="statistic.table"/>
@@ -47,15 +47,16 @@
         <div v-else class="right-side-section">
           Statistic didn't calculated
         </div>
-        
+
         <div class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0">
-            <a href="javascript:void(0)" v-on:click="deleteFiles()">Delete files</a> <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
+            <a href="javascript:void(0)" v-on:click="deleteFiles()" :style="{fontSize: fontSize}">Delete files</a>
+            <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
             Move files to the next folders <span v-if="isLoading.moving"><v-icon name="spinner"></v-icon> (Moving...)</span>:
             <ul style="list-style: none">
               <li v-for="f in nextFolders" v-bind:key="f.path">
-                <v-icon name="folder"></v-icon> <a href="javascript:void(0)" v-on:click="moveFiles(f.path)">{{f.name}}</a>
+                <v-icon name="folder"></v-icon> <a href="javascript:void(0)" v-on:click="moveFiles(f.path)" :style="{fontSize: fontSize}">{{f.name}}</a>
               </li>
             </ul>
           </div>
@@ -79,9 +80,9 @@
           </file>
         </div>
         <div class="file-explorer-grid" v-infinite-scroll="loadMore">
-          <file 
+          <file
             v-bind:id="`file_${file.path}`"
-            v-for="file in screenFiles" 
+            v-for="file in screenFiles"
             v-bind:file="file"
             v-on:click.native="setCursorAndSelect(file, $event)"
             v-on:dblclick.native="openFile(file)"
@@ -92,7 +93,7 @@
       </template>
     </window-splitting>
 
-      <show-file 
+      <show-file
         ref="FileViewing"
         v-if="viewingFile"
         v-bind:file="viewingFile"
@@ -167,6 +168,15 @@ export default {
     selectedFiles: [],
     filter: {}
   }),
+  computed: {
+    fontSize() {
+      const config = this.$store.state.config
+      if (config.rightMenu && config.rightMenu.fontSize) {
+        return config.rightMenu.fontSize
+      }
+      return '1rem'
+    }
+  },
   methods: {
     openCurrentFile () {
       const fileInFocus = this.screenFiles.find(f => f.cursor)
@@ -359,14 +369,14 @@ export default {
 
       // load data
       const content = await api.getFiles(path)
-      
+
       // prepare files
-      this.folder.files = content.files.map( f => { 
+      this.folder.files = content.files.map( f => {
         f.type ='file'
         f.selected = false
         f.serverPath = this.staticServer+f.relativePath
         f.cursor = false
-        return f 
+        return f
       }).filter(f => {
         //console.log(f.name, this.filter.exclude, this.filter.include)
         let excludeFactor = true
@@ -387,10 +397,10 @@ export default {
       })
 
       // prepare folders
-      this.folder.folders = content.folders.map( f => { 
+      this.folder.folders = content.folders.map( f => {
         f.type='folder';
         f.selected = false
-        return f 
+        return f
       })
 
       // add parent dir to folder list
@@ -500,8 +510,8 @@ export default {
               break
             }
           }
-          if ( index > -1 ) self.selectedFiles.splice(index, 1)  
-          
+          if ( index > -1 ) self.selectedFiles.splice(index, 1)
+
           index = -1
           for( let i = 0; i < self.screenFiles.length; i++) {
             if (self.screenFiles[i].path === file.path ) {
@@ -509,7 +519,7 @@ export default {
               break
             }
           }
-          if ( index > -1 ) self.screenFiles.splice(index, 1) 
+          if ( index > -1 ) self.screenFiles.splice(index, 1)
         }
       }
     },
@@ -593,8 +603,8 @@ function preventDefaultScrolling (e) {
   flex-wrap: wrap;
 }
 .file-explorer-controls {
-  svg { 
-    cursor: pointer; 
+  svg {
+    cursor: pointer;
   }
   &.disable {
     color: silver;

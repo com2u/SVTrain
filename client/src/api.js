@@ -18,7 +18,8 @@ const urls = {
   getWorkspace: `${baseurl}getWorkspace`,
   setWorkspace: `${baseurl}setWorkspace`,
   getLastLogs: `${baseurl}getLastLogs`,
-  login: `${baseurl}login`
+  login: `${baseurl}login`,
+  getConfig: `${baseurl}config`,
 }
 
 export default {
@@ -104,6 +105,10 @@ export default {
 
   setSessionToken: token => {
     axios.defaults.headers.common['Authorization'] = token
+  },
+
+  getConfig: async () => {
+    return (await axios.get(urls.getConfig)).data
   }
 }
 

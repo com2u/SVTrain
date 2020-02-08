@@ -34,4 +34,7 @@ Route.post('/setWorkspace', 'ExplorerController.setWorkspace').middleware('auth'
 Route.get('/getLastLogs', 'ExplorerController.getLastLogs').middleware('auth')
 Route.get('/logs/:file', 'ExplorerController.logsFor').middleware('auth')
 
+
 Route.post('/login', 'LoginController.login')
+
+Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
