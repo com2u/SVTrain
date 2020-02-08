@@ -40,15 +40,16 @@
 
 <script>
 export default {
-  props: [
-    'file',
-    'size'
-  ],
-  computed: {
-    showFileName() {
-      const config = this.$store.state.config
-      return !!config.showFileName
+  props: {
+    file: Object,
+    size: [String, Number],
+    showFileName: {
+      type: Boolean,
+      default: true
     }
+  },
+  computed: {
+
   }
 }
 </script>
