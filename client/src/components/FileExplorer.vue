@@ -112,6 +112,7 @@
         </div>
         <div class="file-explorer-grid">
           <file
+            :show-file-name="showFileName"
             v-bind:id="`file_${file.path}`"
             v-for="file in screenFiles"
             v-bind:file="file"
@@ -216,6 +217,9 @@
       },
       forwardOnly() {
         return this.$store.state.config.forwardOnly
+      },
+      showFileName() {
+        return this.$store.state.config.showFileName
       }
     },
     watch: {
@@ -567,7 +571,7 @@
         await api.moveFiles(this.selectedFiles.map(f => f.path), dest)
         this.isLoading.moving = false
         //move files
-        // await this.loadFiles(this.path)
+        await this.loadFiles(this.path)
       },
       fileChanged: function () {
         const self = this
