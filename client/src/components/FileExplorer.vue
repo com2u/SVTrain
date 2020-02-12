@@ -84,6 +84,7 @@
         </div>
         <div class="pagination-group">
           <b-button
+            v-if="!forwardOnly"
             variant="primary"
             size="sm"
             @click="backward()">
