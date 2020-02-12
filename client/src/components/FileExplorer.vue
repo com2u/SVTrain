@@ -83,9 +83,7 @@
           </file>
         </div>
         <div class="pagination-group">
-          <b-alert v-if="forwardOnly" show variant="warning">FORWARD ONLY mode is enable</b-alert>
           <b-button
-            v-else
             variant="primary"
             size="sm"
             @click="backward()">
