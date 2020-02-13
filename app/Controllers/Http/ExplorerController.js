@@ -253,7 +253,8 @@ class ExplorerController {
   */
   async move({request}) {
     let {files, destination} = request.post()
-    const response = await this.moveFiles(files, destination)
+    const user = request.currentUser
+    const response = await this.moveFiles(files, destination, user)
     return response
   }
 
@@ -557,7 +558,8 @@ class ExplorerController {
   }
 
   async getConfig({request, response}) {
-    const resConfig = {...config}
+    const user = request.currentUser
+    const resConfig = {...config, user}
     const forwardOnly = process.env.FORWARD_ONLY
     const trueValues = ['true', 'yes', 'y', '1']
     resConfig.forwardOnly = forwardOnly && trueValues.includes(forwardOnly.toLowerCase())
@@ -568,6 +570,7 @@ class ExplorerController {
     let {selectedFiles, notSelectedFiles} = request.post()
     const selectedPath = Env.get('SELECTED_TARGET_FOLDER', 'Selected')
     const notSelectedPath = Env.get('NOT_SELECTED_TARGET_FOLDER', 'NotSelected')
+    const user = request.currentUser
 
     // Create delete directory if not exist
     if (!fs.existsSync(selectedPath)) {
@@ -578,8 +581,8 @@ class ExplorerController {
       fs.mkdirSync(notSelectedPath);
     }
 
-    const selected = await this.moveFiles(selectedFiles, selectedPath)
-    const notSelected = await this.moveFiles(notSelectedFiles, notSelectedPath)
+    const selected = await this.moveFiles(selectedFiles, selectedPath, user)
+    const notSelected = await this.moveFiles(notSelectedFiles, notSelectedPath, user)
     response.json({
       selected,
       notSelected

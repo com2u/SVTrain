@@ -1,13 +1,22 @@
 'use strict'
+const path = require('path')
 
 const { VueLoaderPlugin } = require('vue-loader')
 const htmlWebpackPlugin = require('html-webpack-plugin')
+
+function resolve(dir) {
+  return path.join(__dirname, '..', dir)
+}
 
 module.exports = {
   mode: 'development',
   entry: [
     './src/app.js'
   ],
+  output: {
+    filename: 'main.js',
+    path: resolve('dist'),
+  },
   module: {
     rules: [
       {
@@ -29,7 +38,16 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
-      }
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        loader: 'file-loader',
+        options: {
+          limit: 10000,
+          esModule: false,
+          name: './images/[hash]-[name].[ext]'
+        }
+      },
     ]
   },
   plugins: [

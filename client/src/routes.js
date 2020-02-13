@@ -4,6 +4,8 @@ import Statistic from './pages/Statistic.vue'
 import StatisticOverview from './pages/StatisticOverview.vue'
 import LoggedInLayout from './pages/LoggedInLayout.vue'
 import Login from './pages/Login.vue'
+import Help from './pages/Help.vue'
+import WorkSpace from './pages/WorkSpace.vue'
 
 const routes = [
   {
@@ -26,6 +28,16 @@ const routes = [
         name: 'statistic',
         path: '/statistic/',
         component: Statistic
+      },
+      {
+        name: 'HelpPage',
+        component: Help,
+        path: '/help'
+      },
+      {
+        name: 'WorkSpacePage',
+        component: WorkSpace,
+        path: '/workspace'
       },
       {
         name: 'statistic-overview',

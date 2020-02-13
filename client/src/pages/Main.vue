@@ -67,7 +67,7 @@
     </ul>
     <hr>
     <p>Active session for user <b>{{sessionUser}}</b> <b-button variant="link" @click="logout">Delete session and logout</b-button></p>
-    
+
   </div>
 </template>
 
@@ -132,7 +132,7 @@ export default {
     },
     async setWorkspace (folder) {
       await api.setWorkspace(folder)
-      
+
     },
     openLogsFor(command) {
       window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`)
