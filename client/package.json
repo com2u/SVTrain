@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@voerro/vue-tagsinput": "^1.11.2",
+    "v-jsoneditor": "^1.2.3",
     "vue": "^2.6.5",
     "vue-router": "^3.0.2"
   },

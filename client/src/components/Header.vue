@@ -65,7 +65,7 @@
     },
     computed: {
       user() {
-        return this.$store.state.user
+        return this.$store.state.app.user
       }
     },
     methods: {
@@ -73,7 +73,7 @@
         this.showHeader = !this.showHeader
       },
       logout() {
-        this.$store.dispatch('logout')
+        this.$store.dispatch('app/logout')
         this.$router.push({ name: 'LoginPage' })
       }
     }

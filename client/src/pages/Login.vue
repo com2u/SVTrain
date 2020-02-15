@@ -68,7 +68,7 @@ export default {
         data = await api.login(this.userLogin, this.userPassword)
         localStorage.setItem('sessionToken', data.sessionToken)
         localStorage.setItem('sessionUser', data.login)
-        this.$store.dispatch('setUser', data.login)
+        this.$store.dispatch('app/setUser', data.login)
         api.setSessionToken(data.sessionToken)
         this.$router.push({ name: 'main' })
         // window.location.reload()

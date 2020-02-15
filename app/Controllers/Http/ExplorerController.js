@@ -231,7 +231,7 @@ class ExplorerController {
   */
   async delete({request}) {
     let {files} = request.post()
-    const destination = Env.get('DELETED_FILES_PATH', 'Deleted_files')
+    const destination = config.deleteDefaultFolder || 'DeletedFiles'
 
     // Create delete directory if not exist
     if (!fs.existsSync(destination)) {
@@ -351,6 +351,71 @@ class ExplorerController {
     return fs.writeFileSync(path, data)
   }
 
+  isValidFile(filename) {
+    const ext = path.extname(filename)
+    return ['.jpg', '.png', '.gif', '.bmp', '.jpeg'].includes(ext)
+  }
+
+  async countSync(dir, name, unclassified = false) {
+    const result = {
+      subFolders: [],
+      unclassified: 0,
+      classified: 0,
+      name: name,
+      path: dir
+    }
+
+    // Read notes
+    const notesPath = path.join(dir, 'notes.txt')
+    if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
+      try {
+        let notes = fs.readFileSync(notesPath, 'utf-8')
+        result.notes = notes
+        result.notesPath = notesPath
+      } catch (e) {
+        console.log(`can not read ${notesPath}`)
+      }
+    }
+
+    //Read Cfg
+    const cfgPath = path.join(dir, '.cfg')
+    if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
+      try {
+        let cfg = fs.readFileSync(cfgPath, 'utf-8')
+        let config = JSON.parse(cfg)
+        result.config = config
+        result.cfgPath = cfgPath
+      } catch (e) {
+        console.log(e)
+        console.log(`can not read ${cfgPath}`)
+      }
+    }
+
+    const files = await readdir(dir)
+    for (const file of files) {
+      const flstat = await lstat(path.join(dir, file))
+      if (flstat.isDirectory()) {
+        const nextDir = path.join(dir, file)
+        let subResult = {}
+        if (file.toLowerCase() === 'unclassified' || unclassified) {
+          subResult = await this.countSync(nextDir, file, true)
+        } else {
+          subResult = await this.countSync(nextDir, file, false)
+        }
+        result.classified += subResult.classified
+        result.unclassified += subResult.unclassified
+        result.subFolders.push(subResult)
+      } else if (this.isValidFile(file)) {
+        if (unclassified) {
+          result.unclassified += 1
+        } else {
+          result.classified += 1
+        }
+      }
+    }
+    return result
+  }
+
   /*
     GET /getSubfolders
     returns an array with subfolders of a specific folder
@@ -358,7 +423,6 @@ class ExplorerController {
   async getSubfolders({request}) {
     let {folder} = request.get()
     if (folder === 'root') folder = CONST_PATHS.root
-    const result = []
 
     if (!folder) throw new Error('The "folder" parameter is needed')
 
@@ -367,17 +431,17 @@ class ExplorerController {
       throw new Error(`Access denied for read directory ${folder}`)
     }
 
-    const files = await readdir(folder)
+    // const files = await readdir(folder)
+    //
+    // for (let i = 0; i < files.length; ++i) {
+    //   const f = files[i]
+    //   const flstat = await lstat(path.join(folder, f))
+    //   if (flstat.isDirectory()) {
+    //     result.push(f)
+    //   }
+    // }
 
-    for (let i = 0; i < files.length; ++i) {
-      const f = files[i]
-      const flstat = await lstat(path.join(folder, f))
-      if (flstat.isDirectory()) {
-        result.push(f)
-      }
-    }
-
-    return result
+    return await this.countSync(folder, 'root')
   }
 
   /*
@@ -560,16 +624,13 @@ class ExplorerController {
   async getConfig({request, response}) {
     const user = request.currentUser
     const resConfig = {...config, user}
-    const forwardOnly = process.env.FORWARD_ONLY
-    const trueValues = ['true', 'yes', 'y', '1']
-    resConfig.forwardOnly = forwardOnly && trueValues.includes(forwardOnly.toLowerCase())
     response.json(resConfig)
   }
 
   async doForwardOnly({request, response}) {
     let {selectedFiles, notSelectedFiles} = request.post()
-    const selectedPath = Env.get('SELECTED_TARGET_FOLDER', 'Selected')
-    const notSelectedPath = Env.get('NOT_SELECTED_TARGET_FOLDER', 'NotSelected')
+    const selectedPath = config.selectedPath || 'Selected'
+    const notSelectedPath = config.notSelectedPath || 'NotSelected'
     const user = request.currentUser
 
     // Create delete directory if not exist
@@ -587,6 +648,25 @@ class ExplorerController {
       selected,
       notSelected
     })
+  }
+
+  async saveNotes({request, response}) {
+    const {path, notes} = request.post()
+    if (fs.existsSync(path)) {
+      fs.writeFileSync(path, notes, {encoding: 'utf8'})
+      return true
+    }
+    return false
+  }
+
+  async saveConfig({request, response}) {
+    const {path, config} = request.post()
+    console.log(config)
+    if (fs.existsSync(path)) {
+      fs.writeFileSync(path, JSON.stringify(config), {encoding: 'utf8'})
+      return true
+    }
+    return false
   }
 }
 

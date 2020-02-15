@@ -22,12 +22,12 @@
         </template>
       </li>
 
-      <li>
-        Set the workspace:
-        <b-button v-for="folder in subfolders" v-bind:key="folder" variant="link" v-on:click="setWorkspace(folder)">
-          {{ folder }}
-        </b-button>
-      </li>
+<!--      <li>-->
+<!--        Set the workspace:-->
+<!--        <b-button v-for="folder in subfolders" v-bind:key="folder" variant="link" v-on:click="setWorkspace(folder)">-->
+<!--          {{ folder }}-->
+<!--        </b-button>-->
+<!--      </li>-->
 
       <li>
         <b-button
@@ -86,7 +86,6 @@ export default {
       stop: false,
       ExportImages: false
     },
-    subfolders: [],
     running: null,
     workspace: null,
     checkInterval: 750,
@@ -148,7 +147,6 @@ export default {
     this.checkStatus()
     this.checkWorkspace()
     this.logs = await api.getLastLogs()
-    this.subfolders = await api.getSubfolders('root')
     socket.subscibeForFolder('running.lock', data => {
       console.log('running.lock: ', data)
       if (data.event === 'unlink') this.running = false

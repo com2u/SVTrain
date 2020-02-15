@@ -39,3 +39,5 @@ Route.post('/login', 'LoginController.login')
 
 Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
 Route.post('/forward-only', 'ExplorerController.doForwardOnly').middleware('auth')
+Route.post('/notes', 'ExplorerController.saveNotes').middleware('auth')
+Route.post('/save-config', 'ExplorerController.saveConfig').middleware('auth')

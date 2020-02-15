@@ -22,8 +22,8 @@
         api.setSessionToken(sessionToken)
         api.getConfig()
           .then(data => {
-            this.$store.dispatch('setConfig', data)
-            this.$store.dispatch('setUser', data.user)
+            this.$store.dispatch('app/setConfig', data)
+            this.$store.dispatch('app/setUser', data.user)
           })
 
       }
@@ -35,7 +35,7 @@
   background: #fafafa;
 
   .app-container {
-    background: #fff;
+    /*background: #fff;*/
     margin: 50px 60px;
   }
 }

@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
 import VoerroTagsInput from '@voerro/vue-tagsinput';
 import store from './store'
+import VJsoneditor from 'v-jsoneditor'
 
 Vue.use(infiniteScroll)
 Vue.use(BootstrapVue)
@@ -18,6 +19,7 @@ Vue.use(BootstrapVueIcons)
 
 const router = new VueRouter({routes})
 Vue.use(VueRouter)
+Vue.use(VJsoneditor)
 Vue.component('v-icon', Icon)
 Vue.component('tags-input', VoerroTagsInput);
 
