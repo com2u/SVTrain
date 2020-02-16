@@ -1,6 +1,6 @@
 <template>
   <div class="ws-container">
-    <div class="folder-label" :style="indent">
+    <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
       <div class="name" :class="!depth? 'root-item': ''" @click="setWorkspace">{{info.name}}</div>
       <div class="options">
         <span>{{progress}}%</span>
@@ -91,6 +91,9 @@
         } else {
           return 100
         }
+      },
+      wsPath() {
+        return this.$store.state.app.config.wsPath
       }
     },
     methods: {

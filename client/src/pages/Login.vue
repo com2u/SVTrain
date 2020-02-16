@@ -70,7 +70,7 @@ export default {
         localStorage.setItem('sessionUser', data.login)
         this.$store.dispatch('app/setUser', data.login)
         api.setSessionToken(data.sessionToken)
-        this.$router.push({ name: 'main' })
+        this.$router.push({ name: 'WorkSpacePage' })
         // window.location.reload()
       } catch(e) {
         this.errorMessage = e.toString()

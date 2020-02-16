@@ -143,6 +143,10 @@
       async setWorkspace(folder) {
         await api.setWorkspace(folder.name)
         this.loadFolders()
+        api.getConfig()
+          .then(data => {
+            this.$store.dispatch('app/setConfig', data)
+          })
       },
       onFolderCreated() {
         this.loadFolders()
@@ -193,8 +197,12 @@
       -webkit-box-shadow: 0px 1px 10px -7px #222222;
       -moz-box-shadow: 0px 1px 10px -7px #222222;
       box-shadow: 0px 1px 10px -7px #222222;
-
       border-radius: 2px;
+
+      &.selected {
+        background: #39d1ff;
+        border: thin solid #39d1ff;
+      }
 
       .name {
         height: $height;
