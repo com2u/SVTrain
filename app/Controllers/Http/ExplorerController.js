@@ -207,7 +207,8 @@ class ExplorerController {
 
   async getSystemConfig() {
     const ws = await this.getWorkspace()
-    const configPath = path.join(ws.toString(), '.cfg')
+    const wsPath = ws.toString()
+    const configPath = path.join(wsPath, '.cfg')
     let cfg
     try {
       if (fs.existsSync(configPath)) {
@@ -218,7 +219,7 @@ class ExplorerController {
       cfg = {}
     }
     if (!cfg) cfg = {}
-    return {...config, ...cfg}
+    return {...config, ...cfg, wsPath}
   }
 
 

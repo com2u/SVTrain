@@ -193,8 +193,12 @@
       -webkit-box-shadow: 0px 1px 10px -7px #222222;
       -moz-box-shadow: 0px 1px 10px -7px #222222;
       box-shadow: 0px 1px 10px -7px #222222;
-
       border-radius: 2px;
+
+      &.selected {
+        background: #39d1ff;
+        border: thin solid #39d1ff;
+      }
 
       .name {
         height: $height;

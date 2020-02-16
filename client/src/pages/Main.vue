@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="title-container">
       <div>
-        <h2>AI</h2>
+        <h2>SVTrain v0.10</h2>
       </div>
       <div>
         <b-button variant="dark" @click="gotoWorkspace">Workspace List</b-button>
