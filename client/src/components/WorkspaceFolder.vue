@@ -1,7 +1,7 @@
 <template>
   <div class="ws-container">
     <div class="folder-label" :style="indent">
-      <div class="name">{{info.name}}</div>
+      <div class="name" :class="!depth? 'root-item': ''" @click="setWorkspace">{{info.name}}</div>
       <div class="options">
         <span>{{progress}}%</span>
         <b-progress :max="100" class="ws-progress" variant="secondary">
@@ -102,6 +102,11 @@
       },
       showConfig() {
         this.$store.dispatch('wsconfig/showFolder', this.info)
+      },
+      setWorkspace() {
+        if (!this.depth) {
+          this.$emit('select-workspace')
+        }
       }
     }
   }

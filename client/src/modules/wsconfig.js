@@ -30,9 +30,9 @@ export default {
       folder.config = val
       commit('SET_FOLDER', folder)
     },
-    save: ({commit, state}) => {
+    save: ({commit, state}, config) => {
       return new Promise((resolve, reject) => {
-        api.saveConfig(state.folder.cfgPath, state.folder.config)
+        api.saveConfig(state.folder.cfgPath, config)
           .then(() => {
             commit('SET_VISIBLE', false)
             resolve()

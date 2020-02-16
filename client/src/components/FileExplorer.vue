@@ -115,7 +115,7 @@
     />
     <!-- </b-modal> -->
     <creating-folder
-      @folderCreated="onFolderCreated"
+      @folder-created="onFolderCreated"
       v-on:shown="onOpenModal"
       v-on:hidden="onCloseModal"
       v-bind:path="openedPath || path"

@@ -22,6 +22,7 @@
         api.setSessionToken(sessionToken)
         api.getConfig()
           .then(data => {
+            console.log('Config: ', data)
             this.$store.dispatch('app/setConfig', data)
             this.$store.dispatch('app/setUser', data.user)
           })
@@ -30,13 +31,18 @@
     }
   }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .app {
   background: #fafafa;
 
   .app-container {
     /*background: #fff;*/
     margin: 50px 60px;
+  }
+  .title-container {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 20px;
   }
 }
 </style>

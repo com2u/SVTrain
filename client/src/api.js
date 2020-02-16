@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseurl = `https://localhost:3333/`
+const baseurl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/';
 const urls = {
   getFiles: dir => `${baseurl}getFiles?dir=${dir}`,
   getRunningState: `${baseurl}getState`,

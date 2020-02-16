@@ -73,6 +73,7 @@
         this.showHeader = !this.showHeader
       },
       logout() {
+
         this.$store.dispatch('app/logout')
         this.$router.push({ name: 'LoginPage' })
       }
@@ -90,7 +91,8 @@
     }
 
     .user-info {
-      padding-left: 120px;
+      padding-left: 60px;
+      padding-right: 40px;
     }
 
     .help-icon {

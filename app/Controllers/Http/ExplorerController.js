@@ -205,6 +205,23 @@ class ExplorerController {
     }
   }
 
+  async getSystemConfig() {
+    const ws = await this.getWorkspace()
+    const configPath = path.join(ws.toString(), '.cfg')
+    let cfg
+    try {
+      if (fs.existsSync(configPath)) {
+        const fileContent = fs.readFileSync(configPath, 'utf-8')
+        cfg = JSON.parse(fileContent)
+      }
+    }catch (e) {
+      cfg = {}
+    }
+    if (!cfg) cfg = {}
+    return {...config, ...cfg}
+  }
+
+
   /*
   POST /setWorkspace
 
@@ -231,7 +248,8 @@ class ExplorerController {
   */
   async delete({request}) {
     let {files} = request.post()
-    const destination = config.deleteDefaultFolder || 'DeletedFiles'
+    const currentCfg = await this.getSystemConfig()
+    const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles'
 
     // Create delete directory if not exist
     if (!fs.existsSync(destination)) {
@@ -466,7 +484,10 @@ class ExplorerController {
     creates a new directory with specified name in a specified folder
   */
   async createFolder({request}) {
-    const {name, folder} = request.post()
+    let {name, folder} = request.post()
+    if (folder === 'root') {
+      folder = CONST_PATHS.root
+    }
     if (!folder || !name) throw new Error('Parameters name and folder are needed')
     if (!accessToFile(CONST_PATHS.root, folder)) {
       throw new Error(`You haven\'t access to ${folder} directory`)
@@ -622,15 +643,17 @@ class ExplorerController {
   }
 
   async getConfig({request, response}) {
+    const currentCfg = await this.getSystemConfig()
     const user = request.currentUser
-    const resConfig = {...config, user}
+    const resConfig = {...currentCfg, user}
     response.json(resConfig)
   }
 
   async doForwardOnly({request, response}) {
     let {selectedFiles, notSelectedFiles} = request.post()
-    const selectedPath = config.selectedPath || 'Selected'
-    const notSelectedPath = config.notSelectedPath || 'NotSelected'
+    const currentCfg = await this.getSystemConfig()
+    const selectedPath = currentCfg.selectedPath || 'Selected'
+    const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected'
     const user = request.currentUser
 
     // Create delete directory if not exist
@@ -661,9 +684,10 @@ class ExplorerController {
 
   async saveConfig({request, response}) {
     const {path, config} = request.post()
-    console.log(config)
+    const configStr = JSON.stringify(config)
+    if (!configStr) return false
     if (fs.existsSync(path)) {
-      fs.writeFileSync(path, JSON.stringify(config), {encoding: 'utf8'})
+      fs.writeFileSync(path, configStr, {encoding: 'utf8'})
       return true
     }
     return false

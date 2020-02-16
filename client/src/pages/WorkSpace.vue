@@ -1,11 +1,26 @@
 <template>
   <div>
-    <h1>WorkSpace List</h1>
+    <div class="title-container">
+      <div>
+        <h1>WorkSpace List</h1>
+      </div>
+      <div>
+        <b-button variant="dark" v-b-modal.create-ws-folder>New Workspace</b-button>
+      </div>
+    </div>
+    <div class="link-container">
+      <b-button @click="toAiPage" variant="link">To AI Page</b-button>
+    </div>
     <div>
       <div v-if="loading" class="spinner-container">
         <b-spinner label="Loading..."></b-spinner>
       </div>
-      <workspace-folder v-for="folder in folders" :info="folder" :key="folder.path"/>
+      <workspace-folder
+        v-for="folder in folders"
+        :info="folder"
+        :key="folder.path"
+        @select-workspace="setWorkspace(folder)"
+      />
     </div>
 
     <b-modal
@@ -13,7 +28,7 @@
       ok-title="Save"
       cancel-title="Back"
       @ok="saveNotes"
-      >
+    >
       <template v-slot:modal-title>Notes for {{ $store.state.notes.folder.name }}</template>
 
       <div>
@@ -32,33 +47,42 @@
       ok-title="Save"
       cancel-title="Back"
       @ok="saveConfig"
+      @shown="onModalShow"
     >
       <template v-slot:modal-title>Config folder {{ $store.state.notes.folder.name }}</template>
 
       <div>
-        <v-jsoneditor v-model="jsonConfig" :plus="false" height="400px"/>
+        <div id="wsjsoneditor"/>
       </div>
 
     </b-modal>
 
+    <creating-folder
+      @folder-created="onFolderCreated"
+      path="root"
+      id="create-ws-folder"
+    />
 
   </div>
 </template>
 <script>
   import api from '../api'
   import WorkspaceFolder from "../components/WorkspaceFolder.vue";
+  import CreatingFolder from '../components/CreatingFolder.vue'
+  import JSONEditor from 'jsoneditor'
 
   export default {
     name: 'WorkSpace',
-    components: {WorkspaceFolder},
+    components: {WorkspaceFolder, CreatingFolder},
     data() {
       return {
         folders: [],
-        loading: false
+        loading: false,
+        editor: null
       }
     },
     computed: {
-      notesVisible :{
+      notesVisible: {
         get: function () {
           return this.$store.state.notes.visible
         },
@@ -66,7 +90,7 @@
           this.$store.dispatch('notes/setVisible', visible)
         }
       },
-      cfgVisible :{
+      cfgVisible: {
         get: function () {
           return this.$store.state.wsconfig.visible
         },
@@ -81,15 +105,7 @@
         set(val) {
           this.$store.dispatch('notes/setContent', val)
         }
-      },
-      jsonConfig: {
-        get() {
-          return this.$store.state.wsconfig.folder.config
-        },
-        set(val) {
-          this.$store.dispatch('wsconfig/setConfig', val)
-        }
-      },
+      }
 
     },
     methods: {
@@ -101,24 +117,67 @@
       },
       saveNotes() {
         this.$store.dispatch('notes/save')
-        .then(() => {
-          this.loadFolders()
-        })
-      },
-      saveConfig() {
-        this.$store.dispatch('wsconfig/save')
           .then(() => {
             this.loadFolders()
           })
+      },
+      saveConfig() {
+        let config
+        if (this.editor) {
+          config = this.editor.get()
+        }
+        this.$store.dispatch('wsconfig/save', config)
+          .then(() => {
+            this.loadFolders()
+          })
+      },
+      onModalShow() {
+        const container = document.getElementById("wsjsoneditor")
+        const options = {
+          mode: 'code'
+        }
+        const editor = new JSONEditor(container, options)
+        this.editor = editor
+        editor.set(this.$store.state.wsconfig.folder.config)
+      },
+      async setWorkspace(folder) {
+        await api.setWorkspace(folder.name)
+        this.loadFolders()
+      },
+      onFolderCreated() {
+        this.loadFolders()
+      },
+      toAiPage() {
+        this.$router.push({name: 'main'})
       }
     },
     mounted() {
       this.loadFolders()
+    },
+    destroyed() {
     }
   }
 </script>
 <style lang="scss">
   $height: 60px;
+
+  .link-container {
+    padding-bottom: 10px;
+  }
+
+  #wsjsoneditor {
+    width: 100%;
+    height: 400px;
+
+    .jsoneditor-menu {
+      background: #6c757d;
+    }
+
+    .jsoneditor {
+      border: thin solid #6c7d7d;
+    }
+  }
+
   .spinner-container {
     text-align: center;
   }
@@ -141,12 +200,17 @@
         height: $height;
         line-height: $height;
         font-weight: bold;
+
+        &.root-item {
+          cursor: pointer;
+        }
       }
 
       .options {
         display: flex;
         height: $height;
         line-height: $height;
+
         .option-icon {
           cursor: pointer;
         }
