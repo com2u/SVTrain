@@ -143,6 +143,10 @@
       async setWorkspace(folder) {
         await api.setWorkspace(folder.name)
         this.loadFolders()
+        api.getConfig()
+          .then(data => {
+            this.$store.dispatch('app/setConfig', data)
+          })
       },
       onFolderCreated() {
         this.loadFolders()
