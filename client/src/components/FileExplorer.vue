@@ -2,14 +2,10 @@
   <div
     id="keyupevents"
     tabindex="0"
-    v-on:keyup.self.space.exact.prevent="selectCurrent(false)"
-    v-on:keyup.self.shift.space.exact.prevent="selectCurrent(true)"
-    v-on:keyup.self.down.exact.prevent="cursor('down')"
-    v-on:keyup.self.left.exact.prevent="cursor('left')"
-    v-on:keyup.self.right.exact.prevent="cursor('right')"
-    v-on:keyup.self.enter.exact.prevent="openCurrentFile()"
-    v-on:keyup.self.up.exact.prevent="cursor('up')"
+    @keyup.self.exact.prevent="onKeyUp"
   >
+    <div tabindex="0"
+         @keyup.self.shift.space.exact.prevent="selectCurrent(true)"></div>
     <window-splitting ref="WindowSplitting">
       <template v-slot:side>
         <div class="right-side-section">
@@ -94,20 +90,6 @@
           <b-button variant="primary" size="sm" @click="forward()">Forward
             <b-icon icon="chevron-right"></b-icon>
           </b-button>
-
-          <!--          <div style="padding-top: 10px">-->
-          <!--            <b-pagination-->
-          <!--              v-model="page"-->
-          <!--              :total-rows="folder.total_file"-->
-          <!--              :per-page="perPage"-->
-          <!--              size="md"-->
-          <!--              first-text="First"-->
-          <!--              prev-text="Prev"-->
-          <!--              next-text="Next"-->
-          <!--              last-text="Last"-->
-          <!--              @change="onPageChange"-->
-          <!--            ></b-pagination>-->
-          <!--          </div>-->
         </div>
         <div class="file-explorer-grid">
           <file
@@ -133,7 +115,7 @@
     />
     <!-- </b-modal> -->
     <creating-folder
-      @folderCreated="onFolderCreated"
+      @folder-created="onFolderCreated"
       v-on:shown="onOpenModal"
       v-on:hidden="onCloseModal"
       v-bind:path="openedPath || path"
@@ -201,24 +183,27 @@
     }),
     computed: {
       fontSize() {
-        const config = this.$store.state.config
+        const config = this.$store.state.app.config
         if (config.rightMenu && config.rightMenu.fontSize) {
           return config.rightMenu.fontSize
         }
         return '1rem'
       },
       configFilePerPage() {
-        const config = this.$store.state.config
+        const config = this.$store.state.app.config
         if (Number.isInteger(config.filePerPage) && config.filePerPage >= 0) {
           return config.filePerPage
         }
         return 0
       },
       forwardOnly() {
-        return this.$store.state.config.forwardOnly
+        return this.$store.state.app.config.forwardOnly
       },
       showFileName() {
-        return this.$store.state.config.showFileName
+        return this.$store.state.app.config.showFileName
+      },
+      systemConfig() {
+        return this.$store.state.app.config
       }
     },
     watch: {
@@ -232,6 +217,81 @@
       }
     },
     methods: {
+      onKeyUp(event) {
+        if (!this.systemConfig.useShortcuts) return
+        let keys = {
+          space: 32,
+          pageUp: 33,
+          pageDown: 34,
+          left: 37,
+          up: 38,
+          right: 39,
+          down: 40,
+          delete: 46,
+          digit0: 48,
+          digit9: 57,
+          numpad0: 96,
+          numpad9: 105,
+          a: 65,
+          z: 90
+        }
+        switch (event.keyCode) {
+          case keys.left:
+            this.cursor('left')
+            break
+          case keys.up:
+            this.cursor('up')
+            break
+          case keys.right:
+            this.cursor('right')
+            break
+          case keys.down:
+            this.cursor('down')
+            break
+          case keys.space:
+            this.selectCurrent(false)
+            break
+          case keys.delete:
+            this.deleteFiles()
+            break
+          case keys.pageUp:
+            this.backward()
+            break
+          case keys.pageDown:
+            this.forward()
+            break
+          default:
+            if (event.keyCode >= keys.a && event.keyCode <= keys.z) {
+              this.selectFolderByLetter(event.key)
+            } else if ((event.keyCode >= keys.digit0 && event.keyCode <= keys.digit9)
+              || (event.keyCode >= keys.numpad0 && event.keyCode <= keys.numpad9)) {
+              const number = event.keyCode < keys.numpad0 ? event.keyCode - keys.digit0 : event.keyCode - keys.numpad0
+              this.selectFileByIndex(number)
+            }
+            break
+
+        }
+      },
+
+      selectFolderByLetter(letter) {
+        console.log('leteter: ' + letter)
+        const folder = this.folder.folders.find(f => f.name.toLowerCase().startsWith(letter))
+        console.log(folder)
+        if (folder) this.goToTheFolder(folder)
+      },
+
+      selectFileByIndex(number) {
+        const index  =(number + 10) % 11
+        if (this.screenFiles.length > index) {
+          this.screenFiles = this.screenFiles.map(i => {
+            i.selected = false
+            return i
+          })
+          this.screenFiles[index].selected = true
+          this.selectedFiles = [this.screenFiles[index]]
+        }
+      },
+
       openCurrentFile() {
         const fileInFocus = this.screenFiles.find(f => f.cursor)
         this.viewingFile = fileInFocus

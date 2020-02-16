@@ -3,7 +3,7 @@ import Ws from '@adonisjs/websocket-client'
 export default {
   init: async function () {
     return new Promise((resolve, reject) => {
-      this.ws = Ws(null, { query: { sessionToken: localStorage.getItem('sessionToken') }})
+      this.ws = Ws(null, {query: {sessionToken: localStorage.getItem('sessionToken')}})
       this.ws.connect()
       this.ws.on('open', () => {
         console.log('Connect open')
@@ -32,7 +32,7 @@ export default {
   subscibeForFolder: function (path, callback) {
     console.log(`Subcribe for folder ${path}`)
     if (this.explorer) {
-      this.explorer.emit('subscribeForFolder', { path })
+      this.explorer.emit('subscribeForFolder', {path})
       this.explorer.on(`folder_${path}`, callback)
     }
     if (this.listeners) {
@@ -40,19 +40,31 @@ export default {
     }
   },
 
-  subscribe (channel, callback) {
-    this.explorer.on(channel, callback)
-    this.listeners[channel] = callback
+  subscribe(channel, callback) {
+    if (this.explorer) {
+      this.explorer.on(channel, callback)
+
+    }
+    if (this.listeners) {
+      this.listeners[channel] = callback
+    }
   },
-  unsubscribe (channel, callback) {
-    this.explorer.off(channel, callback)
-    delete this.listeners[channel]
+  unsubscribe(channel, callback) {
+    if (this.explorer) {
+      this.explorer.off(channel, callback)
+    }
+    if (this.listeners) {
+      delete this.listeners[channel]
+    }
   },
 
   unsubscribeForFolder: function (path) {
     console.log(`Unsibscribe for folder ${path}`)
-    try { this.explorer.off(`folder_${path}`, this.listeners[path]) }
-    catch(e) { console.log('error on adonis ws client: ', e)}
+    try {
+      this.explorer.off(`folder_${path}`, this.listeners[path])
+    } catch (e) {
+      console.log('error on adonis ws client: ', e)
+    }
     if (this.listeners) {
       delete this.listeners[path]
     }

@@ -56,7 +56,7 @@ export default {
         this.userPassword = ''
         return;
       }
-      
+
       if (this.userPassword.length === 0) {
         this.errorMessage = 'Password can not be empty';
         this.userPassword = ''
@@ -66,12 +66,12 @@ export default {
       let data = null
       try {
         data = await api.login(this.userLogin, this.userPassword)
-        console.log('login data', data)
         localStorage.setItem('sessionToken', data.sessionToken)
         localStorage.setItem('sessionUser', data.login)
+        this.$store.dispatch('app/setUser', data.login)
         api.setSessionToken(data.sessionToken)
         this.$router.push({ name: 'main' })
-        window.location.reload()
+        // window.location.reload()
       } catch(e) {
         this.errorMessage = e.toString()
         this.userPassword = ''

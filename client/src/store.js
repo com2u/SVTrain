@@ -1,22 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import app from './modules/app'
+import notes from './modules/notes'
+import wsconfig from './modules/wsconfig'
 
 Vue.use(Vuex)
 
 
 export default new Vuex.Store({
-  state: {
-    config: {}
-  },
-  mutations: {
-    SET_CONFIG: (state, config) => {
-      state.config = config
-    }
-  },
-  actions: {
-    setConfig: ({commit}, config) => {
-      commit('SET_CONFIG', config)
-    }
-  }
+  modules: {app, notes, wsconfig}
 })
 

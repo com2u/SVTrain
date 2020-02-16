@@ -1,6 +1,6 @@
 <template>
-  <b-modal 
-    id="creating-folder-modal"
+  <b-modal
+    :id="id"
     title="Create a folder"
     ok-title="Create"
     ref="modal"
@@ -28,7 +28,11 @@ import api from '../api.js'
 export default {
   name: "CreatingFolder",
   props: {
-    path: { required: true, default: () => '' }
+    path: { required: true, default: () => '' },
+    id: {
+      type: String,
+      default: 'creating-folder-modal'
+    }
   },
   data () {
     return {
@@ -44,13 +48,15 @@ export default {
   methods: {
     async createFolder () {
       await api.createFolder(this.path, this.name)
+      this.$emit('folder-created')
       this.name = null
     },
-    async handleEnter () {
+    handleEnter () {
       this.createFolder()
-      this.$emit('folderCreated')
-      this.$refs.modal.hide()
-      console.log(this.$refs.modal)
+      .then(() => {
+        this.$emit('folder-created')
+        this.$refs.modal.hide()
+      })
     },
     handleHidden (evt) {
       this.$emit('hidden', evt)

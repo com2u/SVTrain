@@ -27,7 +27,7 @@ export default {
   },
   computed: {
     configSideWidth() {
-      const config = this.$store.state.config
+      const config = this.$store.state.app.config
       if (config.rightMenu && config.rightMenu.width) {
         this.sideWidth = config.rightMenu.width
         return config.rightMenu.width

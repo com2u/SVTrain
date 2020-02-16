@@ -9,6 +9,7 @@ import routes from './routes'
 import infiniteScroll from 'vue-infinite-scroll'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
+import 'jsoneditor/dist/jsoneditor.css'
 import VoerroTagsInput from '@voerro/vue-tagsinput';
 import store from './store'
 

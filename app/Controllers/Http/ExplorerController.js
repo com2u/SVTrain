@@ -205,6 +205,23 @@ class ExplorerController {
     }
   }
 
+  async getSystemConfig() {
+    const ws = await this.getWorkspace()
+    const configPath = path.join(ws.toString(), '.cfg')
+    let cfg
+    try {
+      if (fs.existsSync(configPath)) {
+        const fileContent = fs.readFileSync(configPath, 'utf-8')
+        cfg = JSON.parse(fileContent)
+      }
+    }catch (e) {
+      cfg = {}
+    }
+    if (!cfg) cfg = {}
+    return {...config, ...cfg}
+  }
+
+
   /*
   POST /setWorkspace
 
@@ -231,7 +248,8 @@ class ExplorerController {
   */
   async delete({request}) {
     let {files} = request.post()
-    const destination = Env.get('DELETED_FILES_PATH', 'Deleted_files')
+    const currentCfg = await this.getSystemConfig()
+    const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles'
 
     // Create delete directory if not exist
     if (!fs.existsSync(destination)) {
@@ -253,7 +271,8 @@ class ExplorerController {
   */
   async move({request}) {
     let {files, destination} = request.post()
-    const response = await this.moveFiles(files, destination)
+    const user = request.currentUser
+    const response = await this.moveFiles(files, destination, user)
     return response
   }
 
@@ -350,6 +369,71 @@ class ExplorerController {
     return fs.writeFileSync(path, data)
   }
 
+  isValidFile(filename) {
+    const ext = path.extname(filename)
+    return ['.jpg', '.png', '.gif', '.bmp', '.jpeg'].includes(ext)
+  }
+
+  async countSync(dir, name, unclassified = false) {
+    const result = {
+      subFolders: [],
+      unclassified: 0,
+      classified: 0,
+      name: name,
+      path: dir
+    }
+
+    // Read notes
+    const notesPath = path.join(dir, 'notes.txt')
+    if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
+      try {
+        let notes = fs.readFileSync(notesPath, 'utf-8')
+        result.notes = notes
+        result.notesPath = notesPath
+      } catch (e) {
+        console.log(`can not read ${notesPath}`)
+      }
+    }
+
+    //Read Cfg
+    const cfgPath = path.join(dir, '.cfg')
+    if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
+      try {
+        let cfg = fs.readFileSync(cfgPath, 'utf-8')
+        let config = JSON.parse(cfg)
+        result.config = config
+        result.cfgPath = cfgPath
+      } catch (e) {
+        console.log(e)
+        console.log(`can not read ${cfgPath}`)
+      }
+    }
+
+    const files = await readdir(dir)
+    for (const file of files) {
+      const flstat = await lstat(path.join(dir, file))
+      if (flstat.isDirectory()) {
+        const nextDir = path.join(dir, file)
+        let subResult = {}
+        if (file.toLowerCase() === 'unclassified' || unclassified) {
+          subResult = await this.countSync(nextDir, file, true)
+        } else {
+          subResult = await this.countSync(nextDir, file, false)
+        }
+        result.classified += subResult.classified
+        result.unclassified += subResult.unclassified
+        result.subFolders.push(subResult)
+      } else if (this.isValidFile(file)) {
+        if (unclassified) {
+          result.unclassified += 1
+        } else {
+          result.classified += 1
+        }
+      }
+    }
+    return result
+  }
+
   /*
     GET /getSubfolders
     returns an array with subfolders of a specific folder
@@ -357,7 +441,6 @@ class ExplorerController {
   async getSubfolders({request}) {
     let {folder} = request.get()
     if (folder === 'root') folder = CONST_PATHS.root
-    const result = []
 
     if (!folder) throw new Error('The "folder" parameter is needed')
 
@@ -366,17 +449,17 @@ class ExplorerController {
       throw new Error(`Access denied for read directory ${folder}`)
     }
 
-    const files = await readdir(folder)
+    // const files = await readdir(folder)
+    //
+    // for (let i = 0; i < files.length; ++i) {
+    //   const f = files[i]
+    //   const flstat = await lstat(path.join(folder, f))
+    //   if (flstat.isDirectory()) {
+    //     result.push(f)
+    //   }
+    // }
 
-    for (let i = 0; i < files.length; ++i) {
-      const f = files[i]
-      const flstat = await lstat(path.join(folder, f))
-      if (flstat.isDirectory()) {
-        result.push(f)
-      }
-    }
-
-    return result
+    return await this.countSync(folder, 'root')
   }
 
   /*
@@ -401,7 +484,10 @@ class ExplorerController {
     creates a new directory with specified name in a specified folder
   */
   async createFolder({request}) {
-    const {name, folder} = request.post()
+    let {name, folder} = request.post()
+    if (folder === 'root') {
+      folder = CONST_PATHS.root
+    }
     if (!folder || !name) throw new Error('Parameters name and folder are needed')
     if (!accessToFile(CONST_PATHS.root, folder)) {
       throw new Error(`You haven\'t access to ${folder} directory`)
@@ -557,17 +643,18 @@ class ExplorerController {
   }
 
   async getConfig({request, response}) {
-    const resConfig = {...config}
-    const forwardOnly = process.env.FORWARD_ONLY
-    const trueValues = ['true', 'yes', 'y', '1']
-    resConfig.forwardOnly = forwardOnly && trueValues.includes(forwardOnly.toLowerCase())
+    const currentCfg = await this.getSystemConfig()
+    const user = request.currentUser
+    const resConfig = {...currentCfg, user}
     response.json(resConfig)
   }
 
   async doForwardOnly({request, response}) {
     let {selectedFiles, notSelectedFiles} = request.post()
-    const selectedPath = Env.get('SELECTED_TARGET_FOLDER', 'Selected')
-    const notSelectedPath = Env.get('NOT_SELECTED_TARGET_FOLDER', 'NotSelected')
+    const currentCfg = await this.getSystemConfig()
+    const selectedPath = currentCfg.selectedPath || 'Selected'
+    const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected'
+    const user = request.currentUser
 
     // Create delete directory if not exist
     if (!fs.existsSync(selectedPath)) {
@@ -578,12 +665,32 @@ class ExplorerController {
       fs.mkdirSync(notSelectedPath);
     }
 
-    const selected = await this.moveFiles(selectedFiles, selectedPath)
-    const notSelected = await this.moveFiles(notSelectedFiles, notSelectedPath)
+    const selected = await this.moveFiles(selectedFiles, selectedPath, user)
+    const notSelected = await this.moveFiles(notSelectedFiles, notSelectedPath, user)
     response.json({
       selected,
       notSelected
     })
+  }
+
+  async saveNotes({request, response}) {
+    const {path, notes} = request.post()
+    if (fs.existsSync(path)) {
+      fs.writeFileSync(path, notes, {encoding: 'utf8'})
+      return true
+    }
+    return false
+  }
+
+  async saveConfig({request, response}) {
+    const {path, config} = request.post()
+    const configStr = JSON.stringify(config)
+    if (!configStr) return false
+    if (fs.existsSync(path)) {
+      fs.writeFileSync(path, configStr, {encoding: 'utf8'})
+      return true
+    }
+    return false
   }
 }
 

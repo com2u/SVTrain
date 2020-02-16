@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseurl = `https://localhost:3333/`
+const baseurl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/';
 const urls = {
   getFiles: dir => `${baseurl}getFiles?dir=${dir}`,
   getRunningState: `${baseurl}getState`,
@@ -21,6 +21,8 @@ const urls = {
   login: `${baseurl}login`,
   getConfig: `${baseurl}config`,
   forwardOnly: `${baseurl}forward-only`,
+  saveNotes: `${baseurl}notes`,
+  saveConfig: `${baseurl}save-config`,
 }
 
 export default {
@@ -114,7 +116,13 @@ export default {
 
   doForwardOnly: async (selectedFiles, notSelectedFiles) => {
     return (await axios.post(urls.forwardOnly, {selectedFiles, notSelectedFiles})).data
-  }
+  },
+  saveNotes: async (path, notes) => {
+    return (await axios.post(urls.saveNotes, {path, notes})).data
+  },
+  saveConfig: async (path, config) => {
+    return (await axios.post(urls.saveConfig, {path, config})).data
+  },
 }
 
 axios.interceptors.response.use(function (response) {
