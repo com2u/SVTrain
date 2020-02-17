@@ -3,6 +3,7 @@
     <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
       <div class="name" :class="!depth? 'root-item': ''" @click="setWorkspace">{{info.name}}</div>
       <div class="options">
+        <span>{{info.unclassified + info.classified}} files</span>
         <span>{{progress}}%</span>
         <b-progress :max="100" class="ws-progress" variant="secondary">
           <b-progress-bar

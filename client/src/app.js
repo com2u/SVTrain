@@ -6,18 +6,19 @@ import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon.vue'
 import App from './App.vue'
 import routes from './routes'
-import infiniteScroll from 'vue-infinite-scroll'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
 import 'jsoneditor/dist/jsoneditor.css'
 import VoerroTagsInput from '@voerro/vue-tagsinput';
 import store from './store'
 
-Vue.use(infiniteScroll)
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 
-const router = new VueRouter({routes})
+const router = new VueRouter({
+  mode: 'history',
+  routes
+})
 Vue.use(VueRouter)
 Vue.component('v-icon', Icon)
 Vue.component('tags-input', VoerroTagsInput);
