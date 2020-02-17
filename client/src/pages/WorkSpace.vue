@@ -142,11 +142,11 @@
       },
       async setWorkspace(folder) {
         await api.setWorkspace(folder.name)
-        this.loadFolders()
         api.getConfig()
           .then(data => {
             this.$store.dispatch('app/setConfig', data)
           })
+        this.$router.push({name: 'explorer', query: {dir: folder.path}})
       },
       onFolderCreated() {
         this.loadFolders()
@@ -218,6 +218,10 @@
         display: flex;
         height: $height;
         line-height: $height;
+
+        &>span {
+          padding-left: 10px;
+        }
 
         .option-icon {
           cursor: pointer;
