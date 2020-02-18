@@ -2,10 +2,14 @@
   <div
     id="keyupevents"
     tabindex="0"
-    @keyup.self.exact.prevent="onKeyUp"
+    @keyup.self.exact.stop.prevent="onKeyUp"
   >
-    <div tabindex="0"
-         @keyup.self.shift.space.exact.prevent="selectCurrent(true)"></div>
+    <div
+      tabindex="0"
+      @keyup.self.shift.space.exact.prevent="selectCurrent(true)"
+    >
+
+    </div>
     <window-splitting ref="WindowSplitting">
       <template v-slot:side>
         <div class="right-side-section">
@@ -66,7 +70,7 @@
       </template>
       <template v-slot:main>
         <div class="header">
-          <router-link to="/">To main screen</router-link>
+          <router-link :to="{name: 'main'}">To main screen</router-link>
           | <b>{{ openedPath }}</b>
         </div>
         <div class="file-explorer-grid bottom-border">
@@ -204,6 +208,9 @@
       },
       systemConfig() {
         return this.$store.state.app.config
+      },
+      defaultFileSize() {
+        return this.$store.state.app.config.defaultPictureSize
       }
     },
     watch: {
@@ -214,10 +221,25 @@
           this.perPage = 100
         }
         this.calculatePage(this.page)
+      },
+      defaultFileSize(size) {
+        if (Number.isInteger(size) && size > 0) {
+          this.fileSize = size
+        }
+      }
+    },
+    mounted() {
+      const size = this.defaultFileSize
+      if (Number.isInteger(size) && size > 0) {
+        this.fileSize = size
       }
     },
     methods: {
       onKeyUp(event) {
+        // console.log('on key up ', event)
+        if (event) {
+          event.preventDefault()
+        }
         if (!this.systemConfig.useShortcuts) return
         let keys = {
           space: 32,
@@ -281,14 +303,9 @@
       },
 
       selectFileByIndex(number) {
-        const index  =(number + 10) % 11
+        const index = (number + 10) % 11
         if (this.screenFiles.length > index) {
-          this.screenFiles = this.screenFiles.map(i => {
-            i.selected = false
-            return i
-          })
-          this.screenFiles[index].selected = true
-          this.selectedFiles = [this.screenFiles[index]]
+          this.toggleSelect(this.screenFiles[index])
         }
       },
 

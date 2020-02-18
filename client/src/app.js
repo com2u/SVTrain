@@ -31,7 +31,7 @@ Vue.component('tags-input', VoerroTagsInput);
 // }, false);
 
 
-new Vue({
+export default new Vue({
   router,
   store,
   el: '#app',

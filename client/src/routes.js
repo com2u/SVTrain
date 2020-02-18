@@ -15,7 +15,7 @@ const routes = [
     children: [
       {
         name: 'main',
-        path: '/',
+        path: '/ai',
         component: Main
       },
       {
@@ -37,7 +37,7 @@ const routes = [
       {
         name: 'WorkSpacePage',
         component: WorkSpace,
-        path: '/workspace'
+        path: '/'
       },
       {
         name: 'statistic-overview',
