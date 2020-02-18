@@ -10,7 +10,7 @@ module.exports = {
 
   useShortcuts: true,
   requestBeforeDelete: true,
-  defaultPictureSize: '100px',
+  defaultPictureSize: 200,
   deleteDefaultFolder: 'Deleted_files',
   selectedPath: 'Selected',
   notSelectedPath: 'Not_Selected',
