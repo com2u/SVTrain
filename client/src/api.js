@@ -130,7 +130,7 @@ axios.interceptors.response.use(function (response) {
   return response
 }, function (error) {
   if (error.toString().includes('401')) {
-    window.location.href = '#/login'
+    window.location.href = 'login'
   }
   return Promise.reject(error)
 })
