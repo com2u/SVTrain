@@ -129,6 +129,8 @@ export default {
 axios.interceptors.response.use(function (response) {
   return response
 }, function (error) {
+  console.log(error)
+  console.log(error.response)
   if (error.toString().includes('401')) {
     window.location.href = 'login'
   }
