@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const baseurl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/api/';
-// const baseurl = 'https://localhost:3333/api/'
+// const baseurl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/api/';
+const baseurl = 'https://localhost:3333/api/'
 const urls = {
   getFiles: dir => `${baseurl}getFiles?dir=${dir}`,
   getRunningState: `${baseurl}getState`,

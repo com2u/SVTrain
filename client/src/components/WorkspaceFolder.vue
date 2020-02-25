@@ -14,18 +14,23 @@
         <div>
           <span class="icon-wrapper">
             <b-icon
-              v-if="info.notes"
+              icon="bar-chart-fill"
+              :class="info.statistic ? 'clickable-icon': 'gray-icon'"
+              font-scale="1.5"
+            />
+          </span>
+          <span class="icon-wrapper">
+            <b-icon
               icon="document-text"
-              class="option-icon"
+              :class="info.notes ? 'clickable-icon': 'gray-icon'"
               font-scale="1.5"
               @click="showNotes"
             />
           </span>
           <span class="icon-wrapper">
             <b-icon
-              v-if="info.config"
+              :class="info.config ? 'clickable-icon': 'gray-icon'"
               icon="gear-fill"
-              class="option-icon"
               font-scale="1.5"
               @click="showConfig"
             />

@@ -215,7 +215,7 @@ class ExplorerController {
         const fileContent = fs.readFileSync(configPath, 'utf-8')
         cfg = JSON.parse(fileContent)
       }
-    }catch (e) {
+    } catch (e) {
       cfg = {}
     }
     if (!cfg) cfg = {}
@@ -654,20 +654,23 @@ class ExplorerController {
     let {selectedFiles, notSelectedFiles} = request.post()
     const currentCfg = await this.getSystemConfig()
     const selectedPath = currentCfg.selectedPath || 'Selected'
+    const absSelectedPath = path.join(CONST_PATHS.root, selectedPath)
     const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected'
+    const absNotSelectedPath = path.join(CONST_PATHS.root, notSelectedPath)
+
     const user = request.currentUser
 
     // Create delete directory if not exist
-    if (!fs.existsSync(selectedPath)) {
-      fs.mkdirSync(selectedPath);
+    if (!fs.existsSync(absSelectedPath)) {
+      fs.mkdirSync(absSelectedPath);
     }
 
-    if (!fs.existsSync(notSelectedPath)) {
-      fs.mkdirSync(notSelectedPath);
+    if (!fs.existsSync(absNotSelectedPath)) {
+      fs.mkdirSync(absNotSelectedPath);
     }
 
-    const selected = await this.moveFiles(selectedFiles, selectedPath, user)
-    const notSelected = await this.moveFiles(notSelectedFiles, notSelectedPath, user)
+    const selected = await this.moveFiles(selectedFiles, absSelectedPath, user)
+    const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user)
     response.json({
       selected,
       notSelected

@@ -5,11 +5,18 @@
         <h1>WorkSpace List</h1>
       </div>
       <div>
-        <b-button variant="dark" v-b-modal.create-ws-folder>New Workspace</b-button>
+        <b-button
+          variant="dark"
+          @click="toAiPage">
+          <span class="ai-btn-content">AI</span>
+        </b-button>
+        <b-button
+          v-if="systemConfig.newWorkspace"
+          variant="dark"
+          v-b-modal.create-ws-folder>
+          New Workspace
+        </b-button>
       </div>
-    </div>
-    <div class="link-container">
-      <b-button @click="toAiPage" variant="link">To AI Page</b-button>
     </div>
     <div>
       <div v-if="loading" class="spinner-container">
@@ -105,6 +112,9 @@
         set(val) {
           this.$store.dispatch('notes/setContent', val)
         }
+      },
+      systemConfig() {
+        return this.$store.state.app.config
       }
 
     },
@@ -165,8 +175,8 @@
 <style lang="scss">
   $height: 60px;
 
-  .link-container {
-    padding-bottom: 10px;
+  .ai-btn-content {
+    padding: 0 20px;
   }
 
   #wsjsoneditor {
@@ -219,12 +229,17 @@
         height: $height;
         line-height: $height;
 
-        &>span {
+        & > span {
           padding-left: 10px;
         }
 
-        .option-icon {
+        .clickable-icon {
           cursor: pointer;
+        }
+
+        .gray-icon {
+          cursor: default;
+          color: #d4d4d4;
         }
 
         .ws-progress {

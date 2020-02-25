@@ -9,7 +9,6 @@
               <img src="../images/EjectXLogo.png">
             </b-nav-item>
           </b-navbar-nav>
-          <b-navbar-brand :to="{name: 'WorkSpacePage'}">SEIDENANDER</b-navbar-brand>
 
           <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
