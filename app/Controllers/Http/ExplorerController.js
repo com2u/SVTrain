@@ -214,6 +214,10 @@ class ExplorerController {
       if (fs.existsSync(configPath)) {
         const fileContent = fs.readFileSync(configPath, 'utf-8')
         cfg = JSON.parse(fileContent)
+        console.log(cfg)
+        if (cfg.hide === true) {
+          cfg = {}
+        }
       }
     } catch (e) {
       cfg = {}
@@ -624,7 +628,6 @@ class ExplorerController {
         try {
           lastLine = (await readLastLines.read(logs[fileName].path, 2))
         } catch (e) {
-          console.log(e)
         }
         logs[fileName].lastLine = lastLine
       }))
@@ -653,20 +656,21 @@ class ExplorerController {
   async doForwardOnly({request, response}) {
     let {selectedFiles, notSelectedFiles} = request.post()
     const currentCfg = await this.getSystemConfig()
+    const workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root
     const selectedPath = currentCfg.selectedPath || 'Selected'
-    const absSelectedPath = path.join(CONST_PATHS.root, selectedPath)
+    const absSelectedPath = path.join(workingRoot, selectedPath)
     const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected'
-    const absNotSelectedPath = path.join(CONST_PATHS.root, notSelectedPath)
+    const absNotSelectedPath = path.join(workingRoot, notSelectedPath)
 
     const user = request.currentUser
 
     // Create delete directory if not exist
     if (!fs.existsSync(absSelectedPath)) {
-      fs.mkdirSync(absSelectedPath);
+      throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`)
     }
 
     if (!fs.existsSync(absNotSelectedPath)) {
-      fs.mkdirSync(absNotSelectedPath);
+      throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`)
     }
 
     const selected = await this.moveFiles(selectedFiles, absSelectedPath, user)

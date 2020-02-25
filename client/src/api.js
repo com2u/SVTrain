@@ -1,7 +1,9 @@
 import axios from 'axios'
+import EventBus from "./eventbus";
+import Vue from 'vue'
 
-// const baseurl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/api/';
-const baseurl = 'https://localhost:3333/api/'
+const baseurl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/api/';
+// const baseurl = 'https://localhost:3333/api/'
 const urls = {
   getFiles: dir => `${baseurl}getFiles?dir=${dir}`,
   getRunningState: `${baseurl}getState`,
@@ -130,6 +132,8 @@ axios.interceptors.response.use(function (response) {
   return response
 }, function (error) {
   console.log(error)
+
+  EventBus.$emit('auth_api_error', error)
   console.log(error.response)
   if (error.toString().includes('401')) {
     window.location.href = 'login'

@@ -11,7 +11,9 @@ import 'bootstrap-vue/dist/bootstrap-vue'
 import 'jsoneditor/dist/jsoneditor.css'
 import VoerroTagsInput from '@voerro/vue-tagsinput';
 import store from './store'
+import Notifications from 'vue-notification'
 
+Vue.use(Notifications)
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 
