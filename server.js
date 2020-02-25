@@ -31,6 +31,11 @@ new Ignitor(require('@adonisjs/fold'))
   .appRoot(__dirname)
   .wsServer()
   .fireHttpServer(handler => {
+    const rootPath = process.env.ROOT_PATH
+    if (!fs.existsSync(rootPath)) {
+      console.log(`ROOT_PATH folder ${rootPath} does not exist`)
+    }
+
     const httpsServer = https.createServer(options, handler)
     return httpsServer
   })

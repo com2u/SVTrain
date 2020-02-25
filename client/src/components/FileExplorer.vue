@@ -27,6 +27,7 @@
           </div>
         </div>
 
+
         <div class="right-side-section" v-if="statistic.calculated">
           <button
             v-bind:disabled="isLoading.statistic"
@@ -49,7 +50,7 @@
           Statistic didn't calculated
         </div>
 
-        <div class="right-side-section">
+        <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0">
             <a href="javascript:void(0)" v-on:click="deleteFiles()" :style="{fontSize: fontSize}">Delete files</a>
@@ -66,6 +67,22 @@
           <div v-else>
             (select one or more files for show control buttons)
           </div>
+
+        </div>
+        <div v-if="systemConfig.forwardLocaltion === 'right'" class="right-side-section">
+          <div class="pagination-group">
+            <b-button
+              v-if="!forwardOnly"
+              variant="primary"
+              size="sm"
+              @click="backward()">
+              <b-icon icon="chevron-left"></b-icon>
+              Backward
+            </b-button>
+            <b-button variant="primary" size="sm" @click="forward()">Forward
+              <b-icon icon="chevron-right"></b-icon>
+            </b-button>
+          </div>
         </div>
       </template>
       <template v-slot:main>
@@ -74,7 +91,9 @@
           | <b>{{ openedPath }}</b>
         </div>
         <div class="file-explorer-grid bottom-border">
-          <new-folder-button v-b-modal.creating-folder-modal/>
+          <template v-if="systemConfig.newFolder">
+            <new-folder-button v-b-modal.creating-folder-modal/>
+          </template>
           <file
             v-for="file in folder.folders"
             v-bind:file="file"
@@ -82,18 +101,20 @@
             v-bind:key="file.path">
           </file>
         </div>
-        <div class="pagination-group">
-          <b-button
-            v-if="!forwardOnly"
-            variant="primary"
-            size="sm"
-            @click="backward()">
-            <b-icon icon="chevron-left"></b-icon>
-            Backward
-          </b-button>
-          <b-button variant="primary" size="sm" @click="forward()">Forward
-            <b-icon icon="chevron-right"></b-icon>
-          </b-button>
+        <div v-if="systemConfig.forwardLocaltion === 'top'">
+          <div class="pagination-group">
+            <b-button
+              v-if="!forwardOnly"
+              variant="primary"
+              size="sm"
+              @click="backward()">
+              <b-icon icon="chevron-left"></b-icon>
+              Backward
+            </b-button>
+            <b-button variant="primary" size="sm" @click="forward()">Forward
+              <b-icon icon="chevron-right"></b-icon>
+            </b-button>
+          </div>
         </div>
         <div class="file-explorer-grid">
           <file
