@@ -60,7 +60,7 @@ module.exports = class Watcher {
       this.folders['workspace.bat'][socketid].emit(`folder_workspace.bat`, object)
     })
   }
-  
+
   async changeBatFileLog(type, pathname) {
     let object = {
       lastLine: '',
@@ -139,7 +139,7 @@ module.exports = class Watcher {
       const parentTokens = parent.split(path.sep).filter(i => i.length)
       return parentTokens.every((t, i) => child.split(path.sep)[i] === t)
     }
-    this.watcher = chokidar.watch( 
+    this.watcher = chokidar.watch(
       Env.get('COMMAND_FILES_PATH'),
       {
         ignoreInitial: true,
@@ -185,7 +185,6 @@ module.exports = class Watcher {
       }))
       lastLines = lastLines.filter(o => o !== null)
       Object.keys(this.folders['running.lock']).map( socketid => {
-        console.log('sent ', lastLines)
         this.folders['running.lock'][socketid].emit(`logfile`, lastLines)
       })
     }, 1000)

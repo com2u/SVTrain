@@ -4,7 +4,7 @@ module.exports = {
     margin: 5,
     fontSize: "1rem"
   },
-  filePerPage: 50,
+  filePerPage: 3,
 
   showFileName: true,
 
@@ -14,7 +14,7 @@ module.exports = {
   deleteDefaultFolder: 'Deleted_files',
   selectedPath: 'Selected_new',
   notSelectedPath: 'Not_Selected',
-  forwardOnly: false,
+  forwardOnly: true,
   buttonFontSize: '1rem',
   titleFontSize: '1rem',
   defaultEpoch: 1,
@@ -22,7 +22,7 @@ module.exports = {
 
   // top or right
   forwardLocaltion: 'right',
-  moveMenu: true,
+  moveMenu: false,
   newFolder: true,
   newWorkspace: true
 }

@@ -631,9 +631,10 @@
       },
 
       async onForwardOnly() {
-        console.log('forward only')
         const selected = this.selectedFiles.map(f => f.path)
-        const notSelected = this.screenFiles.filter(f => !selected.includes(f.path)).map(f => f.path)
+        const notSelected = this.screenFiles.filter(f =>
+          !selected.includes(f.path) && f.image
+        ).map(f => f.path)
         await api.doForwardOnly(selected, notSelected)
         this.loadFiles(this.path)
       },
