@@ -30,9 +30,9 @@
 
         <div class="right-side-section" v-if="statistic.calculated">
           <button
-            v-bind:disabled="isLoading.statistic"
+            v-bind:disabled="isLoading.statistic || backgroundCalculating"
             v-on:click="calculateStatistic()">
-            Calculate statistic{{ isLoading.statistic ? ' (loading...)' : ''}}
+            Calculate statistic{{ isLoading.statistic || backgroundCalculating ? ' (loading...)' : ''}}
           </button>
           <br>
           <span v-if="!statistic.table">
@@ -207,6 +207,9 @@
       filter: {}
     }),
     computed: {
+      backgroundCalculating() {
+        return this.$store.state.app.calculating
+      },
       fontSize() {
         const config = this.$store.state.app.config
         if (config.rightMenu && config.rightMenu.fontSize) {

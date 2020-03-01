@@ -206,6 +206,7 @@
     mounted() {
       // this.loadFolders()
       this.loadFoldersByPath()
+      this.$store.dispatch('app/calculateStatistic')
       EventBus.$on('load-sub-folders', this.loadSubfolder)
       EventBus.$on('show-statistic', this.showStatistic)
     },
