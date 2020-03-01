@@ -214,7 +214,6 @@ class ExplorerController {
       if (fs.existsSync(configPath)) {
         const fileContent = fs.readFileSync(configPath, 'utf-8')
         cfg = JSON.parse(fileContent)
-        console.log(cfg)
         if (cfg.hide === true) {
           cfg = {}
         }
@@ -550,6 +549,7 @@ class ExplorerController {
   async calculate() {
     try {
       const missedFiles = []
+      const allFiles = []
       const dirsObject = {}
       const ignoreFunc = (_, lstat) => !lstat.isDirectory()
       const dirs = await recursive(CONST_PATHS.root, [ignoreFunc])
@@ -563,12 +563,15 @@ class ExplorerController {
           dirsObject[dir] = {
             missed: 0,
             matched: 0,
-            missmatched: 0
+            missmatched: 0,
+            classified: 0,
+            unclassified: 0
           }
           // count matches | missmatches
           await Promise.all(
             files.map(async f => {
               let filepath = path.join(dir, f)
+              const isUnclassified = dir.toString().toLowerCase().includes('unclassified')
               const stats = await lstat(filepath)
               if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
                 if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
@@ -576,6 +579,14 @@ class ExplorerController {
                 } else {
                   dirsObject[dir].missmatched++
                   missedFiles.push(filepath)
+                }
+                if (regexpForImages.test(f)) {
+
+
+                  allFiles.push({
+                    filepath,
+                    isUnclassified
+                  })
                 }
               }
               if (stats.isDirectory()) {
@@ -596,6 +607,16 @@ class ExplorerController {
         dirsObject[dir].missed = missedFiles.filter(
           f => path.basename(f).toLowerCase().indexOf(path.basename(dir).toLowerCase()) > -1
         ).length
+
+        for (let file of allFiles) {
+          if (file.filepath.startsWith(dir)) {
+            if (file.isUnclassified) {
+              dirsObject[dir].unclassified += 1
+            } else {
+              dirsObject[dir].classified += 1
+            }
+          }
+        }
 
         Statistic.write(dir, dirsObject[dir])
       })
@@ -699,6 +720,65 @@ class ExplorerController {
       return true
     }
     return false
+  }
+
+  isDirectory = source => lstatSync(source).isDirectory()
+
+  async getSubFolderByPath({request, response}) {
+    let dir = request.get().dir || CONST_PATHS.root
+
+    if (!fs.existsSync(dir)) {
+      throw Error(`Folder ${dir} does not exist`)
+    }
+    if (!fs.lstatSync(dir).isDirectory()) {
+      throw Error(`${dir} is not a folder`)
+    }
+    const files = fs.readdirSync(dir)
+    const folders = []
+    for (const name of files) {
+      const subDir = path.join(dir, name)
+      if (fs.lstatSync(subDir).isDirectory()) {
+        const file = {
+          // subFolders: [],
+          name,
+          path: subDir
+        }
+        const statistic = Statistic.get(subDir)
+        if (Number.isInteger(statistic.classified)) {
+          file.classified = statistic.classified
+        }
+
+        if (Number.isInteger(statistic.unclassified)) {
+          file.unclassified = statistic.unclassified
+        }
+
+        const notesPath = path.join(subDir, 'notes.txt')
+        if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
+          try {
+            let notes = fs.readFileSync(notesPath, 'utf-8')
+            file.notes = notes
+            file.notesPath = notesPath
+          } catch (e) {
+            console.log(`can not read ${notesPath}`)
+          }
+        }
+
+        //Read Cfg
+        const cfgPath = path.join(subDir, '.cfg')
+        if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
+          try {
+            let cfg = fs.readFileSync(cfgPath, 'utf-8')
+            let config = JSON.parse(cfg)
+            file.config = config
+            file.cfgPath = cfgPath
+          } catch (e) {
+            console.log(`Can not read ${cfgPath}`)
+          }
+        }
+        folders.push(file)
+      }
+    }
+    return folders
   }
 }
 

@@ -27,7 +27,6 @@ class AuthMiddleware {
       response.unauthorized('InvalidToken')
       return
     }
-    console.log('authorized')
     request.currentUser = sessions[sessionToken].login
     await next()
   }
@@ -59,7 +58,6 @@ class AuthMiddleware {
       next(new Error('InvalidToken'))
       return
     }
-    console.log('ws authorized')
     await next()
   }
 }

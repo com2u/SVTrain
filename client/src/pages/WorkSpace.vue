@@ -23,8 +23,9 @@
         <b-spinner label="Loading..."></b-spinner>
       </div>
       <workspace-folder
-        v-for="folder in folders"
+        v-for="(folder, index) in folders"
         :info="folder"
+        :key-path="`[${index}]`"
         :key="folder.path"
         @select-workspace="setWorkspace(folder)"
       />
@@ -64,6 +65,19 @@
 
     </b-modal>
 
+    <b-modal
+      v-model="statisticVisible"
+      size="xl"
+      cancel-title="Close"
+    >
+      <template v-slot:modal-title>Statistic</template>
+      <statistic-popup ref="statistic"/>
+      <div>
+
+      </div>
+
+    </b-modal>
+
     <creating-folder
       @folder-created="onFolderCreated"
       path="root"
@@ -76,16 +90,20 @@
   import api from '../api'
   import WorkspaceFolder from "../components/WorkspaceFolder.vue";
   import CreatingFolder from '../components/CreatingFolder.vue'
+  import StatisticPopup from "../components/StatisticPopup.vue";
   import JSONEditor from 'jsoneditor'
+  import EventBus from "../eventbus";
+  import _set from 'lodash.set'
 
   export default {
     name: 'WorkSpace',
-    components: {WorkspaceFolder, CreatingFolder},
+    components: {WorkspaceFolder, CreatingFolder, StatisticPopup},
     data() {
       return {
         folders: [],
         loading: false,
-        editor: null
+        editor: null,
+        statisticVisible: false
       }
     },
     computed: {
@@ -123,6 +141,12 @@
         this.loading = true
         const response = await api.getSubfolders('root')
         this.folders = response.subFolders
+        this.loading = false
+      },
+      async loadFoldersByPath(dir = null) {
+        this.loading = true
+        const response = await api.getFoldersByPath(dir)
+        this.folders = response
         this.loading = false
       },
       saveNotes() {
@@ -163,12 +187,31 @@
       },
       toAiPage() {
         this.$router.push({name: 'main'})
+      },
+      async loadSubfolder(item) {
+        const subFolders = await api.getFoldersByPath(item.info.path)
+        const subFoldersPath = `${item.keyPath}.subFolders`
+        const updatedFolders = _set(this.folders, subFoldersPath, subFolders)
+        this.folders = JSON.parse(JSON.stringify(updatedFolders))
+      },
+      showStatistic(dir) {
+        this.statisticVisible = true
+        this.$nextTick(() => {
+          if (this.$refs.statistic) {
+            this.$refs.statistic.open(dir)
+          }
+        })
       }
     },
     mounted() {
-      this.loadFolders()
+      // this.loadFolders()
+      this.loadFoldersByPath()
+      EventBus.$on('load-sub-folders', this.loadSubfolder)
+      EventBus.$on('show-statistic', this.showStatistic)
     },
     destroyed() {
+      EventBus.$off('load-sub-folders')
+      EventBus.$off('show-statistic')
     }
   }
 </script>
@@ -229,8 +272,12 @@
         height: $height;
         line-height: $height;
 
-        & > span {
-          padding-left: 10px;
+        .option-progress {
+          display: flex;
+
+          .file-nums {
+            padding-right: 10px;
+          }
         }
 
         .clickable-icon {

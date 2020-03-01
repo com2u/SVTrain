@@ -26,6 +26,7 @@ const urls = {
   forwardOnly: `${baseurl}forward-only`,
   saveNotes: `${baseurl}notes`,
   saveConfig: `${baseurl}save-config`,
+  getFoldersByPath: dir => dir? `${baseurl}get-folders?dir=${dir}`: `${baseurl}get-folders`
 }
 
 export default {
@@ -96,7 +97,6 @@ export default {
   },
   login: async (login, password) => {
     let response = null
-    console.log('aga')
     try {
       response = await axios.post(urls.login, {login, password})
       return response.data
@@ -126,6 +126,9 @@ export default {
   saveConfig: async (path, config) => {
     return (await axios.post(urls.saveConfig, {path, config})).data
   },
+  getFoldersByPath: async (dir=null) => {
+    return (await axios.get(urls.getFoldersByPath(dir))).data
+  }
 }
 
 axios.interceptors.response.use(function (response) {
@@ -136,7 +139,7 @@ axios.interceptors.response.use(function (response) {
   EventBus.$emit('auth_api_error', error)
   console.log(error.response)
   if (error.toString().includes('401')) {
-    window.location.href = 'login'
+    EventBus.$emit('login', error)
   }
   return Promise.reject(error)
 })
