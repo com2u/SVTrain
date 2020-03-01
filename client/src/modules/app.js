@@ -7,23 +7,27 @@ export default {
     showHeader: true,
     user: {},
     showNotes: false,
-    notesContent: ''
+    notesContent: '',
+    calculating: false
   },
   mutations: {
     SET_CONFIG: (state, config) => {
       state.config = config
     },
-    SET_SHOW_HEADER: (stage, show) => {
-      stage.showHeader = show
+    SET_SHOW_HEADER: (state, show) => {
+      state.showHeader = show
     },
-    SET_USER: (stage, user) => {
-      stage.user = user
+    SET_USER: (state, user) => {
+      state.user = user
     },
-    SET_SHOW_NOTES: (stage, show) => {
-      stage.showNotes = show
+    SET_SHOW_NOTES: (state, show) => {
+      state.showNotes = show
     },
-    SET_NOTES_CONTENT: (stage, content) => {
-      stage.notesContent = content
+    SET_NOTES_CONTENT: (state, content) => {
+      state.notesContent = content
+    },
+    SET_CALCULATING:(state, calculating) => {
+      state.calculating = calculating
     }
 
   },
@@ -42,7 +46,19 @@ export default {
     logout() {
       localStorage.removeItem('sessionToken')
       api.setSessionToken('')
+    },
+
+    calculateStatistic({commit}) {
+      commit('SET_CALCULATING', true)
+      api.calculateStatistic()
+        .then(res => {
+          commit('SET_CALCULATING', false)
+        })
+        .catch(() => {
+          commit('SET_CALCULATING', false)
+        })
     }
+
   },
   getters: {
     showHeader: state => state.showHeader,

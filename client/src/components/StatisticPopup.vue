@@ -3,9 +3,9 @@
     <div v-if="statistic">
       <div class="right-side-section" v-if="statistic.calculated">
         <button
-          v-bind:disabled="isLoading"
+          v-bind:disabled="isLoading || backgroundCalculating"
           v-on:click="calculate()">
-          Calculate statistic{{ isLoading ? ' (loading...)' : ''}}
+          Calculate statistic{{ isLoading || backgroundCalculating ? ' (loading...)' : ''}}
         </button>
         <br>
         <span v-if="!statistic.table">
@@ -39,6 +39,11 @@
         isLoading: false,
         dir: '',
         showTable: false
+      }
+    },
+    computed: {
+      backgroundCalculating() {
+        return this.$store.state.app.calculating
       }
     },
     methods: {
