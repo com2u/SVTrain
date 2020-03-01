@@ -17,10 +17,10 @@ module.exports = class Statistic {
 
     let data = await fs.readFile(this._path, 'utf8')
     try { data = JSON.parse(data) }
-    catch (e) { 
+    catch (e) {
       console.log('Error occured when parse statistic data')
       console.log(e)
-      return 
+      return
     }
 
     this._data = data
@@ -39,13 +39,15 @@ module.exports = class Statistic {
     return await fs.writeFile(this._path, data, 'utf8')
   }
 
-  write( path, { missed, matched, missmatched, table } ) {
+  write( path, { missed, matched, missmatched, table, unclassified, classified } ) {
     this._data[path] = {
       calculated: true,
       missed,
-      matched, 
+      matched,
       missmatched,
-      table
+      table,
+      classified,
+      unclassified
     }
   }
 }

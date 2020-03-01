@@ -3,20 +3,23 @@
     <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
       <div class="name" :class="!depth? 'root-item': ''" @click="setWorkspace">{{info.name}}</div>
       <div class="options">
-        <span>{{info.unclassified + info.classified}} files</span>
-        <span>{{progress}}%</span>
-        <b-progress :max="100" class="ws-progress" variant="secondary">
-          <b-progress-bar
-            :value="progress">
-          </b-progress-bar>
-        </b-progress>
+        <div class="option-progress" v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
+          <span class="file-nums">{{info.unclassified + info.classified}} files</span>
+          <span>{{progress}}%</span>
+          <b-progress :max="100" class="ws-progress" variant="secondary">
+            <b-progress-bar
+              :value="progress">
+            </b-progress-bar>
+          </b-progress>
 
+        </div>
         <div>
           <span class="icon-wrapper">
             <b-icon
               icon="bar-chart-fill"
-              :class="info.statistic ? 'clickable-icon': 'gray-icon'"
+              class="clickable-icon"
               font-scale="1.5"
+              @click="showStatistic"
             />
           </span>
           <span class="icon-wrapper">
@@ -57,15 +60,18 @@
     </div>
     <div v-if="hasChildren && showChildren">
       <workspace-folder
-        v-for="folder in info.subFolders"
+        v-for="(folder, index) in info.subFolders"
         :info="folder"
         :depth="depth + 1"
+        :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
       />
     </div>
   </div>
 </template>
 <script>
+  import EventBus from "../eventbus";
+
   export default {
     name: 'WorkspaceFolder',
     props: {
@@ -76,6 +82,10 @@
       depth: {
         type: Number,
         default: 0
+      },
+      keyPath: {
+        type: String,
+        default: ''
       }
     },
     data() {
@@ -88,7 +98,8 @@
         return {marginLeft: `${this.depth * 50}px`}
       },
       hasChildren() {
-        return !!(this.info && this.info.subFolders && this.info.subFolders.length)
+        return !!(this.info && (Array.isArray(this.info.subFolders) && this.info.subFolders.length)
+          || !Array.isArray(this.info.subFolders))
       },
       progress() {
         if (this.info.classified || this.info.unclassified) {
@@ -105,6 +116,9 @@
     methods: {
       toggleShowChildren() {
         this.showChildren = !this.showChildren
+        if (!this.info.subFolders) {
+          EventBus.$emit('load-sub-folders', {info: this.info, keyPath: this.keyPath})
+        }
       },
       showNotes() {
         this.$store.dispatch('notes/showFolder', this.info)
@@ -116,6 +130,9 @@
         if (!this.depth) {
           this.$emit('select-workspace')
         }
+      },
+      showStatistic() {
+        EventBus.$emit('show-statistic', this.info.path)
       }
     }
   }

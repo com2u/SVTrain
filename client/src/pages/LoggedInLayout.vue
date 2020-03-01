@@ -33,13 +33,14 @@
     },
     mounted() {
       EventBus.$on('auth_api_error', this.handleApiError)
+      EventBus.$on('login', this.handleLogin)
     },
     destroyed() {
       EventBus.$off('auth_api_error')
+      EventBus.$off('login')
     },
     methods: {
       handleApiError(err) {
-        console.log('handleApiError', err)
         let message = 'Error'
         if (err && err.response && err.response.data && err.response.data.error) {
           message = err.response.data.error.message
@@ -50,6 +51,13 @@
           type: 'error',
           text: message
         });
+      },
+      handleLogin() {
+        this.$notify({
+          type: 'error',
+          text: 'You need to login first'
+        });
+        this.$router.push({name: 'LoginPage'})
       }
     }
   }
