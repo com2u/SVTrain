@@ -67,6 +67,7 @@
 
     <b-modal
       v-model="statisticVisible"
+      size="xl"
       cancel-title="Close"
     >
       <template v-slot:modal-title>Statistic</template>
