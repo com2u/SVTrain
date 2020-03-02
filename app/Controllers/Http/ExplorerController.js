@@ -671,6 +671,7 @@ class ExplorerController {
     const currentCfg = await this.getSystemConfig()
     const user = request.currentUser
     const resConfig = {...currentCfg, user}
+    console.log('Current config: ', resConfig)
     response.json(resConfig)
   }
 
