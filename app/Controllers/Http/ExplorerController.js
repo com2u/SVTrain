@@ -548,6 +548,7 @@ class ExplorerController {
   */
   async calculate() {
     try {
+      console.log('Start calculating statistic')
       const missedFiles = []
       const allFiles = []
       const dirsObject = {}
@@ -622,7 +623,9 @@ class ExplorerController {
       })
 
       await Statistic.save()
+      console.log('Finish calculating statistic')
     } catch (e) {
+      console.log('Calculate error')
       console.log(e)
       throw e
     }
