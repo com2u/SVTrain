@@ -548,6 +548,7 @@ class ExplorerController {
   */
   async calculate() {
     try {
+      console.log('Start calculating statistic')
       const missedFiles = []
       const allFiles = []
       const dirsObject = {}
@@ -609,7 +610,8 @@ class ExplorerController {
         ).length
 
         for (let file of allFiles) {
-          if (file.filepath.startsWith(dir)) {
+          const dirLength = dir.length
+          if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === '\\') {
             if (file.isUnclassified) {
               dirsObject[dir].unclassified += 1
             } else {
@@ -622,7 +624,9 @@ class ExplorerController {
       })
 
       await Statistic.save()
+      console.log('Finish calculating statistic')
     } catch (e) {
+      console.log('Calculate error')
       console.log(e)
       throw e
     }
