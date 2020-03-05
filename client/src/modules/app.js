@@ -50,13 +50,17 @@ export default {
 
     calculateStatistic({commit}) {
       commit('SET_CALCULATING', true)
-      api.calculateStatistic()
-        .then(res => {
-          commit('SET_CALCULATING', false)
-        })
-        .catch(() => {
-          commit('SET_CALCULATING', false)
-        })
+      return new Promise((resolve, reject) => {
+        api.calculateStatistic()
+          .then(res => {
+            commit('SET_CALCULATING', false)
+            resolve(true)
+          })
+          .catch((err) => {
+            commit('SET_CALCULATING', false)
+            reject(err)
+          })
+      })
     }
 
   },

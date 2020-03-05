@@ -546,7 +546,7 @@ class ExplorerController {
     GET /calculateStatistic
     Run process for calculate statistic for each folder
   */
-  async calculate() {
+  async calculate(context) {
     try {
       console.log('Start calculating statistic')
       const missedFiles = []
@@ -625,11 +625,20 @@ class ExplorerController {
 
       await Statistic.save()
       console.log('Finish calculating statistic')
+      return true
     } catch (e) {
       console.log('Calculate error')
       console.log(e)
       throw e
     }
+  }
+
+  timeOutData() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve()
+      }, 5000)
+    })
   }
 
   async getLastLogs() {
@@ -784,6 +793,11 @@ class ExplorerController {
       }
     }
     return folders
+  }
+
+  async listStatistic({request}) {
+    const {dirs} = request.post()
+    return Statistic.getList(dirs)
   }
 }
 

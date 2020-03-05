@@ -93,6 +93,7 @@
   import StatisticPopup from "../components/StatisticPopup.vue";
   import JSONEditor from 'jsoneditor'
   import EventBus from "../eventbus";
+  import { updateCounting } from "../utils";
   import _set from 'lodash.set'
 
   export default {
@@ -103,7 +104,8 @@
         folders: [],
         loading: false,
         editor: null,
-        statisticVisible: false
+        statisticVisible: false,
+        populatedFolders: []
       }
     },
     computed: {
@@ -140,12 +142,14 @@
       async loadFolders() {
         this.loading = true
         const response = await api.getSubfolders('root')
-        this.folders = response.subFolders
         this.loading = false
       },
       async loadFoldersByPath(dir = null) {
         this.loading = true
         const response = await api.getFoldersByPath(dir)
+        for (const f of  response) {
+          this.populatedFolders.push(f.path)
+        }
         this.folders = response
         this.loading = false
       },
@@ -190,6 +194,9 @@
       },
       async loadSubfolder(item) {
         const subFolders = await api.getFoldersByPath(item.info.path)
+        for (const f of  subFolders) {
+          this.populatedFolders.push(f.path)
+        }
         const subFoldersPath = `${item.keyPath}.subFolders`
         const updatedFolders = _set(this.folders, subFoldersPath, subFolders)
         this.folders = JSON.parse(JSON.stringify(updatedFolders))
@@ -207,6 +214,11 @@
       // this.loadFolders()
       this.loadFoldersByPath()
       this.$store.dispatch('app/calculateStatistic')
+        .then(async () => {
+          const updatedStatistic =  await api.listStatistics(this.populatedFolders)
+          const folders = updateCounting(this.folders, updatedStatistic)
+          this.folders = folders
+        })
       EventBus.$on('load-sub-folders', this.loadSubfolder)
       EventBus.$on('show-statistic', this.showStatistic)
     },
