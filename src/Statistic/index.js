@@ -1,23 +1,24 @@
-const { promisify } = use('Helpers')
+const {promisify} = use('Helpers')
 const fs = promisify(require('fs'))
 const path = require('path')
 
 module.exports = class Statistic {
-  constructor () {
-    this._path = path.join( __dirname, '../../', 'statistic.data')
+  constructor() {
+    this._path = path.join(__dirname, '../../', 'statistic.data')
     this._data = {}
   }
 
   async init() {
-    if ( !fs.existsSync(this._path) ) {
+    if (!fs.existsSync(this._path)) {
       console.log(this._path)
       console.log('Statistic file doesn\'t exist')
       return
     }
 
     let data = await fs.readFile(this._path, 'utf8')
-    try { data = JSON.parse(data) }
-    catch (e) {
+    try {
+      data = JSON.parse(data)
+    } catch (e) {
       console.log('Error occured when parse statistic data')
       console.log(e)
       return
@@ -26,20 +27,30 @@ module.exports = class Statistic {
     this._data = data
   }
 
-  get( path ) {
+  get(path) {
     return this._data[path]
-    ? this._data[path]
-    : {
-      calculated: false
+      ? this._data[path]
+      : {
+        calculated: false
+      }
+  }
+
+  getList(dirs) {
+    const res = {}
+    for (const dir of dirs) {
+      if (this._data[dir]) {
+        res[dir] = this._data[dir]
+      }
     }
+    return res
   }
 
   async save() {
-    const data = JSON.stringify( this._data, null, 2 )
+    const data = JSON.stringify(this._data, null, 2)
     return await fs.writeFile(this._path, data, 'utf8')
   }
 
-  write( path, { missed, matched, missmatched, table, unclassified, classified } ) {
+  write(path, {missed, matched, missmatched, table, unclassified, classified}) {
     this._data[path] = {
       calculated: true,
       missed,

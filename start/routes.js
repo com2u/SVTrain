@@ -43,6 +43,7 @@ Route.group(() => {
   Route.post('/notes', 'ExplorerController.saveNotes').middleware('auth')
   Route.post('/save-config', 'ExplorerController.saveConfig').middleware('auth')
   Route.get('/get-folders', 'ExplorerController.getSubFolderByPath').middleware('auth')
+  Route.post('/list-statistics', 'ExplorerController.listStatistic').middleware('auth')
 }).prefix('api')
 Route.any('*',({response}) => response.download(Helpers._appRoot + '/public/index.html'))
 

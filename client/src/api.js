@@ -26,7 +26,8 @@ const urls = {
   forwardOnly: `${baseurl}forward-only`,
   saveNotes: `${baseurl}notes`,
   saveConfig: `${baseurl}save-config`,
-  getFoldersByPath: dir => dir? `${baseurl}get-folders?dir=${dir}`: `${baseurl}get-folders`
+  listStatistics: `${baseurl}list-statistics`,
+  getFoldersByPath: dir => dir ? `${baseurl}get-folders?dir=${dir}` : `${baseurl}get-folders`
 }
 
 export default {
@@ -126,8 +127,13 @@ export default {
   saveConfig: async (path, config) => {
     return (await axios.post(urls.saveConfig, {path, config})).data
   },
-  getFoldersByPath: async (dir=null) => {
+  getFoldersByPath: async (dir = null) => {
     return (await axios.get(urls.getFoldersByPath(dir))).data
+  },
+  listStatistics: async (dirs = []) => {
+    return (await axios.post(urls.listStatistics, {
+      dirs
+    })).data
   }
 }
 
