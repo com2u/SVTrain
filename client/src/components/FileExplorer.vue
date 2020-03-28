@@ -157,6 +157,7 @@
   import CreatingFolder from './CreatingFolder.vue'
   import NewFolderButton from './NewFolderButton.vue'
   import WindowSplitting from './WindowSplitting.vue'
+  import {getFileServerPath} from '../utils'
 
   export default {
     props: [
@@ -183,7 +184,8 @@
       page: 0,
       page_count: null,
       perPage: 10,
-      staticServer: 'http://localhost:2929/',
+      staticServer: getFileServerPath(),
+      // staticServer: 'http://localhost:2929/',
       path: null,
       openedPath: null,
       moveDestination: null,
