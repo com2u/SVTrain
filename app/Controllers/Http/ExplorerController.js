@@ -554,7 +554,7 @@ class ExplorerController {
       const dirsObject = {}
       const ignoreFunc = (_, lstat) => !lstat.isDirectory()
       const dirs = await recursive(CONST_PATHS.root, [ignoreFunc])
-      dirs.unshift(CONST_PATHS.root)
+      // dirs.unshift(CONST_PATHS.root)
 
       await Promise.all(
         dirs.map(async dir => {
@@ -624,6 +624,7 @@ class ExplorerController {
       })
 
       await Statistic.save()
+      // await this.timeOutData(10000)
       console.log('Finish calculating statistic')
       return true
     } catch (e) {
@@ -633,11 +634,11 @@ class ExplorerController {
     }
   }
 
-  timeOutData() {
+  timeOutData(s=5000) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve()
-      }, 5000)
+      }, s)
     })
   }
 

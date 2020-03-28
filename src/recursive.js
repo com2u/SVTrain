@@ -1,97 +1,39 @@
 var fs = require("fs");
 var p = require("path");
-var minimatch = require("minimatch");
+const {promisify} = require('util')
+const readdir = promisify(fs.readdir)
+const lstat = promisify(fs.lstat)
 
-function patternMatcher(pattern) {
-  return function(path, stats) {
-    var minimatcher = new minimatch.Minimatch(pattern, { matchBase: true });
-    return (!minimatcher.negate || stats.isFile()) && minimatcher.match(path);
-  };
-}
+// function patternMatcher(pattern) {
+//   return function (path, stats) {
+//     var minimatcher = new minimatch.Minimatch(pattern, {matchBase: true});
+//     return (!minimatcher.negate || stats.isFile()) && minimatcher.match(path);
+//   };
+// }
+//
+// function toMatcherFunction(ignoreEntry) {
+//   if (typeof ignoreEntry == "function") {
+//     return ignoreEntry;
+//   } else {
+//     return patternMatcher(ignoreEntry);
+//   }
+// }
+//
 
-function toMatcherFunction(ignoreEntry) {
-  if (typeof ignoreEntry == "function") {
-    return ignoreEntry;
-  } else {
-    return patternMatcher(ignoreEntry);
-  }
-}
 
-function readdir(path, ignores, callback) {
-  if (typeof ignores == "function") {
-    callback = ignores;
-    ignores = [];
-  }
-
-  if (!callback) {
-    return new Promise(function(resolve, reject) {
-      readdir(path, ignores || [], function(err, data) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-  }
-
-  ignores = ignores.map(toMatcherFunction);
-
-  var list = [];
-
-  fs.readdir(path, function(err, files) {
-    if (err) {
-      return callback(err);
+const readDirRecursiveSync = async function (dir) {
+  let result = [dir]
+  const files = await readdir(dir)
+  for (const file of files) {
+    const nextPath = p.join(dir, file)
+    const flstat = await lstat(nextPath)
+    if (flstat.isDirectory()) {
+      const nextPathResult = await readDirRecursiveSync(nextPath)
+      result = [...result, ...nextPathResult]
     }
-
-    var pending = files.length;
-    if (!pending) {
-      // we are done, woop woop
-      return callback(null, list);
-    }
-
-    files.forEach(function(file) {
-      var filePath = p.join(path, file);
-      fs.stat(filePath, function(_err, stats) {
-        if (_err) {
-          return callback(_err);
-        }
-
-        if (
-          ignores.some(function(matcher) {
-            return matcher(filePath, stats);
-          })
-        ) {
-          pending -= 1;
-          if (!pending) {
-            return callback(null, list);
-          }
-          return null;
-        }
-
-        if (stats.isDirectory()) {
-          readdir(filePath, ignores, function(__err, res) {
-            if (__err) {
-              return callback(__err);
-            }
-
-            list = list.concat(res);
-            list.push(filePath)
-            pending -= 1;
-            if (!pending) {
-              return callback(null, list);
-            }
-          });
-        } else {
-          list.push(filePath);
-          pending -= 1;
-          if (!pending) {
-            return callback(null, list);
-          }
-        }
-      });
-    });
-  });
+  }
+  return result
 }
 
-module.exports = readdir;
+
+module.exports = readDirRecursiveSync;
