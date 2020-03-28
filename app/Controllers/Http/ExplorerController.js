@@ -19,6 +19,7 @@ const readLastLines = require('read-last-lines')
 const config = require('../../../config/ui')
 
 const logger = require('../../../logger')
+const pathSep = path.sep
 
 
 // if file is landing under root directory
@@ -553,7 +554,7 @@ class ExplorerController {
       const allFiles = []
       const dirsObject = {}
       const ignoreFunc = (_, lstat) => !lstat.isDirectory()
-      const dirs = await recursive(CONST_PATHS.root, [ignoreFunc])
+      const dirs = await recursive(CONST_PATHS.root)
       // dirs.unshift(CONST_PATHS.root)
 
       await Promise.all(
@@ -611,7 +612,8 @@ class ExplorerController {
 
         for (let file of allFiles) {
           const dirLength = dir.length
-          if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === '\\') {
+          if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
+
             if (file.isUnclassified) {
               dirsObject[dir].unclassified += 1
             } else {
