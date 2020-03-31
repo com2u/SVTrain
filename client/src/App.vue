@@ -1,30 +1,30 @@
 <script>
-import socket from './socket'
+import socket from './utils/socket';
 
 export default {
   data: () => ({
-    message: 'important message'
+    message: 'important message',
   }),
-  async beforeCreate () {
-    const waitConnection = () => new Promise(resolve => {
-      let time = 0
+  async beforeCreate() {
+    const waitConnection = () => new Promise((resolve, reject) => {
+      let time = 0;
       const interval = setInterval(() => {
         if (socket.isConnected()) {
-          clearInterval(interval)
-          resolve(true)
+          clearInterval(interval);
+          resolve(true);
         } else {
-          time += 100
+          time += 100;
           if (time >= 10000) {
-            clearInterval(interval)
-            reject('Timeout error with connecting to the server socker')
+            clearInterval(interval);
+            reject(Error('Timeout error with connecting to the server socker'));
           }
         }
-      }, 100)
-    })
-    socket.init()
-    await waitConnection()
-  }
-}
+      }, 100);
+    });
+    socket.init();
+    await waitConnection();
+  },
+};
 </script>
 
 
@@ -36,7 +36,7 @@ export default {
 </template>
 
 <style lang="scss">
-html, body, .maxheight {
-  height: 100%;
-}
+  html, body, .maxheight {
+    height: 100%;
+  }
 </style>

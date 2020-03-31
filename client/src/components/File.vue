@@ -45,13 +45,13 @@ export default {
     size: [String, Number],
     showFileName: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   computed: {
 
-  }
-}
+  },
+};
 </script>
 
 

@@ -24,7 +24,7 @@
           </span>
           <span class="icon-wrapper">
             <b-icon
-              icon="document-text"
+              icon="file-text"
               :class="info.notes ? 'clickable-icon': 'gray-icon'"
               font-scale="1.5"
               @click="showNotes"
@@ -70,70 +70,71 @@
   </div>
 </template>
 <script>
-  import EventBus from "../eventbus";
+import EventBus from '../utils/eventbus';
 
-  export default {
-    name: 'WorkspaceFolder',
-    props: {
-      info: {
-        type: Object,
-        default: () => ({})
-      },
-      depth: {
-        type: Number,
-        default: 0
-      },
-      keyPath: {
-        type: String,
-        default: ''
+export default {
+  name: 'WorkspaceFolder',
+  props: {
+    info: {
+      type: Object,
+      default: () => ({}),
+    },
+    depth: {
+      type: Number,
+      default: 0,
+    },
+    keyPath: {
+      type: String,
+      default: '',
+    },
+  },
+  data() {
+    return {
+      showChildren: false,
+    };
+  },
+  computed: {
+    indent() {
+      return { marginLeft: `${this.depth * 50}px` };
+    },
+    hasChildren() {
+      // eslint-disable-next-line no-mixed-operators
+      return !!(this.info && (Array.isArray(this.info.subFolders) && this.info.subFolders.length)
+      // eslint-disable-next-line no-mixed-operators
+          || !Array.isArray(this.info.subFolders));
+    },
+    progress() {
+      if (this.info.classified || this.info.unclassified) {
+        return +(((this.info.classified / (this.info.classified + this.info.unclassified)) * 100)
+          .toFixed(2));
+      }
+      return 100;
+    },
+    wsPath() {
+      return this.$store.state.app.config.wsPath;
+    },
+  },
+  methods: {
+    toggleShowChildren() {
+      this.showChildren = !this.showChildren;
+      if (!this.info.subFolders) {
+        EventBus.$emit('load-sub-folders', { info: this.info, keyPath: this.keyPath });
       }
     },
-    data() {
-      return {
-        showChildren: false
+    showNotes() {
+      this.$store.dispatch('notes/showFolder', this.info);
+    },
+    showConfig() {
+      this.$store.dispatch('wsconfig/showFolder', this.info);
+    },
+    setWorkspace() {
+      if (!this.depth) {
+        this.$emit('select-workspace');
       }
     },
-    computed: {
-      indent() {
-        return {marginLeft: `${this.depth * 50}px`}
-      },
-      hasChildren() {
-        return !!(this.info && (Array.isArray(this.info.subFolders) && this.info.subFolders.length)
-          || !Array.isArray(this.info.subFolders))
-      },
-      progress() {
-        if (this.info.classified || this.info.unclassified) {
-          return +(((this.info.classified / (this.info.classified + this.info.unclassified)) * 100)
-            .toFixed(2))
-        } else {
-          return 100
-        }
-      },
-      wsPath() {
-        return this.$store.state.app.config.wsPath
-      }
+    showStatistic() {
+      EventBus.$emit('show-statistic', this.info.path);
     },
-    methods: {
-      toggleShowChildren() {
-        this.showChildren = !this.showChildren
-        if (!this.info.subFolders) {
-          EventBus.$emit('load-sub-folders', {info: this.info, keyPath: this.keyPath})
-        }
-      },
-      showNotes() {
-        this.$store.dispatch('notes/showFolder', this.info)
-      },
-      showConfig() {
-        this.$store.dispatch('wsconfig/showFolder', this.info)
-      },
-      setWorkspace() {
-        if (!this.depth) {
-          this.$emit('select-workspace')
-        }
-      },
-      showStatistic() {
-        EventBus.$emit('show-statistic', this.info.path)
-      }
-    }
-  }
+  },
+};
 </script>

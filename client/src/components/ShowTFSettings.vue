@@ -18,7 +18,7 @@
         v-on:input="validateMaxTrainSteps"
       />
     </b-form-group>
-    
+
     <!-- Classes -->
     <b-form-group
       v-bind:state="errors.classes === null ? null : false"
@@ -372,29 +372,65 @@
 </template>
 
 <script>
-import '@voerro/vue-tagsinput/dist/style.css'
-import api from '../api.js'
-import axios from 'axios'
+import '@voerro/vue-tagsinput/dist/style.css';
+import axios from 'axios';
+import api from '../utils/api.js';
+
+function isInteger(value) {
+  if (typeof value === 'number') return value % 1 === 0;
+  if (typeof value === 'string') return /^\d+$/.test(value);
+  return false;
+}
+function isFloat(value) {
+  if (typeof value === 'string') return /^[\d.]+$/.test(value);
+  return false;
+}
+function isLinuxPath(path) {
+  return !path.includes('\\');
+}
+function getFolder(path) {
+  if (isLinuxPath(path)) {
+    const tmp = path.split('/');
+    tmp.splice(tmp.length - 1, 1);
+    return tmp.join('/');
+  }
+  const tmp = path.split('\\');
+  tmp.splice(tmp.length - 1, 1);
+  return tmp.join('\\');
+}
+function getLastDirectory(path) {
+  if (isLinuxPath(path)) {
+    const tmp = path.split('/');
+    return tmp[tmp.length - 1];
+  }
+  return path.match(/[^\\/:*?"<>|\r\n]+$/)[0];
+}
+function isTrainDirectory(value) {
+  return getLastDirectory(value) === 'train';
+}
+function isValidateDirectory(value) {
+  return getLastDirectory(value) === 'validate';
+}
 
 export default {
-  name: "ShowTFSettings",
+  name: 'ShowTFSettings',
   props: { file: { type: Object, required: true } },
-  data () {
+  data() {
     return {
       originalJSON: '',
       parseInt: ['max_train_steps', 'batch_size', 'input_width', 'input_height', 'input_depth', 'log_every_n_steps'],
       parseFloat: ['augmentation_noise_std', 'augmentation_brightness_delta', 'learning_rate'],
       existing_classes: {
-        Boden: "Boden",
-        Bubble: "Bubble",
-        Bubble2: "Bubble2",
-        Flocke: "Flocke",
-        Line: "Line",
-        Particle1: "Particle1",
-        Particle2: "Particle2",
-        Raute: "Raute",
-        Triangle: "Triangle",
-        Vertex: "Vertex"
+        Boden: 'Boden',
+        Bubble: 'Bubble',
+        Bubble2: 'Bubble2',
+        Flocke: 'Flocke',
+        Line: 'Line',
+        Particle1: 'Particle1',
+        Particle2: 'Particle2',
+        Raute: 'Raute',
+        Triangle: 'Triangle',
+        Vertex: 'Vertex',
       },
       fields: {
         max_train_steps: 0,
@@ -417,7 +453,7 @@ export default {
         network_architecture: '',
         good_class: '',
         log_every_n_steps: 0,
-        workspace: ''
+        workspace: '',
       },
       errors: {
         max_train_steps: null,
@@ -440,7 +476,7 @@ export default {
         network_architecture: null,
         good_class: null,
         log_every_n_steps: null,
-        workspace: null
+        workspace: null,
       },
       titles: {
         max_train_steps: 'Max train steps',
@@ -463,128 +499,89 @@ export default {
         network_architecture: 'Network architecture',
         good_class: 'Good class',
         log_every_n_steps: 'Log every N steps',
-        workspace: 'Workspace'
+        workspace: 'Workspace',
       },
-    }
+    };
   },
   computed: {
-    hasErrors () {
-      return Object.keys(this.errors).some(field => this.errors[field])
-    }
+    hasErrors() {
+      return Object.keys(this.errors).some((field) => this.errors[field]);
+    },
   },
   methods: {
-    validateInteger (value) {
-      return !isInteger(value) ? 'The value must be an integer' : null
+    validateInteger(value) {
+      return !isInteger(value) ? 'The value must be an integer' : null;
     },
-    validateFloat (value) {
-      return !isFloat(value) ? 'The value must be a float number' : null
+    validateFloat(value) {
+      return !isFloat(value) ? 'The value must be a float number' : null;
     },
-    validateMaxTrainSteps () {
-      this.errors.max_train_steps = this.validateInteger(this.fields.max_train_steps)
+    validateMaxTrainSteps() {
+      this.errors.max_train_steps = this.validateInteger(this.fields.max_train_steps);
     },
-    async validateClasses () {
-      const supportedClasses = await api.getSubfolders(getFolder(this.file.path))
-      const bad = this.fields.classes.find(el => {
-        return !supportedClasses.includes(el)
-      })
-      this.errors.classes = bad ? `Unsupported element ${bad}` : null
+    async validateClasses() {
+      const supportedClasses = await api.getSubfolders(getFolder(this.file.path));
+      const bad = this.fields.classes.find((el) => !supportedClasses.includes(el));
+      this.errors.classes = bad ? `Unsupported element ${bad}` : null;
     },
-    async validateModelDir () {
-      const result = await api.checkFolder(this.fields.model_dir)
-      if (result === 'ok') this.errors.model_dir = null
-      if (result === 'not_found') this.errors.model_dir = 'That directory isn\'t found'
-      if (result === 'access_denied') this.errors.model_dir = 'The folder is out of the root directory'
+    async validateModelDir() {
+      const result = await api.checkFolder(this.fields.model_dir);
+      if (result === 'ok') this.errors.model_dir = null;
+      if (result === 'not_found') this.errors.model_dir = 'That directory isn\'t found';
+      if (result === 'access_denied') this.errors.model_dir = 'The folder is out of the root directory';
     },
-    async validatePathToDatasetTraining () {
+    async validatePathToDatasetTraining() {
       if (!isTrainDirectory(this.fields.path_to_dataset_training)) {
-        this.errors.path_to_dataset_training = 'The directory must be a train directory'
-        return
+        this.errors.path_to_dataset_training = 'The directory must be a train directory';
+        return;
       }
-      const result = await api.checkFolder(this.fields.path_to_dataset_training)
-      if (result === 'ok') this.errors.path_to_dataset_training = null
-      if (result === 'not_found') this.errors.path_to_dataset_training = 'That directory isn\'t found'
-      if (result === 'access_denied') this.errors.path_to_dataset_training = 'The folder is out of the root directory'      
+      const result = await api.checkFolder(this.fields.path_to_dataset_training);
+      if (result === 'ok') this.errors.path_to_dataset_training = null;
+      if (result === 'not_found') this.errors.path_to_dataset_training = 'That directory isn\'t found';
+      if (result === 'access_denied') this.errors.path_to_dataset_training = 'The folder is out of the root directory';
     },
-    async validatePathToDatasetValidation () {
+    async validatePathToDatasetValidation() {
       if (!isValidateDirectory(this.fields.path_to_dataset_validation)) {
-        this.errors.path_to_dataset_validation = 'The directory must be a validate directory'
-        return
+        this.errors.path_to_dataset_validation = 'The directory must be a validate directory';
+        return;
       }
-      const result = await api.checkFolder(this.fields.path_to_dataset_validation)
-      if (result === 'ok') this.errors.path_to_dataset_validation = null
-      if (result === 'not_found') this.errors.path_to_dataset_validation = 'That directory isn\'t found'
-      if (result === 'access_denied') this.errors.path_to_dataset_validation = 'The folder is out of the root directory'      
+      const result = await api.checkFolder(this.fields.path_to_dataset_validation);
+      if (result === 'ok') this.errors.path_to_dataset_validation = null;
+      if (result === 'not_found') this.errors.path_to_dataset_validation = 'That directory isn\'t found';
+      if (result === 'access_denied') this.errors.path_to_dataset_validation = 'The folder is out of the root directory';
     },
-    async loadSubfoldersForClasses () {
-      const subfolders = await api.getSubfolders(getFolder(this.file.path))
-      this.fields.classes = subfolders
+    async loadSubfoldersForClasses() {
+      const subfolders = await api.getSubfolders(getFolder(this.file.path));
+      this.fields.classes = subfolders;
     },
-    setCurrentFolderFor (fieldname) { 
-      this.fields[fieldname] = getFolder(this.file.path)
+    setCurrentFolderFor(fieldname) {
+      this.fields[fieldname] = getFolder(this.file.path);
     },
-    async loadFile () {
-      const data = (await axios.get(this.file.serverPath)).data
-      this.originalJSON = data
-      Object.keys(this.fields).forEach(field => {
-        this.fields[field] = data[field] || this.fields[field]
-      })
+    async loadFile() {
+      const { data } = await axios.get(this.file.serverPath);
+      this.originalJSON = data;
+      Object.keys(this.fields).forEach((field) => {
+        this.fields[field] = data[field] || this.fields[field];
+      });
     },
-    async saveFile () {
+    async saveFile() {
       const data = {
         ...this.originalJSON,
-        ...this.fields
-      }
-      this.parseInt.forEach(fieldname => {
-        data[fieldname] = data[fieldname] ? parseInt(data[fieldname]) : data[fieldname]
-      })
-      this.parseFloat.forEach(fieldname => {
-        data[fieldname] = data[fieldname] ? parseFloat(data[fieldname]) : data[fieldname]
-      })
-      await api.saveFile(this.file.path, JSON.stringify(data, null, 2))
-      this.$emit('saved')
-    }
+        ...this.fields,
+      };
+      this.parseInt.forEach((fieldname) => {
+        // eslint-disable-next-line radix
+        data[fieldname] = data[fieldname] ? parseInt(data[fieldname]) : data[fieldname];
+      });
+      this.parseFloat.forEach((fieldname) => {
+        data[fieldname] = data[fieldname] ? parseFloat(data[fieldname]) : data[fieldname];
+      });
+      await api.saveFile(this.file.path, JSON.stringify(data, null, 2));
+      this.$emit('saved');
+    },
   },
-  created () {
-    this.loadFile()
-    this.fields.workspace = getFolder(this.file.path)
-  }
-}
-
-function isInteger(value) {
-  if (typeof value === 'number') return value % 1 === 0
-  if (typeof value === 'string') return /^\d+$/.test(value)
-  return false
-}
-function isFloat(value) {
-  if (typeof value === 'string') return /^[\d\.]+$/.test(value)
-  return false
-}
-function isLinuxPath(path) {
-  return !path.includes('\\')
-}
-function getFolder(path) {
-  if (isLinuxPath(path)) {
-    const tmp = path.split('/')
-    tmp.splice(tmp.length - 1, 1)
-    return tmp.join('/')
-  } else {
-    const tmp = path.split('\\')
-    tmp.splice(tmp.length - 1, 1)
-    return tmp.join('\\')
-  }
-}
-function getLastDirectory(path) {
-  if (isLinuxPath(path)) {
-    const tmp = path.split('/')
-    return tmp[tmp.length - 1]
-  } else {
-    return path.match(/[^\\/:*?"<>|\r\n]+$/)[0]
-  }
-}
-function isTrainDirectory(value) {
-  return getLastDirectory(value) === 'train'
-}
-function isValidateDirectory(value) {
-  return getLastDirectory(value) === 'validate'
-}
+  created() {
+    this.loadFile();
+    this.fields.workspace = getFolder(this.file.path);
+  },
+};
 </script>

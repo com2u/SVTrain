@@ -4,21 +4,21 @@
     <b-img v-bind:src="file.serverPath" v-bind:style="{ width: `${imageWidth}%` }" fluid class="image"/>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
-  </div> 
+  </div>
 </template>
 
 <script>
 export default {
-  name: "ShowImage",
+  name: 'ShowImage',
   props: {
-    file: { type: Object, required: true }
+    file: { type: Object, required: true },
   },
-  data () {
+  data() {
     return {
-      imageWidth: 70
-    }
-  }
-}
+      imageWidth: 70,
+    };
+  },
+};
 </script>
 
 <style lang="scss" scoped>

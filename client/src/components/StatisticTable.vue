@@ -13,7 +13,7 @@
       <input type="radio" name="exclude" v-model="exclude" id="excludeTrue" v-bind:value="true">
       <label for="excludeTrue">Exclude</label>
       <input type="radio" name="exclude" v-model="exclude" id="excludeFalse" v-bind:value="false">
-      <label for="excludeFalse">All</label>      
+      <label for="excludeFalse">All</label>
     </div>
     <table>
       <tr>
@@ -48,14 +48,14 @@
 export default {
   props: [
     'table',
-    'folder'
+    'folder',
   ],
-  data () {
+  data() {
     return {
       valuesView: 'absolute',
       exclude: false,
-      sums: {}
-    }
+      sums: {},
+    };
   },
   methods: {
     select(dir1, dir2) {
@@ -63,25 +63,25 @@ export default {
         folder: dir1,
         filter: {
           include: dir2,
-          exclude: this.exclude ? '!' : null
-        }
-      })
+          exclude: this.exclude ? '!' : null,
+        },
+      });
     },
-    sumFor (name) {
+    sumFor(name) {
       return Object.keys(this.table[name])
-        .map(n=> this.exclude ? this.table[name][n].exclude : this.table[name][n].all )
-        .reduce((p, c) => c + p)
-    }
+        .map((n) => (this.exclude ? this.table[name][n].exclude : this.table[name][n].all))
+        .reduce((p, c) => c + p);
+    },
   },
   computed: {
-    names () {
-      console.log(Object.keys(this.table).map(n=>n))
-      return Object.keys(this.table).map(n=>n)
-    }
+    names() {
+      console.log(Object.keys(this.table).map((n) => n));
+      return Object.keys(this.table).map((n) => n);
+    },
   },
-  created () {
-  }
-}
+  created() {
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -97,4 +97,3 @@ td.title {
   font-weight: bold;
 }
 </style>
-

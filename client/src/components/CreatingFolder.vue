@@ -23,49 +23,48 @@
 </template>
 
 <script>
-import api from '../api.js'
+import api from '../utils/api.js';
 
 export default {
-  name: "CreatingFolder",
+  name: 'CreatingFolder',
   props: {
     path: { required: true, default: () => '' },
     id: {
       type: String,
-      default: 'creating-folder-modal'
-    }
+      default: 'creating-folder-modal',
+    },
   },
-  data () {
+  data() {
     return {
       name: null,
-      modal: null
-    }
+      modal: null,
+    };
   },
   computed: {
-    isValid () {
-      return this.name === null ? this.name : !!this.name
-    }
+    isValid() {
+      return this.name === null ? this.name : !!this.name;
+    },
   },
   methods: {
-    async createFolder () {
-      await api.createFolder(this.path, this.name)
-      this.$emit('folder-created')
-      this.name = null
+    async createFolder() {
+      await api.createFolder(this.path, this.name);
+      this.$emit('folder-created');
+      this.name = null;
     },
-    handleEnter () {
+    handleEnter() {
       this.createFolder()
-      .then(() => {
-        this.$emit('folder-created')
-        this.$refs.modal.hide()
-      })
+        .then(() => {
+          this.$emit('folder-created');
+          this.$refs.modal.hide();
+        });
     },
-    handleHidden (evt) {
-      this.$emit('hidden', evt)
+    handleHidden(evt) {
+      this.$emit('hidden', evt);
     },
-    handleShown (evt) {
-      this.$refs.folderName.focus()
-      this.$emit('shown', evt)
-    }
-  }
-}
+    handleShown(evt) {
+      this.$refs.folderName.focus();
+      this.$emit('shown', evt);
+    },
+  },
+};
 </script>
-
