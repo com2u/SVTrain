@@ -1,42 +1,42 @@
-Statistical profiling result from isolate-00000156EF465B90-12016-v8.log, (6374 ticks, 0 unaccounted, 0 excluded).
+Statistical profiling result from isolate-000001A79CA2A360-2388-v8.log, (20538 ticks, 1 unaccounted, 0 excluded).
 
  [Shared libraries]:
    ticks  total  nonlib   name
-   4721   74.1%          C:\Windows\SYSTEM32\ntdll.dll
-   1597   25.1%          C:\Program Files\nodejs\node.exe
-      4    0.1%          C:\Windows\System32\KERNELBASE.dll
-      3    0.0%          C:\Windows\System32\KERNEL32.DLL
-      1    0.0%          C:\Windows\system32\mswsock.dll
+  17055   83.0%          C:\Windows\SYSTEM32\ntdll.dll
+   3048   14.8%          C:\Program Files\nodejs\node.exe
+     41    0.2%          C:\Windows\System32\KERNELBASE.dll
+     41    0.2%          C:\Windows\System32\KERNEL32.DLL
 
  [JavaScript]:
    ticks  total  nonlib   name
-     19    0.3%   39.6%  LazyCompile: *resolve path.js:130:10
-      7    0.1%   14.6%  LazyCompile: *basename path.js:668:11
-      5    0.1%   10.4%  LazyCompile: *normalize path.js:265:12
-      2    0.0%    4.2%  LazyCompile: *isPathSeparator path.js:38:25
-      2    0.0%    4.2%  LazyCompile: *getStatsFromBinding internal/fs/utils.js:397:29
-      2    0.0%    4.2%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:609:11
-      1    0.0%    2.1%  RegExp: \bMac (OS X)\b
-      1    0.0%    2.1%  RegExp: ([ -])(?!$)
-      1    0.0%    2.1%  LazyCompile: *normalizeString path.js:52:25
-      1    0.0%    2.1%  LazyCompile: *lstat fs.js:869:15
-      1    0.0%    2.1%  LazyCompile: *Stats._checkModeProperty internal/fs/utils.js:389:46
-      1    0.0%    2.1%  LazyCompile: *Module._nodeModulePaths internal/modules/cjs/loader.js:544:37
-      1    0.0%    2.1%  LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-      1    0.0%    2.1%  LazyCompile: *<anonymous> internal/util.js:278:36
-      1    0.0%    2.1%  LazyCompile: *<anonymous> internal/fs/utils.js:523:38
-      1    0.0%    2.1%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
-      1    0.0%    2.1%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:607:39
+     96    0.5%   27.2%  LazyCompile: *basename path.js:668:11
+     73    0.4%   20.7%  LazyCompile: *resolve path.js:130:10
+     60    0.3%   17.0%  LazyCompile: *normalize path.js:265:12
+     47    0.2%   13.3%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:607:39
+     21    0.1%    5.9%  LazyCompile: *getStatsFromBinding internal/fs/utils.js:397:29
+     14    0.1%    4.0%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      8    0.0%    2.3%  LazyCompile: *lstat fs.js:869:15
+      8    0.0%    2.3%  LazyCompile: *<anonymous> internal/util.js:278:36
+      7    0.0%    2.0%  LazyCompile: *<anonymous> fs.js:157:10
+      6    0.0%    1.7%  LazyCompile: *normalizeString path.js:52:25
+      4    0.0%    1.1%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      3    0.0%    0.8%  LazyCompile: *readDirRecursiveSync D:\work\upwork\SVTrain_v2\src\SVTrain\src\recursive.js:24:45
+      1    0.0%    0.3%  RegExp: (?:^|\/)\.?\.$
+      1    0.0%    0.3%  LazyCompile: *toNamespacedPath path.js:549:19
+      1    0.0%    0.3%  LazyCompile: *Module._nodeModulePaths internal/modules/cjs/loader.js:544:37
+      1    0.0%    0.3%  LazyCompile: *<anonymous> internal/per_context/primordials.js:24:10
+      1    0.0%    0.3%  LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:609:11
 
  [C++]:
    ticks  total  nonlib   name
 
  [Summary]:
    ticks  total  nonlib   name
-     48    0.8%  100.0%  JavaScript
+    352    1.7%   99.7%  JavaScript
       0    0.0%    0.0%  C++
-     42    0.7%   87.5%  GC
-   6326   99.2%          Shared libraries
+    248    1.2%   70.3%  GC
+  20185   98.3%          Shared libraries
+      1    0.0%          Unaccounted
 
  [C++ entry points]:
    ticks    cpp   total   name
@@ -47,544 +47,407 @@ Statistical profiling result from isolate-00000156EF465B90-12016-v8.log, (6374 t
   Callers occupying less than 1.0% are not shown.
 
    ticks parent  name
-   4721   74.1%  C:\Windows\SYSTEM32\ntdll.dll
-     92    1.9%    LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-     92  100.0%      LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-     92  100.0%        LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-     92  100.0%          LazyCompile: ~Module.require internal/modules/cjs/loader.js:844:36
-     92  100.0%            LazyCompile: ~require internal/modules/cjs/helpers.js:73:31
-     85    1.8%    C:\Program Files\nodejs\node.exe
-     32   37.6%      C:\Program Files\nodejs\node.exe
-      8   25.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:567:38
-      8  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      8  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      5   15.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:533:38
+  17055   83.0%  C:\Windows\SYSTEM32\ntdll.dll
+
+   3048   14.8%  C:\Program Files\nodejs\node.exe
+   1858   61.0%    C:\Program Files\nodejs\node.exe
+    100    5.4%      LazyCompile: *getStatsFromBinding internal/fs/utils.js:397:29
+     99   99.0%        LazyCompile: *<anonymous> fs.js:157:10
+      1    1.0%        LazyCompile: ~<anonymous> fs.js:157:10
+     94    5.1%      LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:607:39
+     94  100.0%        C:\Program Files\nodejs\node.exe
+     94  100.0%          LazyCompile: ~calculate D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:549:18
+     94  100.0%            C:\Program Files\nodejs\node.exe
+     89    4.8%      LazyCompile: *lstat fs.js:869:15
+     61   68.5%        LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+     61  100.0%          C:\Program Files\nodejs\node.exe
+     61  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
+     10   11.2%        LazyCompile: *readDirRecursiveSync D:\work\upwork\SVTrain_v2\src\SVTrain\src\recursive.js:24:45
+     10  100.0%          C:\Program Files\nodejs\node.exe
+      8    9.0%        LazyCompile: *<anonymous> internal/util.js:277:24
+      8  100.0%          C:\Program Files\nodejs\node.exe
+      8  100.0%            LazyCompile: ~fn internal/util.js:276:14
+      6    6.7%        LazyCompile: *fn internal/util.js:276:14
+      5   83.3%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      5  100.0%            C:\Program Files\nodejs\node.exe
+      1   16.7%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      1  100.0%            C:\Program Files\nodejs\node.exe
+      4    4.5%        LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      4  100.0%          C:\Program Files\nodejs\node.exe
+      4  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:560:18
+     89    4.8%      C:\Program Files\nodejs\node.exe
+     20   22.5%        LazyCompile: *lstat fs.js:869:15
+     14   70.0%          LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+     14  100.0%            C:\Program Files\nodejs\node.exe
+      3   15.0%          LazyCompile: *readDirRecursiveSync D:\work\upwork\SVTrain_v2\src\SVTrain\src\recursive.js:24:45
+      3  100.0%            C:\Program Files\nodejs\node.exe
+      3   15.0%          LazyCompile: *fn internal/util.js:276:14
+      2   66.7%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      1   33.3%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      9   10.1%        LazyCompile: ~calculate D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:549:18
+      9  100.0%          C:\Program Files\nodejs\node.exe
+      5    5.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:567:38
       5  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
       5  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      2    6.3%        LazyCompile: ~qualify D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:212:19
-      1   50.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:548:38
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      1   50.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:515:38
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      2    6.3%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:548:38
+      4    4.5%        LazyCompile: ~join path.js:367:7
+      4  100.0%          LazyCompile: ~readDirRecursiveSync D:\work\upwork\SVTrain_v2\src\SVTrain\src\recursive.js:24:45
+      4  100.0%            C:\Program Files\nodejs\node.exe
+      3    3.4%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:609:11
+      3  100.0%          C:\Program Files\nodejs\node.exe
+      3  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:607:39
+      2    2.2%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:515:38
       2  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      2  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      1    3.1%        LazyCompile: ~trim D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:239:16
+      2  100.0%            LazyCompile: ~forOwn D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:168:18
+      2    2.2%        LazyCompile: *hidden internal/errors.js:243:25
+      2  100.0%          LazyCompile: *hidden internal/errors.js:243:25
+      2  100.0%            LazyCompile: *hidden internal/errors.js:243:25
+      2    2.2%        LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
+      1   50.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\json\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1   50.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\bson\lib\bson\bson.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\bson\index.js:1:1
+      2    2.2%        LazyCompile: *<anonymous> internal/fs/utils.js:523:38
+      2  100.0%          LazyCompile: *hidden internal/errors.js:243:25
+      2  100.0%            LazyCompile: *hidden internal/errors.js:243:25
+      2    2.2%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\useragent\lib\regexps.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\useragent\index.js:1:1
+      2  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Request\index.js:1:1
+      2    2.2%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\read-last-lines\dist\index.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\src\Watcher\index.js:1:1
+      2  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\providers\AppProvider.js:15:35
+      2    2.2%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\index.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\Drivers\File.js:1:1
+      2  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\Drivers\index.js:1:1
+      1    1.1%        LazyCompile: ~trim D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:239:16
       1  100.0%          LazyCompile: ~format D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:154:18
       1  100.0%            LazyCompile: ~cleanupOS D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:78:21
-      1    3.1%        LazyCompile: ~transform D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\logform\splat.js:84:12
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\logform\combine.js:17:10
-      1  100.0%            LazyCompile: ~_transform D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\winston\lib\winston\logger.js:267:13
-      1    3.1%        LazyCompile: ~strEscape internal/util/inspect.js:284:19
-      1  100.0%          LazyCompile: ~formatPrimitive internal/util/inspect.js:1110:25
-      1  100.0%            LazyCompile: ~formatValue internal/util/inspect.js:530:21
-      1    3.1%        LazyCompile: ~stat internal/modules/cjs/loader.js:115:14
-      1  100.0%          LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      1    3.1%        LazyCompile: ~resolve D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\index.js:383:11
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\Manager.js:295:53
-      1  100.0%            LazyCompile: ~baseFindIndex D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:797:25
-      1    3.1%        LazyCompile: ~parseQueryStringKeys D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\qs\lib\parse.js:140:46
-      1  100.0%          LazyCompile: ~module.exports D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\qs\lib\parse.js:228:27
-      1  100.0%            LazyCompile: ~Request.get D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-req\index.js:81:15
-      1    3.1%        LazyCompile: ~module.exports D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\logform\node_modules\colors\lib\system\has-flag.js:27:26
-      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\logform\node_modules\colors\lib\system\supports-colors.js:1:1
-      1  100.0%            LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1    3.1%        LazyCompile: ~format D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:154:18
-      1  100.0%          LazyCompile: ~parse D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:253:17
-      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:7:11
-      1    3.1%        LazyCompile: ~calculate D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:549:18
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1    3.1%        LazyCompile: ~addLevelMethods D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\logger.js:110:25
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\logger.js:1:1
-      1    3.1%        LazyCompile: ~Mime.lookup D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\mime\mime.js:69:33
-      1  100.0%          LazyCompile: ~type D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\send\index.js:834:43
-      1  100.0%            LazyCompile: ~send D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\send\index.js:607:43
-      1    3.1%        LazyCompile: ~FSWatcher._getWatchHelpers D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\chokidar\index.js:391:48
-      1  100.0%          LazyCompile: ~NodeFsHandler._addToNodeFs D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\chokidar\lib\nodefs-handler.js:452:9
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\chokidar\index.js:649:30
-      1    3.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\pluralize\pluralize.js:17:19
-      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\pluralize\pluralize.js:3:11
-      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\pluralize\pluralize.js:1:1
-      1    3.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\dotenv\lib\main.js:37:47
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1  100.0%            LazyCompile: ~parse D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\dotenv\lib\main.js:32:16
-      1    3.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\fs\index.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      2    2.4%      LazyCompile: ~setConfig D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\Drivers\Console.js:24:13
-      2  100.0%        LazyCompile: ~driver D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\Manager.js:58:10
-      2  100.0%          LazyCompile: ~transport D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\Facade.js:83:13
-      2  100.0%            LazyCompile: ~get D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\Facade.js:23:7
-      2    2.4%      LazyCompile: ~decrypt D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-cookie\node_modules\simple-encryptor\index.js:82:19
-      2  100.0%        LazyCompile: ~Cookie._decrypt D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-cookie\index.js:197:28
-      2  100.0%          LazyCompile: ~Cookie.unPackValue D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-cookie\index.js:318:31
-      2  100.0%            LazyCompile: ~Cookie.get D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-cookie\index.js:290:23
-      2    2.4%      LazyCompile: ~__webpack_require__ D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\esprima\dist\esprima.js:18:39
-      2  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\esprima\dist\esprima.js:412:15
-      2  100.0%          LazyCompile: ~__webpack_require__ D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\esprima\dist\esprima.js:18:39
-      2  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\esprima\dist\esprima.js:58:15
-      2    2.4%      LazyCompile: ~Readable.read _stream_readable.js:400:35
-      1   50.0%        LazyCompile: ~resume_ _stream_readable.js:973:17
-      1  100.0%          LazyCompile: ~processTicksAndRejections internal/process/task_queues.js:65:35
-      1   50.0%        LazyCompile: ~Socket.read net.js:604:33
-      1  100.0%          LazyCompile: ~Socket net.js:253:16
-      1  100.0%            LazyCompile: ~onconnection net.js:1517:22
-      1    1.2%      LazyCompile: ~toRealPath internal/modules/cjs/loader.js:336:20
-      1  100.0%        LazyCompile: ~tryFile internal/modules/cjs/loader.js:328:17
-      1  100.0%          LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-      1  100.0%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1    1.2%      LazyCompile: ~thenify.withCallback D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\thenify\index.js:28:33
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\thenify-all\index.js:53:28
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1  100.0%            LazyCompile: ~promisifyAll D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\thenify-all\index.js:36:22
-      1    1.2%      LazyCompile: ~resolveFunc D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Resolver\index.js:221:15
-      1  100.0%        LazyCompile: ~resolveFunc D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Resolver\Manager.js:116:15
-      1  100.0%          LazyCompile: ~_resolveMiddleware D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\middleware-base\index.js:192:22
-      1  100.0%            LazyCompile: ~_invoke D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-compose\src\Runnable.js:56:11
-      1    1.2%      LazyCompile: ~register D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\providers\LucidProvider.js:91:12
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Registrar\index.js:128:13
-      1  100.0%          LazyCompile: ~arrayEach D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:511:21
-      1  100.0%            LazyCompile: ~forEach D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:9340:21
-      1    1.2%      LazyCompile: ~realpathSync fs.js:1448:22
-      1  100.0%        LazyCompile: ~toRealPath internal/modules/cjs/loader.js:336:20
-      1  100.0%          LazyCompile: ~tryFile internal/modules/cjs/loader.js:328:17
-      1  100.0%            LazyCompile: ~tryExtensions internal/modules/cjs/loader.js:343:23
-      1    1.2%      LazyCompile: ~readPackage internal/modules/cjs/loader.js:221:21
-      1  100.0%        LazyCompile: ~readPackageMain internal/modules/cjs/loader.js:272:25
-      1  100.0%          LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-      1  100.0%            LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-      1    1.2%      LazyCompile: ~randomBlock D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\cuid\index.js:22:22
-      1  100.0%        LazyCompile: ~cuid D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\cuid\index.js:34:15
-      1  100.0%          LazyCompile: ~Connection D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:36:15
-      1  100.0%            LazyCompile: ~handle D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Ws\index.js:206:10
-      1    1.2%      LazyCompile: ~providers D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Registrar\index.js:161:13
-      1  100.0%        LazyCompile: ~_registerProviders D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\ignitor\src\Ignitor\index.js:261:22
-      1  100.0%          LazyCompile: ~fire D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\ignitor\src\Ignitor\index.js:728:14
-      1  100.0%            LazyCompile: ~fireHttpServer D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\ignitor\src\Ignitor\index.js:808:24
-      1    1.2%      LazyCompile: ~nowDate internal/http.js:9:17
-      1  100.0%        LazyCompile: ~connectionListenerInternal _http_server.js:362:36
-      1  100.0%          LazyCompile: ~defaultTriggerAsyncIdScope internal/async_hooks.js:292:36
-      1  100.0%            LazyCompile: ~connectionListener _http_server.js:356:28
-      1    1.2%      LazyCompile: ~module.exports D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\qs\lib\parse.js:228:27
-      1  100.0%        LazyCompile: ~Request.get D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-req\index.js:81:15
-      1  100.0%          LazyCompile: ~Request D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Request\index.js:52:15
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\providers\WsProvider.js:72:42
-      1    1.2%      LazyCompile: ~mkdirsSync D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\mkdirs\mkdirs-sync.js:9:21
-      1  100.0%        LazyCompile: ~_renewWriteStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:224:20
-      1  100.0%          LazyCompile: ~RollingFileWriteStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:31:14
-      1  100.0%            LazyCompile: ~RollingFileStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileStream.js:5:14
-      1    1.2%      LazyCompile: ~lookup dns.js:90:16
-      1  100.0%        LazyCompile: ~lookupAndListen net.js:1481:25
-      1  100.0%          LazyCompile: ~Server.listen net.js:1381:35
-      1  100.0%            LazyCompile: ~start D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\static-server\server.js:113:46
-      1    1.2%      LazyCompile: ~log D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\Drivers\Console.js:105:7
-      1  100.0%        LazyCompile: ~log D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\index.js:89:7
-      1  100.0%          LazyCompile: ~info D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Logger\index.js:117:8
-      1  100.0%            LazyCompile: ~listen D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Server\index.js:473:10
-      1    1.2%      LazyCompile: ~listOnTimeout internal/timers.js:480:25
-      1  100.0%        LazyCompile: ~processTimers internal/timers.js:460:25
-      1    1.2%      LazyCompile: ~isKey D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:6302:19
-      1  100.0%        LazyCompile: ~castPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:4455:22
-      1  100.0%          LazyCompile: ~baseGet D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:3028:21
-      1  100.0%            LazyCompile: ~get D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:13126:17
-      1    1.2%      LazyCompile: ~handleUpgrade D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\websocket-server.js:161:17
-      1  100.0%        LazyCompile: ~upgrade D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\websocket-server.js:77:18
-      1  100.0%          LazyCompile: ~emit events.js:160:44
-      1  100.0%            LazyCompile: ~onParserExecuteCommon _http_server.js:570:31
-      1    1.2%      LazyCompile: ~handle D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Ws\index.js:206:10
-      1  100.0%        LazyCompile: ~emit events.js:160:44
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\websocket-server.js:78:49
-      1  100.0%            LazyCompile: ~completeUpgrade D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\websocket-server.js:233:19
-      1    1.2%      LazyCompile: ~getConfig D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:684:18
-      1  100.0%        C:\Program Files\nodejs\node.exe
-      1    1.2%      LazyCompile: ~forEachCode D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\http-errors\index.js:243:38
-      1  100.0%        C:\Program Files\nodejs\node.exe
-      1  100.0%          LazyCompile: ~populateConstructorExports D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\http-errors\index.js:242:37
-      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\http-errors\index.js:1:1
-      1    1.2%      LazyCompile: ~exports.watch D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\chokidar\index.js:745:25
-      1  100.0%        LazyCompile: ~init D:\work\upwork\SVTrain_v2\src\SVTrain\src\Watcher\index.js:136:7
-      1  100.0%          LazyCompile: ~boot D:\work\upwork\SVTrain_v2\src\SVTrain\providers\AppProvider.js:33:14
-      1  100.0%            C:\Program Files\nodejs\node.exe
-      1    1.2%      LazyCompile: ~enable D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\node_modules\debug\src\common.js:158:18
-      1  100.0%        LazyCompile: ~setup D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\node_modules\debug\src\common.js:7:15
-      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\node_modules\debug\src\node.js:1:1
-      1  100.0%            LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1    1.2%      LazyCompile: ~emit events.js:160:44
-      1  100.0%        LazyCompile: ~onFinish _http_outgoing.js:685:18
-      1  100.0%          LazyCompile: ~afterWrite _stream_writable.js:493:20
-      1  100.0%            LazyCompile: ~onwrite _stream_writable.js:459:17
-      1    1.2%      LazyCompile: ~doWrite _stream_writable.js:421:17
-      1  100.0%        LazyCompile: ~writeOrBuffer _stream_writable.js:381:23
-      1  100.0%          LazyCompile: ~Writable.write _stream_writable.js:278:36
-      1  100.0%            LazyCompile: ~socketOnData D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\websocket.js:794:23
-      1    1.2%      LazyCompile: ~defineProperty D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\static-extend\node_modules\define-property\index.js:12:41
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\static-extend\index.js:52:18
-      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\index.js:1:1
-      1  100.0%            LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1    1.2%      LazyCompile: ~createDebug D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\node_modules\debug\src\debug.js:63:21
-      1  100.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\lib\compiler.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    1.2%      LazyCompile: ~createDebug D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\send\node_modules\debug\src\debug.js:63:21
-      1  100.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\send\index.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    1.2%      LazyCompile: ~createAppender D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:43:24
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:75:41
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1  100.0%            LazyCompile: ~setup D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:72:15
-      1    1.2%      LazyCompile: ~baseMergeDeep D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:3633:27
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:3600:31
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:4897:22
-      1  100.0%            LazyCompile: ~baseMerge D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:3596:23
-      1    1.2%      LazyCompile: ~authenticator D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\src\Auth\index.js:82:17
-      1  100.0%        LazyCompile: ~Auth D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\src\Auth\index.js:64:15
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\providers\AuthProvider.js:150:37
-      1  100.0%            LazyCompile: ~wrappedCallback D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\macroable\index.js:130:50
-      1    1.2%      LazyCompile: ~_makeInstanceOf D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:312:19
-      1  100.0%        LazyCompile: ~make D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:797:8
-      1  100.0%          LazyCompile: ~makeFunc D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:866:12
-      1  100.0%            LazyCompile: ~resolveFunc D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Resolver\index.js:221:15
-      1    1.2%      LazyCompile: ~_invoke D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-compose\src\Runnable.js:56:11
-      1  100.0%        LazyCompile: ~run D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-compose\src\Runnable.js:142:7
-      1  100.0%          LazyCompile: ~_executeMiddleware D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Channel\index.js:110:22
-      1  100.0%            LazyCompile: ~joinTopic D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Channel\index.js:245:19
-      1    1.2%      LazyCompile: ~_guardValue D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\Store.js:137:15
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\Store.js:339:38
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:13805:60
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:4897:22
-      1    1.2%      LazyCompile: ~RollingFileWriteStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:31:14
-      1  100.0%        LazyCompile: ~RollingFileStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileStream.js:5:14
-      1  100.0%          LazyCompile: ~openTheStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\file.js:8:23
-      1  100.0%            LazyCompile: ~fileAppender D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\file.js:38:22
-      1    1.2%      LazyCompile: ~Pipe D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\haye\dist\haye.js:1:27
-      1  100.0%        LazyCompile: ~toArray D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\haye\dist\haye.js:1:1355
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\middleware-base\index.js:211:32
-      1  100.0%            C:\Program Files\nodejs\node.exe
-      1    1.2%      LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-      1  100.0%        LazyCompile: ~Module.runMain internal/modules/cjs/loader.js:1033:26
+      1    1.1%        LazyCompile: ~setup D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\debug\src\common.js:7:15
       1  100.0%          Eval: ~<anonymous> internal/main/run_main_module.js:1:1
-      1    1.2%      LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\categories.js:72:40
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\configuration.js:42:34
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1  100.0%            LazyCompile: ~configure D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\configuration.js:37:19
-      1    1.2%      LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:150:24
-      1  100.0%        C:\Program Files\nodejs\node.exe
-      1  100.0%          LazyCompile: ~_openPacket D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:149:15
-      1  100.0%            LazyCompile: ~_onMessage D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:174:14
-      1    1.2%      LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Registrar\index.js:147:12
-      1  100.0%        LazyCompile: ~arrayMap D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:633:20
-      1  100.0%          LazyCompile: ~map D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:9552:17
-      1  100.0%            LazyCompile: ~interceptor D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:16996:35
-      1    1.2%      LazyCompile: *normalizeString path.js:52:25
-      1  100.0%        LazyCompile: ~normalize path.js:265:12
-      1  100.0%          LazyCompile: ~_getAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:247:22
-      1  100.0%            LazyCompile: ~_resolveAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:264:26
-      1    1.2%      LazyCompile: *join path.js:367:7
-      1  100.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
-      1  100.0%          C:\Program Files\nodejs\node.exe
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:560:18
-      1    1.2%      LazyCompile: *handleErrorFromBinding internal/fs/utils.js:215:32
-      1  100.0%        LazyCompile: ~mkdirSync fs.js:806:19
-      1  100.0%          LazyCompile: ~mkdirsSync D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\mkdirs\mkdirs-sync.js:9:21
-      1  100.0%            LazyCompile: ~_renewWriteStream D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:224:20
-      1    1.2%      LazyCompile: *<anonymous> fs.js:157:10
-      1    1.2%      Eval: ~runInContext D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:1406:44
-      1  100.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:9:11
-      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:1:1
-      1  100.0%            LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1    1.2%      Eval: ~<anonymous> internal/bootstrap/node.js:1:1
-      1    1.2%      Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\index.js:1:1
-      1  100.0%        LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%          LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:807:33
-     49    1.0%    LazyCompile: *tryExtensions internal/modules/cjs/loader.js:343:23
-     41   83.7%      LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-     41  100.0%        LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-     41  100.0%          LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-     41  100.0%            LazyCompile: ~Module.require internal/modules/cjs/loader.js:844:36
-      8   16.3%      LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-      6   75.0%        LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-      6  100.0%          LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      6  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-      2   25.0%        LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      2  100.0%          LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      2  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-
-   1597   25.1%  C:\Program Files\nodejs\node.exe
-   1242   77.8%    C:\Program Files\nodejs\node.exe
-    184   14.8%      LazyCompile: ~openSync fs.js:431:18
-    184  100.0%        LazyCompile: ~readFileSync fs.js:339:22
-    173   94.0%          LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-    173  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:807:33
-      3    1.6%          LazyCompile: ~handle D:\work\upwork\SVTrain_v2\src\SVTrain\app\Middleware\AuthMiddleware.js:7:16
-      3  100.0%            LazyCompile: ~_resolveMiddleware D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\middleware-base\index.js:192:22
-      3    1.6%          LazyCompile: ~getSubFolderByPath D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:742:27
-      3  100.0%            LazyCompile: ~_routeHandler D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Server\index.js:119:23
-      3    1.6%          LazyCompile: ~Module._extensions..json internal/modules/cjs/loader.js:1000:39
-      3  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:807:33
-    157   12.6%      LazyCompile: ~stat internal/modules/cjs/loader.js:115:14
-     89   56.7%        LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-     89  100.0%          LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-     89  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-     68   43.3%        LazyCompile: ~tryFile internal/modules/cjs/loader.js:328:17
-     49   72.1%          LazyCompile: ~tryExtensions internal/modules/cjs/loader.js:343:23
-     44   89.8%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      5   10.2%            LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-     19   27.9%          LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-     12   63.2%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      7   36.8%            LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-    155   12.5%      LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-    155  100.0%        LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-    155  100.0%          LazyCompile: ~Module.load internal/modules/cjs/loader.js:807:33
-    155  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-    143   11.5%      LazyCompile: ~realpathSync fs.js:1448:22
-    111   77.6%        LazyCompile: ~toRealPath internal/modules/cjs/loader.js:336:20
-     88   79.3%          LazyCompile: ~tryFile internal/modules/cjs/loader.js:328:17
-     51   58.0%            LazyCompile: ~tryExtensions internal/modules/cjs/loader.js:343:23
-     37   42.0%            LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-     18   16.2%          LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-     18  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      5    4.5%          LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      5  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-     32   22.4%        LazyCompile: *tryExtensions internal/modules/cjs/loader.js:343:23
-     20   62.5%          LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-     16   80.0%            LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-      4   20.0%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-     12   37.5%          LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-     12  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-    100    8.1%      LazyCompile: ~readPackage internal/modules/cjs/loader.js:221:21
-     89   89.0%        LazyCompile: ~readPackageMain internal/modules/cjs/loader.js:272:25
-     89  100.0%          LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-     68   76.4%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-     21   23.6%            LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
-     11   11.0%        LazyCompile: ~readPackageScope internal/modules/cjs/loader.js:254:26
-     11  100.0%          LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-     11  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:807:33
-     62    5.0%      C:\Program Files\nodejs\node.exe
-      7   11.3%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:567:38
-      7  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      7  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      4    6.5%        LazyCompile: *lstat fs.js:869:15
-      4  100.0%          LazyCompile: *fn internal/util.js:276:14
-      4  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
-      4    6.5%        LazyCompile: *<anonymous> internal/fs/utils.js:523:38
-      4  100.0%          LazyCompile: *hidden internal/errors.js:243:25
-      4  100.0%            LazyCompile: ~<anonymous> internal/fs/utils.js:535:42
-      3    4.8%        LazyCompile: ~readPackage internal/modules/cjs/loader.js:221:21
-      3  100.0%          LazyCompile: ~readPackageMain internal/modules/cjs/loader.js:272:25
-      3  100.0%            LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-      3    4.8%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:548:38
-      3  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      3  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      2    3.2%        LazyCompile: ~resolve D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\index.js:383:11
-      2  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\Manager.js:295:53
-      2  100.0%            LazyCompile: ~baseFindIndex D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:797:25
-      2    3.2%        LazyCompile: ~parse D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:253:17
-      1   50.0%          LazyCompile: ~Csp.build D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-csp\src\Csp\index.js:73:22
-      1  100.0%            LazyCompile: ~buildCsp D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\src\Shield\index.js:158:12
-      1   50.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:7:11
-      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:1:1
-      2    3.2%        LazyCompile: ~calculate D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:549:18
-      2  100.0%          C:\Program Files\nodejs\node.exe
-      2    3.2%        LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      2  100.0%          LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      2  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-      2    3.2%        LazyCompile: ~<anonymous> internal/fs/utils.js:234:35
-      2  100.0%          LazyCompile: *hidden internal/errors.js:243:25
-      2  100.0%            LazyCompile: ~<anonymous> internal/fs/utils.js:523:38
-      2    3.2%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:609:11
-      2  100.0%          C:\Program Files\nodejs\node.exe
-      2  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:607:39
-      1    1.6%        LazyCompile: ~with D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:755:8
-      1  100.0%          LazyCompile: ~_registerValidatorBindings D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\providers\BodyParserProvider.js:85:30
-      1  100.0%            LazyCompile: ~boot D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\providers\BodyParserProvider.js:99:8
-      1    1.6%        LazyCompile: ~toNamespacedPath path.js:549:19
-      1  100.0%          LazyCompile: ~stat internal/modules/cjs/loader.js:115:14
-      1  100.0%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1    1.6%        LazyCompile: ~stat internal/modules/cjs/loader.js:115:14
-      1  100.0%          LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      1    1.6%        LazyCompile: ~splitRoot fs.js:1406:33
-      1  100.0%          LazyCompile: ~realpathSync fs.js:1448:22
-      1  100.0%            LazyCompile: ~toRealPath internal/modules/cjs/loader.js:336:20
-      1    1.6%        LazyCompile: ~processTicksAndRejections internal/process/task_queues.js:65:35
-      1    1.6%        LazyCompile: ~normalize path.js:265:12
-      1  100.0%          LazyCompile: ~_getAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:247:22
-      1  100.0%            LazyCompile: ~_resolveAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:264:26
-      1    1.6%        LazyCompile: ~merge D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\env-variable\index.js:65:27
-      1  100.0%          LazyCompile: ~env D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\env-variable\index.js:12:13
-      1  100.0%            LazyCompile: ~enabled D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\enabled\index.js:13:34
-      1    1.6%        LazyCompile: ~makePacket D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket-packet\dist\wsp.node.js:85:20
-      1  100.0%          LazyCompile: ~fns.joinAckPacket D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket-packet\dist\wsp.node.js:296:30
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:368:15
-      1    1.6%        LazyCompile: ~isClass D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:20:17
-      1  100.0%          LazyCompile: ~_makeInstanceOf D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:312:19
-      1  100.0%            LazyCompile: ~make D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:797:8
-      1    1.6%        LazyCompile: ~filterFile D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\require-all\index.js:21:22
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\require-all\index.js:34:26
+      1    1.1%        LazyCompile: ~resolve D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\index.js:383:11
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\Manager.js:295:53
+      1  100.0%            LazyCompile: ~match D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Route\Manager.js:289:9
+      1    1.1%        LazyCompile: ~replaceXRange D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\semver\semver.js:1088:24
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\semver\semver.js:1083:41
       1  100.0%            C:\Program Files\nodejs\node.exe
-      1    1.6%        LazyCompile: ~debuglogImpl internal/util/debuglog.js:34:22
-      1  100.0%          LazyCompile: ~<anonymous> internal/util/debuglog.js:57:18
-      1  100.0%            LazyCompile: ~Module._resolveLookupPaths internal/modules/cjs/loader.js:625:38
-      1    1.6%        LazyCompile: ~clone D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\graceful-fs\clone.js:5:16
-      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\graceful-fs\graceful-fs.js:1:1
-      1  100.0%            LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1    1.6%        LazyCompile: ~cleanupOS D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:78:21
+      1    1.1%        LazyCompile: ~parse D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:253:17
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:7:11
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:1:1
+      1    1.1%        LazyCompile: ~escapeStringRegexp D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\logform\node_modules\colors\lib\colors.js:78:34
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\logform\node_modules\colors\lib\colors.js:99:43
+      1  100.0%            C:\Program Files\nodejs\node.exe
+      1    1.1%        LazyCompile: ~cleanupOS D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:78:21
       1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:548:38
       1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      1    1.6%        LazyCompile: ~_joinTopic D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:333:14
-      1  100.0%          LazyCompile: ~_getSubscriptionHandle D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:270:26
-      1  100.0%            LazyCompile: ~_advanceQueue D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:284:17
-      1    1.6%        LazyCompile: ~Range.parseRange D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\semver\semver.js:891:39
+      1    1.1%        LazyCompile: ~_resolveAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:264:26
+      1  100.0%          LazyCompile: ~make D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:797:8
+      1  100.0%            LazyCompile: ~setConfig D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\src\Serializers\Lucid.js:120:13
+      1    1.1%        LazyCompile: ~_registerLoggerManager D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\providers\AppProvider.js:127:26
+      1  100.0%          LazyCompile: ~register D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\providers\AppProvider.js:301:12
+      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Registrar\index.js:128:13
+      1    1.1%        LazyCompile: ~Range.parseRange D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\semver\semver.js:891:39
       1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\semver\semver.js:866:53
       1  100.0%            C:\Program Files\nodejs\node.exe
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:597:39
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:548:38
       1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
       1  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:533:38
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:533:38
       1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
       1  100.0%            LazyCompile: ~each D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:134:16
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:515:38
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:226:25
-      1  100.0%            LazyCompile: ~forOwn D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\platform\platform.js:168:18
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\categories.js:74:27
-      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\configuration.js:46:21
-      1  100.0%            C:\Program Files\nodejs\node.exe
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:17025:78
-      1  100.0%          LazyCompile: ~arrayEach D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:511:21
-      1  100.0%            Eval: ~runInContext D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\lodash\lodash.js:1406:44
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Channel\Manager.js:121:61
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Channel\Manager.js:121:61
       1  100.0%          C:\Program Files\nodejs\node.exe
       1  100.0%            LazyCompile: ~resolve D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Channel\Manager.js:120:11
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\providers\AppProvider.js:45:45
+      1  100.0%          LazyCompile: ~_resolveBinding D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:227:19
+      1  100.0%            LazyCompile: ~use D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:725:7
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
       1  100.0%          C:\Program Files\nodejs\node.exe
-      1    1.6%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
       1  100.0%          C:\Program Files\nodejs\node.exe
-      1    1.6%        Eval: ~<anonymous> internal/util/inspect.js:1:1
-      1  100.0%          LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1  100.0%            LazyCompile: ~nativeModuleRequire internal/bootstrap/loaders.js:183:29
-      1    1.6%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\useragent\lib\regexps.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    1.6%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\stack-trace\lib\stack-trace.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    1.6%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\bson\lib\bson\objectid.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    1.6%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\middleware-base\node_modules\debug\src\node.js:1:1
-      1  100.0%          LazyCompile: ~Module._compile internal/modules/cjs/loader.js:868:37
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-     38    3.1%      LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-     35   92.1%        LazyCompile: ~nativeModuleRequire internal/bootstrap/loaders.js:183:29
-      3    8.6%          Eval: ~<anonymous> internal/bootstrap/node.js:1:1
-      2    5.7%          Eval: ~<anonymous> tty.js:1:1
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      1  100.0%          C:\Program Files\nodejs\node.exe
+      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:560:18
+      1    1.1%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:560:18
+      1  100.0%          C:\Program Files\nodejs\node.exe
+      1    1.1%        LazyCompile: *<anonymous> internal/fs/utils.js:535:42
+      1  100.0%          LazyCompile: *hidden internal/errors.js:243:25
+      1  100.0%            LazyCompile: ~lstat fs.js:869:15
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\youch\src\Youch.js:1:1
+      1  100.0%          Eval: ~<anonymous> internal/main/run_main_module.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\readdirp\node_modules\readable-stream\lib\_stream_duplex.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\readdirp\node_modules\readable-stream\readable.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\readdirp\stream-api.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\proxy-addr\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-req\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Request\index.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\nanomatch\node_modules\define-property\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\nanomatch\lib\utils.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\nanomatch\index.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\jsonwebtoken\decode.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\jsonwebtoken\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\src\Schemes\Jwt.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Template\Compiler.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Template\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Edge\index.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\cuid\lib\fingerprint.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\cuid\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:1:1
+      1    1.1%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\async\internal\eachOfLimit.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\async\eachOfLimit.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\async\eachOf.js:1:1
+     50    2.7%      LazyCompile: *Module._findPath internal/modules/cjs/loader.js:463:28
+      3    6.0%        LazyCompile: ~requireStack D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\require-stack\src\index.js:40:44
+      3  100.0%          LazyCompile: ~_resolveAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:264:26
+      2   66.7%            LazyCompile: ~make D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:797:8
+      1   33.3%            LazyCompile: ~use D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:725:7
+      3    6.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:1:1
+      3  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\index.js:1:1
+      3  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\file.js:1:1
+      3    6.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:1:1
+      3  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\log4js.js:1:1
+      3  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\logger.js:1:1
+      3    6.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\iconv-lite\encodings\index.js:1:1
+      3  100.0%          LazyCompile: ~getCodec D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\iconv-lite\lib\index.js:63:35
+      3  100.0%            LazyCompile: ~getDecoder D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\iconv-lite\lib\index.js:126:39
+      2    4.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\csrf\index.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\src\Shield\index.js:1:1
+      2  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\providers\ShieldProvider.js:16:47
+      2    4.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-body\lib\json.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-body\lib\any.js:1:1
+      2  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-body\index.js:1:1
+      2    4.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\bson\lib\bson\bson.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\bson\index.js:1:1
+      2  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\Store.js:1:1
+      2    4.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\Store.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\index.js:1:1
+      2  100.0%            LazyCompile: ~getRequestInstance D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\getRequestInstance.js:14:46
+      2    4.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\Multipart\File.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\Multipart\index.js:1:1
+      2  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\BodyParser\index.js:1:1
+      2    4.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\logger.js:1:1
+      2  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:1:1
+      2  100.0%            LazyCompile: ~requireStack D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\require-stack\src\index.js:40:44
+      1    2.0%        LazyCompile: ~getRequestInstance D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\src\Session\getRequestInstance.js:14:46
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\session\providers\SessionProvider.js:128:44
+      1  100.0%            LazyCompile: ~wrappedCallback D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\macroable\index.js:130:50
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\uid-safe\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\multiparty\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\Multipart\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\ensure\symlink.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\ensure\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\empty\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\copy\copy.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\copy\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\copy-sync\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\lib\RollingFileWriteStream.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\copy-sync\copy-sync.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\copy-sync\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\streamroller\node_modules\fs-extra\lib\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\raw-body\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-body\lib\json.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-body\lib\any.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-csp\src\Csp\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-csp\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\src\Shield\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-csp\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\src\Shield\index.js:1:1
+      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\providers\ShieldProvider.js:16:47
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\multiparty\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\Multipart\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\BodyParser\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\log4js.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\logger.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\layouts.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\log4js.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\logger.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\clustering.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\log4js.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\file.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\log4js.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\LoggingEvent.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\clustering.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\log4js\lib\appenders\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\iconv-lite\lib\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\raw-body\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\co-body\lib\json.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\src\Shield\index.js:1:1
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\shield\providers\ShieldProvider.js:16:47
+      1  100.0%            LazyCompile: ~_resolveBinding D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:227:19
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Relations\BelongsToMany.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Relations\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\QueryBuilder\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\index.js:1:1
+      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\providers\LucidProvider.js:45:39
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\index.js:1:1
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\providers\LucidProvider.js:45:39
+      1  100.0%            LazyCompile: ~_resolveBinding D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:227:19
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\Base.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\index.js:1:1
+      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\providers\LucidProvider.js:45:39
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\lib\util.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\QueryBuilder\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\lucid\src\Lucid\Model\index.js:1:1
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\src\BodyParser\index.js:1:1
+      1  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\bodyparser\providers\BodyParserProvider.js:113:51
+      1  100.0%            LazyCompile: ~_resolveBinding D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:227:19
+      1    2.0%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:1:1
+      1  100.0%          LazyCompile: ~requireStack D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\require-stack\src\index.js:40:44
+      1  100.0%            LazyCompile: ~_resolveAutoloadedPath D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\fold\src\Ioc\index.js:264:26
+     44    2.4%      LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
+     37   84.1%        LazyCompile: ~nativeModuleRequire internal/bootstrap/loaders.js:183:29
+      8   21.6%          LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
+      6   75.0%            LazyCompile: ~nativeModuleRequire internal/bootstrap/loaders.js:183:29
+      2   25.0%            Eval: ~<anonymous> internal/main/run_main_module.js:1:1
+      4   10.8%          Eval: ~<anonymous> internal/bootstrap/node.js:1:1
+      2    5.4%          Eval: ~<anonymous> tls.js:1:1
       2  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      2    5.7%          Eval: ~<anonymous> stream.js:1:1
+      2    5.4%          Eval: ~<anonymous> internal/url.js:1:1
       2  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      2    5.7%          Eval: ~<anonymous> internal/source_map/source_map_cache.js:1:1
+      2    5.4%          Eval: ~<anonymous> internal/source_map/source_map_cache.js:1:1
       2  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      2    5.7%          Eval: ~<anonymous> https.js:1:1
+      2    5.4%          Eval: ~<anonymous> https.js:1:1
       2  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      2    5.7%          Eval: ~<anonymous> crypto.js:1:1
+      2    5.4%          Eval: ~<anonymous> fs.js:1:1
       2  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          LazyCompile: ~setupPrepareStackTrace internal/bootstrap/node.js:300:32
+      2    5.4%          Eval: ~<anonymous> events.js:1:1
+      2  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
+      1    2.7%          LazyCompile: ~setupPrepareStackTrace internal/bootstrap/node.js:300:32
       1  100.0%            Eval: ~<anonymous> internal/bootstrap/node.js:1:1
-      1    2.9%          LazyCompile: ~setupInspectorHooks internal/bootstrap/pre_execution.js:213:29
+      1    2.7%          LazyCompile: ~setupInspectorHooks internal/bootstrap/pre_execution.js:213:29
       1  100.0%            LazyCompile: ~prepareMainThreadExecution internal/bootstrap/pre_execution.js:9:36
-      1    2.9%          LazyCompile: ~setupBuffer internal/bootstrap/node.js:403:21
+      1    2.7%          LazyCompile: ~setupBuffer internal/bootstrap/node.js:403:21
       1  100.0%            Eval: ~<anonymous> internal/bootstrap/node.js:1:1
-      1    2.9%          LazyCompile: ~readFile fs.js:276:18
-      1  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\pify\index.js:6:15
-      1    2.9%          LazyCompile: ~lookupAndListen net.js:1481:25
-      1  100.0%            LazyCompile: ~Server.listen net.js:1381:35
-      1    2.9%          LazyCompile: ~initializeCJSLoader internal/bootstrap/pre_execution.js:391:29
+      1    2.7%          LazyCompile: ~lazyLoadStreams fs.js:1793:25
+      1  100.0%            LazyCompile: ~get ReadStream fs.js:1894:17
+      1    2.7%          LazyCompile: ~initializeCJSLoader internal/bootstrap/pre_execution.js:391:29
       1  100.0%            LazyCompile: ~prepareMainThreadExecution internal/bootstrap/pre_execution.js:9:36
-      1    2.9%          LazyCompile: ~get fs.js:1949:8
-      1  100.0%            LazyCompile: ~module.exports D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\pify\index.js:36:18
-      1    2.9%          Eval: ~<anonymous> tls.js:1:1
+      1    2.7%          Eval: ~<anonymous> timers.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> internal/url.js:1:1
+      1    2.7%          Eval: ~<anonymous> internal/main/run_main_module.js:1:1
+      1    2.7%          Eval: ~<anonymous> internal/crypto/pbkdf2.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> internal/timers.js:1:1
+      1    2.7%          Eval: ~<anonymous> internal/crypto/keygen.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> internal/process/task_queues.js:1:1
+      1    2.7%          Eval: ~<anonymous> internal/console/global.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> internal/modules/cjs/loader.js:1:1
+      1    2.7%          Eval: ~<anonymous> internal/child_process.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> internal/main/run_main_module.js:1:1
-      1    2.9%          Eval: ~<anonymous> internal/child_process.js:1:1
+      1    2.7%          Eval: ~<anonymous> buffer.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> fs.js:1:1
+      1    2.7%          Eval: ~<anonymous> _http_server.js:1:1
       1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> events.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> cluster.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> child_process.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> buffer.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> _stream_readable.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> _http_server.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      1    2.9%          Eval: ~<anonymous> _http_outgoing.js:1:1
-      1  100.0%            LazyCompile: ~NativeModule.compile internal/bootstrap/loaders.js:272:42
-      3    7.9%        LazyCompile: ~NativeModule.compileForPublicLoader internal/bootstrap/loaders.js:214:57
-      3  100.0%          LazyCompile: ~loadNativeModule internal/modules/cjs/helpers.js:19:26
-      3  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:671:24
-     25    2.0%      LazyCompile: ~readSync fs.js:482:18
-     25  100.0%        LazyCompile: ~tryReadSync fs.js:327:21
-     25  100.0%          LazyCompile: ~readFileSync fs.js:339:22
-     24   96.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    4.0%            LazyCompile: ~getWorkspace D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:197:21
-     17    1.4%      LazyCompile: ~closeSync fs.js:397:19
-     15   88.2%        LazyCompile: ~closeSync D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\graceful-fs\graceful-fs.js:68:24
-     15  100.0%          LazyCompile: ~readFileSync fs.js:339:22
-     14   93.3%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    6.7%            LazyCompile: ~getSubFolderByPath D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:742:27
-      2   11.8%        LazyCompile: ~readFileSync fs.js:339:22
-      2  100.0%          LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      2  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:807:33
-     15    1.2%      LazyCompile: ~lstat fs.js:869:15
-     15  100.0%        LazyCompile: ~<anonymous> internal/util.js:277:24
-     15  100.0%          C:\Program Files\nodejs\node.exe
-     15  100.0%            LazyCompile: ~fn internal/util.js:276:14
-     14    1.1%      LazyCompile: ~handleWriteReq internal/stream_base_commons.js:40:24
-     14  100.0%        LazyCompile: ~writeGeneric internal/stream_base_commons.js:137:22
-     14  100.0%          LazyCompile: ~Socket._writeGeneric net.js:745:42
-     14  100.0%            LazyCompile: ~Socket._write net.js:782:35
-     13    1.0%      LazyCompile: *resolve path.js:130:10
-      8   61.5%        LazyCompile: *toNamespacedPath path.js:549:19
-      4   50.0%          LazyCompile: ~lstat fs.js:869:15
-      2   50.0%            LazyCompile: ~<anonymous> internal/util.js:277:24
-      1   25.0%            LazyCompile: ~LOOP fs.js:1632:16
-      1   25.0%            LazyCompile: *fn internal/util.js:276:14
-      1   12.5%          LazyCompile: ~stat internal/modules/cjs/loader.js:115:14
-      1  100.0%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1   12.5%          LazyCompile: ~readdir fs.js:826:17
-      1  100.0%            LazyCompile: ~<anonymous> internal/util.js:277:24
-      1   12.5%          LazyCompile: ~readPackage internal/modules/cjs/loader.js:221:21
-      1  100.0%            LazyCompile: ~readPackageMain internal/modules/cjs/loader.js:272:25
-      1   12.5%          LazyCompile: ~lstatSync fs.js:901:19
-      1  100.0%            LazyCompile: ~getSubFolderByPath D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:742:27
-      1    7.7%        LazyCompile: ~resolveExports internal/modules/cjs/loader.js:374:24
-      1  100.0%          LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      1    7.7%        LazyCompile: ~realpathSync fs.js:1448:22
-      1  100.0%          LazyCompile: *tryExtensions internal/modules/cjs/loader.js:343:23
-      1  100.0%            LazyCompile: ~tryPackage internal/modules/cjs/loader.js:282:20
-      1    7.7%        LazyCompile: ~readPackage internal/modules/cjs/loader.js:221:21
-      1  100.0%          LazyCompile: ~readPackageScope internal/modules/cjs/loader.js:254:26
-      1  100.0%            LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:968:37
-      1    7.7%        LazyCompile: *tryExtensions internal/modules/cjs/loader.js:343:23
-      1  100.0%          LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:463:28
-      1  100.0%            LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:742:35
-      1    7.7%        LazyCompile: *lstat fs.js:869:15
-      1  100.0%          LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      1    2.3%        Eval: ~<anonymous> internal/main/run_main_module.js:1:1
+      1    2.3%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\permessage-deflate.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\lib\websocket.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\ws\index.js:1:1
+      1    2.3%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\resolve-from\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\require-uncached\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Loader\index.js:1:1
+      1    2.3%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\opn\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\static-server\server.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\src\StaticServer\index.js:1:1
+      1    2.3%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\graceful-fs\polyfills.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\graceful-fs\graceful-fs.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\fs\index.js:1:1
+      1    2.3%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\remove\rimraf.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\remove\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\empty\index.js:1:1
+      1    2.3%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\ClusterHop\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Socket\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\websocket\src\Connection\index.js:1:1
+     35    1.9%      LazyCompile: ~lstat fs.js:869:15
+     31   88.6%        LazyCompile: ~<anonymous> internal/util.js:277:24
+     31  100.0%          C:\Program Files\nodejs\node.exe
+     31  100.0%            LazyCompile: ~fn internal/util.js:276:14
+      4   11.4%        LazyCompile: *<anonymous> internal/util.js:277:24
+      4  100.0%          C:\Program Files\nodejs\node.exe
+      4  100.0%            LazyCompile: ~fn internal/util.js:276:14
+     32    1.7%      LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+     32  100.0%        C:\Program Files\nodejs\node.exe
+      8   25.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
+      8  100.0%            C:\Program Files\nodejs\node.exe
+     30    1.6%      LazyCompile: *<anonymous> internal/util.js:278:36
+     30  100.0%        LazyCompile: *<anonymous> fs.js:157:10
+     23    1.2%      Eval: ~<anonymous> internal/main/run_main_module.js:1:1
+     21    1.1%      LazyCompile: *resolve path.js:130:10
+      8   38.1%        LazyCompile: *lstat fs.js:869:15
+      7   87.5%          LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      7  100.0%            C:\Program Files\nodejs\node.exe
+      1   12.5%          LazyCompile: *readDirRecursiveSync D:\work\upwork\SVTrain_v2\src\SVTrain\src\recursive.js:24:45
       1  100.0%            C:\Program Files\nodejs\node.exe
+      5   23.8%        LazyCompile: *toNamespacedPath path.js:549:19
+      1   20.0%          LazyCompile: ~readdir fs.js:826:17
+      1  100.0%            LazyCompile: *<anonymous> internal/util.js:277:24
+      1   20.0%          LazyCompile: ~Edge D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Edge\index.js:25:15
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\index.js:1:1
+      1   20.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\lib\compiler.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\index.js:1:1
+      1   20.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\send\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-res\index.js:1:1
+      1   20.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Expressions\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\edge.js\src\Lexer\index.js:1:1
+      2    9.5%        LazyCompile: *stat internal/modules/cjs/loader.js:115:14
+      1   50.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\serve-static\node_modules\send\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\serve-static\index.js:1:1
+      1   50.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\readdirp\node_modules\readable-stream\lib\internal\streams\destroy.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\readdirp\node_modules\readable-stream\lib\_stream_readable.js:1:1
+      1    4.8%        LazyCompile: *Module._nodeModulePaths internal/modules/cjs/loader.js:544:37
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\object-copy\node_modules\is-descriptor\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\object-copy\node_modules\define-property\index.js:1:1
+      1    4.8%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\node_modules\define-property\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\snapdragon\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\braces\lib\braces.js:1:1
+      1    4.8%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\send\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\node-res\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\framework\src\Response\index.js:1:1
+      1    4.8%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\jsonwebtoken\index.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\src\Schemes\Jwt.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\@adonisjs\auth\src\Schemes\index.js:1:1
+      1    4.8%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\mkdirs\mkdirs.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\mkdirs\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\copy-sync\copy-sync.js:1:1
+      1    4.8%        Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\copy-sync\copy-sync.js:1:1
+      1  100.0%          Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\copy-sync\index.js:1:1
+      1  100.0%            Eval: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\node_modules\fs-extra\lib\index.js:1:1
+     76    2.5%    LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:607:39
+     76  100.0%      C:\Program Files\nodejs\node.exe
+     76  100.0%        LazyCompile: ~calculate D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:549:18
+     76  100.0%          C:\Program Files\nodejs\node.exe
+     70    2.3%    LazyCompile: *lstat fs.js:869:15
+     44   62.9%      LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+     44  100.0%        C:\Program Files\nodejs\node.exe
+     44  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
+     44  100.0%            C:\Program Files\nodejs\node.exe
+     13   18.6%      LazyCompile: *readDirRecursiveSync D:\work\upwork\SVTrain_v2\src\SVTrain\src\recursive.js:24:45
+     13  100.0%        C:\Program Files\nodejs\node.exe
+      8   11.4%      LazyCompile: *fn internal/util.js:276:14
+      6   75.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+      6  100.0%          C:\Program Files\nodejs\node.exe
+      6  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
+      2   25.0%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      2  100.0%          C:\Program Files\nodejs\node.exe
+      2  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:560:18
+      3    4.3%      LazyCompile: *<anonymous> internal/util.js:277:24
+      3  100.0%        C:\Program Files\nodejs\node.exe
+      3  100.0%          LazyCompile: ~fn internal/util.js:276:14
+      3  100.0%            LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      2    2.9%      LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:573:23
+      2  100.0%        C:\Program Files\nodejs\node.exe
+      2  100.0%          LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:560:18
+      2  100.0%            C:\Program Files\nodejs\node.exe
+     34    1.1%    LazyCompile: *<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:66:23
+     34  100.0%      C:\Program Files\nodejs\node.exe
+     28   82.4%        LazyCompile: ~<anonymous> D:\work\upwork\SVTrain_v2\src\SVTrain\app\Controllers\Http\ExplorerController.js:59:24
+     28  100.0%          C:\Program Files\nodejs\node.exe
 

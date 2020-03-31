@@ -22,3 +22,7 @@ export const updateCounting = (folders, statistics) => {
   })
   return res
 }
+
+export const getFileServerPath = () => {
+  return 'http://' + location.hostname + ':2929/';
+}
