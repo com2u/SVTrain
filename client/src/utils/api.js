@@ -1,8 +1,8 @@
 import axios from 'axios';
 import EventBus from './eventbus';
 
-const baseurl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`;
-// const baseurl = 'https://localhost:3333/api/';
+// const baseurl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`;
+const baseurl = 'https://localhost:3333/api/';
 const urls = {
   getFiles: (dir) => `${baseurl}getFiles?dir=${dir}`,
   getRunningState: `${baseurl}getState`,

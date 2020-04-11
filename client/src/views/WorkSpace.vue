@@ -2,20 +2,7 @@
   <div>
     <div class="title-container">
       <div>
-        <h1>WorkSpace List</h1>
-      </div>
-      <div class="action-bar">
-        <b-button
-          variant="dark"
-          @click="toAiPage">
-          <span class="ai-btn-content">AI</span>
-        </b-button>
-        <b-button
-          v-if="systemConfig.newWorkspace"
-          variant="dark"
-          v-b-modal.create-ws-folder>
-          New Workspace
-        </b-button>
+        <h1>Work Spaces</h1>
       </div>
     </div>
     <div>
@@ -29,13 +16,19 @@
         :key="folder.path"
         @select-workspace="setWorkspace(folder)"
       />
+      <div
+        class="new-ws"
+        v-if="systemConfig.newWorkspace"
+        v-b-modal.create-ws-folder>
+        <b-icon icon="plus-circle"></b-icon>
+        New Workspace
+      </div>
     </div>
 
     <b-modal
       v-model="notesVisible"
       ok-title="Save"
       cancel-title="Back"
-      @ok="saveNotes"
     >
       <template v-slot:modal-title>Notes for {{ $store.state.notes.folder.name }}</template>
 
@@ -47,6 +40,15 @@
           max-rows="6"
         ></b-form-textarea>
       </div>
+      <template v-slot:modal-footer>
+        <b-button @click="notesVisible=false">Cancel</b-button>
+        <b-button
+          v-if="canEditNote"
+          variant="primary"
+          @click="saveNotes" >
+          Save
+        </b-button>
+      </template>
 
     </b-modal>
 
@@ -54,7 +56,6 @@
       v-model="cfgVisible"
       ok-title="Save"
       cancel-title="Back"
-      @ok="saveConfig"
       @shown="onModalShow"
     >
       <template v-slot:modal-title>Config folder {{ $store.state.notes.folder.name }}</template>
@@ -62,6 +63,15 @@
       <div>
         <div id="wsjsoneditor"/>
       </div>
+      <template v-slot:modal-footer>
+        <b-button @click="cfgVisible=false">Cancel</b-button>
+        <b-button
+          v-if="canEditConfig"
+          variant="primary"
+          @click="saveConfig" >
+          Save
+        </b-button>
+      </template>
 
     </b-modal>
 
@@ -89,6 +99,7 @@
 <script>
 import JSONEditor from 'jsoneditor';
 import _set from 'lodash.set';
+import { mapGetters } from 'vuex';
 import api from '../utils/api';
 import WorkspaceFolder from '../components/WorkspaceFolder.vue';
 import CreatingFolder from '../components/CreatingFolder.vue';
@@ -140,14 +151,17 @@ export default {
     systemConfig() {
       return this.$store.state.app.config;
     },
-
+    ...mapGetters([
+      'canEditNote',
+      'canEditConfig',
+    ]),
   },
   methods: {
-    async loadFolders() {
-      this.loading = true;
-      await api.getSubfolders('root');
-      this.loading = false;
-    },
+    // async loadFolders() {
+    //   this.loading = true;
+    //   await api.getSubfolders('root');
+    //   this.loading = false;
+    // },
     async loadFoldersByPath(dir = null) {
       this.loading = true;
       const response = await api.getFoldersByPath(dir);
@@ -160,7 +174,7 @@ export default {
     saveNotes() {
       this.$store.dispatch('notes/save')
         .then(() => {
-          this.loadFolders();
+          this.loadFoldersByPath();
         });
     },
     saveConfig() {
@@ -170,7 +184,7 @@ export default {
       }
       this.$store.dispatch('wsconfig/save', config)
         .then(() => {
-          this.loadFolders();
+          this.loadFoldersByPath();
         });
     },
     onModalShow() {
@@ -194,7 +208,7 @@ export default {
       });
     },
     onFolderCreated() {
-      this.loadFolders();
+      this.loadFoldersByPath();
     },
     toAiPage() {
       this.$router.push({ name: 'main' });
@@ -269,7 +283,7 @@ export default {
     .folder-label {
       height: $height;
       margin-bottom: 10px;
-      background: #fff;
+      background: #f3f3f3;
       display: flex;
       justify-content: space-between;
       padding: 0 10px;
@@ -287,6 +301,8 @@ export default {
         height: $height;
         line-height: $height;
         font-weight: bold;
+        padding-left: 10px;
+        cursor: pointer;
 
         &.root-item {
           cursor: pointer;
@@ -326,8 +342,32 @@ export default {
           width: 15px;
           display: inline-block;
           margin-left: 10px;
+
+          &.expand-icon {
+            font-size: 10px;
+            svg {
+              width: 10px !important;
+              font-size: 10px !important;
+            }
+          }
         }
       }
     }
+  }
+  .new-ws {
+    width: 100%;
+    border: 1px solid #f3f3f3;
+    color: #333;
+    background: #fafafa;
+    border-radius: 2px;
+    cursor: pointer;
+    height: 50px;
+    line-height: 50px;
+    padding-left: 10px;
+    -webkit-box-shadow: 0px 1px 10px -7px #222222;
+    -moz-box-shadow: 0px 1px 10px -7px #222222;
+    box-shadow: 0px 1px 10px -7px #222222;
+    margin-top: 20px;
+    font-weight: 600;
   }
 </style>

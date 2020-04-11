@@ -39,4 +39,11 @@ export default {
   html, body, .maxheight {
     height: 100%;
   }
+
+  .unclickable {
+    cursor: default;
+  }
+  .clickable {
+    cursor: pointer !important;
+  }
 </style>

@@ -54,7 +54,6 @@ export default {
     handleEnter() {
       this.createFolder()
         .then(() => {
-          this.$emit('folder-created');
           this.$refs.modal.hide();
         });
     },

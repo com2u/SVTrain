@@ -5,6 +5,7 @@
       <router-view/>
       <notifications/>
     </div>
+    <page-footer/>
   </div>
 </template>
 
@@ -12,10 +13,11 @@
 import api from '../utils/api';
 import Header from '../components/Header.vue';
 import EventBus from '../utils/eventbus';
+import PageFooter from '../components/PageFooter.vue';
 
 export default {
   name: 'LoggedInLayout',
-  components: { Header },
+  components: { Header, PageFooter },
   created() {
     const sessionToken = localStorage.getItem('sessionToken', null);
     if (!sessionToken) {
@@ -63,11 +65,12 @@ export default {
 </script>
 <style lang="scss">
 .app {
-  background: #fafafa;
+  background: #fff;
 
   .app-container {
     /*background: #fff;*/
     margin: 50px 60px;
+    /*margin-bottom: 50px;*/
   }
   .title-container {
     display: flex;

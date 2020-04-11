@@ -22,10 +22,8 @@ export default {
       commit('SET_FOLDER', folder);
     },
     showFolder: ({ commit }, folder) => {
-      if (folder.notes) {
-        commit('SET_FOLDER', folder);
-        commit('SET_VISIBLE', true);
-      }
+      commit('SET_FOLDER', folder);
+      commit('SET_VISIBLE', true);
     },
     setContent: ({ commit, state }, val) => {
       const folder = { ...state.folder };

@@ -6,7 +6,7 @@
         <b-navbar toggleable="lg" type="light" variant="faded">
           <b-navbar-nav :to="{name: 'WorkSpacePage'}">
             <b-nav-item class="logo" :to="{name: 'WorkSpacePage'}">
-              <img src="../assets/EjectXLogo.png">
+              <img src="../assets/logo.png">
             </b-nav-item>
           </b-navbar-nav>
 
@@ -42,7 +42,7 @@ export default {
   },
   computed: {
     user() {
-      return this.$store.state.app.user;
+      return this.$store.state.app.user.username;
     },
   },
   methods: {
@@ -58,7 +58,7 @@ export default {
 </script>
 <style lang="scss" scoped>
   .header {
-    background: #fff;
+    background: #fafafa;
 
     .logo {
       img {
