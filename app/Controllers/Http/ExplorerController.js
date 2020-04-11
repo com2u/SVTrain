@@ -22,6 +22,7 @@ const logger = require('../../../logger')
 const pathSep = path.sep
 
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg')
+const highlightPrefix = '[HIGHLIGHT]'
 
 
 // if file is landing under root directory
@@ -724,7 +725,11 @@ class ExplorerController {
   }
 
   async saveNotes({request, response}) {
-    const {path, notes} = request.post()
+    const {path, highlight } = request.post()
+    let { notes } = request.post()
+    if (highlight) {
+      notes = `${highlightPrefix}${notes}`
+    }
     fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'})
     return true
   }
@@ -773,10 +778,16 @@ class ExplorerController {
         const notesPath = path.join(subDir, 'notes.txt')
         file.notes = ''
         file.notesPath = notesPath
+        file.highlight = false
         if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
           try {
             let notes = fs.readFileSync(notesPath, 'utf-8')
-            file.notes = notes
+            if (notes.startsWith(highlightPrefix)) {
+              file.notes = notes.substring(highlightPrefix.length)
+              file.highlight = true
+            } else {
+              file.notes = notes
+            }
           } catch (e) {
             console.log(`can not read ${notesPath}`)
           }

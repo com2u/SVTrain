@@ -22,6 +22,7 @@ export default {
       commit('SET_FOLDER', folder);
     },
     showFolder: ({ commit }, folder) => {
+      console.log(folder);
       commit('SET_FOLDER', folder);
       commit('SET_VISIBLE', true);
     },
@@ -30,8 +31,13 @@ export default {
       folder.notes = val;
       commit('SET_FOLDER', folder);
     },
+    setHighlight: ({ commit, state }, val) => {
+      const folder = { ...state.folder };
+      folder.highlight = val;
+      commit('SET_FOLDER', folder);
+    },
     save: ({ commit, state }) => new Promise((resolve, reject) => {
-      api.saveNotes(state.folder.notesPath, state.folder.notes)
+      api.saveNotes(state.folder.notesPath, state.folder.notes, state.folder.highlight)
         .then(() => {
           commit('SET_VISIBLE', false);
           resolve();

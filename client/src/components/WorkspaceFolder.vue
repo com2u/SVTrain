@@ -46,6 +46,7 @@
             <b-icon
               icon="file-text"
               class="clickable-icon"
+              :class="info.highlight ? 'highlight': ''"
               font-scale="1.5"
               @click="showNotes"
             />

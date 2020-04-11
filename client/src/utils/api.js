@@ -86,7 +86,7 @@ export default {
   getConfig: async () => (await axios.get(urls.getConfig)).data,
 
   doForwardOnly: async (selectedFiles, notSelectedFiles) => (await axios.post(urls.forwardOnly, { selectedFiles, notSelectedFiles })).data,
-  saveNotes: async (path, notes) => (await axios.post(urls.saveNotes, { path, notes })).data,
+  saveNotes: async (path, notes, highlight) => (await axios.post(urls.saveNotes, { path, notes, highlight })).data,
   saveConfig: async (path, config) => (await axios.post(urls.saveConfig, { path, config })).data,
   getFoldersByPath: async (dir = null) => (await axios.get(urls.getFoldersByPath(dir))).data,
   listStatistics: async (dirs = []) => (await axios.post(urls.listStatistics, {

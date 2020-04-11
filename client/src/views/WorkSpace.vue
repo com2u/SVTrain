@@ -18,7 +18,7 @@
       />
       <div
         class="new-ws"
-        v-if="systemConfig.newWorkspace"
+        v-if="systemConfig.newWorkspace && newWorkspace"
         v-b-modal.create-ws-folder>
         <b-icon icon="plus-circle"></b-icon>
         New Workspace
@@ -41,13 +41,23 @@
         ></b-form-textarea>
       </div>
       <template v-slot:modal-footer>
-        <b-button @click="notesVisible=false">Cancel</b-button>
-        <b-button
-          v-if="canEditNote"
-          variant="primary"
-          @click="saveNotes" >
-          Save
-        </b-button>
+        <div class="note-footer">
+          <div>
+            <b-form-checkbox v-model="notesHighlight">
+              Highlight Note
+            </b-form-checkbox>
+          </div>
+          <div>
+            <b-button @click="notesVisible=false">Cancel</b-button>
+            <b-button
+              v-if="canEditNote"
+              variant="primary"
+              @click="saveNotes" >
+              Save
+            </b-button>
+          </div>
+        </div>
+
       </template>
 
     </b-modal>
@@ -148,12 +158,21 @@ export default {
         this.$store.dispatch('notes/setContent', val);
       },
     },
+    notesHighlight: {
+      get() {
+        return this.$store.state.notes.folder.highlight;
+      },
+      set(val) {
+        this.$store.dispatch('notes/setHighlight', val);
+      },
+    },
     systemConfig() {
       return this.$store.state.app.config;
     },
     ...mapGetters([
       'canEditNote',
       'canEditConfig',
+      'newWorkspace',
     ]),
   },
   methods: {
@@ -326,6 +345,10 @@ export default {
           cursor: pointer;
         }
 
+        .highlight {
+          color: blue;
+        }
+
         .gray-icon {
           cursor: default;
           color: #d4d4d4;
@@ -369,5 +392,13 @@ export default {
     box-shadow: 0px 1px 10px -7px #222222;
     margin-top: 20px;
     font-weight: 600;
+  }
+  .note-footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    button {
+      margin-left: 10px;
+    }
   }
 </style>
