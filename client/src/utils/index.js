@@ -23,4 +23,6 @@ export const updateCounting = (folders, statistics) => {
   return res;
 };
 
+export const getToken = () => localStorage.getItem('sessionToken', null);
+
 export const getFileServerPath = () => `http://${window.location.hostname}:2929/`;

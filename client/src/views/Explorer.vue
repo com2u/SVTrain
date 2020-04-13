@@ -6,6 +6,7 @@
 
 <script>
 import FileExplorer from '../components/FileExplorer.vue';
+import EventBus from '../utils/eventbus';
 
 export default {
   props: [
@@ -13,6 +14,16 @@ export default {
   ],
   components: {
     FileExplorer,
+  },
+  methods: {
+    checkPermission() {
+    },
+  },
+  mounted() {
+    EventBus.$on('loaded-config', this.checkPermission);
+  },
+  destroyed() {
+    EventBus.$off('loaded-config');
   },
 };
 </script>

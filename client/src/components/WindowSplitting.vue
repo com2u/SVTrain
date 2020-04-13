@@ -80,8 +80,8 @@ export default {
   }
   .expand-side {
     position: fixed;
-    top: 0px;
-    right: 0px;
+    top: 80px;
+    right: 0;
     background: #fff;
   }
   .border {
@@ -89,7 +89,7 @@ export default {
     position: absolute;
     width: 10px;
     background: silver;
-    top: 0px;
+    top: 0;
     cursor: ew-resize;
   }
 }

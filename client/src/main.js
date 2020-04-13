@@ -8,8 +8,10 @@ import 'jsoneditor/dist/jsoneditor.css';
 import VoerroTagsInput from '@voerro/vue-tagsinput';
 
 import Notifications from 'vue-notification';
+import './icons'; // icon
 import store from './store';
 import router from './router';
+import './permissions';
 import App from './App.vue';
 
 Vue.use(Notifications);

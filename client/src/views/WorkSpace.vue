@@ -43,7 +43,7 @@
       <template v-slot:modal-footer>
         <div class="note-footer">
           <div>
-            <b-form-checkbox v-model="notesHighlight">
+            <b-form-checkbox v-model="notesHighlight" :disabled="!canEditNote">
               Highlight Note
             </b-form-checkbox>
           </div>

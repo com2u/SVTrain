@@ -20,6 +20,9 @@ const routes = [
         path: '/explorer/',
         component: () => import('../views/Explorer'),
         props: (route) => ({ dir: route.query.dir }),
+        meta: {
+          permission: 'classify',
+        },
       },
       {
         name: 'statistic',
@@ -41,6 +44,30 @@ const routes = [
         path: '/statistic-overview',
         component: () => import('../views/StatisticOverview'),
         props: (route) => ({ dir: route.query.dir }),
+      },
+      {
+        name: 'Train',
+        path: '/train',
+        component: () => import('../views/Train'),
+        meta: {
+          permission: 'train',
+        },
+      },
+      {
+        name: 'Test',
+        path: '/test',
+        component: () => import('../views/Test'),
+        meta: {
+          permission: 'test',
+        },
+      },
+      {
+        name: 'Validate',
+        path: '/validate',
+        component: () => import('../views/Validate'),
+        meta: {
+          permission: 'validate',
+        },
       },
     ],
   },

@@ -53,13 +53,12 @@
           </span>
           <span class="icon-wrapper">
             <b-icon
-              :class="info.config ? 'clickable-icon': 'gray-icon'"
+              :class="info.config && canEditConfig ? 'clickable-icon': 'gray-icon'"
               icon="gear-fill"
               font-scale="1.5"
               @click="showConfig"
             />
           </span>
-
         </div>
       </div>
     </div>
