@@ -10,11 +10,9 @@
 </template>
 
 <script>
-import api from '../utils/api';
 import Header from '../components/Header.vue';
 import EventBus from '../utils/eventbus';
 import PageFooter from '../components/PageFooter.vue';
-import { getToken } from '../utils';
 
 export default {
   name: 'LoggedInLayout',
@@ -23,18 +21,18 @@ export default {
     PageFooter,
   },
   created() {
-    const sessionToken = getToken();
-    if (!sessionToken) {
-      this.$router.push({ name: 'LoginPage' });
-    } else {
-      api.setSessionToken(sessionToken);
-      api.getConfig()
-        .then((data) => {
-          this.$store.dispatch('app/setConfig', data);
-          this.$store.dispatch('app/setUser', data.user);
-          EventBus.$emit('loaded-config');
-        });
-    }
+    // const sessionToken = getToken();
+    // if (!sessionToken) {
+    //   this.$router.push({ name: 'LoginPage' });
+    // } else {
+    //   api.setSessionToken(sessionToken);
+    //   api.getConfig()
+    //     .then((data) => {
+    //       this.$store.dispatch('app/setConfig', data);
+    //       this.$store.dispatch('app/setUser', data.user);
+    //       EventBus.$emit('loaded-config');
+    //     });
+    // }
   },
   mounted() {
     EventBus.$on('auth_api_error', this.handleApiError);

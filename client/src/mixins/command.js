@@ -1,3 +1,4 @@
+import { mapGetters } from 'vuex';
 import api from '../utils/api';
 import socket from '../utils/socket.js';
 
@@ -18,14 +19,11 @@ export default {
       workspace: null,
       checkInterval: 750,
       commands: [
-        'train',
-        'test',
-        'validate',
-        'export',
-        'ExportImages',
-        'stop',
       ],
     };
+  },
+  computed: {
+    ...mapGetters(['currentWs']),
   },
   methods: {
     async checkStatus() {

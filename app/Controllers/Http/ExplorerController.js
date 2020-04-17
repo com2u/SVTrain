@@ -618,7 +618,6 @@ class ExplorerController {
         for (let file of allFiles) {
           const dirLength = dir.length
           if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
-
             if (file.isUnclassified) {
               dirsObject[dir].unclassified += 1
             } else {
@@ -691,7 +690,7 @@ class ExplorerController {
   async getConfig({request, response}) {
     const currentCfg = await this.getSystemConfig()
     const user = request.currentUser
-    const resConfig = {...currentCfg, user}
+    const resConfig = {...currentCfg, user, root: CONST_PATHS.root}
     // console.log('Current config: ', resConfig)
     response.json(resConfig)
   }

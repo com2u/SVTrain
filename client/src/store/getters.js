@@ -9,5 +9,9 @@ const getters = {
   canTrain: (state) => getPermissions(state) && state.app.user.permissions.train,
   canTest: (state) => getPermissions(state) && state.app.user.permissions.test,
   canValidate: (state) => getPermissions(state) && state.app.user.permissions.validate,
+  currentWs: (state) => {
+    const { wsPath, root } = state.app.config;
+    return wsPath ? wsPath.substring(root.length) : 'Root';
+  },
 };
 export default getters;

@@ -2,26 +2,29 @@
   <div class="container-fluid">
     <div class="title-container">
       <div>
-        <h2>SVTrain v0.10</h2>
+        <h4>SVTrain v0.10</h4>
       </div>
     </div>
     <div class="cmd-main-menu">
+      <div>Workspace: <strong>{{ currentWs}}</strong></div>
       <div>
         Running status:
-        <template v-if="running !== null">
-          {{ running ? `${running}%` : 'idle' }}
-        </template>
-        <template v-else>
-          no info
-        </template>
+        <strong>
+          <template v-if="running !== null">
+            {{ running ? `${running}%` : 'idle' }}
+          </template>
+          <template v-else>
+            no info
+          </template>
+        </strong>
       </div>
-      <div v-for="command in commands" :key="command" class="cmd">
+      <div v-for="command in commands" :key="command.value" class="cmd">
         <b-button
-          v-bind:variant="command === 'stop' ? 'danger' : 'success'"
-          v-bind:disabled="!!isLoading[command] || command === 'stop' && !running || command !== 'stop' && !!running"
-          v-on:click="runCommand(command)">
-          <v-icon v-bind:name="command === 'stop' ? 'stop' : 'play'"/>
-          Run {{command}}.bat
+          v-bind:variant="command.value === 'stop' ? 'danger' : 'success'"
+          v-bind:disabled="!!isLoading[command.value] || command.value === 'stop' && !running || command.value !== 'stop' && !!running"
+          v-on:click="runCommand(command.value)">
+          <v-icon v-bind:name="command.value === 'stop' ? 'stop' : 'play'"/>
+          {{command.label}}
         </b-button>
       </div>
     </div>
@@ -36,8 +39,14 @@ export default {
   data() {
     return {
       commands: [
-        'test',
-        'stop',
+        {
+          value: 'test',
+          label: 'Run test batch',
+        },
+        {
+          value: 'stop',
+          label: 'Stop running test',
+        },
       ],
     };
   },

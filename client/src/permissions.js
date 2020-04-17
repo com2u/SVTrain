@@ -19,8 +19,17 @@ router.beforeEach(async (to, from, next) => {
       next();
     } else {
       if (!config.user) {
-        api.setSessionToken(token);
-        config = await api.getConfig();
+        try {
+          api.setSessionToken(token);
+          config = await api.getConfig();
+          store.dispatch('app/setConfig', config);
+          store.dispatch('app/setUser', config.user);
+          EventBus.$emit('loaded-config');
+          console.log(config);
+        } catch (e) {
+          next('/login');
+          return;
+        }
       }
       const permission = to.meta && to.meta.permission;
       if (!permission) {
