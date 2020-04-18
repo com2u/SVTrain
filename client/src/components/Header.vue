@@ -239,7 +239,7 @@ export default {
         &:before {
           content: attr(data-step);
           position: absolute;
-          bottom: -20px;
+          bottom: -17px;
           left: 50%;
           transform: translateX(-50%);
           font-weight: 600;

@@ -13,5 +13,7 @@ const getters = {
     const { wsPath, root } = state.app.config;
     return wsPath ? wsPath.substring(root.length) : 'Root';
   },
+
+  imageSpacing: (state) => state.app.config.imageSpacing || 10,
 };
 export default getters;

@@ -2,11 +2,13 @@
   <div
     id="keyupevents"
     tabindex="0"
+    @keyup.self.exact.shift.space="selectCurrent(true)"
+    @keyup.self.exact.alt.187="zoomIn(true)"
+    @keyup.self.exact.alt.189="zoomOut(true)"
     @keyup.self.exact.stop.prevent="onKeyUp"
   >
     <div
       tabindex="0"
-      @keyup.self.shift.space.exact.prevent="selectCurrent(true)"
     >
 
     </div>
@@ -14,16 +16,13 @@
       <template v-slot:side>
         <div class="right-side-section">
           <div class="section-item">
-            <span v-if="status !== null">
-              <font v-if="status" color=red>Status: {{status}}%</font>
-              <font v-else>Status: idle</font>
-            </span>
-            <span v-else>
-              Status: no info
-            </span>
-          </div>
-          <div class="section-item">
-            Set file size (in pixels): <input type="number" v-model="fileSize">
+            <svg-icon icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
+            <svg-icon icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
+            <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
+            <b-button>
+              <svg-icon icon-class="statistical"/>
+              <span> Statistic</span>
+            </b-button>
           </div>
         </div>
 
@@ -32,7 +31,8 @@
           <button
             v-bind:disabled="isLoading.statistic || backgroundCalculating"
             v-on:click="calculateStatistic()">
-            Calculate statistic{{ isLoading.statistic || backgroundCalculating ? ' (loading...)' : ''}}
+            Calculate statistic{{ isLoading.statistic || backgroundCalculating ? ' (loading...)' :
+            ''}}
           </button>
           <br>
           <span v-if="!statistic.table">
@@ -53,14 +53,17 @@
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0">
-            <a href="javascript:void(0)" v-on:click="deleteFiles()" :style="{fontSize: fontSize}">Delete files</a>
-            <span v-if="isLoading.deleting"><v-icon name="spinner"></v-icon> Removing...</span><br><br>
+            <a href="javascript:void(0)" v-on:click="deleteFiles()" :style="{fontSize: fontSize}">Delete
+              files</a>
+            <span v-if="isLoading.deleting"><v-icon
+              name="spinner"></v-icon> Removing...</span><br><br>
             Move files to the next folders <span v-if="isLoading.moving"><v-icon
             name="spinner"></v-icon> (Moving...)</span>:
             <ul style="list-style: none">
               <li v-for="f in nextFolders" v-bind:key="f.path">
                 <v-icon name="folder"></v-icon>
-                <a href="javascript:void(0)" v-on:click="moveFiles(f.path)" :style="{fontSize: fontSize}">{{f.name}}</a>
+                <a href="javascript:void(0)" v-on:click="moveFiles(f.path)"
+                   :style="{fontSize: fontSize}">{{f.name}}</a>
               </li>
             </ul>
           </div>
@@ -71,17 +74,24 @@
         </div>
         <div v-if="systemConfig.forwardLocaltion === 'right'" class="right-side-section">
           <div class="pagination-group">
-            <b-button
-              v-if="!forwardOnly"
-              variant="primary"
-              size="sm"
-              @click="backward()">
-              <b-icon icon="chevron-left"></b-icon>
-              Backward
-            </b-button>
-            <b-button variant="primary" size="sm" @click="forward()">Forward
-              <b-icon icon="chevron-right"></b-icon>
-            </b-button>
+            <template v-if="forwardOnly">
+              <b-button variant="primary" size="sm" @click="forward()">
+                <b-icon icon="folder-fill"></b-icon>
+                Confirm
+              </b-button>
+            </template>
+            <template v-else>
+              <b-button
+                variant="primary"
+                size="sm"
+                @click="backward()">
+                <b-icon icon="chevron-left"></b-icon>
+                Backward
+              </b-button>
+              <b-button variant="primary" size="sm" @click="forward()">Forward
+                <b-icon icon="chevron-right"></b-icon>
+              </b-button>
+            </template>
           </div>
         </div>
       </template>
@@ -145,6 +155,31 @@
       v-on:hidden="onCloseModal"
       v-bind:path="openedPath || path"
     />
+
+    <b-modal v-model="showShortcuts" title="Shortcuts" size="lg">
+      <div>
+        <b-row>
+          <b-col>
+            <div v-for="shortcut in shortCuts.left" :key="shortcut.label" class="shortcut-item">
+              <div>{{shortcut.label}}</div>
+              <div class="shortcut-btn">
+                <span v-for="key in shortcut.keys" :key="key">{{key}}</span>
+              </div>
+            </div>
+
+          </b-col>
+          <b-col>
+            <div v-for="shortcut in shortCuts.right" :key="shortcut.label" class="shortcut-item">
+              <div>{{shortcut.label}}</div>
+              <div class="shortcut-btn">
+                <span v-for="key in shortcut.keys" :key="key">{{key}}</span>
+              </div>
+            </div>
+          </b-col>
+        </b-row>
+      </div>
+      <template v-slot:modal-footer><span></span></template>
+    </b-modal>
   </div>
 </template>
 
@@ -186,10 +221,13 @@ export default {
       moving: false,
       statistic: false,
     },
+    showShortcuts: false,
     status: null,
     viewingFile: null,
     statisticShown: false,
     fileSize: 100,
+    minFileSize: 20,
+    maxFileSize: 1000,
     page: 0,
     page_count: null,
     perPage: 10,
@@ -216,6 +254,52 @@ export default {
     createdFolders: [],
     selectedFiles: [],
     filter: {},
+    shortCuts: {
+      left: [
+        {
+          label: 'Zoom In',
+          keys: ['Alt', '-'],
+        },
+        {
+          label: 'Select/Unselect Image',
+          keys: ['Space'],
+        },
+        {
+          label: 'Move left',
+          keys: ['Left'],
+        },
+        {
+          label: 'Move up',
+          keys: ['Up'],
+        },
+        {
+          label: 'Backward',
+          keys: ['PageUp'],
+        },
+      ],
+      right: [
+        {
+          label: 'Zoom Out',
+          keys: ['Alt', '='],
+        },
+        {
+          label: 'Multiple select',
+          keys: ['Shift', 'Space'],
+        },
+        {
+          label: 'Move right',
+          keys: ['Right'],
+        },
+        {
+          label: 'Move down',
+          keys: ['Down'],
+        },
+        {
+          label: 'Forward / Confirm',
+          keys: ['PageDown'],
+        },
+      ],
+    },
   }),
   computed: {
     backgroundCalculating() {
@@ -270,8 +354,21 @@ export default {
     }
   },
   methods: {
+    zoomIn(byShortCut = false) {
+      if (!this.systemConfig.useShortcuts && byShortCut) return;
+      const zoom = Math.floor((this.fileSize * 105) / 100);
+      this.fileSize = (zoom < this.maxFileSize) ? zoom : this.maxFileSize;
+    },
+    zoomOut(byShortCut = false) {
+      if (!this.systemConfig.useShortcuts && byShortCut) return;
+      const zoom = Math.floor((this.fileSize * 95) / 100);
+      this.fileSize = (zoom > this.minFileSize) ? zoom : this.minFileSize;
+    },
+
+    showShortcutsModal() {
+      this.showShortcuts = true;
+    },
     onKeyUp(event) {
-      // console.log('on key up ', event)
       if (event) {
         event.preventDefault();
       }
@@ -331,7 +428,8 @@ export default {
 
     selectFolderByLetter(letter) {
       console.log(`leteter: ${letter}`);
-      const folder = this.folder.folders.find((f) => f.name.toLowerCase().startsWith(letter));
+      const folder = this.folder.folders.find((f) => f.name.toLowerCase()
+        .startsWith(letter));
       console.log(folder);
       if (folder) this.goToTheFolder(folder);
     },
@@ -471,7 +569,6 @@ export default {
       }
     },
     selectCurrent(selectAll) {
-      console.log('Select all: ', selectAll);
       const fileInFocusIndex = this.screenFiles.findIndex((f) => f.cursor);
       if (fileInFocusIndex === -1) return;
       this.toggleSelect(this.screenFiles[fileInFocusIndex], true);
@@ -548,24 +645,27 @@ export default {
         f.serverPath = this.staticServer + f.relativePath;
         f.cursor = false;
         return f;
-      }).filter((f) => {
-        // console.log(f.name, this.filter.exclude, this.filter.include)
-        let excludeFactor = true;
-        let includeFactor = true;
-        if (this.filter.exclude) {
-          if (f.name.toLowerCase().includes(this.filter.exclude.toLowerCase())) {
-            excludeFactor = false;
+      })
+        .filter((f) => {
+          // console.log(f.name, this.filter.exclude, this.filter.include)
+          let excludeFactor = true;
+          let includeFactor = true;
+          if (this.filter.exclude) {
+            if (f.name.toLowerCase()
+              .includes(this.filter.exclude.toLowerCase())) {
+              excludeFactor = false;
+            }
           }
-        }
-        if (this.filter.include) {
-          if (f.name.toLowerCase().includes(this.filter.include.toLowerCase())) {
-            includeFactor = true;
-          } else {
-            includeFactor = false;
+          if (this.filter.include) {
+            if (f.name.toLowerCase()
+              .includes(this.filter.include.toLowerCase())) {
+              includeFactor = true;
+            } else {
+              includeFactor = false;
+            }
           }
-        }
-        return includeFactor && excludeFactor;
-      });
+          return includeFactor && excludeFactor;
+        });
 
       this.folder.total_file = this.folder.files.length;
 
@@ -649,7 +749,8 @@ export default {
 
     async onForwardOnly() {
       const selected = this.selectedFiles.map((f) => f.path);
-      const notSelected = this.screenFiles.filter((f) => !selected.includes(f.path) && f.image).map((f) => f.path);
+      const notSelected = this.screenFiles.filter((f) => !selected.includes(f.path) && f.image)
+        .map((f) => f.path);
       await api.doForwardOnly(selected, notSelected);
       this.loadFiles(this.path);
     },
@@ -665,9 +766,15 @@ export default {
       }
       if (this.statisticShown && file.path.length > this.path.length) {
         // eslint-disable-next-line no-return-await,consistent-return
-        return await this.selectFolder({ folder: file.name, filter: {} });
+        return await this.selectFolder({
+          folder: file.name,
+          filter: {},
+        });
       }
-      this.$router.push({ name: 'explorer', query: { dir: file.path } });
+      this.$router.push({
+        name: 'explorer',
+        query: { dir: file.path },
+      });
     },
     async deleteFiles() {
       if (this.selectedFiles.length === 0) return;
@@ -742,7 +849,8 @@ export default {
     },
     setFocusOnFiles() {
       console.log('set focus on files');
-      window.document.getElementById('keyupevents').focus();
+      window.document.getElementById('keyupevents')
+        .focus();
     },
     enablePreventingScrolling() {
       window.addEventListener('keydown', preventDefaultScrolling, false);
@@ -811,7 +919,6 @@ export default {
 
   .right-side-section {
     margin-top: 10px;
-    border: 1px solid black;
     padding: 5px;
   }
 
@@ -840,5 +947,32 @@ export default {
 
   .pagination-group {
     padding: 5px;
+  }
+
+  .section-item {
+    .section-icon {
+      margin-right: 20px;
+
+      font-size: 20px;
+      cursor: pointer;
+    }
+  }
+
+  .shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px #dedede solid;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+
+    .shortcut-btn {
+      span {
+        border: 1px #777 solid;
+        margin-right: 5px;
+        padding: 5px;
+        border-radius: 2px;
+        box-shadow: 0px 1px 6px -2px #777;
+      }
+    }
   }
 </style>

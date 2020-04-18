@@ -35,10 +35,15 @@
         </div>
         <div>
           <span class="icon-wrapper">
-            <b-icon
-              icon="bar-chart-fill"
+<!--            <b-icon-->
+<!--              icon="bar-chart-fill"-->
+<!--              :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"-->
+<!--              font-scale="1.5"-->
+<!--              @click="showStatistic"-->
+<!--            />-->
+
+            <svg-icon icon-class="statistical" class="svg-icon"
               :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"
-              font-scale="1.5"
               @click="showStatistic"
             />
           </span>

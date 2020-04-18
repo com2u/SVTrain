@@ -18,14 +18,17 @@ export default {
       running: null,
       workspace: null,
       checkInterval: 750,
-      commands: [
-      ],
+      commands: [],
     };
   },
   computed: {
     ...mapGetters(['currentWs']),
   },
   methods: {
+    openLogsFor(command) {
+      window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`);
+    },
+
     async checkStatus() {
       const runstatus = await api.getRunningState();
       this.running = runstatus;

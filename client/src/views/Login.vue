@@ -21,12 +21,13 @@
           />
         </li>
         <li>
-          <button
+          <b-button
+            :disabled="loading"
             @click="login"
             @keydown.enter="login"
           >
             Login
-          </button>
+          </b-button>
         </li>
         <li v-show="errorMessage.length > 0" class="error-message">
           {{ errorMessage }}
@@ -46,6 +47,7 @@ export default {
       userLogin: 'admin',
       userPassword: '',
       errorMessage: '',
+      loading: false,
     };
   },
   methods: {
@@ -65,14 +67,17 @@ export default {
 
       let data = null;
       try {
+        this.loading = true;
         data = await api.login(this.userLogin, this.userPassword);
         localStorage.setItem('sessionToken', data.sessionToken);
         localStorage.setItem('sessionUser', data.login);
-        this.$store.dispatch('app/setUser', data.login);
+        // this.$store.dispatch('app/setUser', data.login);
         api.setSessionToken(data.sessionToken);
         this.$router.push({ name: 'WorkSpacePage' });
         // window.location.reload()
+        this.loading = false;
       } catch (e) {
+        this.loading = false;
         this.errorMessage = e.toString();
         this.userPassword = '';
       }

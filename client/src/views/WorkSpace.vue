@@ -366,6 +366,12 @@ export default {
           display: inline-block;
           margin-left: 10px;
 
+          .svg-icon {
+            font-size: 25px;
+            margin-bottom: -5px;
+            padding-right: 2px;
+          }
+
           &.expand-icon {
             font-size: 10px;
             svg {

@@ -26,6 +26,15 @@
           <v-icon v-bind:name="command.value === 'stop' ? 'stop' : 'play'"/>
           {{command.label}}
         </b-button>
+
+        <span v-if="isLoading[command.value]">Running...</span>
+        <pre
+          style="padding-left: 10px"
+          v-if="logs[command.value] && logs[command.value].lastLine"
+          class="log-line"
+          @click="openLogsFor(command.value)"
+          v-html="logs[command.value].lastLine"/>
+        <div style="clear: both"/>
       </div>
     </div>
   </div>

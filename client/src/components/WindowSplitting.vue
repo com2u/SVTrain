@@ -83,6 +83,8 @@ export default {
     top: 80px;
     right: 0;
     background: #fff;
+    bottom: 50px;
+    overflow-y: scroll;
   }
   .border {
     height: 100%;
