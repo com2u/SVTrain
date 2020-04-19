@@ -25,7 +25,6 @@ router.beforeEach(async (to, from, next) => {
           store.dispatch('app/setConfig', config);
           store.dispatch('app/setUser', config.user);
           EventBus.$emit('loaded-config');
-          console.log(config);
         } catch (e) {
           next('/login');
           return;

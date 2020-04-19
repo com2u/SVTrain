@@ -3,7 +3,8 @@
     <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
       <div :class="!depth? 'root-item': ''">
         <span class="icon-wrapper expand-icon">
-            <template v-if="hasChildren">
+            <b-spinner v-if="loadingChildren" small label="Small Spinner"></b-spinner>
+            <template v-if="hasChildren && !loadingChildren">
               <b-icon
                 v-if="showChildren"
                 icon="triangle-fill"
@@ -101,6 +102,7 @@ export default {
   data() {
     return {
       showChildren: false,
+      loadingChildren: false,
     };
   },
   computed: {
@@ -133,10 +135,15 @@ export default {
     toggleShowChildren() {
       this.showChildren = !this.showChildren;
       if (!this.info.subFolders) {
-        EventBus.$emit('load-sub-folders', {
-          info: this.info,
-          keyPath: this.keyPath,
-        });
+        this.loadingChildren = true;
+        EventBus
+          .$emit('load-sub-folders', {
+            info: this.info,
+            keyPath: this.keyPath,
+            done: () => {
+              this.loadingChildren = false;
+            },
+          });
       }
     },
     showNotes() {
@@ -151,7 +158,9 @@ export default {
       }
     },
     showStatistic() {
-      EventBus.$emit('show-statistic', this.info.path);
+      if (this.canViewStatistics) {
+        EventBus.$emit('show-statistic', this.info.path);
+      }
     },
   },
 };

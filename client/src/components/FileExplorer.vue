@@ -19,7 +19,7 @@
             <svg-icon icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
             <svg-icon icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
-            <b-button>
+            <b-button @click="showStatistic">
               <svg-icon icon-class="statistical"/>
               <span> Statistic</span>
             </b-button>
@@ -27,28 +27,28 @@
         </div>
 
 
-        <div class="right-side-section" v-if="statistic.calculated">
-          <button
-            v-bind:disabled="isLoading.statistic || backgroundCalculating"
-            v-on:click="calculateStatistic()">
-            Calculate statistic{{ isLoading.statistic || backgroundCalculating ? ' (loading...)' :
-            ''}}
-          </button>
-          <br>
-          <span v-if="!statistic.table">
-            Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}
-          </span>
-          <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>
-          <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">
-            <statistic-table
-              v-on:folderselected="selectFolder"
-              v-bind:folder="path"
-              v-bind:table="statistic.table"/>
-          </b-collapse>
-        </div>
-        <div v-else class="right-side-section">
-          Statistic didn't calculated
-        </div>
+<!--        <div class="right-side-section" v-if="statistic.calculated">-->
+<!--          <button-->
+<!--            v-bind:disabled="isLoading.statistic || backgroundCalculating"-->
+<!--            v-on:click="calculateStatistic()">-->
+<!--            Calculate statistic{{ isLoading.statistic || backgroundCalculating ? ' (loading...)' :-->
+<!--            ''}}-->
+<!--          </button>-->
+<!--          <br>-->
+<!--          <span v-if="!statistic.table">-->
+<!--            Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}-->
+<!--          </span>-->
+<!--          <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>-->
+<!--          <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">-->
+<!--            <statistic-table-->
+<!--              v-on:folderselected="selectFolder"-->
+<!--              v-bind:folder="path"-->
+<!--              v-bind:table="statistic.table"/>-->
+<!--          </b-collapse>-->
+<!--        </div>-->
+<!--        <div v-else class="right-side-section">-->
+<!--          Statistic didn't calculated-->
+<!--        </div>-->
 
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
@@ -189,12 +189,12 @@
 import File from './File.vue';
 import api from '../utils/api';
 import socket from '../utils/socket';
-import StatisticTable from './StatisticTable.vue';
 import ShowFile from './ShowFile.vue';
 import CreatingFolder from './CreatingFolder.vue';
 import NewFolderButton from './NewFolderButton.vue';
 import WindowSplitting from './WindowSplitting.vue';
 import { getFileServerPath } from '../utils';
+import EventBus from '../utils/eventbus';
 
 function preventDefaultScrolling(e) {
   // space and arrow keys
@@ -209,7 +209,6 @@ export default {
   ],
   components: {
     File,
-    StatisticTable,
     ShowFile,
     CreatingFolder,
     NewFolderButton,
@@ -864,6 +863,9 @@ export default {
     onCloseModal() {
       this.setFocusOnFiles();
       this.enablePreventingScrolling();
+    },
+    showStatistic() {
+      EventBus.$emit('show-statistic', this.path);
     },
   },
   async created() {

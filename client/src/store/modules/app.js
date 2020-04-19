@@ -9,10 +9,14 @@ export default {
     showNotes: false,
     notesContent: '',
     calculating: false,
+    statisticVisible: false,
   },
   mutations: {
     SET_CONFIG: (state, config) => {
       state.config = config;
+    },
+    SET_STATISTIC_VISIBLE: (state, visible) => {
+      state.statisticVisible = visible;
     },
     SET_SHOW_HEADER: (state, show) => {
       state.showHeader = show;
@@ -35,6 +39,9 @@ export default {
     setConfig: ({ commit }, config) => {
       commit('SET_CONFIG', config);
     },
+    setStatisticVisible: ({ commit }, visible) => {
+      commit('SET_STATISTIC_VISIBLE', visible);
+    },
     toggleHeader: ({ commit, state }) => {
       console.log('state', state);
       commit('SET_SHOW_HEADER', !state.showHeader);
@@ -43,7 +50,8 @@ export default {
       commit('SET_USER', user);
     },
 
-    logout() {
+    logout({ commit }) {
+      commit('SET_CONFIG', {});
       localStorage.removeItem('sessionToken');
       api.setSessionToken('');
     },
