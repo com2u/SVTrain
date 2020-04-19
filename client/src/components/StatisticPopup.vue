@@ -27,52 +27,53 @@
 </template>
 
 <script>
-  import StatisticTable from "./StatisticTable.vue";
-  import api from "../api";
+import StatisticTable from './StatisticTable.vue';
+import api from '../utils/api';
 
-  export default {
-    name: "StatisticPopup",
-    components: {StatisticTable},
-    data() {
-      return {
-        statistic: null,
-        isLoading: false,
-        dir: '',
-        showTable: false
-      }
+export default {
+  name: 'StatisticPopup',
+  components: { StatisticTable },
+  data() {
+    return {
+      statistic: null,
+      isLoading: false,
+      dir: '',
+      showTable: false,
+    };
+  },
+  computed: {
+    backgroundCalculating() {
+      return this.$store.state.app.calculating;
     },
-    computed: {
-      backgroundCalculating() {
-        return this.$store.state.app.calculating
-      }
+  },
+  methods: {
+    open(dir) {
+      this.dir = dir;
+      this.load(dir);
     },
-    methods: {
-      open(dir) {
-        this.dir = dir
-        this.load(dir)
-      },
-      async load(dir) {
-        if (!dir) {
-          dir = this.dir
-        }
-        const response = await api.getStatistic(dir)
-        this.statistic = response
-      },
-      async calculate() {
-        this.isLoading = true
-        await api.calculateStatistic()
-        await this.load()
-        this.isLoading = false
-      },
-      toggleShowTable() {
-        this.showTable = !this.showTable
-      },
-      selectFolder(item) {
-        const gotoDir = `${this.dir}\\${item.folder}`
-        this.$router.push({name: 'explorer', query: {dir: gotoDir}})
+    async load(dir) {
+      if (!dir) {
+        // eslint-disable-next-line no-param-reassign
+        dir = this.dir;
       }
-    }
-  }
+      const response = await api.getStatistic(dir);
+      this.statistic = response;
+    },
+    async calculate() {
+      this.isLoading = true;
+      await api.calculateStatistic();
+      await this.load();
+      this.isLoading = false;
+    },
+    toggleShowTable() {
+      this.showTable = !this.showTable;
+    },
+    selectFolder(item) {
+      const gotoDir = `${this.dir}\\${item.folder}`;
+      this.$router.push({ name: 'explorer', query: { dir: gotoDir } });
+    },
+  },
+};
 </script>
 
 <style scoped>

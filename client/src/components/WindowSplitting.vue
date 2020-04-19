@@ -17,55 +17,56 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
       originalSideWidth: null,
       sideWidth: null,
       resizing: false,
-      originalPageX: null
-    }
+      originalPageX: null,
+    };
   },
   computed: {
     configSideWidth() {
-      const config = this.$store.state.app.config
+      const { config } = this.$store.state.app;
       if (config.rightMenu && config.rightMenu.width) {
-        this.sideWidth = config.rightMenu.width
-        return config.rightMenu.width
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.sideWidth = config.rightMenu.width;
+        return config.rightMenu.width;
       }
-      return 250
+      return 250;
     },
     displayedWidth() {
-      return this.sideWidth || this.configSideWidth
-    }
+      return this.sideWidth || this.configSideWidth;
+    },
   },
   methods: {
-    onMouseUpOnWrapper (e) {
-      this.resizing = false
+    onMouseUpOnWrapper() {
+      this.resizing = false;
     },
-    onMouseMoveOnWrapper (e) {
-      if (!this.resizing) return
-      const difference = this.originalPageX - e.pageX
-      this.sideWidth = this.originalSideWidth + difference
-      if (this.sideWidth < 250) this.sideWidth = 250
-      if (this.sideWidth > 1000) this.sideWidth = 1000
-      e.preventDefault()
+    onMouseMoveOnWrapper(e) {
+      if (!this.resizing) return;
+      const difference = this.originalPageX - e.pageX;
+      this.sideWidth = this.originalSideWidth + difference;
+      if (this.sideWidth < 250) this.sideWidth = 250;
+      if (this.sideWidth > 1000) this.sideWidth = 1000;
+      e.preventDefault();
     },
-    onMouseDownOnBorder (e) {
-      this.resizing = true
-      this.originalPageX = e.pageX
-      this.originalSideWidth = this.sideWidth
+    onMouseDownOnBorder(e) {
+      this.resizing = true;
+      this.originalPageX = e.pageX;
+      this.originalSideWidth = this.sideWidth;
     },
-    onMouseUpOnBorder (e) {
-      this.resizing = false
+    onMouseUpOnBorder() {
+      this.resizing = false;
     },
-    expand () {
-      this.sideWidth = 800
+    expand() {
+      this.sideWidth = 800;
     },
-    shrink () {
-      this.sideWidth = 250
-    }
-  }
-}
+    shrink() {
+      this.sideWidth = 250;
+    },
+  },
+};
 </script>
 
 
@@ -79,16 +80,18 @@ export default {
   }
   .expand-side {
     position: fixed;
-    top: 0px;
-    right: 0px;
+    top: 80px;
+    right: 0;
     background: #fff;
+    bottom: 50px;
+    overflow-y: scroll;
   }
   .border {
     height: 100%;
     position: absolute;
     width: 10px;
     background: silver;
-    top: 0px;
+    top: 0;
     cursor: ew-resize;
   }
 }

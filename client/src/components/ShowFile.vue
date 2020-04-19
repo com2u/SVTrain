@@ -1,5 +1,5 @@
 <template>
-  <b-modal 
+  <b-modal
     hide-footer
     size="lg"
     ref="modal"
@@ -16,64 +16,63 @@
 </template>
 
 <script>
-import ShowImage from './ShowImage.vue'
-import ShowJSON from './ShowJSON.vue'
-import ShowTFSettings from './ShowTFSettings.vue'
+import ShowImage from './ShowImage.vue';
+import ShowJSON from './ShowJSON.vue';
+import ShowTFSettings from './ShowTFSettings.vue';
 
 export default {
   name: 'ShowFile',
   props: {
-    file: { type: Object, required: true }
+    file: { type: Object, required: true },
   },
   components: { ShowImage, ShowJSON, ShowTFSettings },
-  data () {
+  data() {
     return {
       modal: null,
       types: {
         image: 'image',
         json: 'json',
         tfsettings: 'tfsettings',
-        unsupported: 'unsupported'
-      }
-    }
+        unsupported: 'unsupported',
+      },
+    };
   },
   methods: {
-    show () {
-      this.$refs.modal.show()
+    show() {
+      this.$refs.modal.show();
     },
-    onShown (e) {
-      console.log('show file shown')
-      this.$emit('shown', e)
+    onShown(e) {
+      console.log('show file shown');
+      this.$emit('shown', e);
     },
-    onHidden (e) {
-      console.log('show file hidden')
-      this.$emit('hidden', e)
+    onHidden(e) {
+      console.log('show file hidden');
+      this.$emit('hidden', e);
     },
-    closeModal () {
-      this.$refs.modal.hide()
-    }
+    closeModal() {
+      this.$refs.modal.hide();
+    },
   },
   computed: {
-    fileType () {
-      if (typeof this.file.path !== 'string') return 'unsupported'
-      const p = this.file.path.toLowerCase()
-      const jsonRegexp = /\.json$/
-      const tfsettingRegexp = /tfsettings\.json$/
-      const imageRegexp = /\.(jpeg|jpg|gif|bmp|png)$/
+    fileType() {
+      if (typeof this.file.path !== 'string') return 'unsupported';
+      const p = this.file.path.toLowerCase();
+      const jsonRegexp = /\.json$/;
+      const tfsettingRegexp = /tfsettings\.json$/;
+      const imageRegexp = /\.(jpeg|jpg|gif|bmp|png)$/;
       if (imageRegexp.test(p)) {
-        return this.types.image
-      } else if (tfsettingRegexp.test(p)) {
-        return this.types.tfsettings
-      } else if (jsonRegexp.test(p)) {
-        return this.types.json
+        return this.types.image;
+      } if (tfsettingRegexp.test(p)) {
+        return this.types.tfsettings;
+      } if (jsonRegexp.test(p)) {
+        return this.types.json;
       }
-      return this.types.unsupported
-    }
-  }
-}
+      return this.types.unsupported;
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
 
 </style>
-

@@ -1,10 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 const sessionsFilePath = path.join(__dirname, '../../sessions.json')
-
+const {getUsers, getRoles} = require('../utils')
 
 class AuthMiddleware {
-  async handle ({ request, response }, next) {
+  async handle({request, response}, next, properties) {
     let sessionToken = request.header('Authorization') || request.get().sessionToken
     if (!sessionToken) {
       console.log("where is sessionToken")
@@ -27,12 +27,30 @@ class AuthMiddleware {
       response.unauthorized('InvalidToken')
       return
     }
-    request.currentUser = sessions[sessionToken].login
+    const username = sessions[sessionToken].login
+    let user = getUsers()
+    if (!user[username]) {
+      response.unauthorized('UserNotExist')
+      return
+    }
+    const role = user[username].role
+    const permissions = getRoles()[role]
+    if (properties.length) {
+      for (const permission of properties) {
+        response.unauthorized('PermissionDenied')
+        return
+      }
+    }
+    request.currentUser = {
+      username,
+      role,
+      permissions
+    }
     await next()
   }
 
-  async wsHandle ({ request, response }, next) {
-    let { sessionToken } = request.get()
+  async wsHandle({request, response}, next) {
+    let {sessionToken} = request.get()
     if (!sessionToken) {
       console.log("ws where is sessionToken")
       throw new Error('LoginFirst')

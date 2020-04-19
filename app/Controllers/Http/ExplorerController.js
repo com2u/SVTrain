@@ -21,6 +21,9 @@ const config = require('../../../config/ui')
 const logger = require('../../../logger')
 const pathSep = path.sep
 
+const defaultCfgPath = path.join(__dirname, '../../../default.cfg')
+const highlightPrefix = '[HIGHLIGHT]'
+
 
 // if file is landing under root directory
 // prevent access to that file
@@ -261,7 +264,7 @@ class ExplorerController {
       fs.mkdirSync(destination);
     }
 
-    const user = request.currentUser
+    const user = request.currentUser.username
     const response = await this.moveFiles(files, destination, user, true)
     return response
   }
@@ -276,7 +279,7 @@ class ExplorerController {
   */
   async move({request}) {
     let {files, destination} = request.post()
-    const user = request.currentUser
+    const user = request.currentUser.username
     const response = await this.moveFiles(files, destination, user)
     return response
   }
@@ -501,8 +504,10 @@ class ExplorerController {
       throw new Error(`The directory ${folder} doesn't exist`)
     }
     console.log(path.join(folder, name))
-    await mkdir(path.join(folder, name))
-    logger.info(`User ${request.currentUser} has created new folder "${path.join(folder, name)}"`)
+    const newFolderPath = path.join(folder, name)
+    await mkdir(newFolderPath)
+    fs.copyFileSync(defaultCfgPath, path.join(newFolderPath, '.cfg'))
+    logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`)
     return true
   }
 
@@ -613,7 +618,6 @@ class ExplorerController {
         for (let file of allFiles) {
           const dirLength = dir.length
           if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
-
             if (file.isUnclassified) {
               dirsObject[dir].unclassified += 1
             } else {
@@ -636,7 +640,7 @@ class ExplorerController {
     }
   }
 
-  timeOutData(s=5000) {
+  timeOutData(s = 5000) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve()
@@ -686,8 +690,8 @@ class ExplorerController {
   async getConfig({request, response}) {
     const currentCfg = await this.getSystemConfig()
     const user = request.currentUser
-    const resConfig = {...currentCfg, user}
-    console.log('Current config: ', resConfig)
+    const resConfig = {...currentCfg, user, root: CONST_PATHS.root}
+    // console.log('Current config: ', resConfig)
     response.json(resConfig)
   }
 
@@ -700,7 +704,7 @@ class ExplorerController {
     const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected'
     const absNotSelectedPath = path.join(workingRoot, notSelectedPath)
 
-    const user = request.currentUser
+    const user = request.currentUser.username
 
     // Create delete directory if not exist
     if (!fs.existsSync(absSelectedPath)) {
@@ -720,12 +724,13 @@ class ExplorerController {
   }
 
   async saveNotes({request, response}) {
-    const {path, notes} = request.post()
-    if (fs.existsSync(path)) {
-      fs.writeFileSync(path, notes, {encoding: 'utf8'})
-      return true
+    const {path, highlight } = request.post()
+    let { notes } = request.post()
+    if (highlight) {
+      notes = `${highlightPrefix}${notes}`
     }
-    return false
+    fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'})
+    return true
   }
 
   async saveConfig({request, response}) {
@@ -770,11 +775,18 @@ class ExplorerController {
         }
 
         const notesPath = path.join(subDir, 'notes.txt')
+        file.notes = ''
+        file.notesPath = notesPath
+        file.highlight = false
         if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
           try {
             let notes = fs.readFileSync(notesPath, 'utf-8')
-            file.notes = notes
-            file.notesPath = notesPath
+            if (notes.startsWith(highlightPrefix)) {
+              file.notes = notes.substring(highlightPrefix.length)
+              file.highlight = true
+            } else {
+              file.notes = notes
+            }
           } catch (e) {
             console.log(`can not read ${notesPath}`)
           }

@@ -6,40 +6,73 @@
         <b-navbar toggleable="lg" type="light" variant="faded">
           <b-navbar-nav :to="{name: 'WorkSpacePage'}">
             <b-nav-item class="logo" :to="{name: 'WorkSpacePage'}">
-              <img src="../images/EjectXLogo.png">
+              <img src="../assets/logo.png">
             </b-nav-item>
           </b-navbar-nav>
-
+          <b-navbar-nav class="step-nav-item">
+            <div class="step-container">
+              <ul class="step-progress">
+                <li data-step="Classify">
+                  <svg-icon
+                    icon-class="microscope"
+                    class="step-icon"
+                    :class="{
+                      'is-active': $route.name==='explorer',
+                      'clickable': canClassify,
+                      'is-disabled': !canClassify
+                    }"
+                    @click="gotoPage('explorer')"
+                  />
+                </li>
+                <li data-step="Train">
+                  <svg-icon
+                    icon-class="xtrain"
+                    class="step-icon"
+                    :class="{
+                      'is-active': $route.name==='Train',
+                      'clickable': canTrain,
+                      'is-disabled': !canTrain
+                    }"
+                    @click="gotoPage('Train')"
+                  />
+                </li>
+                <li data-step="Test">
+                  <svg-icon
+                    icon-class="search"
+                    class="step-icon"
+                    :class="{
+                      'is-active': $route.name==='Test',
+                      'clickable': canTrain,
+                      'is-disabled': !canTrain
+                    }"
+                    @click="gotoPage('Test')"
+                  />
+                </li>
+                <li data-step="Validate">
+                  <svg-icon
+                    icon-class="certificate"
+                    class="step-icon"
+                    :class="{
+                      'is-active': $route.name==='Validate',
+                      'clickable': canTrain,
+                      'is-disabled': !canTrain
+                    }"
+                    @click="gotoPage('Validate')"
+                  />
+                </li>
+              </ul>
+            </div>
+          </b-navbar-nav>
           <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
           <b-collapse id="nav-collapse" is-nav>
-            <!--            <b-navbar-nav>-->
-            <!--              <b-nav-item href="#">Link</b-nav-item>-->
-            <!--              <b-nav-item href="#" disabled>Disabled</b-nav-item>-->
-            <!--            </b-navbar-nav>-->
-
-
-            <!-- Right aligned nav items -->
 
             <b-navbar-nav class="ml-auto">
-              <!--              <b-nav-form>-->
-              <!--                <b-form-input size="sm" class="mr-sm-2" placeholder="Search"></b-form-input>-->
-              <!--                <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>-->
-              <!--              </b-nav-form>-->
               <b-navbar-nav>
                 <b-nav-item :to="{name: 'HelpPage'}">
                   <b-icon icon="question" class="help-icon"/>
                 </b-nav-item>
               </b-navbar-nav>
-
-
-<!--              <b-nav-item-dropdown right class="user-info">-->
-<!--                &lt;!&ndash; Using 'button-content' slot &ndash;&gt;-->
-<!--                <template v-slot:button-content>-->
-<!--                  <em>{{user}}</em>-->
-<!--                </template>-->
-<!--                <b-dropdown-item @click="logOut">Sign Out</b-dropdown-item>-->
-<!--              </b-nav-item-dropdown>-->
 
               <b-navbar-nav class="user-info">
                 <b-nav-item @click="logout">
@@ -54,36 +87,59 @@
   </div>
 </template>
 <script>
-  const x = require('../images/EjectXLogo.png')
-  export default {
-    data() {
-      return {
-        showHeader: true,
-        imgSrc: x
-      }
-    },
-    computed: {
-      user() {
-        return this.$store.state.app.user
-      }
-    },
-    methods: {
-      toggleHeader() {
-        this.showHeader = !this.showHeader
-      },
-      logout() {
+import { mapGetters } from 'vuex';
 
-        this.$store.dispatch('app/logout')
-        this.$router.push({ name: 'LoginPage' })
+export default {
+  data() {
+    return {
+      showHeader: true,
+    };
+  },
+  computed: {
+    user() {
+      return this.$store.state.app.user.username;
+    },
+
+    ...mapGetters([
+      'canClassify',
+      'canTrain',
+      'canTest',
+      'canValidate',
+    ]),
+  },
+  methods: {
+    toggleHeader() {
+      this.showHeader = !this.showHeader;
+    },
+    logout() {
+      this.$store.dispatch('app/logout');
+      this.$router.push({ name: 'LoginPage' });
+    },
+    gotoPage(page) {
+      const permissionMap = {
+        explorer: 'canClassify',
+        Train: 'canTrain',
+        Test: 'canTest',
+        Validate: 'canValidate',
+      };
+      if (this[permissionMap[page]]) {
+        this.$router.push({
+          name: page,
+        });
       }
-    }
-  }
+    },
+  },
+  mounted() {
+  },
+};
 </script>
 <style lang="scss" scoped>
   .header {
-    background: #fff;
+    background: #fafafa;
 
     .logo {
+      height: 80px;
+
       img {
         height: 50px;
       }
@@ -119,5 +175,76 @@
     }
 
     z-index: 999;
+  }
+
+  .step-nav-item {
+    width: 100%;
+  }
+
+  .step-container {
+    width: 600px;
+    margin: 0 auto;
+
+    .step-progress {
+      li {
+        list-style-type: none;
+        width: 25%;
+        float: left;
+        position: relative;
+        text-align: center;
+        margin-top: -10px;
+        /*z-index: 1;*/
+
+        .step-icon {
+          border: 1px solid #333;
+          border-radius: 50%;
+          width: 45px;
+          height: 45px;
+          padding: 5px;
+          background: #fafafa;
+          margin-top: -5px;
+
+          &.is-active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+          }
+
+          &.is-disabled {
+            background: #d1d1d1;
+            cursor: not-allowed;
+            border: 1px solid #a1a1a1;
+          }
+
+          &.icon-sm {
+            padding: 10px;
+          }
+        }
+
+        &:after {
+          width: 100%;
+          height: 2px;
+          content: '';
+          position: absolute;
+          background-color: #000000;
+          top: 15px;
+          left: -50%;
+          z-index: -2;
+        }
+
+        &:first-child:after {
+          content: none;
+        }
+
+        &:before {
+          content: attr(data-step);
+          position: absolute;
+          bottom: -17px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-weight: 600;
+        }
+      }
+    }
   }
 </style>

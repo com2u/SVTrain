@@ -1,0 +1,36 @@
+{
+  "expert": {
+    "editConfig": true,
+    "editNote": true,
+    "newWorkspace": true,
+    "newFolder": true,
+    "viewStatistics": true,
+    "moveMenu": true,
+    "showLog": true,
+    "classify": true,
+    "train": true,
+    "test": true,
+    "validate": true,
+    "workspaces": [
+      "Cake",
+      "Liquide products",
+      "Lyo.*"
+    ]
+  },
+  "operator": {
+    "editConfig": false,
+    "editNote": false,
+    "newWorkspace": false,
+    "newFolder": false,
+    "viewStatistics": false,
+    "moveMenu": true,
+    "showLog": false,
+    "classify": false,
+    "train": false,
+    "test": false,
+    "validate": false,
+    "workspaces": [
+      "Test"
+    ]
+  }
+}
