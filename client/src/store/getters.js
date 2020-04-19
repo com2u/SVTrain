@@ -5,6 +5,7 @@ const getters = {
   canEditConfig: (state) => getPermissions(state) && state.app.user.permissions.editConfig,
   canViewStatistics: (state) => getPermissions(state) && state.app.user.permissions.viewStatistics,
   newWorkspace: (state) => getPermissions(state) && state.app.user.permissions.newWorkspace,
+  newFolder: (state) => getPermissions(state) && state.app.user.permissions.newFolder,
   canClassify: (state) => getPermissions(state) && state.app.user.permissions.classify,
   canTrain: (state) => getPermissions(state) && state.app.user.permissions.train,
   canTest: (state) => getPermissions(state) && state.app.user.permissions.test,

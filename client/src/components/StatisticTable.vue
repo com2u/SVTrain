@@ -44,7 +44,7 @@
           </b-tr>
         </b-tbody>
       </b-table-simple>
-      <div class="input-container">
+      <div class="input-container value-type-input">
         <input type="radio" name="view" v-model="valuesView" id="absoluteView" value="absolute">
         <label for="absoluteView">Absolute Numbers</label>
         <input type="radio" name="view" v-model="valuesView" id="percentageView" value="percentage">
@@ -156,5 +156,9 @@ export default {
     input {
       margin-left: 10px;
     }
+  }
+
+  .value-type-input {
+    text-align: right;
   }
 </style>

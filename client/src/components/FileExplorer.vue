@@ -16,7 +16,9 @@
       <template v-slot:side>
         <div class="right-side-section">
           <div class="section-item">
-            <svg-icon icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
+            <svg-icon
+              v-b-toolptip.hover="'text!'"
+              icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
             <svg-icon icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
             <b-button @click="showStatistic">
@@ -26,44 +28,28 @@
           </div>
         </div>
 
-
-<!--        <div class="right-side-section" v-if="statistic.calculated">-->
-<!--          <button-->
-<!--            v-bind:disabled="isLoading.statistic || backgroundCalculating"-->
-<!--            v-on:click="calculateStatistic()">-->
-<!--            Calculate statistic{{ isLoading.statistic || backgroundCalculating ? ' (loading...)' :-->
-<!--            ''}}-->
-<!--          </button>-->
-<!--          <br>-->
-<!--          <span v-if="!statistic.table">-->
-<!--            Statistic: matched={{statistic.matched}}, missed={{statistic.missed}}, missmatched={{statistic.missmatched}}-->
-<!--          </span>-->
-<!--          <button v-b-toggle.statistics v-if="statistic.table">Expand statistic table</button>-->
-<!--          <b-collapse id="statistics" v-on:show="statisticExpanded()" v-on:hide="statisticHidden()">-->
-<!--            <statistic-table-->
-<!--              v-on:folderselected="selectFolder"-->
-<!--              v-bind:folder="path"-->
-<!--              v-bind:table="statistic.table"/>-->
-<!--          </b-collapse>-->
-<!--        </div>-->
-<!--        <div v-else class="right-side-section">-->
-<!--          Statistic didn't calculated-->
-<!--        </div>-->
-
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0">
-            <a href="javascript:void(0)" v-on:click="deleteFiles()" :style="{fontSize: fontSize}">Delete
-              files</a>
-            <span v-if="isLoading.deleting"><v-icon
-              name="spinner"></v-icon> Removing...</span><br><br>
             Move files to the next folders <span v-if="isLoading.moving"><v-icon
             name="spinner"></v-icon> (Moving...)</span>:
-            <ul style="list-style: none">
-              <li v-for="f in nextFolders" v-bind:key="f.path">
-                <v-icon name="folder"></v-icon>
-                <a href="javascript:void(0)" v-on:click="moveFiles(f.path)"
-                   :style="{fontSize: fontSize}">{{f.name}}</a>
+            <ul class="next-folders">
+              <li v-for="f in nextFolders" v-bind:key="f.path" @click="moveFiles(f.path)">
+                <img v-if="f.icon" :src="`${staticServer}${f.icon}`" alt="icon"
+                     class="next-folders-icon">
+                <span v-else>
+                  <svg-icon icon-class="unknown"/>
+                </span>
+                <span class="folder-name"
+                      :style="{fontSize: fontSize}">{{f.name}}</span>
+              </li>
+              <li>
+                <span>
+                  <svg-icon icon-class="delete"/>
+                </span>
+                <span class="folder-name" :style="{fontSize: fontSize}" @click="deleteFiles()">
+                  Delete image(s)
+                </span>
               </li>
             </ul>
           </div>
@@ -96,20 +82,22 @@
         </div>
       </template>
       <template v-slot:main>
-        <div class="header">
-          <router-link :to="{name: 'main'}">To main screen</router-link>
-          | <b>{{ openedPath }}</b>
+        <div>
+          <div><strong>{{dir}}</strong></div>
+          <div v-if="systemConfig.newFolder && newFolder">
+            <new-folder-button v-b-modal.creating-folder-modal/>
+          </div>
+          <div class="list-folders">
+            <file class="folder"
+                  v-for="file in folder.folders"
+                  v-bind:file="file"
+                  v-on:click.native="goToTheFolder(file)"
+                  v-bind:key="file.path">
+            </file>
+          </div>
         </div>
         <div class="file-explorer-grid bottom-border">
-          <template v-if="systemConfig.newFolder">
-            <new-folder-button v-b-modal.creating-folder-modal/>
-          </template>
-          <file
-            v-for="file in folder.folders"
-            v-bind:file="file"
-            v-on:click.native="goToTheFolder(file)"
-            v-bind:key="file.path">
-          </file>
+
         </div>
         <div v-if="systemConfig.forwardLocaltion === 'top'">
           <div class="pagination-group">
@@ -186,6 +174,7 @@
 <script>
 /* eslint no-plusplus: 0 */
 /* eslint no-param-reassign: 0 */
+import { mapGetters } from 'vuex';
 import File from './File.vue';
 import api from '../utils/api';
 import socket from '../utils/socket';
@@ -330,6 +319,7 @@ export default {
     defaultFileSize() {
       return this.$store.state.app.config.defaultPictureSize;
     },
+    ...mapGetters(['newFolder']),
   },
   watch: {
     configFilePerPage() {
@@ -911,12 +901,35 @@ export default {
   }
 
   .next-folders {
-    height: 100%;
-    overflow-y: auto;
-    width: 240px;
-    position: fixed;
-    top: 10px;
-    right: 0px
+    /*height: 100%;*/
+    /*overflow-y: auto;*/
+    /*width: 240px;*/
+    /*position: fixed;*/
+    /*top: 10px;*/
+    /*right: 0px*/
+    list-style-type: none;
+
+    li {
+      background: var(--primary);
+      margin-bottom: 10px;
+      padding: 0 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      font-size: 25px;
+      line-height: 25px;
+
+      .folder-name {
+        padding-left: 10px;
+        font-size: 1rem;
+      }
+
+      .next-folders-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
   }
 
   .right-side-section {
@@ -975,6 +988,13 @@ export default {
         border-radius: 2px;
         box-shadow: 0px 1px 6px -2px #777;
       }
+    }
+  }
+
+  .list-folders {
+    .folder {
+      display: inline;
+      cursor: pointer;
     }
   }
 </style>
