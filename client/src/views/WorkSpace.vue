@@ -85,19 +85,6 @@
 
     </b-modal>
 
-    <b-modal
-      v-model="statisticVisible"
-      size="xl"
-      cancel-title="Close"
-    >
-      <template v-slot:modal-title>Statistic</template>
-      <statistic-popup ref="statistic"/>
-      <div>
-
-      </div>
-
-    </b-modal>
-
     <creating-folder
       @folder-created="onFolderCreated"
       path="root"
@@ -113,7 +100,6 @@ import { mapGetters } from 'vuex';
 import api from '../utils/api';
 import WorkspaceFolder from '../components/WorkspaceFolder.vue';
 import CreatingFolder from '../components/CreatingFolder.vue';
-import StatisticPopup from '../components/StatisticPopup.vue';
 import EventBus from '../utils/eventbus';
 import { updateCounting } from '../utils';
 
@@ -122,14 +108,12 @@ export default {
   components: {
     WorkspaceFolder,
     CreatingFolder,
-    StatisticPopup,
   },
   data() {
     return {
       folders: [],
       loading: false,
       editor: null,
-      statisticVisible: false,
       populatedFolders: [],
     };
   },
@@ -240,13 +224,8 @@ export default {
       const subFoldersPath = `${item.keyPath}.subFolders`;
       const updatedFolders = _set(this.folders, subFoldersPath, subFolders);
       this.folders = JSON.parse(JSON.stringify(updatedFolders));
-    },
-    showStatistic(dir) {
-      this.statisticVisible = true;
       this.$nextTick(() => {
-        if (this.$refs.statistic) {
-          this.$refs.statistic.open(dir);
-        }
+        item.done();
       });
     },
   },
@@ -260,11 +239,9 @@ export default {
         this.folders = folders;
       });
     EventBus.$on('load-sub-folders', this.loadSubfolder);
-    EventBus.$on('show-statistic', this.showStatistic);
   },
   destroyed() {
     EventBus.$off('load-sub-folders');
-    EventBus.$off('show-statistic');
   },
 };
 </script>
@@ -351,7 +328,7 @@ export default {
 
         .gray-icon {
           cursor: default;
-          color: #d4d4d4;
+          color: #999;
         }
 
         .ws-progress {

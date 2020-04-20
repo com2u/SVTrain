@@ -4,9 +4,9 @@ module.exports = {
     margin: 5,
     fontSize: "1rem"
   },
-  filePerPage: 3,
+  filePerPage: 10,
 
-  showFileName: true,
+  showFileName: false,
 
   useShortcuts: true,
   requestBeforeDelete: true,
@@ -22,7 +22,9 @@ module.exports = {
 
   // top or right
   forwardLocaltion: 'right',
-  moveMenu: false,
+  moveMenu: true,
   newFolder: true,
-  newWorkspace: true
+  newWorkspace: true,
+
+  imageSpacing: 10,
 }

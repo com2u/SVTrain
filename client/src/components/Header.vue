@@ -193,7 +193,7 @@ export default {
         position: relative;
         text-align: center;
         margin-top: -10px;
-        /*z-index: 1;*/
+        z-index: 1;
 
         .step-icon {
           border: 1px solid #333;
@@ -203,6 +203,7 @@ export default {
           padding: 5px;
           background: #fafafa;
           margin-top: -5px;
+          z-index: 2;
 
           &.is-active {
             background: var(--primary);
@@ -222,14 +223,13 @@ export default {
         }
 
         &:after {
-          width: 100%;
-          height: 2px;
+          width: calc(100% - 45px);
+          height: 5px;
           content: '';
           position: absolute;
           background-color: #000000;
           top: 15px;
-          left: -50%;
-          z-index: -2;
+          left: calc(-50% + 23px);
         }
 
         &:first-child:after {

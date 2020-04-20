@@ -23,6 +23,7 @@ const pathSep = path.sep
 
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg')
 const highlightPrefix = '[HIGHLIGHT]'
+const iconName = 'favicon.ico';
 
 
 // if file is landing under root directory
@@ -119,20 +120,22 @@ class ExplorerController {
 
     for (let i = 0; i < files.length; ++i) {
       const f = files[i]
+      const fPath = path.join(dir, f)
       const flstat = await lstat(path.join(dir, f))
       if (f)
         if (flstat.isDirectory()) {
-          result.folders.push({
-            path: path.join(dir, f),
+          const folder = {
+            path: fPath,
             name: f,
             type: FTYPES.folder,
             image: false,
             match: false
-          })
+          }
+          result.folders.push(folder)
         } else if (flstat.isFile()) {
           result.files.push({
-            path: path.join(dir, f),
-            relativePath: path.relative(CONST_PATHS.root, path.join(dir, f)),
+            path: fPath,
+            relativePath: path.relative(CONST_PATHS.root, fPath),
             name: f,
             type: FTYPES.file,
             image: regexpForImages.test(f),
@@ -260,8 +263,9 @@ class ExplorerController {
     const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles'
 
     // Create delete directory if not exist
-    if (!fs.existsSync(destination)) {
-      fs.mkdirSync(destination);
+    const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination)
+    if (!fs.existsSync(absDestination)) {
+      fs.mkdirSync(absDestination);
     }
 
     const user = request.currentUser.username
@@ -285,6 +289,7 @@ class ExplorerController {
   }
 
   async moveFiles(files, destination, user, isDelete = false) {
+    const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination)
     if (!accessToFile(CONST_PATHS.root, destination)) {
       throw new Error(`Access denied to the directory ${destination}`)
     }
@@ -300,7 +305,7 @@ class ExplorerController {
       files.map(
         async f => await rename(
           f,
-          path.join(destination, path.basename(f))
+          path.join(absDestination, path.basename(f))
         )
       )
     )
@@ -310,12 +315,12 @@ class ExplorerController {
       }
     } else {
       for (const file of files) {
-        logger.info(`User ${user} has move file "${file}" to "${path.join(destination, path.basename(file))}"`)
+        logger.info(`User ${user} has move file "${file}" to "${path.join(absDestination, path.basename(file))}"`)
       }
     }
 
     return files.map(
-      f => path.join(destination, path.basename(f))
+      f => path.join(absDestination, path.basename(f))
     )
   }
 
@@ -348,12 +353,19 @@ class ExplorerController {
 
     for (let i = 0; i < files.length; ++i) {
       const f = files[i]
-      const flstat = await lstat(path.join(parentDirectory, f))
+      const fPath = path.join(parentDirectory, f)
+      const flstat = await lstat(fPath)
       if (flstat.isDirectory()) {
-        result.push({
-          path: path.join(parentDirectory, f),
-          name: f
-        })
+        const folder = {
+          path: fPath,
+          name: f,
+          icon: false,
+        }
+        const iconPath = path.join(fPath, iconName)
+        if (fs.existsSync(iconPath)) {
+          folder.icon = path.relative(CONST_PATHS.root, iconPath)
+        }
+        result.push(folder)
       }
     }
 
@@ -724,8 +736,8 @@ class ExplorerController {
   }
 
   async saveNotes({request, response}) {
-    const {path, highlight } = request.post()
-    let { notes } = request.post()
+    const {path, highlight} = request.post()
+    let {notes} = request.post()
     if (highlight) {
       notes = `${highlightPrefix}${notes}`
     }
