@@ -23,7 +23,7 @@
               v-b-popover.hover.html.top="'<b>Alt</b> + <b>=</b>'" title="Shortcut"
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
-            <b-button @click="showStatistic">
+            <b-button @click="showStatistic" :disabled="!canViewStatistics">
               <svg-icon icon-class="statistical"/>
               <span> Statistic</span>
             </b-button>
@@ -32,7 +32,7 @@
 
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
-          <div v-if="selectedFiles.length > 0">
+          <div v-if="selectedFiles.length > 0 && canSeeMoveMenu">
             Move files to the next folders <span v-if="isLoading.moving"><v-icon
             name="spinner"></v-icon> (Moving...)</span>:
             <ul class="next-folders">
@@ -339,7 +339,11 @@ export default {
     defaultFileSize() {
       return this.$store.state.app.config.defaultPictureSize;
     },
-    ...mapGetters(['newFolder']),
+    ...mapGetters([
+      'newFolder',
+      'canViewStatistics',
+      'canSeeMoveMenu',
+    ]),
   },
   watch: {
     configFilePerPage() {
