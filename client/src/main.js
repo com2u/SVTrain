@@ -14,6 +14,7 @@ import router from './router';
 import './permissions';
 import App from './App.vue';
 
+
 Vue.use(Notifications);
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
