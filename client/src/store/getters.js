@@ -10,6 +10,7 @@ const getters = {
   canTrain: (state) => getPermissions(state) && state.app.user.permissions.train,
   canTest: (state) => getPermissions(state) && state.app.user.permissions.test,
   canValidate: (state) => getPermissions(state) && state.app.user.permissions.validate,
+  canSeeMoveMenu: (state) => getPermissions(state) && state.app.user.permissions.moveMenu,
   currentWs: (state) => {
     const { wsPath, root } = state.app.config;
     return wsPath ? wsPath.substring(root.length) : 'Root';

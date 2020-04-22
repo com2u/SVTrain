@@ -14,7 +14,7 @@ module.exports = {
   deleteDefaultFolder: 'Deleted_files',
   selectedPath: 'Selected_new',
   notSelectedPath: 'Not_Selected',
-  forwardOnly: true,
+  forwardOnly: false,
   buttonFontSize: '1rem',
   titleFontSize: '1rem',
   defaultEpoch: 1,

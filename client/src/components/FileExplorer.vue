@@ -17,11 +17,13 @@
         <div class="right-side-section">
           <div class="section-item">
             <svg-icon
-              v-b-toolptip.hover="'text!'"
+              v-b-popover.hover.html.top="'<b>Alt</b> + <b>-</b>'" title="Shortcut"
               icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
-            <svg-icon icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
+            <svg-icon
+              v-b-popover.hover.html.top="'<b>Alt</b> + <b>=</b>'" title="Shortcut"
+              icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
-            <b-button @click="showStatistic">
+            <b-button @click="showStatistic" :disabled="!canViewStatistics">
               <svg-icon icon-class="statistical"/>
               <span> Statistic</span>
             </b-button>
@@ -30,7 +32,7 @@
 
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
-          <div v-if="selectedFiles.length > 0">
+          <div v-if="selectedFiles.length > 0 && canSeeMoveMenu">
             Move files to the next folders <span v-if="isLoading.moving"><v-icon
             name="spinner"></v-icon> (Moving...)</span>:
             <ul class="next-folders">
@@ -47,7 +49,10 @@
                 <span>
                   <svg-icon icon-class="delete"/>
                 </span>
-                <span class="folder-name" :style="{fontSize: fontSize}" @click="deleteFiles()">
+                <span
+                  class="folder-name"
+                  :style="{fontSize: fontSize}"
+                  @click="deleteFiles()">
                   Delete image(s)
                 </span>
               </li>
@@ -61,20 +66,26 @@
         <div v-if="systemConfig.forwardLocaltion === 'right'" class="right-side-section">
           <div class="pagination-group">
             <template v-if="forwardOnly">
-              <b-button variant="primary" size="sm" @click="forward()">
+              <b-button
+                v-b-popover.hover.html.top="'<b>PageDown</b>'" title="Shortcut"
+                variant="primary" size="sm" @click="forward()">
                 <b-icon icon="folder-fill"></b-icon>
                 Confirm
               </b-button>
             </template>
             <template v-else>
               <b-button
+                v-b-popover.hover.html.top="'<b>PageUp</b>'" title="Shortcut"
                 variant="primary"
                 size="sm"
                 @click="backward()">
                 <b-icon icon="chevron-left"></b-icon>
                 Backward
               </b-button>
-              <b-button variant="primary" size="sm" @click="forward()">Forward
+              <b-button
+                style="margin-left: 10px"
+                v-b-popover.hover.html.top="'<b>PageDown</b>'" title="Shortcut"
+                variant="primary" size="sm" @click="forward()">Forward
                 <b-icon icon="chevron-right"></b-icon>
               </b-button>
             </template>
@@ -88,12 +99,21 @@
             <new-folder-button v-b-modal.creating-folder-modal/>
           </div>
           <div class="list-folders">
-            <file class="folder"
-                  v-for="file in folder.folders"
-                  v-bind:file="file"
-                  v-on:click.native="goToTheFolder(file)"
-                  v-bind:key="file.path">
-            </file>
+            <span v-for="file in folder.folders" :key="file.path">
+              <file
+                v-if="file.shortcut"
+                v-b-popover.hover.html.top="`<b>${file.shortcut}</b>`" title="Shortcut"
+                class="folder"
+                v-bind:file="file"
+                v-on:click.native="goToTheFolder(file)">
+              </file>
+              <file
+                v-else
+                class="folder"
+                v-bind:file="file"
+                v-on:click.native="goToTheFolder(file)">
+              </file>
+            </span>
           </div>
         </div>
         <div class="file-explorer-grid bottom-border">
@@ -319,7 +339,11 @@ export default {
     defaultFileSize() {
       return this.$store.state.app.config.defaultPictureSize;
     },
-    ...mapGetters(['newFolder']),
+    ...mapGetters([
+      'newFolder',
+      'canViewStatistics',
+      'canSeeMoveMenu',
+    ]),
   },
   watch: {
     configFilePerPage() {
@@ -419,7 +443,6 @@ export default {
       console.log(`leteter: ${letter}`);
       const folder = this.folder.folders.find((f) => f.name.toLowerCase()
         .startsWith(letter));
-      console.log(folder);
       if (folder) this.goToTheFolder(folder);
     },
 
@@ -659,9 +682,17 @@ export default {
       this.folder.total_file = this.folder.files.length;
 
       // prepare folders
+      let previousLetter = '-';
       this.folder.folders = content.folders.map((f) => {
         f.type = 'folder';
         f.selected = false;
+        const lowerName = f.name.toLowerCase();
+        const firstLetter = lowerName.substring(0, 1);
+        if (!lowerName.startsWith(previousLetter) && firstLetter.toUpperCase() !== firstLetter.toLowerCase()) {
+          f.shortcut = firstLetter.toUpperCase();
+          console.log(firstLetter.toUpperCase());
+          previousLetter = firstLetter;
+        }
         return f;
       });
 
