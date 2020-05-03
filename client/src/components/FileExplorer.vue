@@ -342,7 +342,7 @@ export default {
     },
     relativeDir() {
       const { root } = this.$store.state.app.config;
-      return this.dir.substring(root.length);
+      return this.dir && root ? this.dir.substring(root.length) : this.dir;
     },
     ...mapGetters([
       'newFolder',
