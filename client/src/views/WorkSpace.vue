@@ -2,7 +2,11 @@
   <div>
     <div class="title-container">
       <div>
-        <h1>Work Spaces</h1>
+        <h1
+          :style="{
+            fontSize: workspaceFontSize
+            }"
+        >Work Spaces</h1>
       </div>
     </div>
     <div>
@@ -52,7 +56,7 @@
             <b-button
               v-if="canEditNote"
               variant="primary"
-              @click="saveNotes" >
+              @click="saveNotes">
               Save
             </b-button>
           </div>
@@ -78,7 +82,7 @@
         <b-button
           v-if="canEditConfig"
           variant="primary"
-          @click="saveConfig" >
+          @click="saveConfig">
           Save
         </b-button>
       </template>
@@ -157,6 +161,7 @@ export default {
       'canEditNote',
       'canEditConfig',
       'newWorkspace',
+      'workspaceFontSize',
     ]),
   },
   methods: {
@@ -225,7 +230,9 @@ export default {
       const updatedFolders = _set(this.folders, subFoldersPath, subFolders);
       this.folders = JSON.parse(JSON.stringify(updatedFolders));
       this.$nextTick(() => {
-        item.done();
+        if (item.done) {
+          item.done();
+        }
       });
     },
   },
@@ -279,7 +286,7 @@ export default {
     .folder-label {
       height: $height;
       margin-bottom: 10px;
-      background: #f3f3f3;
+      background: #f2f1ef;
       display: flex;
       justify-content: space-between;
       padding: 0 10px;
@@ -287,6 +294,10 @@ export default {
       -moz-box-shadow: 0px 1px 10px -7px #222222;
       box-shadow: 0px 1px 10px -7px #222222;
       border-radius: 2px;
+
+      .margin-keeper {
+        margin-left: 18px;
+      }
 
       &.selected {
         background: #39d1ff;
@@ -336,6 +347,10 @@ export default {
           margin-right: 30px;
           margin-top: 23px;
           margin-left: 5px;
+
+          .black-bar {
+            background: #000;
+          }
         }
 
         .icon-wrapper {
@@ -351,6 +366,7 @@ export default {
 
           &.expand-icon {
             font-size: 10px;
+
             svg {
               width: 10px !important;
               font-size: 10px !important;
@@ -360,6 +376,7 @@ export default {
       }
     }
   }
+
   .new-ws {
     width: 100%;
     border: 1px solid #f3f3f3;
@@ -376,10 +393,12 @@ export default {
     margin-top: 20px;
     font-weight: 600;
   }
+
   .note-footer {
     display: flex;
     justify-content: space-between;
     width: 100%;
+
     button {
       margin-left: 10px;
     }

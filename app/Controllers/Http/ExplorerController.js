@@ -24,6 +24,7 @@ const pathSep = path.sep
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg')
 const highlightPrefix = '[HIGHLIGHT]'
 const iconName = 'favicon.ico';
+const {hasPermissionWorkspaces} = require('../../utils/index')
 
 
 // if file is landing under root directory
@@ -215,6 +216,7 @@ class ExplorerController {
   async getSystemConfig() {
     const ws = await this.getWorkspace()
     const wsPath = ws.toString()
+    console.log(wsPath)
     const configPath = path.join(wsPath, '.cfg')
     let cfg
     try {
@@ -703,7 +705,6 @@ class ExplorerController {
     const currentCfg = await this.getSystemConfig()
     const user = request.currentUser
     const resConfig = {...currentCfg, user, root: CONST_PATHS.root}
-    // console.log('Current config: ', resConfig)
     response.json(resConfig)
   }
 
@@ -761,6 +762,8 @@ class ExplorerController {
   async getSubFolderByPath({request, response}) {
     let dir = request.get().dir || CONST_PATHS.root
 
+    let checkPermission = dir === CONST_PATHS.root
+
     if (!fs.existsSync(dir)) {
       throw Error(`Folder ${dir} does not exist`)
     }
@@ -769,13 +772,20 @@ class ExplorerController {
     }
     const files = fs.readdirSync(dir)
     const folders = []
+    const permissions = request.currentUser
+      && request.currentUser.permissions
+      && request.currentUser.permissions.workspaces
     for (const name of files) {
+      if (checkPermission) {
+        if (!hasPermissionWorkspaces(name, permissions)) continue
+      }
       const subDir = path.join(dir, name)
       if (fs.lstatSync(subDir).isDirectory()) {
         const file = {
           // subFolders: [],
           name,
-          path: subDir
+          path: subDir,
+          hasSubFolders: this.hasSubFolders(subDir)
         }
         const statistic = Statistic.get(subDir)
         if (Number.isInteger(statistic.classified)) {
@@ -825,6 +835,12 @@ class ExplorerController {
   async listStatistic({request}) {
     const {dirs} = request.post()
     return Statistic.getList(dirs)
+  }
+
+  hasSubFolders(dir) {
+    return fs
+      .readdirSync(dir, {withFileTypes: true})
+      .filter(file => file.isDirectory()).length > 0
   }
 }
 

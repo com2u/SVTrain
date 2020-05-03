@@ -135,7 +135,12 @@ export default {
 </script>
 <style lang="scss" scoped>
   .header {
-    background: #fafafa;
+    background: #fff;
+    border-bottom: 1px solid #fafafa;
+
+    -webkit-box-shadow: 0px 2px 6px -7px #222222;
+    -moz-box-shadow: 0px 2px 6px -7px #222222;
+    box-shadow: 0px 2px 6px -7px #222222;
 
     .logo {
       height: 80px;
@@ -207,7 +212,7 @@ export default {
 
           &.is-active {
             background: var(--primary);
-            border-color: var(--primary);
+            /*border-color: var(--primary);*/
             color: #fff;
           }
 

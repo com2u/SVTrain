@@ -3,8 +3,8 @@
     id="keyupevents"
     tabindex="0"
     @keyup.self.exact.shift.space="selectCurrent(true)"
-    @keyup.self.exact.alt.187="zoomIn(true)"
-    @keyup.self.exact.alt.189="zoomOut(true)"
+    @keyup.self.exact.187="zoomIn(true)"
+    @keyup.self.exact.189="zoomOut(true)"
     @keyup.self.exact.stop.prevent="onKeyUp"
   >
     <div
@@ -17,10 +17,10 @@
         <div class="right-side-section">
           <div class="section-item">
             <svg-icon
-              v-b-popover.hover.html.top="'<b>Alt</b> + <b>-</b>'" title="Shortcut"
+              v-b-popover.hover.html.top="'<b>-</b>'" title="Shortcut"
               icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
             <svg-icon
-              v-b-popover.hover.html.top="'<b>Alt</b> + <b>=</b>'" title="Shortcut"
+              v-b-popover.hover.html.top="'<b>=</b>'" title="Shortcut"
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
             <b-button @click="showStatistic" :disabled="!canViewStatistics">
@@ -94,7 +94,7 @@
       </template>
       <template v-slot:main>
         <div>
-          <div><strong>{{dir}}</strong></div>
+          <div><strong>{{relativeDir}}</strong></div>
           <div v-if="systemConfig.newFolder && newFolder">
             <new-folder-button v-b-modal.creating-folder-modal/>
           </div>
@@ -136,15 +136,16 @@
         </div>
         <div class="file-explorer-grid">
           <file
+            v-for="(file, index) in screenFiles"
+            v-b-popover.hover.html.top="index < 10 ? `<b>${(index + 1) % 10}</b>` : null"
+            :title="index< 10 ? 'Shortcut' : null"
             :show-file-name="showFileName"
-            v-bind:id="`file_${file.path}`"
-            v-for="file in screenFiles"
-            v-bind:file="file"
-            v-on:click.native="setCursorAndSelect(file, $event)"
-            v-on:dblclick.native="openFile(file)"
-            v-bind:key="file.path"
-            v-bind:size="fileSize">
-          </file>
+            :id="`file_${file.path}`"
+            :file="file"
+            :key="file.path"
+            :size="fileSize"
+            @click.native="setCursorAndSelect(file, $event)"
+            @dblclick.native="openFile(file)"/>
         </div>
       </template>
     </window-splitting>
@@ -266,7 +267,7 @@ export default {
       left: [
         {
           label: 'Zoom In',
-          keys: ['Alt', '-'],
+          keys: ['-'],
         },
         {
           label: 'Select/Unselect Image',
@@ -288,7 +289,7 @@ export default {
       right: [
         {
           label: 'Zoom Out',
-          keys: ['Alt', '='],
+          keys: ['='],
         },
         {
           label: 'Multiple select',
@@ -338,6 +339,10 @@ export default {
     },
     defaultFileSize() {
       return this.$store.state.app.config.defaultPictureSize;
+    },
+    relativeDir() {
+      const { root } = this.$store.state.app.config;
+      return this.dir.substring(root.length);
     },
     ...mapGetters([
       'newFolder',

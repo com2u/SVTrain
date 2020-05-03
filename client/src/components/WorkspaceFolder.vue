@@ -4,13 +4,14 @@
       <div :class="!depth? 'root-item': ''">
         <span class="icon-wrapper expand-icon">
             <b-spinner v-if="loadingChildren" small label="Small Spinner"></b-spinner>
-            <template v-if="hasChildren && !loadingChildren">
-              <b-icon
-                v-if="showChildren"
-                icon="triangle-fill"
-                class="option-icon"
-                @click="toggleShowChildren"
-              />
+            <template v-else>
+              <template v-if="info.hasSubFolders">
+                <b-icon
+                  v-if="showChildren"
+                  icon="triangle-fill"
+                  class="option-icon"
+                  @click="toggleShowChildren"
+                />
               <b-icon
                 v-else
                 icon="triangle-fill"
@@ -18,17 +19,26 @@
                 flip-v
                 @click="toggleShowChildren"
               />
+              </template>
+              <span v-else class="margin-keeper"/>
             </template>
           </span>
-        <span class="name" @click="setWorkspace">{{info.name}}</span>
+        <span
+          class="name"
+          @click="setWorkspace"
+          :style="{
+            fontSize: subFolderFontSize
+          }"
+        >{{info.name}}</span>
       </div>
       <div class="options">
         <div class="option-progress"
              v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
           <span class="file-nums">{{info.unclassified + info.classified}} files</span>
           <span>{{progress}}%</span>
-          <b-progress :max="100" class="ws-progress" variant="secondary">
+          <b-progress :max="100" class="ws-progress">
             <b-progress-bar
+              class="black-bar"
               :value="progress">
             </b-progress-bar>
           </b-progress>
@@ -37,24 +47,29 @@
         <div>
           <span class="icon-wrapper">
 <!--            <b-icon-->
-<!--              icon="bar-chart-fill"-->
-<!--              :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"-->
-<!--              font-scale="1.5"-->
-<!--              @click="showStatistic"-->
-<!--            />-->
+            <!--              icon="bar-chart-fill"-->
+            <!--              :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"-->
+            <!--              font-scale="1.5"-->
+            <!--              @click="showStatistic"-->
+            <!--            />-->
 
             <svg-icon icon-class="statistical" class="svg-icon"
-              :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"
-              @click="showStatistic"
+                      :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"
+                      @click="showStatistic"
             />
           </span>
           <span class="icon-wrapper">
-            <b-icon
-              icon="file-text"
-              class="clickable-icon"
-              :class="info.highlight ? 'highlight': ''"
-              font-scale="1.5"
-              @click="showNotes"
+<!--            <b-icon-->
+<!--              icon="file-text"-->
+<!--              class="clickable-icon"-->
+<!--              :class="info.highlight ? 'highlight': ''"-->
+<!--              font-scale="1.5"-->
+<!--              @click="showNotes"-->
+<!--            />-->
+
+            <svg-icon icon-class="note" class="svg-icon"
+                      :class="info.highlight ? 'highlight': ''"
+                      @click="showNotes"
             />
           </span>
           <span class="icon-wrapper">
@@ -129,6 +144,7 @@ export default {
       'canEditNote',
       'canEditConfig',
       'canViewStatistics',
+      'subFolderFontSize',
     ]),
   },
   methods: {
@@ -150,7 +166,9 @@ export default {
       this.$store.dispatch('notes/showFolder', this.info);
     },
     showConfig() {
-      this.$store.dispatch('wsconfig/showFolder', this.info);
+      if (this.canEditConfig) {
+        this.$store.dispatch('wsconfig/showFolder', this.info);
+      }
     },
     setWorkspace() {
       if (!this.depth) {

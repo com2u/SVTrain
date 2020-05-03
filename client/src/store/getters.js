@@ -17,5 +17,7 @@ const getters = {
   },
 
   imageSpacing: (state) => state.app.config.imageSpacing || 10,
+  workspaceFontSize: (state) => state.app.config.workspaceFontSize,
+  subFolderFontSize: (state) => state.app.config.subFolderFontSize,
 };
 export default getters;
