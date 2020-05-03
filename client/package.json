@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "cross-env NODE_ENV=development vue-cli-service serve",
     "build": "cross-env NODE_ENV=production vue-cli-service build",
+    "buildPublic": "cross-env NODE_ENV=production vue-cli-service build && node buildAndCopy.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -14,10 +15,10 @@
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.9.0",
     "core-js": "^3.6.4",
+    "fs-extra": "^9.0.0",
     "jsoneditor": "^8.6.4",
     "lodash.set": "^4.3.2",
     "v-jsoneditor": "^1.2.3",
-    "v-tooltip": "^2.0.3",
     "vue": "^2.6.11",
     "vue-awesome": "^4.0.2",
     "vue-infinite-scroll": "^2.0.2",

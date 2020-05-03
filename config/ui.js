@@ -4,10 +4,8 @@ module.exports = {
     margin: 5,
     fontSize: "1rem"
   },
-  filePerPage: 10,
-
+  filePerPage: 15,
   showFileName: false,
-
   useShortcuts: true,
   requestBeforeDelete: true,
   defaultPictureSize: 200,
@@ -27,4 +25,7 @@ module.exports = {
   newWorkspace: true,
 
   imageSpacing: 10,
+
+  workspaceFontSize: '25px',
+  subFolderFontSize: '16px',
 }

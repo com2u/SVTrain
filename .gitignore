@@ -24,3 +24,6 @@ npm-debug.log
 
 # Activity log
 SVTrain.log
+
+# role config
+roles.json

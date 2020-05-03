@@ -45,5 +45,5 @@ Route.group(() => {
   Route.get('/get-folders', 'ExplorerController.getSubFolderByPath').middleware('auth')
   Route.post('/list-statistics', 'ExplorerController.listStatistic').middleware('auth')
 }).prefix('api')
-Route.any('*',({response}) => response.download(Helpers._appRoot + '/public/index.html'))
+Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))
 
