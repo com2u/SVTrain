@@ -136,11 +136,16 @@ export default {
 <style lang="scss" scoped>
   .header {
     background: #fff;
+    z-index: 999;
+    /*
     border-bottom: 1px solid #fafafa;
-
     -webkit-box-shadow: 0px 2px 6px -7px #222222;
     -moz-box-shadow: 0px 2px 6px -7px #222222;
     box-shadow: 0px 2px 6px -7px #222222;
+    */
+    position: fixed;
+    top: 0;
+    width: 100%;
 
     .logo {
       height: 80px;

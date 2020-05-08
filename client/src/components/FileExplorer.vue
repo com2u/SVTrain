@@ -24,7 +24,10 @@
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
             <b-button @click="showStatistic" :disabled="!canViewStatistics">
-              <svg-icon icon-class="statistical"/>
+
+              <b-icon
+                icon="bar-chart-fill"
+              />
               <span> Statistic</span>
             </b-button>
           </div>

@@ -52,7 +52,7 @@
             </b-form-checkbox>
           </div>
           <div>
-            <b-button @click="notesVisible=false">Cancel</b-button>
+            <b-button @click="notesVisible=false" class="btn-cancel">Cancel</b-button>
             <b-button
               v-if="canEditNote"
               variant="primary"
@@ -289,7 +289,7 @@ export default {
       background: #f2f1ef;
       display: flex;
       justify-content: space-between;
-      padding: 0 10px;
+      padding-left: 10px;
       -webkit-box-shadow: 0px 1px 10px -7px #222222;
       -moz-box-shadow: 0px 1px 10px -7px #222222;
       box-shadow: 0px 1px 10px -7px #222222;
@@ -297,11 +297,6 @@ export default {
 
       .margin-keeper {
         margin-left: 18px;
-      }
-
-      &.selected {
-        background: #39d1ff;
-        border: thin solid #39d1ff;
       }
 
       .name {
@@ -327,6 +322,10 @@ export default {
           .file-nums {
             padding-right: 10px;
           }
+
+          .option-progress-text {
+            color: #BFB8AF;
+          }
         }
 
         .clickable-icon {
@@ -351,12 +350,16 @@ export default {
           .black-bar {
             background: #000;
           }
+
+          &.progress {
+            background: #d9d4cf;
+          }
         }
 
         .icon-wrapper {
           width: 15px;
           display: inline-block;
-          margin-left: 10px;
+          margin-right: 20px;
 
           .svg-icon {
             font-size: 25px;
@@ -372,6 +375,15 @@ export default {
               font-size: 10px !important;
             }
           }
+        }
+      }
+
+      &.selected {
+        background: #0060FF;
+        border: thin solid #39d1ff;
+
+        .clickable-icon, .name, .option-progress-text {
+          color: #fff !important;
         }
       }
     }
@@ -401,6 +413,18 @@ export default {
 
     button {
       margin-left: 10px;
+    }
+  }
+
+  .btn-cancel {
+    background: #D9D4CF;
+    border: 1px solid #D9D4CF;
+    color: #000;
+
+    &:hover {
+      background: #D9D4CF;
+      border: 1px solid #D9D4CF;
+      color: #000;
     }
   }
 </style>

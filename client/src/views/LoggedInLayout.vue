@@ -102,7 +102,7 @@ export default {
 
     .app-container {
       /*background: #fff;*/
-      margin: 50px 60px;
+      margin: 60px 60px;
       /*margin-bottom: 50px;*/
     }
 
