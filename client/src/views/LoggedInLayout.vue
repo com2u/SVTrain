@@ -102,7 +102,7 @@ export default {
 
     .app-container {
       /*background: #fff;*/
-      margin: 60px 60px;
+      margin: 80px 60px;
       /*margin-bottom: 50px;*/
     }
 
@@ -115,6 +115,18 @@ export default {
     .cmd-main-menu {
       .cmd {
         padding-top: 10px;
+      }
+
+      .btn-stop-command {
+        background: #D9D4CF !important;
+        border: 1px solid #D9D4CF !important;
+        color: #000 !important;
+      }
+
+      .btn-command {
+        background: #0060FF !important;
+        border: 1px solid #0060FF !important;
+        color: #fff;
       }
     }
   }
