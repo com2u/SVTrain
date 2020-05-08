@@ -1,10 +1,10 @@
 <template>
   <div>
-    <b-button
-      :disabled="isLoading || backgroundCalculating"
-      @click="calculate()">
-      Calculate statistic{{ isLoading || backgroundCalculating ? ' (loading...)' : ''}}
-    </b-button>
+<!--    <b-button-->
+<!--      :disabled="isLoading || backgroundCalculating"-->
+<!--      @click="calculate()">-->
+<!--      Calculate statistic{{ isLoading || backgroundCalculating ? ' (loading...)' : ''}}-->
+<!--    </b-button>-->
     <div v-if="statistic">
       <div class="right-side-section" v-if="statistic.calculated">
         <div class="caption">

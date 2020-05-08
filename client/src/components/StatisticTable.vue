@@ -1,7 +1,10 @@
 <template>
   <div>
     <div>
-      <b-table-simple :class="{'statistic-table-responsive': responsive}" class="statistic-table">
+      <b-table-simple
+        striped
+        :class="{'statistic-table-responsive': responsive}"
+        class="statistic-table">
         <b-thead>
           <b-tr>
             <b-th colspan="2" rowspan="2">
@@ -26,7 +29,9 @@
         </b-thead>
         <b-tbody>
           <b-tr v-for="(name1, index1) in names" :key="name1">
-            <b-td v-if="index1 === 0" class="header"  :rowspan="names.length">AI classification</b-td>
+            <b-td v-if="index1 === 0" class="header header-rotation"  :rowspan="names.length">
+              <span class="rotation">AI classification</span>
+            </b-td>
             <b-td class="header">{{name1}}</b-td>
             <b-td v-for="(name2, index2) in names" :key="name2" :class="{'main-diagonal': index1 === index2}">
               <span v-if="table[name2][name1].all > 0" class="clickable-text">
@@ -117,7 +122,7 @@ export default {
   }
 
   th, td {
-    border: 1px solid gray;
+    border: 1px solid #fff;
   }
 
   td.title {
@@ -131,14 +136,27 @@ export default {
     }
 
     .main-diagonal {
-      background: #dadada;
+      background: #BFB8AF;
     }
 
     .header {
-      background: #676767;
+      background: #968B7C;
       color: #fff;
       font-weight: 600;
       border: 1px solid #fff;
+
+      &.header-rotation {
+        vertical-align: middle;
+        text-align: center;
+
+        .rotation {
+          -ms-writing-mode: tb-rl;
+          -webkit-writing-mode: vertical-rl;
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+          white-space: nowrap;
+        }
+      }
     }
 
     .gray-text {
@@ -160,5 +178,12 @@ export default {
 
   .value-type-input {
     text-align: right;
+  }
+
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #E8E6E3;
+  }
+  .table-striped tbody tr:nth-of-type(even) {
+    background-color: #F4F3F2;
   }
 </style>

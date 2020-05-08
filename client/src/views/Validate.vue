@@ -20,7 +20,7 @@
       </div>
       <div v-for="command in commands" :key="command.value" class="cmd">
         <b-button
-          v-bind:variant="command.value === 'stop' ? 'danger' : 'success'"
+          :class="command.value === 'stop' ? 'btn-stop-command' : 'btn-command'"
           v-bind:disabled="!!isLoading[command.value] || command.value === 'stop' && !running || command.value !== 'stop' && !!running"
           v-on:click="runCommand(command.value)">
           <v-icon v-bind:name="command.value === 'stop' ? 'stop' : 'play'"/>

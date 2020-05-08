@@ -3,19 +3,19 @@
     <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
       <div :class="!depth? 'root-item': ''">
         <span class="icon-wrapper expand-icon">
-            <b-spinner v-if="loadingChildren" small label="Small Spinner"></b-spinner>
+            <b-spinner v-if="loadingChildren" small label="Small Spinner" class="clickable-icon"></b-spinner>
             <template v-else>
               <template v-if="info.hasSubFolders">
                 <b-icon
                   v-if="showChildren"
                   icon="triangle-fill"
-                  class="option-icon"
+                  class="option-icon clickable-icon"
                   @click="toggleShowChildren"
                 />
               <b-icon
                 v-else
                 icon="triangle-fill"
-                class="option-icon"
+                class="option-icon clickable-icon"
                 flip-v
                 @click="toggleShowChildren"
               />
@@ -34,8 +34,8 @@
       <div class="options">
         <div class="option-progress"
              v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
-          <span class="file-nums">{{info.unclassified + info.classified}} files</span>
-          <span>{{progress}}%</span>
+          <span class="file-nums option-progress-text">{{info.unclassified + info.classified}} files</span>
+          <span class="option-progress-text">{{progress}}%</span>
           <b-progress :max="100" class="ws-progress">
             <b-progress-bar
               class="black-bar"
@@ -46,28 +46,16 @@
         </div>
         <div>
           <span class="icon-wrapper">
-<!--            <b-icon-->
-            <!--              icon="bar-chart-fill"-->
-            <!--              :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"-->
-            <!--              font-scale="1.5"-->
-            <!--              @click="showStatistic"-->
-            <!--            />-->
-
-            <svg-icon icon-class="statistical" class="svg-icon"
-                      :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"
-                      @click="showStatistic"
+            <b-icon
+              icon="bar-chart-fill"
+              :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"
+              font-scale="1.5"
+              @click="showStatistic"
             />
           </span>
           <span class="icon-wrapper">
-<!--            <b-icon-->
-<!--              icon="file-text"-->
-<!--              class="clickable-icon"-->
-<!--              :class="info.highlight ? 'highlight': ''"-->
-<!--              font-scale="1.5"-->
-<!--              @click="showNotes"-->
-<!--            />-->
 
-            <svg-icon icon-class="note" class="svg-icon"
+            <svg-icon icon-class="note" class="svg-icon clickable-icon"
                       :class="info.highlight ? 'highlight': ''"
                       @click="showNotes"
             />
