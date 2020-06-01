@@ -295,6 +295,7 @@ export default {
       box-shadow: 0px 1px 10px -7px #222222;
       border-radius: 2px;
 
+
       .margin-keeper {
         margin-left: 18px;
       }
