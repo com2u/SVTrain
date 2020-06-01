@@ -34,7 +34,7 @@
       <div class="options">
         <div class="option-progress"
              v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
-          <span class="file-nums option-progress-text">{{info.unclassified + info.classified}} files</span>
+          <span class="file-nums option-progress-text">{{totalFiles}} files</span>
           <span class="option-progress-text">{{progress}}%</span>
           <b-progress :max="100" class="ws-progress">
             <b-progress-bar
@@ -109,6 +109,9 @@ export default {
     };
   },
   computed: {
+    totalFiles() {
+      return (this.info.unclassified + this.info.classified).toLocaleString();
+    },
     indent() {
       return { marginLeft: `${this.depth * 50}px` };
     },
@@ -121,7 +124,7 @@ export default {
     progress() {
       if (this.info.classified || this.info.unclassified) {
         return +(((this.info.classified / (this.info.classified + this.info.unclassified)) * 100)
-          .toFixed(2));
+          .toFixed(1));
       }
       return 100;
     },

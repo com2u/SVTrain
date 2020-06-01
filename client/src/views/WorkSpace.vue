@@ -290,10 +290,6 @@ export default {
       display: flex;
       justify-content: space-between;
       padding-left: 10px;
-      -webkit-box-shadow: 0px 1px 10px -7px #222222;
-      -moz-box-shadow: 0px 1px 10px -7px #222222;
-      box-shadow: 0px 1px 10px -7px #222222;
-      border-radius: 2px;
 
 
       .margin-keeper {
@@ -316,16 +312,19 @@ export default {
         display: flex;
         height: $height;
         line-height: $height;
+        min-width: 430px;
 
         .option-progress {
           display: flex;
 
           .file-nums {
             padding-right: 10px;
+            width: 95px;
           }
 
           .option-progress-text {
             color: #BFB8AF;
+            min-width: 45px;
           }
         }
 
