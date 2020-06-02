@@ -20,6 +20,14 @@
         :key="folder.path"
         @select-workspace="setWorkspace(folder)"
       />
+      <div
+        class="new-ws"
+        v-if="systemConfig.newWorkspace && newWorkspace"
+        @click="createNewFolder"
+      >
+        <b-icon icon="plus-circle"></b-icon>
+        New Workspace
+      </div>
     </div>
 
     <b-modal
@@ -227,6 +235,9 @@ export default {
           item.done();
         }
       });
+    },
+    createNewFolder() {
+      EventBus.$emit('create-new-folder', 'root');
     },
   },
   mounted() {
