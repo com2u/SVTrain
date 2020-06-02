@@ -1,6 +1,6 @@
 <template>
   <div class="ws-container">
-    <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
+    <div class="folder-label" :style="indent" :class="wsPath === info.path ? 'selected': ''">
       <div class="folder-label-name" :class="!depth? 'root-item': ''">
         <span class="icon-wrapper expand-icon">
             <b-spinner v-if="loadingChildren" small label="Small Spinner" class="clickable-icon"></b-spinner>
@@ -14,9 +14,9 @@
                 />
               <b-icon
                 v-else
+                rotate="90"
                 icon="triangle-fill"
                 class="option-icon clickable-icon"
-                flip-v
                 @click="toggleShowChildren"
               />
               </template>
@@ -79,6 +79,17 @@
         :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
       />
+      <div
+        class="new-ws"
+        :style="{
+          marginLeft: `${((depth + 1) * 50)}px`
+        }"
+        v-if="systemConfig.newWorkspace && newWorkspace"
+        @click="createNewFolder"
+      >
+        <b-icon icon="plus-circle"></b-icon>
+        New Workspace
+      </div>
     </div>
   </div>
 </template>
@@ -109,6 +120,9 @@ export default {
     };
   },
   computed: {
+    systemConfig() {
+      return this.$store.state.app.config;
+    },
     totalFiles() {
       return (this.info.unclassified + this.info.classified).toLocaleString();
     },
@@ -136,6 +150,7 @@ export default {
       'canEditConfig',
       'canViewStatistics',
       'subFolderFontSize',
+      'newWorkspace',
     ]),
   },
   methods: {
@@ -170,6 +185,9 @@ export default {
       if (this.canViewStatistics) {
         EventBus.$emit('show-statistic', this.info.path);
       }
+    },
+    createNewFolder() {
+      EventBus.$emit('create-new-folder', this.info.path);
     },
   },
 };

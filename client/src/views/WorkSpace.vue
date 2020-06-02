@@ -20,13 +20,6 @@
         :key="folder.path"
         @select-workspace="setWorkspace(folder)"
       />
-      <div
-        class="new-ws"
-        v-if="systemConfig.newWorkspace && newWorkspace"
-        v-b-modal.create-ws-folder>
-        <b-icon icon="plus-circle"></b-icon>
-        New Workspace
-      </div>
     </div>
 
     <b-modal
@@ -290,6 +283,7 @@ export default {
       display: flex;
       justify-content: space-between;
       padding-left: 10px;
+      border-radius: 8px;
 
 
       .margin-keeper {
@@ -313,6 +307,7 @@ export default {
         height: $height;
         line-height: $height;
         min-width: 430px;
+        justify-content: flex-end;
 
         .option-progress {
           display: flex;
@@ -390,20 +385,18 @@ export default {
   }
 
   .new-ws {
-    width: 100%;
+    /*width: 100%;*/
     border: 1px solid #f3f3f3;
-    color: #333;
     background: #fafafa;
-    border-radius: 2px;
     cursor: pointer;
     height: 50px;
     line-height: 50px;
     padding-left: 10px;
-    -webkit-box-shadow: 0px 1px 10px -7px #222222;
-    -moz-box-shadow: 0px 1px 10px -7px #222222;
-    box-shadow: 0px 1px 10px -7px #222222;
-    margin-top: 20px;
+    margin-top: 10px;
     font-weight: 600;
+    color: #808080;
+    border-radius: 8px;
+    margin-bottom: 10px;
   }
 
   .note-footer {

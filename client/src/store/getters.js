@@ -19,5 +19,6 @@ const getters = {
   imageSpacing: (state) => state.app.config.imageSpacing || 10,
   workspaceFontSize: (state) => state.app.config.workspaceFontSize,
   subFolderFontSize: (state) => state.app.config.subFolderFontSize,
+  showNavigationIcon: (state) => state.app.config.showNavigationIcon,
 };
 export default getters;

@@ -21,5 +21,7 @@
   "forwardLocaltion": "right",
   "moveMenu": false,
   "newFolder": true,
-  "newWorkspace": true
+  "newWorkspace": true,
+
+  "showNavigationIcon": true
 }

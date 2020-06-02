@@ -24,6 +24,7 @@
 
 <script>
 import api from '../utils/api.js';
+import EventBus from '../utils/eventbus';
 
 export default {
   name: 'CreatingFolder',
@@ -38,6 +39,7 @@ export default {
     return {
       name: null,
       modal: null,
+      createPath: this.path,
     };
   },
   computed: {
@@ -47,7 +49,7 @@ export default {
   },
   methods: {
     async createFolder() {
-      await api.createFolder(this.path, this.name);
+      await api.createFolder(this.createPath, this.name);
       this.$emit('folder-created');
       this.name = null;
     },
@@ -64,6 +66,16 @@ export default {
       this.$refs.folderName.focus();
       this.$emit('shown', evt);
     },
+    onCreateNewFolder(path) {
+      this.createPath = path;
+      this.$refs.modal.show();
+    },
+  },
+  mounted() {
+    EventBus.$on('create-new-folder', this.onCreateNewFolder);
+  },
+  destroyed() {
+    EventBus.$off('create-new-folder');
   },
 };
 </script>
