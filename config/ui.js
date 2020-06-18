@@ -28,4 +28,6 @@ module.exports = {
 
   workspaceFontSize: '25px',
   subFolderFontSize: '16px',
+
+  showNavigationIcon: false
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="ws-container">
-    <div class="folder-label" :style="indent" :class="wsPath == info.path ? 'selected': ''">
-      <div :class="!depth? 'root-item': ''">
+    <div class="folder-label" :style="indent" :class="wsPath === info.path ? 'selected': ''">
+      <div class="folder-label-name" :class="!depth? 'root-item': ''">
         <span class="icon-wrapper expand-icon">
             <b-spinner v-if="loadingChildren" small label="Small Spinner" class="clickable-icon"></b-spinner>
             <template v-else>
@@ -14,9 +14,9 @@
                 />
               <b-icon
                 v-else
+                rotate="90"
                 icon="triangle-fill"
                 class="option-icon clickable-icon"
-                flip-v
                 @click="toggleShowChildren"
               />
               </template>
@@ -34,7 +34,7 @@
       <div class="options">
         <div class="option-progress"
              v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
-          <span class="file-nums option-progress-text">{{info.unclassified + info.classified}} files</span>
+          <span class="file-nums option-progress-text">{{totalFiles}} files</span>
           <span class="option-progress-text">{{progress}}%</span>
           <b-progress :max="100" class="ws-progress">
             <b-progress-bar
@@ -79,6 +79,17 @@
         :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
       />
+      <div
+        class="new-ws"
+        :style="{
+          marginLeft: `${((depth + 1) * 50)}px`
+        }"
+        v-if="systemConfig.newWorkspace && newWorkspace"
+        @click="createNewFolder"
+      >
+        <b-icon icon="plus-circle"></b-icon>
+        New Workspace
+      </div>
     </div>
   </div>
 </template>
@@ -109,6 +120,12 @@ export default {
     };
   },
   computed: {
+    systemConfig() {
+      return this.$store.state.app.config;
+    },
+    totalFiles() {
+      return (this.info.unclassified + this.info.classified).toLocaleString();
+    },
     indent() {
       return { marginLeft: `${this.depth * 50}px` };
     },
@@ -121,7 +138,7 @@ export default {
     progress() {
       if (this.info.classified || this.info.unclassified) {
         return +(((this.info.classified / (this.info.classified + this.info.unclassified)) * 100)
-          .toFixed(2));
+          .toFixed(1));
       }
       return 100;
     },
@@ -133,6 +150,7 @@ export default {
       'canEditConfig',
       'canViewStatistics',
       'subFolderFontSize',
+      'newWorkspace',
     ]),
   },
   methods: {
@@ -167,6 +185,9 @@ export default {
       if (this.canViewStatistics) {
         EventBus.$emit('show-statistic', this.info.path);
       }
+    },
+    createNewFolder() {
+      EventBus.$emit('create-new-folder', this.info.path);
     },
   },
 };

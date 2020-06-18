@@ -38,6 +38,7 @@ export default {
 <style lang="scss">
   html, body, .maxheight {
     height: 100%;
+    font-family: Arial ;
   }
 
   .unclickable {

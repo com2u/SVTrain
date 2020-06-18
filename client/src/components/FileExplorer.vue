@@ -23,7 +23,7 @@
               v-b-popover.hover.html.top="'<b>=</b>'" title="Shortcut"
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
-            <b-button @click="showStatistic" :disabled="!canViewStatistics">
+            <b-button @click="showStatistic" :disabled="!canViewStatistics" class="statistic-btn">
 
               <b-icon
                 icon="bar-chart-fill"
@@ -36,20 +36,31 @@
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0 && canSeeMoveMenu">
-            Move files to the next folders <span v-if="isLoading.moving"><v-icon
-            name="spinner"></v-icon> (Moving...)</span>:
-            <ul class="next-folders">
-              <li v-for="f in nextFolders" v-bind:key="f.path" @click="moveFiles(f.path)">
-                <img v-if="f.icon" :src="`${staticServer}${f.icon}`" alt="icon"
-                     class="next-folders-icon">
+            <div v-if="forwardOnly && nextFolders.length === 0">
+              <div>
+              Please confirm images that show a/an
+              </div>
+              <div class="link-current-folder">{{relativeDir}}</div>
+            </div>
+            <span v-else>
+              Please select images and move them to the according defect class
+            </span>
+            <span v-if="isLoading.moving"><v-icon
+              name="spinner"></v-icon> (Moving...)</span>:
+            <div class="next-folders">
+              <div v-for="f in nextFolders" v-bind:key="f.path" @click="moveFiles(f.path)">
+                <span v-if="showNavigationIcon">
+                  <img v-if="f.icon" :src="`${staticServer}${f.icon}`" alt="icon"
+                       class="next-folders-icon">
                 <span v-else>
                   <svg-icon icon-class="unknown"/>
                 </span>
+                </span>
                 <span class="folder-name"
                       :style="{fontSize: fontSize}">{{f.name}}</span>
-              </li>
-              <li>
-                <span>
+              </div>
+              <div>
+                <span v-if="showNavigationIcon">
                   <svg-icon icon-class="delete"/>
                 </span>
                 <span
@@ -58,8 +69,8 @@
                   @click="deleteFiles()">
                   Delete image(s)
                 </span>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
           <div v-else>
             (select one or more files for show control buttons)
@@ -70,9 +81,10 @@
           <div class="pagination-group">
             <template v-if="forwardOnly">
               <b-button
+                class="confirm-btn"
                 v-b-popover.hover.html.top="'<b>PageDown</b>'" title="Shortcut"
                 variant="primary" size="sm" @click="forward()">
-                <b-icon icon="folder-fill"></b-icon>
+                <b-icon icon="folder-fill" v-if="showNavigationIcon"></b-icon>
                 Confirm
               </b-button>
             </template>
@@ -99,7 +111,7 @@
         <div>
           <div><strong>{{relativeDir}}</strong></div>
           <div v-if="systemConfig.newFolder && newFolder">
-            <new-folder-button v-b-modal.creating-folder-modal/>
+            <new-folder-button @click.native="createNewFolder"/>
           </div>
           <div class="list-folders">
             <span v-for="file in folder.folders" :key="file.path">
@@ -351,6 +363,7 @@ export default {
       'newFolder',
       'canViewStatistics',
       'canSeeMoveMenu',
+      'showNavigationIcon',
     ]),
   },
   watch: {
@@ -698,7 +711,6 @@ export default {
         const firstLetter = lowerName.substring(0, 1);
         if (!lowerName.startsWith(previousLetter) && firstLetter.toUpperCase() !== firstLetter.toLowerCase()) {
           f.shortcut = firstLetter.toUpperCase();
-          console.log(firstLetter.toUpperCase());
           previousLetter = firstLetter;
         }
         return f;
@@ -896,6 +908,10 @@ export default {
     showStatistic() {
       EventBus.$emit('show-statistic', this.path);
     },
+    createNewFolder() {
+      console.log('create new folder');
+      EventBus.$emit('create-new-folder', this.path);
+    },
   },
   async created() {
     this.perPage = this.configFilePerPage;
@@ -946,9 +962,8 @@ export default {
     /*position: fixed;*/
     /*top: 10px;*/
     /*right: 0px*/
-    list-style-type: none;
 
-    li {
+    & > div {
       background: var(--primary);
       margin-bottom: 10px;
       padding: 0 10px;
@@ -1000,7 +1015,12 @@ export default {
   }
 
   .pagination-group {
-    padding: 5px;
+    /*padding: 5px;*/
+    .confirm-btn {
+      width: 100%;
+      max-width: 220px;
+      text-align: left;
+    }
   }
 
   .section-item {
@@ -1030,10 +1050,71 @@ export default {
     }
   }
 
+  .statistic-btn {
+    color: #000;
+    background: #D9D4CF;
+    border: 1px solid #D9D4CF;
+
+    &:hover, &:focus, &:active {
+      background: #D9D4CF !important;
+      color: #000 !important;
+    }
+  }
+
+  .file-explorer-item {
+    overflow: hidden;
+    word-wrap: break-word;
+    padding: 5px;
+    position: relative;
+
+    &.selected {
+      background: var(--primary)
+    }
+
+    &.cursor {
+      border: 3px solid gray;
+    }
+  }
+
+  .file-explorer-preview {
+    object-fit: cover;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .file-explorer-file-name {
+    font-size: 12px;
+    padding: 1px;
+    display: inline-block;
+
+    &.matched {
+      background: #a0fcac;
+      color: black;
+    }
+
+    &.missmatched {
+      background: rgb(255, 183, 183);
+      color: black;
+    }
+  }
+
   .list-folders {
     .folder {
       display: inline;
       cursor: pointer;
     }
+
+    .file-explorer-item {
+      display: inline;
+      padding: 5px 0 5px 5px;
+      padding-left: 10px;
+      margin-right: 0 !important;
+    }
+  }
+  .link-current-folder {
+    color: #39d1ff;
   }
 </style>

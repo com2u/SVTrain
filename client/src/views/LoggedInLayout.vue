@@ -9,6 +9,7 @@
         v-model="statisticVisible"
         size="xl"
         cancel-title="Close"
+        footer-class="statistic-footer"
       >
         <template v-slot:modal-title>Statistic</template>
         <statistic-popup ref="statistic"/>
@@ -127,6 +128,23 @@ export default {
         background: #0060FF !important;
         border: 1px solid #0060FF !important;
         color: #fff;
+      }
+
+      .svtrain-cmd-btn {
+        width: 200px;
+        text-align: left;
+      }
+    }
+
+  }
+  .statistic-footer {
+    .btn-secondary {
+      color: #000;
+      background: #D9D4CF;
+      border: 1px solid #D9D4CF;
+      &:hover, &:focus, &:active {
+        background: #D9D4CF !important;
+        color: #000 !important;
       }
     }
   }

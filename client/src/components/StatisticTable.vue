@@ -7,7 +7,7 @@
         class="statistic-table">
         <b-thead>
           <b-tr>
-            <b-th colspan="2" rowspan="2">
+            <b-th colspan="2" rowspan="2" class="input-conner">
               <div class="input-container">
                 <input type="radio" name="responsive" v-model="responsive" id="autofit" :value="false">
                 <label for="autofit">Autofit</label>
@@ -170,11 +170,20 @@ export default {
       }
     }
   }
+
+  .input-conner {
+    padding: 0;
+    vertical-align: middle;
+  }
   .input-container {
-    input {
-      margin-left: 10px;
+    text-align: left;
+    label {
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 10px;
     }
   }
+
 
   .value-type-input {
     text-align: right;

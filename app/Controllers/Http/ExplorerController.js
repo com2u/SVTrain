@@ -216,7 +216,6 @@ class ExplorerController {
   async getSystemConfig() {
     const ws = await this.getWorkspace()
     const wsPath = ws.toString()
-    console.log(wsPath)
     const configPath = path.join(wsPath, '.cfg')
     let cfg
     try {
