@@ -300,6 +300,10 @@ export default {
           label: 'Backward',
           keys: ['PageUp'],
         },
+        {
+          label: 'Select image by index',
+          keys: ['1-10'],
+        },
       ],
       right: [
         {
@@ -321,6 +325,10 @@ export default {
         {
           label: 'Forward / Confirm',
           keys: ['PageDown'],
+        },
+        {
+          label: 'Select folder by name',
+          keys: ['A-Z'],
         },
       ],
     },

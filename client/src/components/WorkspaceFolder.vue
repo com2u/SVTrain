@@ -179,6 +179,11 @@ export default {
     setWorkspace() {
       if (!this.depth) {
         this.$emit('select-workspace');
+      } else {
+        this.$router.push({
+          name: 'explorer',
+          query: { dir: this.info.path },
+        });
       }
     },
     showStatistic() {

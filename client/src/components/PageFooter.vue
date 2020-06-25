@@ -26,7 +26,7 @@
       text-transform: uppercase;
       img {
         flex: none;
-        max-height: 100%;
+        max-height: 80%;
         width: auto;
       }
     }
