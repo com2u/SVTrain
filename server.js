@@ -18,14 +18,14 @@
 */
 
 const { Ignitor } = require('@adonisjs/ignitor')
-const https = require('https')
+const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const options = {
-  key: fs.readFileSync(path.join(__dirname, './ssl/server.key')),
-  cert: fs.readFileSync(path.join(__dirname, './ssl/server.crt'))
-}
+//const options = {
+//key: fs.readFileSync(path.join(__dirname, './ssl/server.key')),
+//cert: fs.readFileSync(path.join(__dirname, './ssl/server.crt'))
+//}
 
 new Ignitor(require('@adonisjs/fold'))
   .appRoot(__dirname)
@@ -36,7 +36,8 @@ new Ignitor(require('@adonisjs/fold'))
       console.log(`ROOT_PATH folder ${rootPath} does not exist`)
     }
 
-    const httpsServer = https.createServer(options, handler)
-    return httpsServer
+    //const httpsServer = https.createServer(options, handler)
+    const httpServer = http.createServer(handler)
+    return httpServer
   })
   .catch(console.error)
