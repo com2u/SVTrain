@@ -16,9 +16,9 @@ export default {
   data() {
     return {
       imageWidth: 70,
-    };
+    }
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>

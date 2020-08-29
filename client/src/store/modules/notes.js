@@ -1,4 +1,4 @@
-import api from '../../utils/api';
+import api from '../../utils/api'
 
 export default {
   namespaced: true,
@@ -8,41 +8,41 @@ export default {
   },
   mutations: {
     SET_VISIBLE: (state, visible) => {
-      state.visible = visible;
+      state.visible = visible
     },
     SET_FOLDER: (state, folder) => {
-      state.folder = folder;
+      state.folder = folder
     },
   },
   actions: {
     setVisible: ({ commit }, visible) => {
-      commit('SET_VISIBLE', visible);
+      commit('SET_VISIBLE', visible)
     },
     setFolder: ({ commit }, folder) => {
-      commit('SET_FOLDER', folder);
+      commit('SET_FOLDER', folder)
     },
     showFolder: ({ commit }, folder) => {
-      console.log(folder);
-      commit('SET_FOLDER', folder);
-      commit('SET_VISIBLE', true);
+      console.log(folder)
+      commit('SET_FOLDER', folder)
+      commit('SET_VISIBLE', true)
     },
     setContent: ({ commit, state }, val) => {
-      const folder = { ...state.folder };
-      folder.notes = val;
-      commit('SET_FOLDER', folder);
+      const folder = { ...state.folder }
+      folder.notes = val
+      commit('SET_FOLDER', folder)
     },
     setHighlight: ({ commit, state }, val) => {
-      const folder = { ...state.folder };
-      folder.highlight = val;
-      commit('SET_FOLDER', folder);
+      const folder = { ...state.folder }
+      folder.highlight = val
+      commit('SET_FOLDER', folder)
     },
     save: ({ commit, state }) => new Promise((resolve, reject) => {
       api.saveNotes(state.folder.notesPath, state.folder.notes, state.folder.highlight)
         .then(() => {
-          commit('SET_VISIBLE', false);
-          resolve();
+          commit('SET_VISIBLE', false)
+          resolve()
         })
-        .catch(reject);
+        .catch(reject)
     }),
   },
-};
+}

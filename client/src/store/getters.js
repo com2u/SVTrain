@@ -1,4 +1,4 @@
-const getPermissions = (state) => state.app.user && state.app.user.permissions;
+const getPermissions = (state) => state.app.user && state.app.user.permissions
 
 const getters = {
   canEditNote: (state) => getPermissions(state) && state.app.user.permissions.editNote,
@@ -12,13 +12,15 @@ const getters = {
   canValidate: (state) => getPermissions(state) && state.app.user.permissions.validate,
   canSeeMoveMenu: (state) => getPermissions(state) && state.app.user.permissions.moveMenu,
   currentWs: (state) => {
-    const { wsPath, root } = state.app.config;
-    return wsPath ? wsPath.substring(root.length) : 'Root';
+    const { wsPath, root } = state.app.config
+    return wsPath ? wsPath.substring(root.length) : 'Root'
   },
 
-  imageSpacing: (state) => state.app.config.imageSpacing || 10,
+  imageSpacing: (state) => state.app.explorerConfig.imageSpacing || 10,
   workspaceFontSize: (state) => state.app.config.workspaceFontSize,
   subFolderFontSize: (state) => state.app.config.subFolderFontSize,
-  showNavigationIcon: (state) => state.app.config.showNavigationIcon,
-};
-export default getters;
+  showNavigationIcon: (state) => state.app.explorerConfig.showNavigationIcon,
+  imageFit: (state) => (state.app.explorerConfig.imageFit || 'fill').toLowerCase(),
+  imageViewer: (state) => state.app.explorerConfig.imageViewer,
+}
+export default getters

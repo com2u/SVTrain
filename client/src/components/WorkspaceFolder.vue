@@ -94,8 +94,8 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
-import EventBus from '../utils/eventbus';
+import { mapGetters } from 'vuex'
+import EventBus from '../utils/eventbus'
 
 export default {
   name: 'WorkspaceFolder',
@@ -117,33 +117,33 @@ export default {
     return {
       showChildren: false,
       loadingChildren: false,
-    };
+    }
   },
   computed: {
     systemConfig() {
-      return this.$store.state.app.config;
+      return this.$store.state.app.config
     },
     totalFiles() {
-      return (this.info.unclassified + this.info.classified).toLocaleString();
+      return (this.info.unclassified + this.info.classified).toLocaleString()
     },
     indent() {
-      return { marginLeft: `${this.depth * 50}px` };
+      return { marginLeft: `${this.depth * 50}px` }
     },
     hasChildren() {
       // eslint-disable-next-line no-mixed-operators
       return !!(this.info && (Array.isArray(this.info.subFolders) && this.info.subFolders.length)
           // eslint-disable-next-line no-mixed-operators
-          || !Array.isArray(this.info.subFolders));
+          || !Array.isArray(this.info.subFolders))
     },
     progress() {
       if (this.info.classified || this.info.unclassified) {
         return +(((this.info.classified / (this.info.classified + this.info.unclassified)) * 100)
-          .toFixed(1));
+          .toFixed(1))
       }
-      return 100;
+      return 100
     },
     wsPath() {
-      return this.$store.state.app.config.wsPath;
+      return this.$store.state.app.config.wsPath
     },
     ...mapGetters([
       'canEditNote',
@@ -155,45 +155,45 @@ export default {
   },
   methods: {
     toggleShowChildren() {
-      this.showChildren = !this.showChildren;
+      this.showChildren = !this.showChildren
       if (!this.info.subFolders) {
-        this.loadingChildren = true;
+        this.loadingChildren = true
         EventBus
           .$emit('load-sub-folders', {
             info: this.info,
             keyPath: this.keyPath,
             done: () => {
-              this.loadingChildren = false;
+              this.loadingChildren = false
             },
-          });
+          })
       }
     },
     showNotes() {
-      this.$store.dispatch('notes/showFolder', this.info);
+      this.$store.dispatch('notes/showFolder', this.info)
     },
     showConfig() {
       if (this.canEditConfig) {
-        this.$store.dispatch('wsconfig/showFolder', this.info);
+        this.$store.dispatch('wsconfig/showFolder', this.info)
       }
     },
     setWorkspace() {
       if (!this.depth) {
-        this.$emit('select-workspace');
+        this.$emit('select-workspace')
       } else {
         this.$router.push({
           name: 'explorer',
           query: { dir: this.info.path },
-        });
+        })
       }
     },
     showStatistic() {
       if (this.canViewStatistics) {
-        EventBus.$emit('show-statistic', this.info.path);
+        EventBus.$emit('show-statistic', this.info.path)
       }
     },
     createNewFolder() {
-      EventBus.$emit('create-new-folder', this.info.path);
+      EventBus.$emit('create-new-folder', this.info.path)
     },
   },
-};
+}
 </script>

@@ -15,6 +15,7 @@
               <img
                 v-bind:src="file.serverPath"
                 class="file-explorer-preview"
+                :class="imageFit === 'fit' ? 'image-fit' : 'image-fill'"
                 v-bind:style="{width: size-15 + 'px', height: size-15 + 'px' }">
             </div>
           </template>
@@ -47,7 +48,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
 
 export default {
   props: {
@@ -59,17 +60,17 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['imageSpacing']),
+    ...mapGetters(['imageSpacing', 'imageFit']),
     imageStyles() {
       return {
         width: `${this.size}px`,
         height: `${this.size}px`,
         marginBottom: `${this.imageSpacing}px`,
         marginRight: `${this.imageSpacing}px`,
-      };
+      }
     },
   },
-};
+}
 </script>
 
 

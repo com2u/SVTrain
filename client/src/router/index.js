@@ -1,8 +1,8 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import LoggedInLayout from '../views/LoggedInLayout';
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import LoggedInLayout from '../views/LoggedInLayout'
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 const routes = [
   {
@@ -76,11 +76,11 @@ const routes = [
     path: '/login',
     component: () => import('../views/Login.vue'),
   },
-];
+]
 
 const router = new VueRouter({
   mode: 'history',
   routes,
-});
+})
 
-export default router;
+export default router

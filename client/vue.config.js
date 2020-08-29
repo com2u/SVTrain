@@ -1,10 +1,10 @@
-const path = require('path');
+const path = require('path')
 
 function resolve(dir) {
-  return path.join(__dirname, dir);
+  return path.join(__dirname, dir)
 }
 
-const name = 'SVTrain';
+const name = 'SVTrain'
 module.exports = {
 
   configureWebpack: {
@@ -22,15 +22,15 @@ module.exports = {
       .plugin('html')
       .tap((args) => {
         // eslint-disable-next-line no-param-reassign
-        args[0].title = 'SVTrain';
-        return args;
-      });
+        args[0].title = 'SVTrain'
+        return args
+      })
 
     // set svg-sprite-loader
     config.module
       .rule('svg')
       .exclude.add(resolve('src/icons'))
-      .end();
+      .end()
     config.module
       .rule('icons')
       .test(/\.svg$/)
@@ -41,6 +41,6 @@ module.exports = {
       .options({
         symbolId: 'icon-[name]',
       })
-      .end();
+      .end()
   },
-};
+}

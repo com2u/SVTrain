@@ -16,9 +16,9 @@
 </template>
 
 <script>
-import ShowImage from './ShowImage.vue';
-import ShowJSON from './ShowJSON.vue';
-import ShowTFSettings from './ShowTFSettings.vue';
+import ShowImage from './ShowImage.vue'
+import ShowJSON from './ShowJSON.vue'
+import ShowTFSettings from './ShowTFSettings.vue'
 
 export default {
   name: 'ShowFile',
@@ -35,42 +35,42 @@ export default {
         tfsettings: 'tfsettings',
         unsupported: 'unsupported',
       },
-    };
+    }
   },
   methods: {
     show() {
-      this.$refs.modal.show();
+      this.$refs.modal.show()
     },
     onShown(e) {
-      console.log('show file shown');
-      this.$emit('shown', e);
+      console.log('show file shown')
+      this.$emit('shown', e)
     },
     onHidden(e) {
-      console.log('show file hidden');
-      this.$emit('hidden', e);
+      console.log('show file hidden')
+      this.$emit('hidden', e)
     },
     closeModal() {
-      this.$refs.modal.hide();
+      this.$refs.modal.hide()
     },
   },
   computed: {
     fileType() {
-      if (typeof this.file.path !== 'string') return 'unsupported';
-      const p = this.file.path.toLowerCase();
-      const jsonRegexp = /\.json$/;
-      const tfsettingRegexp = /tfsettings\.json$/;
-      const imageRegexp = /\.(jpeg|jpg|gif|bmp|png)$/;
+      if (typeof this.file.path !== 'string') return 'unsupported'
+      const p = this.file.path.toLowerCase()
+      const jsonRegexp = /\.json$/
+      const tfsettingRegexp = /tfsettings\.json$/
+      const imageRegexp = /\.(jpeg|jpg|gif|bmp|png)$/
       if (imageRegexp.test(p)) {
-        return this.types.image;
+        return this.types.image
       } if (tfsettingRegexp.test(p)) {
-        return this.types.tfsettings;
+        return this.types.tfsettings
       } if (jsonRegexp.test(p)) {
-        return this.types.json;
+        return this.types.json
       }
-      return this.types.unsupported;
+      return this.types.unsupported
     },
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>

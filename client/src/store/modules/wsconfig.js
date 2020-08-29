@@ -1,4 +1,4 @@
-import api from '../../utils/api';
+import api from '../../utils/api'
 
 export default {
   namespaced: true,
@@ -8,37 +8,37 @@ export default {
   },
   mutations: {
     SET_VISIBLE: (state, visible) => {
-      state.visible = visible;
+      state.visible = visible
     },
     SET_FOLDER: (state, folder) => {
-      state.folder = folder;
+      state.folder = folder
     },
   },
   actions: {
     setVisible: ({ commit }, visible) => {
-      commit('SET_VISIBLE', visible);
+      commit('SET_VISIBLE', visible)
     },
     setFolder: ({ commit }, folder) => {
-      commit('SET_FOLDER', folder);
+      commit('SET_FOLDER', folder)
     },
     showFolder: ({ commit }, folder) => {
       if (folder.config) {
-        commit('SET_FOLDER', folder);
-        commit('SET_VISIBLE', true);
+        commit('SET_FOLDER', folder)
+        commit('SET_VISIBLE', true)
       }
     },
     setConfig: ({ commit, state }, val) => {
-      const folder = { ...state.folder };
-      folder.config = val;
-      commit('SET_FOLDER', folder);
+      const folder = { ...state.folder }
+      folder.config = val
+      commit('SET_FOLDER', folder)
     },
     save: ({ commit, state }, config) => new Promise((resolve, reject) => {
       api.saveConfig(state.folder.cfgPath, config)
         .then(() => {
-          commit('SET_VISIBLE', false);
-          resolve();
+          commit('SET_VISIBLE', false)
+          resolve()
         })
-        .catch(reject);
+        .catch(reject)
     }),
   },
-};
+}

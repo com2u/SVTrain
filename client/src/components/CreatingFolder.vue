@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import api from '../utils/api.js';
-import EventBus from '../utils/eventbus';
+import api from '../utils/api.js'
+import EventBus from '../utils/eventbus'
 
 export default {
   name: 'CreatingFolder',
@@ -40,42 +40,42 @@ export default {
       name: null,
       modal: null,
       createPath: this.path,
-    };
+    }
   },
   computed: {
     isValid() {
-      return this.name === null ? this.name : !!this.name;
+      return this.name === null ? this.name : !!this.name
     },
   },
   methods: {
     async createFolder() {
-      await api.createFolder(this.createPath, this.name);
-      this.$emit('folder-created');
-      this.name = null;
+      await api.createFolder(this.createPath, this.name)
+      this.$emit('folder-created')
+      this.name = null
     },
     handleEnter() {
       this.createFolder()
         .then(() => {
-          this.$refs.modal.hide();
-        });
+          this.$refs.modal.hide()
+        })
     },
     handleHidden(evt) {
-      this.$emit('hidden', evt);
+      this.$emit('hidden', evt)
     },
     handleShown(evt) {
-      this.$refs.folderName.focus();
-      this.$emit('shown', evt);
+      this.$refs.folderName.focus()
+      this.$emit('shown', evt)
     },
     onCreateNewFolder(path) {
-      this.createPath = path;
-      this.$refs.modal.show();
+      this.createPath = path
+      this.$refs.modal.show()
     },
   },
   mounted() {
-    EventBus.$on('create-new-folder', this.onCreateNewFolder);
+    EventBus.$on('create-new-folder', this.onCreateNewFolder)
   },
   destroyed() {
-    EventBus.$off('create-new-folder');
+    EventBus.$off('create-new-folder')
   },
-};
+}
 </script>

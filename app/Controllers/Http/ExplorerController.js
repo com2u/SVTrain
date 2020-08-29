@@ -213,14 +213,11 @@ class ExplorerController {
     }
   }
 
-  async getSystemConfig() {
-    const ws = await this.getWorkspace()
-    const wsPath = ws.toString()
-    const configPath = path.join(wsPath, '.cfg')
-    let cfg
+  async getJsonConfig(path) {
+    let cfg = {}
     try {
-      if (fs.existsSync(configPath)) {
-        const fileContent = fs.readFileSync(configPath, 'utf-8')
+      if (fs.existsSync(path)) {
+        const fileContent = fs.readFileSync(path, 'utf-8')
         cfg = JSON.parse(fileContent)
         if (cfg.hide === true) {
           cfg = {}
@@ -229,7 +226,14 @@ class ExplorerController {
     } catch (e) {
       cfg = {}
     }
-    if (!cfg) cfg = {}
+    return cfg
+  }
+
+  async getSystemConfig() {
+    const ws = await this.getWorkspace()
+    const wsPath = ws.toString()
+    const configPath = path.join(wsPath, '.cfg')
+    const cfg = await this.getJsonConfig(configPath)
     return {...config, ...cfg, wsPath}
   }
 
@@ -704,6 +708,25 @@ class ExplorerController {
     const currentCfg = await this.getSystemConfig()
     const user = request.currentUser
     const resConfig = {...currentCfg, user, root: CONST_PATHS.root}
+    response.json(resConfig)
+  }
+
+  async getExplorerConfig({request, response}) {
+    let dir = request.get().dir
+    let parentConfig = {}
+    const rootPath = CONST_PATHS.root
+    if (dir && dir.startsWith(rootPath)) {
+      dir = dir.substring(rootPath.length + 1)
+      const sepIndex = dir.indexOf(pathSep)
+      if (sepIndex) {
+        dir = dir.substring(0, sepIndex)
+      }
+      const configPath = path.join(rootPath, dir, '.cfg')
+      parentConfig = await this.getJsonConfig(configPath)
+    }
+
+    const user = request.currentUser
+    const resConfig = {...config, ...parentConfig, user, root: CONST_PATHS.root}
     response.json(resConfig)
   }
 

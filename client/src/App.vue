@@ -1,5 +1,5 @@
 <script>
-import socket from './utils/socket';
+import socket from './utils/socket'
 
 export default {
   data: () => ({
@@ -7,24 +7,24 @@ export default {
   }),
   async beforeCreate() {
     const waitConnection = () => new Promise((resolve, reject) => {
-      let time = 0;
+      let time = 0
       const interval = setInterval(() => {
         if (socket.isConnected()) {
-          clearInterval(interval);
-          resolve(true);
+          clearInterval(interval)
+          resolve(true)
         } else {
-          time += 100;
+          time += 100
           if (time >= 10000) {
-            clearInterval(interval);
-            reject(Error('Timeout error with connecting to the server socker'));
+            clearInterval(interval)
+            reject(Error('Timeout error with connecting to the server socker'))
           }
         }
-      }, 100);
-    });
-    socket.init();
-    await waitConnection();
+      }, 100)
+    })
+    socket.init()
+    await waitConnection()
   },
-};
+}
 </script>
 
 

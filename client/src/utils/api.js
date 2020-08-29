@@ -1,10 +1,10 @@
-import axios from 'axios';
-import EventBus from './eventbus';
+import axios from 'axios'
+import EventBus from './eventbus'
 
-const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`;
-const developmentUrl = 'https://localhost:3333/api/';
-const env = process.env.NODE_ENV || 'production';
-const baseurl = env === 'production' ? productionUrl : developmentUrl;
+const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`
+const developmentUrl = 'http://localhost:3333/api/'
+const env = process.env.NODE_ENV || 'production'
+const baseurl = env === 'production' ? productionUrl : developmentUrl
 
 const urls = {
   getFiles: (dir) => `${baseurl}getFiles?dir=${dir}`,
@@ -25,12 +25,13 @@ const urls = {
   getLastLogs: `${baseurl}getLastLogs`,
   login: `${baseurl}login`,
   getConfig: `${baseurl}config`,
+  getExplorerConfig: `${baseurl}explorerConfig`,
   forwardOnly: `${baseurl}forward-only`,
   saveNotes: `${baseurl}notes`,
   saveConfig: `${baseurl}save-config`,
   listStatistics: `${baseurl}list-statistics`,
   getFoldersByPath: (dir) => (dir ? `${baseurl}get-folders?dir=${dir}` : `${baseurl}get-folders`),
-};
+}
 
 export default {
   getFiles: async (path) => (await axios.get(urls.getFiles(path || ''))).data,
@@ -57,11 +58,11 @@ export default {
   calculateStatistic: async () => (await axios.get(urls.calculateStatistic)).data,
 
   saveFile: async (path, data) => {
-    console.log(path, data);
+    console.log(path, data)
     return (await axios.post(urls.saveFile, {
       path,
       data,
-    })).data;
+    })).data
   },
 
   checkFolder: async (path) => (await axios.get(urls.checkFolder(path))).data,
@@ -78,28 +79,29 @@ export default {
   setWorkspace: async (workspace) => (await axios.post(urls.setWorkspace, { workspace })).data,
   getLastLogs: async () => (await axios.get(urls.getLastLogs)).data,
   login: async (login, password) => {
-    let response = null;
+    let response = null
     try {
       response = await axios.post(urls.login, {
         login,
         password,
-      });
-      return response.data;
+      })
+      return response.data
     } catch (e) {
-      console.log(e.toString());
+      console.log(e.toString())
       if (e.toString()
         .includes('401')) {
-        throw new Error('Invalid login or password (401)');
+        throw new Error('Invalid login or password (401)')
       }
-      throw e;
+      throw e
     }
   },
 
   setSessionToken: (token) => {
-    axios.defaults.headers.common.Authorization = token;
+    axios.defaults.headers.common.Authorization = token
   },
 
   getConfig: async () => (await axios.get(urls.getConfig)).data,
+  getExplorerConfig: async (dir) => (await axios.get(urls.getExplorerConfig, { params: { dir } })).data,
 
   doForwardOnly: async (selectedFiles, notSelectedFiles) => (await axios.post(urls.forwardOnly, {
     selectedFiles,
@@ -118,16 +120,16 @@ export default {
   listStatistics: async (dirs = []) => (await axios.post(urls.listStatistics, {
     dirs,
   })).data,
-};
+}
 
 axios.interceptors.response.use((response) => response, (error) => {
-  console.log(error);
+  console.log(error)
 
-  EventBus.$emit('auth_api_error', error);
-  console.log(error.response);
+  EventBus.$emit('auth_api_error', error)
+  console.log(error.response)
   if (error.toString()
     .includes('401')) {
-    EventBus.$emit('login', error);
+    EventBus.$emit('login', error)
   }
-  return Promise.reject(error);
-});
+  return Promise.reject(error)
+})
