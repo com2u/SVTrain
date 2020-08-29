@@ -21,10 +21,10 @@
 </template>
 
 <script>
-import Header from '../components/Header.vue';
-import EventBus from '../utils/eventbus';
-import PageFooter from '../components/PageFooter.vue';
-import StatisticPopup from '../components/StatisticPopup.vue';
+import Header from '../components/Header.vue'
+import EventBus from '../utils/eventbus'
+import PageFooter from '../components/PageFooter.vue'
+import StatisticPopup from '../components/StatisticPopup.vue'
 
 export default {
   name: 'LoggedInLayout',
@@ -36,66 +36,66 @@ export default {
   data() {
     return {
       statisticVisible: false,
-    };
+    }
   },
   created() {
   },
   mounted() {
-    EventBus.$on('auth_api_error', this.handleApiError);
-    EventBus.$on('notify-error', this.handleErrorMessage);
-    EventBus.$on('login', this.handleLogin);
-    EventBus.$on('show-statistic', this.showStatistic);
-    EventBus.$on('statistic-folder-selected', this.selectFolder);
+    EventBus.$on('auth_api_error', this.handleApiError)
+    EventBus.$on('notify-error', this.handleErrorMessage)
+    EventBus.$on('login', this.handleLogin)
+    EventBus.$on('show-statistic', this.showStatistic)
+    EventBus.$on('statistic-folder-selected', this.selectFolder)
   },
   destroyed() {
-    EventBus.$off('auth_api_error');
-    EventBus.$off('notify-error');
-    EventBus.$off('login');
-    EventBus.$off('show-statistic');
-    EventBus.$off('statistic-folder-selected');
+    EventBus.$off('auth_api_error')
+    EventBus.$off('notify-error')
+    EventBus.$off('login')
+    EventBus.$off('show-statistic')
+    EventBus.$off('statistic-folder-selected')
   },
   methods: {
     showStatistic(dir) {
-      this.statisticVisible = true;
+      this.statisticVisible = true
       this.$nextTick(() => {
         if (this.$refs.statistic) {
-          this.$refs.statistic.open(dir);
+          this.$refs.statistic.open(dir)
         }
-      });
+      })
     },
     handleApiError(err) {
-      let message = 'Error';
+      let message = 'Error'
       if (err && err.response && err.response.data && err.response.data.error) {
-        message = err.response.data.error.message;
+        message = err.response.data.error.message
       } else if (err) {
-        message = err.toString();
+        message = err.toString()
       }
       this.$notify({
         type: 'error',
         text: message,
-      });
+      })
     },
     handleErrorMessage(message) {
       this.$notify({
         type: 'error',
         text: message,
-      });
+      })
     },
 
     handleLogin() {
       this.$notify({
         type: 'error',
         text: 'You need to login first',
-      });
-      this.$router.push({ name: 'LoginPage' });
+      })
+      this.$router.push({ name: 'LoginPage' })
     },
     selectFolder(item) {
-      this.statisticVisible = false;
-      const gotoDir = item.folder;
-      this.$router.push({ name: 'explorer', query: { dir: gotoDir } });
+      this.statisticVisible = false
+      const gotoDir = item.folder
+      this.$router.push({ name: 'explorer', query: { dir: gotoDir } })
     },
   },
-};
+}
 </script>
 <style lang="scss">
   .app {

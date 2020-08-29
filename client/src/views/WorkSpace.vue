@@ -99,14 +99,14 @@
   </div>
 </template>
 <script>
-import JSONEditor from 'jsoneditor';
-import _set from 'lodash.set';
-import { mapGetters } from 'vuex';
-import api from '../utils/api';
-import WorkspaceFolder from '../components/WorkspaceFolder.vue';
-import CreatingFolder from '../components/CreatingFolder.vue';
-import EventBus from '../utils/eventbus';
-import { updateCounting } from '../utils';
+import JSONEditor from 'jsoneditor'
+import _set from 'lodash.set'
+import { mapGetters } from 'vuex'
+import api from '../utils/api'
+import WorkspaceFolder from '../components/WorkspaceFolder.vue'
+import CreatingFolder from '../components/CreatingFolder.vue'
+import EventBus from '../utils/eventbus'
+import { updateCounting } from '../utils'
 
 export default {
   name: 'WorkSpace',
@@ -120,43 +120,43 @@ export default {
       loading: false,
       editor: null,
       populatedFolders: [],
-    };
+    }
   },
   computed: {
     notesVisible: {
       get() {
-        return this.$store.state.notes.visible;
+        return this.$store.state.notes.visible
       },
       set(visible) {
-        this.$store.dispatch('notes/setVisible', visible);
+        this.$store.dispatch('notes/setVisible', visible)
       },
     },
     cfgVisible: {
       get() {
-        return this.$store.state.wsconfig.visible;
+        return this.$store.state.wsconfig.visible
       },
       set(visible) {
-        this.$store.dispatch('wsconfig/setVisible', visible);
+        this.$store.dispatch('wsconfig/setVisible', visible)
       },
     },
     notesContent: {
       get() {
-        return this.$store.state.notes.folder.notes;
+        return this.$store.state.notes.folder.notes
       },
       set(val) {
-        this.$store.dispatch('notes/setContent', val);
+        this.$store.dispatch('notes/setContent', val)
       },
     },
     notesHighlight: {
       get() {
-        return this.$store.state.notes.folder.highlight;
+        return this.$store.state.notes.folder.highlight
       },
       set(val) {
-        this.$store.dispatch('notes/setHighlight', val);
+        this.$store.dispatch('notes/setHighlight', val)
       },
     },
     systemConfig() {
-      return this.$store.state.app.config;
+      return this.$store.state.app.config
     },
     ...mapGetters([
       'canEditNote',
@@ -172,89 +172,89 @@ export default {
     //   this.loading = false;
     // },
     async loadFoldersByPath(dir = null) {
-      this.loading = true;
-      const response = await api.getFoldersByPath(dir);
+      this.loading = true
+      const response = await api.getFoldersByPath(dir)
       response.forEach((f) => {
-        this.populatedFolders.push(f.path);
-      });
-      this.folders = response;
-      this.loading = false;
+        this.populatedFolders.push(f.path)
+      })
+      this.folders = response
+      this.loading = false
     },
     saveNotes() {
       this.$store.dispatch('notes/save')
         .then(() => {
-          this.loadFoldersByPath();
-        });
+          this.loadFoldersByPath()
+        })
     },
     saveConfig() {
-      let config;
+      let config
       if (this.editor) {
-        config = this.editor.get();
+        config = this.editor.get()
       }
       this.$store.dispatch('wsconfig/save', config)
         .then(() => {
-          this.loadFoldersByPath();
-        });
+          this.loadFoldersByPath()
+        })
     },
     onModalShow() {
-      const container = document.getElementById('wsjsoneditor');
+      const container = document.getElementById('wsjsoneditor')
       const options = {
         mode: 'code',
-      };
-      const editor = new JSONEditor(container, options);
-      this.editor = editor;
-      editor.set(this.$store.state.wsconfig.folder.config);
+      }
+      const editor = new JSONEditor(container, options)
+      this.editor = editor
+      editor.set(this.$store.state.wsconfig.folder.config)
     },
     async setWorkspace(folder) {
-      await api.setWorkspace(folder.name);
+      await api.setWorkspace(folder.name)
       api.getConfig()
         .then((data) => {
-          this.$store.dispatch('app/setConfig', data);
-        });
+          this.$store.dispatch('app/setConfig', data)
+        })
       this.$router.push({
         name: 'explorer',
         query: { dir: folder.path },
-      });
+      })
     },
     onFolderCreated() {
-      this.loadFoldersByPath();
+      this.loadFoldersByPath()
     },
     toAiPage() {
-      this.$router.push({ name: 'main' });
+      this.$router.push({ name: 'main' })
     },
     async loadSubfolder(item) {
-      const subFolders = await api.getFoldersByPath(item.info.path);
+      const subFolders = await api.getFoldersByPath(item.info.path)
       subFolders.forEach((f) => {
-        this.populatedFolders.push(f.path);
-      });
-      const subFoldersPath = `${item.keyPath}.subFolders`;
-      const updatedFolders = _set(this.folders, subFoldersPath, subFolders);
-      this.folders = JSON.parse(JSON.stringify(updatedFolders));
+        this.populatedFolders.push(f.path)
+      })
+      const subFoldersPath = `${item.keyPath}.subFolders`
+      const updatedFolders = _set(this.folders, subFoldersPath, subFolders)
+      this.folders = JSON.parse(JSON.stringify(updatedFolders))
       this.$nextTick(() => {
         if (item.done) {
-          item.done();
+          item.done()
         }
-      });
+      })
     },
     createNewFolder() {
-      EventBus.$emit('create-new-folder', 'root');
+      EventBus.$emit('create-new-folder', 'root')
     },
   },
   mounted() {
     // this.loadFolders()
-    this.loadFoldersByPath();
+    this.loadFoldersByPath()
     this.$store.dispatch('app/calculateStatistic')
       .then(async () => {
-        const updatedStatistic = await api.listStatistics(this.populatedFolders);
-        const folders = updateCounting(this.folders, updatedStatistic);
-        this.folders = folders;
-      });
-    EventBus.$on('load-sub-folders', this.loadSubfolder);
+        const updatedStatistic = await api.listStatistics(this.populatedFolders)
+        const folders = updateCounting(this.folders, updatedStatistic)
+        this.folders = folders
+      })
+    EventBus.$on('load-sub-folders', this.loadSubfolder)
   },
   destroyed() {
-    EventBus.$off('load-sub-folders');
+    EventBus.$off('load-sub-folders')
   },
-};
+}
 </script>
 <style lang="scss">
   $height: 60px;

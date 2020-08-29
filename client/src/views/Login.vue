@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import api from '../utils/api';
+import api from '../utils/api'
 
 export default {
   name: 'LoginPage',
@@ -48,52 +48,52 @@ export default {
       userPassword: '',
       errorMessage: '',
       loading: false,
-    };
+    }
   },
   methods: {
     async login() {
-      this.errorMessage = '';
+      this.errorMessage = ''
       if (this.userLogin.length === 0) {
-        this.errorMessage = 'Login can not be empty';
-        this.userPassword = '';
-        return;
+        this.errorMessage = 'Login can not be empty'
+        this.userPassword = ''
+        return
       }
 
       if (this.userPassword.length === 0) {
-        this.errorMessage = 'Password can not be empty';
-        this.userPassword = '';
-        return;
+        this.errorMessage = 'Password can not be empty'
+        this.userPassword = ''
+        return
       }
 
-      let data = null;
+      let data = null
       try {
-        this.loading = true;
-        data = await api.login(this.userLogin, this.userPassword);
-        localStorage.setItem('sessionToken', data.sessionToken);
-        localStorage.setItem('sessionUser', data.login);
+        this.loading = true
+        data = await api.login(this.userLogin, this.userPassword)
+        localStorage.setItem('sessionToken', data.sessionToken)
+        localStorage.setItem('sessionUser', data.login)
         // this.$store.dispatch('app/setUser', data.login);
-        api.setSessionToken(data.sessionToken);
-        this.$router.push({ name: 'WorkSpacePage' });
+        api.setSessionToken(data.sessionToken)
+        this.$router.push({ name: 'WorkSpacePage' })
         // window.location.reload()
-        this.loading = false;
+        this.loading = false
       } catch (e) {
-        this.loading = false;
-        this.errorMessage = e.toString();
-        this.userPassword = '';
+        this.loading = false
+        this.errorMessage = e.toString()
+        this.userPassword = ''
       }
     },
   },
   mounted() {
-    this.$refs.password.focus();
+    this.$refs.password.focus()
     this.$bvToast.toast('Mounted', {
       title: 'Error',
       autoHideDelay: 5000,
       variant: 'danger',
       toaster: 'b-toaster-bottom-right',
       solid: true,
-    });
+    })
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>

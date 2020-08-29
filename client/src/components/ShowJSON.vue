@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import axios from 'axios';
-import api from '../utils/api.js';
+import axios from 'axios'
+import api from '../utils/api.js'
 
 export default {
   name: 'ShowJSON',
@@ -25,30 +25,30 @@ export default {
   data() {
     return {
       content: '',
-    };
+    }
   },
   methods: {
     async loadFile() {
-      const response = await axios.get(this.file.serverPath);
-      this.content = JSON.stringify(response.data, null, 2);
+      const response = await axios.get(this.file.serverPath)
+      this.content = JSON.stringify(response.data, null, 2)
     },
     async submit() {
       // eslint-disable-next-line no-alert
-      if (!this.isValidJSON) alert('There are should be a valid JSON string in the input!');
-      await api.saveFile(this.file.path, this.content);
-      this.$emit('saved');
+      if (!this.isValidJSON) alert('There are should be a valid JSON string in the input!')
+      await api.saveFile(this.file.path, this.content)
+      this.$emit('saved')
     },
   },
   computed: {
     isValidJSON() {
-      try { JSON.parse(this.content); } catch (e) { return false; }
-      return true;
+      try { JSON.parse(this.content) } catch (e) { return false }
+      return true
     },
   },
   async mounted() {
-    await this.loadFile();
-    console.log(this.$refs.textarea.$el);
-    this.$refs.textarea.$el.focus();
+    await this.loadFile()
+    console.log(this.$refs.textarea.$el)
+    this.$refs.textarea.$el.focus()
   },
-};
+}
 </script>

@@ -31,6 +31,9 @@
               <span> Statistic</span>
             </b-button>
           </div>
+          <div v-if="imageViewer" class="image-viewer-ctn">
+            <b-button variant="primary" :disabled="!viewerImages.length" @click="showImageViewer">Show selected images</b-button>
+          </div>
         </div>
 
         <div v-if="systemConfig.moveMenu" class="right-side-section">
@@ -204,27 +207,30 @@
       </div>
       <template v-slot:modal-footer><span></span></template>
     </b-modal>
+    <v-gallery :images="viewerImages"
+               :index="viewerIndex"
+               @close="viewerIndex = null" />
   </div>
 </template>
 
 <script>
 /* eslint no-plusplus: 0 */
 /* eslint no-param-reassign: 0 */
-import { mapGetters } from 'vuex';
-import File from './File.vue';
-import api from '../utils/api';
-import socket from '../utils/socket';
-import ShowFile from './ShowFile.vue';
-import CreatingFolder from './CreatingFolder.vue';
-import NewFolderButton from './NewFolderButton.vue';
-import WindowSplitting from './WindowSplitting.vue';
-import { getFileServerPath } from '../utils';
-import EventBus from '../utils/eventbus';
+import { mapGetters } from 'vuex'
+import { getFileServerPath } from '@/utils'
+import api from '@/utils/api'
+import socket from '@/utils/socket'
+import EventBus from '@/utils/eventbus'
+import File from './File.vue'
+import ShowFile from './ShowFile.vue'
+import CreatingFolder from './CreatingFolder.vue'
+import NewFolderButton from './NewFolderButton.vue'
+import WindowSplitting from './WindowSplitting.vue'
 
 function preventDefaultScrolling(e) {
   // space and arrow keys
   if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-    e.preventDefault();
+    e.preventDefault()
   }
 }
 
@@ -240,6 +246,7 @@ export default {
     WindowSplitting,
   },
   data: () => ({
+    viewerIndex: null,
     isLoading: {
       deleting: false,
       moving: false,
@@ -334,87 +341,99 @@ export default {
     },
   }),
   computed: {
+    viewerImages() {
+      return this.selectedFiles.map((file) => file.serverPath)
+    },
+
     backgroundCalculating() {
-      return this.$store.state.app.calculating;
+      return this.$store.state.app.calculating
     },
     fontSize() {
-      const { config } = this.$store.state.app;
+      const config = this.systemConfig
       if (config.rightMenu && config.rightMenu.fontSize) {
-        return config.rightMenu.fontSize;
+        return config.rightMenu.fontSize
       }
-      return '1rem';
+      return '1rem'
     },
     configFilePerPage() {
-      const { config } = this.$store.state.app;
+      const config = this.systemConfig
       if (Number.isInteger(config.filePerPage) && config.filePerPage >= 0) {
-        return config.filePerPage;
+        return config.filePerPage
       }
-      return 0;
+      return 0
     },
     forwardOnly() {
-      return this.$store.state.app.config.forwardOnly;
+      return this.systemConfig.forwardOnly
     },
     showFileName() {
-      return this.$store.state.app.config.showFileName;
+      return this.systemConfig.showFileName
     },
     systemConfig() {
-      return this.$store.state.app.config;
+      return this.$store.state.app.explorerConfig
     },
     defaultFileSize() {
-      return this.$store.state.app.config.defaultPictureSize;
+      return this.systemConfig.defaultPictureSize
     },
     relativeDir() {
-      const { root } = this.$store.state.app.config;
-      return this.dir && root ? this.dir.substring(root.length) : this.dir;
+      const { root } = this.systemConfig
+      return this.dir && root ? this.dir.substring(root.length) : this.dir
     },
     ...mapGetters([
       'newFolder',
       'canViewStatistics',
       'canSeeMoveMenu',
+      'imageViewer',
       'showNavigationIcon',
     ]),
   },
   watch: {
     configFilePerPage() {
       if (this.configFilePerPage) {
-        this.perPage = this.configFilePerPage;
+        this.perPage = this.configFilePerPage
       } else {
-        this.perPage = 100;
+        this.perPage = 100
       }
-      this.calculatePage(this.page);
+      this.calculatePage(this.page)
     },
     defaultFileSize(size) {
       if (Number.isInteger(size) && size > 0) {
-        this.fileSize = size;
+        this.fileSize = size
       }
     },
   },
   mounted() {
-    const size = this.defaultFileSize;
+    const size = this.defaultFileSize
     if (Number.isInteger(size) && size > 0) {
-      this.fileSize = size;
+      this.fileSize = size
     }
   },
   methods: {
+
+    showImageViewer() {
+      if (this.selectedFiles.length) {
+        this.viewerIndex = 0
+      }
+    },
+
     zoomIn(byShortCut = false) {
-      if (!this.systemConfig.useShortcuts && byShortCut) return;
-      const zoom = Math.floor((this.fileSize * 105) / 100);
-      this.fileSize = (zoom < this.maxFileSize) ? zoom : this.maxFileSize;
+      if (!this.systemConfig.useShortcuts && byShortCut) return
+      const zoom = Math.floor((this.fileSize * 105) / 100)
+      this.fileSize = (zoom < this.maxFileSize) ? zoom : this.maxFileSize
     },
     zoomOut(byShortCut = false) {
-      if (!this.systemConfig.useShortcuts && byShortCut) return;
-      const zoom = Math.floor((this.fileSize * 95) / 100);
-      this.fileSize = (zoom > this.minFileSize) ? zoom : this.minFileSize;
+      if (!this.systemConfig.useShortcuts && byShortCut) return
+      const zoom = Math.floor((this.fileSize * 95) / 100)
+      this.fileSize = (zoom > this.minFileSize) ? zoom : this.minFileSize
     },
 
     showShortcutsModal() {
-      this.showShortcuts = true;
+      this.showShortcuts = true
     },
     onKeyUp(event) {
       if (event) {
-        event.preventDefault();
+        event.preventDefault()
       }
-      if (!this.systemConfig.useShortcuts) return;
+      if (!this.systemConfig.useShortcuts) return
       const keys = {
         space: 32,
         pageUp: 33,
@@ -430,105 +449,105 @@ export default {
         numpad9: 105,
         a: 65,
         z: 90,
-      };
+      }
       switch (event.keyCode) {
         case keys.left:
-          this.cursor('left');
-          break;
+          this.cursor('left')
+          break
         case keys.up:
-          this.cursor('up');
-          break;
+          this.cursor('up')
+          break
         case keys.right:
-          this.cursor('right');
-          break;
+          this.cursor('right')
+          break
         case keys.down:
-          this.cursor('down');
-          break;
+          this.cursor('down')
+          break
         case keys.space:
-          this.selectCurrent(false);
-          break;
+          this.selectCurrent(false)
+          break
         case keys.delete:
-          this.deleteFiles();
-          break;
+          this.deleteFiles()
+          break
         case keys.pageUp:
-          this.backward();
-          break;
+          this.backward()
+          break
         case keys.pageDown:
-          this.forward();
-          break;
+          this.forward()
+          break
         default:
           if (event.keyCode >= keys.a && event.keyCode <= keys.z) {
-            this.selectFolderByLetter(event.key);
+            this.selectFolderByLetter(event.key)
           } else if ((event.keyCode >= keys.digit0 && event.keyCode <= keys.digit9)
               || (event.keyCode >= keys.numpad0 && event.keyCode <= keys.numpad9)) {
-            const number = event.keyCode < keys.numpad0 ? event.keyCode - keys.digit0 : event.keyCode - keys.numpad0;
-            this.selectFileByIndex(number);
+            const number = event.keyCode < keys.numpad0 ? event.keyCode - keys.digit0 : event.keyCode - keys.numpad0
+            this.selectFileByIndex(number)
           }
-          break;
+          break
       }
     },
 
     selectFolderByLetter(letter) {
-      console.log(`leteter: ${letter}`);
+      console.log(`leteter: ${letter}`)
       const folder = this.folder.folders.find((f) => f.name.toLowerCase()
-        .startsWith(letter));
-      if (folder) this.goToTheFolder(folder);
+        .startsWith(letter))
+      if (folder) this.goToTheFolder(folder)
     },
 
     selectFileByIndex(number) {
-      const index = (number + 10) % 11;
+      const index = (number + 10) % 11
       if (this.screenFiles.length > index) {
-        this.toggleSelect(this.screenFiles[index]);
+        this.toggleSelect(this.screenFiles[index])
       }
     },
 
     openCurrentFile() {
-      const fileInFocus = this.screenFiles.find((f) => f.cursor);
-      this.viewingFile = fileInFocus;
-      this.$nextTick(() => this.$refs.FileViewing.show());
+      const fileInFocus = this.screenFiles.find((f) => f.cursor)
+      this.viewingFile = fileInFocus
+      this.$nextTick(() => this.$refs.FileViewing.show())
     },
     openFile(file) {
-      console.log(file);
-      this.viewingFile = file;
-      this.$nextTick(() => this.$refs.FileViewing.show());
+      console.log(file)
+      this.viewingFile = file
+      this.$nextTick(() => this.$refs.FileViewing.show())
     },
     async calculateStatistic() {
-      this.isLoading.statistic = true;
+      this.isLoading.statistic = true
       try {
-        await api.calculateStatistic();
+        await api.calculateStatistic()
       } catch (e) {
-        console.log(e);
-        console.error('An error occurred!');
+        console.log(e)
+        console.error('An error occurred!')
       }
-      await this.loadStatistic(this.path);
-      this.isLoading.statistic = false;
+      await this.loadStatistic(this.path)
+      this.isLoading.statistic = false
     },
     async selectFolder({ folder, filter }) {
-      const folderFromArray = this.createdFolders.find((f) => f.name === folder);
-      const openedPath = folderFromArray.path;
-      console.log(folderFromArray);
-      this.filter = filter || {};
-      socket.unsubscribeForFolder(this.openedPath);
-      await this.loadFiles(folderFromArray.path);
-      socket.subscibeForFolder(openedPath, this.fileChanged());
-      this.openedPath = openedPath;
+      const folderFromArray = this.createdFolders.find((f) => f.name === folder)
+      const openedPath = folderFromArray.path
+      console.log(folderFromArray)
+      this.filter = filter || {}
+      socket.unsubscribeForFolder(this.openedPath)
+      await this.loadFiles(folderFromArray.path)
+      socket.subscibeForFolder(openedPath, this.fileChanged())
+      this.openedPath = openedPath
     },
     statisticExpanded() {
-      this.$refs.WindowSplitting.expand();
-      this.statisticShown = true;
+      this.$refs.WindowSplitting.expand()
+      this.statisticShown = true
     },
     statisticHidden() {
-      this.$refs.WindowSplitting.shrink();
-      this.statisticShown = false;
+      this.$refs.WindowSplitting.shrink()
+      this.statisticShown = false
     },
     setCursorAndSelect(file, $event) {
-      const currentCursorFile = this.screenFiles.find((f) => f.cursor);
-      if (currentCursorFile) currentCursorFile.cursor = false;
-      file.cursor = true;
+      const currentCursorFile = this.screenFiles.find((f) => f.cursor)
+      if (currentCursorFile) currentCursorFile.cursor = false
+      file.cursor = true
       if ($event.shiftKey) {
-        this.selectCurrent(true);
+        this.selectCurrent(true)
       } else {
-        this.toggleSelect(file);
+        this.toggleSelect(file)
       }
     },
     /**
@@ -536,13 +555,13 @@ export default {
        * @param {Number} focusFileIndex - Index of file with focus
        */
     scrollToFocusFile(focusFileIndex) {
-      const focusedFile = this.screenFiles[focusFileIndex];
-      const element = document.getElementById(`file_${focusedFile.path}`);
-      const windowHeight = window.innerHeight;
-      const elementHeight = element.getBoundingClientRect().top - element.getBoundingClientRect().bottom;
+      const focusedFile = this.screenFiles[focusFileIndex]
+      const element = document.getElementById(`file_${focusedFile.path}`)
+      const windowHeight = window.innerHeight
+      const elementHeight = element.getBoundingClientRect().top - element.getBoundingClientRect().bottom
       if (element) {
-        element.scrollIntoView(false);
-        window.scrollBy(0, Math.floor(windowHeight / 2) + elementHeight);
+        element.scrollIntoView(false)
+        window.scrollBy(0, Math.floor(windowHeight / 2) + elementHeight)
       }
     },
     /**
@@ -551,104 +570,104 @@ export default {
        * @param {String} to - Direction to move cursor
        */
     cursor(to) {
-      console.log('cursor to', to);
-      const fileInFocusIndex = this.screenFiles.findIndex((f) => f.cursor);
-      let nextFileFocusIndex = null;
+      console.log('cursor to', to)
+      const fileInFocusIndex = this.screenFiles.findIndex((f) => f.cursor)
+      let nextFileFocusIndex = null
       if (fileInFocusIndex === -1) {
-        this.screenFiles[0].cursor = true;
-        return;
+        this.screenFiles[0].cursor = true
+        return
       }
 
-      let fileInFocusCoords = null;
+      let fileInFocusCoords = null
       switch (to) {
         case 'right':
           if (fileInFocusIndex + 1 < this.screenFiles.length) {
-            nextFileFocusIndex = fileInFocusIndex + 1;
+            nextFileFocusIndex = fileInFocusIndex + 1
           }
-          break;
+          break
         case 'left':
           if (fileInFocusIndex > 0) {
-            nextFileFocusIndex = fileInFocusIndex - 1;
+            nextFileFocusIndex = fileInFocusIndex - 1
           }
-          break;
+          break
         case 'down':
           fileInFocusCoords = document
             .getElementById(`file_${this.screenFiles[fileInFocusIndex].path}`)
-            .getBoundingClientRect();
+            .getBoundingClientRect()
           for (let i = fileInFocusIndex + 1; i < this.screenFiles.length; ++i) {
             const nextFileCoords = document
               .getElementById(`file_${this.screenFiles[i].path}`)
-              .getBoundingClientRect();
+              .getBoundingClientRect()
             if (fileInFocusCoords.x === nextFileCoords.x) {
-              nextFileFocusIndex = i;
-              break;
+              nextFileFocusIndex = i
+              break
             }
           }
-          break;
+          break
         case 'up':
           fileInFocusCoords = document
             .getElementById(`file_${this.screenFiles[fileInFocusIndex].path}`)
-            .getBoundingClientRect();
+            .getBoundingClientRect()
           for (let i = fileInFocusIndex - 1; i >= 0; --i) {
             const nextFileCoords = document
               .getElementById(`file_${this.screenFiles[i].path}`)
-              .getBoundingClientRect();
+              .getBoundingClientRect()
             if (fileInFocusCoords.left === nextFileCoords.left) {
-              nextFileFocusIndex = i;
-              break;
+              nextFileFocusIndex = i
+              break
             }
           }
-          break;
+          break
         default:
-          break;
+          break
       }
 
       if (nextFileFocusIndex || nextFileFocusIndex === 0) {
-        this.screenFiles[fileInFocusIndex].cursor = false;
-        this.screenFiles[nextFileFocusIndex].cursor = true;
-        this.scrollToFocusFile(nextFileFocusIndex);
+        this.screenFiles[fileInFocusIndex].cursor = false
+        this.screenFiles[nextFileFocusIndex].cursor = true
+        this.scrollToFocusFile(nextFileFocusIndex)
       }
     },
     selectCurrent(selectAll) {
-      const fileInFocusIndex = this.screenFiles.findIndex((f) => f.cursor);
-      if (fileInFocusIndex === -1) return;
-      this.toggleSelect(this.screenFiles[fileInFocusIndex], true);
+      const fileInFocusIndex = this.screenFiles.findIndex((f) => f.cursor)
+      if (fileInFocusIndex === -1) return
+      this.toggleSelect(this.screenFiles[fileInFocusIndex], true)
       if (selectAll && (this.lastSelectedFileIndex || this.lastSelectedFileIndex === 0)) {
-        const different = fileInFocusIndex - this.lastSelectedFileIndex;
-        const beginFrom = Math.sign(different) > 0 ? this.lastSelectedFileIndex + 1 : fileInFocusIndex + 1;
-        const endWith = Math.sign(different) > 0 ? fileInFocusIndex - 1 : this.lastSelectedFileIndex - 1;
-        console.log(beginFrom, endWith, 'kokoko');
+        const different = fileInFocusIndex - this.lastSelectedFileIndex
+        const beginFrom = Math.sign(different) > 0 ? this.lastSelectedFileIndex + 1 : fileInFocusIndex + 1
+        const endWith = Math.sign(different) > 0 ? fileInFocusIndex - 1 : this.lastSelectedFileIndex - 1
+        console.log(beginFrom, endWith, 'kokoko')
         for (let i = beginFrom; i <= endWith; ++i) {
-          this.toggleSelect(this.screenFiles[i], true);
+          this.toggleSelect(this.screenFiles[i], true)
         }
-        this.lastSelectedFileIndex = null;
+        this.lastSelectedFileIndex = null
       }
       if (!selectAll) {
-        this.lastSelectedFileIndex = fileInFocusIndex;
+        this.lastSelectedFileIndex = fileInFocusIndex
       }
     },
     selected: () => {
-      console.log('selected');
+      console.log('selected')
     },
     toggleSelect(file, doNotUpdateLastSelectedFileIndex) {
-      console.log(`File ${file.path} ${file.selected ? 'unselected' : 'selected'}`);
-      file.selected = !file.selected;
+      console.log(`File ${file.path} ${file.selected ? 'unselected' : 'selected'}`)
+      file.selected = !file.selected
       if (file.selected) {
-        this.selectedFiles.push(file);
+        this.selectedFiles.push(file)
       } else {
-        let index = -1;
+        let index = -1
         for (let i = 0; i < this.selectedFiles.length; ++i) {
           if (this.selectedFiles[i].path === file.path) {
-            index = i;
-            break;
+            index = i
+            break
           }
         }
         if (index > -1) {
-          this.selectedFiles.splice(index, 1);
+          this.selectedFiles.splice(index, 1)
         }
       }
       if (!doNotUpdateLastSelectedFileIndex) {
-        this.lastSelectedFileIndex = this.screenFiles.findIndex((f) => f.path === file.path);
+        this.lastSelectedFileIndex = this.screenFiles.findIndex((f) => f.path === file.path)
       }
     },
     async loadStatistic(path) {
@@ -658,298 +677,298 @@ export default {
         missmatched,
         calculated,
         table,
-      } = await api.getStatistic(path);
-      this.statistic.calculated = calculated;
-      this.statistic.matched = matched;
-      this.statistic.missed = missed;
-      this.statistic.missmatched = missmatched;
-      this.statistic.table = table;
-      console.log('statistic table: ', this.statistic.table);
+      } = await api.getStatistic(path)
+      this.statistic.calculated = calculated
+      this.statistic.matched = matched
+      this.statistic.missed = missed
+      this.statistic.missmatched = missmatched
+      this.statistic.table = table
+      console.log('statistic table: ', this.statistic.table)
     },
     onFolderCreated() {
-      this.loadFiles(this.openedPath);
+      this.loadFiles(this.openedPath)
     },
     async loadFiles(path) {
       // clear old files
-      this.folder.files = [];
-      this.folder.folders = [];
-      this.screenFiles = [];
-      this.selectedFiles = [];
+      this.folder.files = []
+      this.folder.folders = []
+      this.screenFiles = []
+      this.selectedFiles = []
 
       // load data
-      const content = await api.getFiles(path);
+      const content = await api.getFiles(path)
 
       // prepare files
       this.folder.files = content.files.map((f) => {
-        f.type = 'file';
-        f.selected = false;
-        f.serverPath = this.staticServer + f.relativePath;
-        f.cursor = false;
-        return f;
+        f.type = 'file'
+        f.selected = false
+        f.serverPath = this.staticServer + f.relativePath
+        f.cursor = false
+        return f
       })
         .filter((f) => {
           // console.log(f.name, this.filter.exclude, this.filter.include)
-          let excludeFactor = true;
-          let includeFactor = true;
+          let excludeFactor = true
+          let includeFactor = true
           if (this.filter.exclude) {
             if (f.name.toLowerCase()
               .includes(this.filter.exclude.toLowerCase())) {
-              excludeFactor = false;
+              excludeFactor = false
             }
           }
           if (this.filter.include) {
             if (f.name.toLowerCase()
               .includes(this.filter.include.toLowerCase())) {
-              includeFactor = true;
+              includeFactor = true
             } else {
-              includeFactor = false;
+              includeFactor = false
             }
           }
-          return includeFactor && excludeFactor;
-        });
+          return includeFactor && excludeFactor
+        })
 
-      this.folder.total_file = this.folder.files.length;
+      this.folder.total_file = this.folder.files.length
 
       // prepare folders
-      let previousLetter = '-';
+      let previousLetter = '-'
       this.folder.folders = content.folders.map((f) => {
-        f.type = 'folder';
-        f.selected = false;
-        const lowerName = f.name.toLowerCase();
-        const firstLetter = lowerName.substring(0, 1);
+        f.type = 'folder'
+        f.selected = false
+        const lowerName = f.name.toLowerCase()
+        const firstLetter = lowerName.substring(0, 1)
         if (!lowerName.startsWith(previousLetter) && firstLetter.toUpperCase() !== firstLetter.toLowerCase()) {
-          f.shortcut = firstLetter.toUpperCase();
-          previousLetter = firstLetter;
+          f.shortcut = firstLetter.toUpperCase()
+          previousLetter = firstLetter
         }
-        return f;
-      });
+        return f
+      })
 
       // add parent dir to folder list
-      const parentDir = await api.getParent(path);
+      const parentDir = await api.getParent(path)
       if (parentDir.access) {
         this.folder.folders.unshift({
           path: parentDir.path,
           name: '../',
           type: 'folder',
-        });
+        })
       }
 
       // prepare next folder for move
-      this.nextFolders = await api.getNextFolders(path);
+      this.nextFolders = await api.getNextFolders(path)
 
       // prepare to show page
       if (!this.page) {
-        this.page = 1;
+        this.page = 1
       }
 
       if (!this.configFilePerPage) {
-        this.perPage = this.folder.files.length;
+        this.perPage = this.folder.files.length
       } else {
-        this.perPage = this.configFilePerPage;
+        this.perPage = this.configFilePerPage
       }
-      this.page_count = Math.ceil(this.folder.files.length / this.perPage);
+      this.page_count = Math.ceil(this.folder.files.length / this.perPage)
       if (this.page > this.page_count) {
-        this.page = this.page_count;
+        this.page = this.page_count
       }
 
-      this.calculatePage(this.page);
+      this.calculatePage(this.page)
 
       return {
         currentPath: content.path,
-      };
+      }
     },
 
     calculatePage(page) {
       if (!this.perPage) {
-        this.screenFiles = [...this.folder.files];
+        this.screenFiles = [...this.folder.files]
       } else {
-        this.screenFiles = this.folder.files.slice((page - 1) * this.perPage, page * this.perPage);
+        this.screenFiles = this.folder.files.slice((page - 1) * this.perPage, page * this.perPage)
       }
       if (this.screenFiles.length) {
         this.screenFiles = this.screenFiles.map((f) => {
-          f.cursor = false;
-          return f;
-        });
-        this.screenFiles[0].cursor = true;
+          f.cursor = false
+          return f
+        })
+        this.screenFiles[0].cursor = true
       }
     },
     onPageChange(page) {
-      this.page = page;
-      this.calculatePage(page);
+      this.page = page
+      this.calculatePage(page)
     },
     backward() {
       if (this.page > 1) {
-        this.page -= 1;
-        this.calculatePage(this.page);
+        this.page -= 1
+        this.calculatePage(this.page)
       }
     },
 
     forward() {
       if (!this.forwardOnly) {
         if (this.page < this.page_count) {
-          this.page += 1;
-          this.calculatePage(this.page);
+          this.page += 1
+          this.calculatePage(this.page)
         }
       } else {
-        this.onForwardOnly();
+        this.onForwardOnly()
       }
     },
 
     async onForwardOnly() {
-      const selected = this.selectedFiles.map((f) => f.path);
+      const selected = this.selectedFiles.map((f) => f.path)
       const notSelected = this.screenFiles.filter((f) => !selected.includes(f.path) && f.image)
-        .map((f) => f.path);
-      await api.doForwardOnly(selected, notSelected);
-      this.loadFiles(this.path);
+        .map((f) => f.path)
+      await api.doForwardOnly(selected, notSelected)
+      this.loadFiles(this.path)
     },
 
     async goToTheFolder(file) {
       if (file.path === this.path) {
-        socket.unsubscribeForFolder(this.openedPath);
-        socket.subscibeForFolder(this.path, this.fileChanged());
-        this.openedPath = this.path;
-        this.filter = {};
-        await this.loadFiles(this.path);
-        return;
+        socket.unsubscribeForFolder(this.openedPath)
+        socket.subscibeForFolder(this.path, this.fileChanged())
+        this.openedPath = this.path
+        this.filter = {}
+        await this.loadFiles(this.path)
+        return
       }
       if (this.statisticShown && file.path.length > this.path.length) {
         // eslint-disable-next-line no-return-await,consistent-return
         return await this.selectFolder({
           folder: file.name,
           filter: {},
-        });
+        })
       }
       this.$router.push({
         name: 'explorer',
         query: { dir: file.path },
-      });
+      })
     },
     async deleteFiles() {
-      if (this.selectedFiles.length === 0) return;
-      console.log('Delete files');
-      this.isLoading.deleting = true;
-      await api.deleteFiles(this.selectedFiles.map((f) => f.path));
-      this.isLoading.deleting = false;
+      if (this.selectedFiles.length === 0) return
+      console.log('Delete files')
+      this.isLoading.deleting = true
+      await api.deleteFiles(this.selectedFiles.map((f) => f.path))
+      this.isLoading.deleting = false
       // delete that files from folder
-      await this.loadFiles(this.path);
+      await this.loadFiles(this.path)
     },
     async moveFiles(dest) {
-      if (this.selectedFiles.length === 0) return;
-      if (this.nextFolders.length === 0) return;
-      this.isLoading.moving = true;
-      await api.moveFiles(this.selectedFiles.map((f) => f.path), dest);
-      this.isLoading.moving = false;
+      if (this.selectedFiles.length === 0) return
+      if (this.nextFolders.length === 0) return
+      this.isLoading.moving = true
+      await api.moveFiles(this.selectedFiles.map((f) => f.path), dest)
+      this.isLoading.moving = false
       // move files
-      await this.loadFiles(this.path);
+      await this.loadFiles(this.path)
     },
     fileChanged() {
-      const self = this;
+      const self = this
       return (file) => {
-        console.log(file);
+        console.log(file)
         if (file.event === 'add' && file.type === 'file') {
-          file.selected = false;
-          file.serverPath = this.staticServer + file.relativePath;
-          self.folder.files.push(file);
+          file.selected = false
+          file.serverPath = this.staticServer + file.relativePath
+          self.folder.files.push(file)
           if (self.page === self.page_count) {
-            self.screenFiles.push(file);
+            self.screenFiles.push(file)
           }
         } else if (file.event === 'add' && file.type === 'folder') {
-          file.selected = false;
-          self.folder.folders.push(file);
+          file.selected = false
+          self.folder.folders.push(file)
         } else if (file.event === 'remove' && file.type === 'folder') {
-          let index = -1;
+          let index = -1
           for (let i = 0; i < self.folder.folders.length; i++) {
             if (self.folder.folders[i].path === file.path) {
-              index = i;
-              break;
+              index = i
+              break
             }
           }
-          if (index > -1) self.folder.folders.splice(index, 1);
+          if (index > -1) self.folder.folders.splice(index, 1)
         } else if (file.event === 'remove' && file.type === 'file') {
-          let index = -1;
+          let index = -1
           for (let i = 0; i < self.folder.files.length; i++) {
             if (self.folder.files[i].path === file.path) {
-              index = i;
-              break;
+              index = i
+              break
             }
           }
-          if (index > -1) self.folder.files.splice(index, 1);
+          if (index > -1) self.folder.files.splice(index, 1)
 
-          index = -1;
+          index = -1
           for (let i = 0; i < self.selectedFiles.length; i++) {
             if (self.selectedFiles[i].path === file.path) {
-              index = i;
-              break;
+              index = i
+              break
             }
           }
-          if (index > -1) self.selectedFiles.splice(index, 1);
+          if (index > -1) self.selectedFiles.splice(index, 1)
 
-          index = -1;
+          index = -1
           for (let i = 0; i < self.screenFiles.length; i++) {
             if (self.screenFiles[i].path === file.path) {
-              index = i;
-              break;
+              index = i
+              break
             }
           }
-          if (index > -1) self.screenFiles.splice(index, 1);
+          if (index > -1) self.screenFiles.splice(index, 1)
         }
-      };
+      }
     },
     setFocusOnFiles() {
-      console.log('set focus on files');
+      console.log('set focus on files')
       window.document.getElementById('keyupevents')
-        .focus();
+        .focus()
     },
     enablePreventingScrolling() {
-      window.addEventListener('keydown', preventDefaultScrolling, false);
+      window.addEventListener('keydown', preventDefaultScrolling, false)
     },
     disablePreventingScrolling() {
-      window.removeEventListener('keydown', preventDefaultScrolling);
+      window.removeEventListener('keydown', preventDefaultScrolling)
     },
     onOpenModal() {
-      this.disablePreventingScrolling();
+      this.disablePreventingScrolling()
     },
     onCloseModal() {
-      this.setFocusOnFiles();
-      this.enablePreventingScrolling();
+      this.setFocusOnFiles()
+      this.enablePreventingScrolling()
     },
     showStatistic() {
-      EventBus.$emit('show-statistic', this.path);
+      EventBus.$emit('show-statistic', this.path)
     },
     createNewFolder() {
-      console.log('create new folder');
-      EventBus.$emit('create-new-folder', this.path);
+      console.log('create new folder')
+      EventBus.$emit('create-new-folder', this.path)
     },
   },
   async created() {
-    this.perPage = this.configFilePerPage;
-    const { currentPath } = await this.loadFiles(this.dir || null);
-    this.createdFolders = this.folder.folders;
-    await this.loadStatistic(this.dir || currentPath || this.path || null);
+    this.perPage = this.configFilePerPage
+    const { currentPath } = await this.loadFiles(this.dir || null)
+    this.createdFolders = this.folder.folders
+    await this.loadStatistic(this.dir || currentPath || this.path || null)
 
     // set current path if he hasn't defined
-    this.path = currentPath;
-    this.openedPath = currentPath;
+    this.path = currentPath
+    this.openedPath = currentPath
 
     // subscribe for that folder
-    socket.subscibeForFolder(this.path, this.fileChanged());
+    socket.subscibeForFolder(this.path, this.fileChanged())
 
     // set focus on keyupevents
-    this.setFocusOnFiles();
+    this.setFocusOnFiles()
 
     // get status
-    this.status = await api.getRunningState();
+    this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
-      if (data.event === 'change') this.status = data.content;
-      if (data.event === 'unlink') this.status = false;
-    });
-    this.enablePreventingScrolling();
+      if (data.event === 'change') this.status = data.content
+      if (data.event === 'unlink') this.status = false
+    })
+    this.enablePreventingScrolling()
   },
   beforeDestroy() {
-    socket.unsubscribeForFolder(this.path);
-    socket.unsubscribeForFolder('running.lock');
+    socket.unsubscribeForFolder(this.path)
+    socket.unsubscribeForFolder('running.lock')
   },
-};
+}
 
 
 </script>
@@ -1085,12 +1104,20 @@ export default {
   }
 
   .file-explorer-preview {
-    object-fit: cover;
+
     margin: auto;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
+    &.image-fill {
+      object-fit: cover;
+    }
+
+    &.image-fit {
+      object-fit: contain;
+    }
   }
 
   .file-explorer-file-name {
@@ -1124,5 +1151,11 @@ export default {
   }
   .link-current-folder {
     color: #39d1ff;
+  }
+  .image-viewer-ctn {
+    padding-top: 10px;
+    button {
+      width: 100%;
+    }
   }
 </style>

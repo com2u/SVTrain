@@ -6,7 +6,8 @@
     "serve": "cross-env NODE_ENV=development vue-cli-service serve",
     "build": "cross-env NODE_ENV=production vue-cli-service build",
     "buildPublic": "cross-env NODE_ENV=production vue-cli-service build && node buildAndCopy.js",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "lint-fix": "vue-cli-service lint --fix"
   },
   "dependencies": {
     "@adonisjs/websocket-client": "^1.0.9",
@@ -19,8 +20,11 @@
     "jsoneditor": "^8.6.4",
     "lodash.set": "^4.3.2",
     "v-jsoneditor": "^1.2.3",
+    "v-viewer": "^1.5.1",
+    "viewerjs": "^1.6.1",
     "vue": "^2.6.11",
     "vue-awesome": "^4.0.2",
+    "vue-gallery": "^2.0.1",
     "vue-infinite-scroll": "^2.0.2",
     "vue-js-modal": "^1.3.33",
     "vue-notification": "^1.3.20",
@@ -42,6 +46,7 @@
     "eslint-plugin-vue": "^6.1.2",
     "lint-staged": "^9.5.0",
     "node-sass": "^4.12.0",
+    "nodemon": "^2.0.4",
     "sass-loader": "^8.0.2",
     "svg-sprite-loader": "^4.2.3",
     "svgo": "^1.3.2",

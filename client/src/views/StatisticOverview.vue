@@ -23,14 +23,14 @@ export default {
   data() {
     return {
       expandRightSide: false,
-    };
+    }
   },
   methods: {
     toggleExpand() {
-      this.expandRightSide = !this.expandRightSide;
+      this.expandRightSide = !this.expandRightSide
     },
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>

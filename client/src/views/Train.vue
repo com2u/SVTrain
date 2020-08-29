@@ -41,7 +41,7 @@
   </div>
 </template>
 <script>
-import command from '../mixins/command';
+import command from '../mixins/command'
 
 export default {
   name: 'Train',
@@ -58,7 +58,7 @@ export default {
           label: 'Stop running train',
         },
       ],
-    };
+    }
   },
-};
+}
 </script>

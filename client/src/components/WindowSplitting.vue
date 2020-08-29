@@ -23,50 +23,50 @@ export default {
       sideWidth: null,
       resizing: false,
       originalPageX: null,
-    };
+    }
   },
   computed: {
     configSideWidth() {
-      const { config } = this.$store.state.app;
+      const { config } = this.$store.state.app
       if (config.rightMenu && config.rightMenu.width) {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.sideWidth = config.rightMenu.width;
-        return config.rightMenu.width;
+        this.sideWidth = config.rightMenu.width
+        return config.rightMenu.width
       }
-      return 250;
+      return 250
     },
     displayedWidth() {
-      return this.sideWidth || this.configSideWidth;
+      return this.sideWidth || this.configSideWidth
     },
   },
   methods: {
     onMouseUpOnWrapper() {
-      this.resizing = false;
+      this.resizing = false
     },
     onMouseMoveOnWrapper(e) {
-      if (!this.resizing) return;
-      const difference = this.originalPageX - e.pageX;
-      this.sideWidth = this.originalSideWidth + difference;
-      if (this.sideWidth < 250) this.sideWidth = 250;
-      if (this.sideWidth > 1000) this.sideWidth = 1000;
-      e.preventDefault();
+      if (!this.resizing) return
+      const difference = this.originalPageX - e.pageX
+      this.sideWidth = this.originalSideWidth + difference
+      if (this.sideWidth < 250) this.sideWidth = 250
+      if (this.sideWidth > 1000) this.sideWidth = 1000
+      e.preventDefault()
     },
     onMouseDownOnBorder(e) {
-      this.resizing = true;
-      this.originalPageX = e.pageX;
-      this.originalSideWidth = this.sideWidth;
+      this.resizing = true
+      this.originalPageX = e.pageX
+      this.originalSideWidth = this.sideWidth
     },
     onMouseUpOnBorder() {
-      this.resizing = false;
+      this.resizing = false
     },
     expand() {
-      this.sideWidth = 800;
+      this.sideWidth = 800
     },
     shrink() {
-      this.sideWidth = 250;
+      this.sideWidth = 250
     },
   },
-};
+}
 </script>
 
 

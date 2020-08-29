@@ -5,8 +5,8 @@
 </template>
 
 <script>
-import FileExplorer from '../components/FileExplorer.vue';
-import EventBus from '../utils/eventbus';
+import FileExplorer from '../components/FileExplorer.vue'
+import EventBus from '../utils/eventbus'
 
 export default {
   props: [
@@ -20,10 +20,10 @@ export default {
     },
   },
   mounted() {
-    EventBus.$on('loaded-config', this.checkPermission);
+    EventBus.$on('loaded-config', this.checkPermission)
   },
   destroyed() {
-    EventBus.$off('loaded-config');
+    EventBus.$off('loaded-config')
   },
-};
+}
 </script>

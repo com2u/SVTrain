@@ -87,17 +87,17 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
 
 export default {
   data() {
     return {
       showHeader: true,
-    };
+    }
   },
   computed: {
     user() {
-      return this.$store.state.app.user.username;
+      return this.$store.state.app.user.username
     },
 
     ...mapGetters([
@@ -109,11 +109,11 @@ export default {
   },
   methods: {
     toggleHeader() {
-      this.showHeader = !this.showHeader;
+      this.showHeader = !this.showHeader
     },
     logout() {
-      this.$store.dispatch('app/logout');
-      this.$router.push({ name: 'LoginPage' });
+      this.$store.dispatch('app/logout')
+      this.$router.push({ name: 'LoginPage' })
     },
     gotoPage(page) {
       const permissionMap = {
@@ -121,17 +121,17 @@ export default {
         Train: 'canTrain',
         Test: 'canTest',
         Validate: 'canValidate',
-      };
+      }
       if (this[permissionMap[page]]) {
         this.$router.push({
           name: page,
-        });
+        })
       }
     },
   },
   mounted() {
   },
-};
+}
 </script>
 <style lang="scss" scoped>
   .header {

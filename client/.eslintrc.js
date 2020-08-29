@@ -15,5 +15,6 @@ module.exports = {
     'no-debugger': 'off',
     'max-len': 'off',
     'import/extensions': 'off',
+    semi: ['error', 'never'],
   },
-};
+}

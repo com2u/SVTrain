@@ -23,5 +23,7 @@
   "newFolder": true,
   "newWorkspace": true,
 
-  "showNavigationIcon": true
+  "showNavigationIcon": true,
+  "imageFit": "fit",
+  "imageViewer": true
 }

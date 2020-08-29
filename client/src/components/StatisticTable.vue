@@ -61,7 +61,7 @@
 
 <script>
 
-import EventBus from '../utils/eventbus';
+import EventBus from '../utils/eventbus'
 
 export default {
   props: [
@@ -74,38 +74,38 @@ export default {
       exclude: false,
       responsive: false,
       sums: {},
-    };
+    }
   },
   methods: {
     select(dir1, dir2) {
-      const gotoDir = `${this.folder}\\${dir1}`;
-      console.log(' goto dir', gotoDir);
+      const gotoDir = `${this.folder}\\${dir1}`
+      console.log(' goto dir', gotoDir)
       EventBus.$emit('statistic-folder-selected', {
         folder: gotoDir,
         filter: {
           include: dir2,
           exclude: this.exclude ? '!' : null,
         },
-      });
+      })
     },
     sumFor(name) {
       return Object.keys(this.table[name])
         .map((n) => (this.exclude ? this.table[name][n].exclude : this.table[name][n].all))
-        .reduce((p, c) => c + p);
+        .reduce((p, c) => c + p)
     },
   },
   computed: {
     names() {
       console.log(Object.keys(this.table)
-        .map((n) => n));
+        .map((n) => n))
       return Object.keys(this.table)
-        .map((n) => n);
+        .map((n) => n)
     },
 
   },
   created() {
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>

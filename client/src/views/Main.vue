@@ -74,8 +74,8 @@
 </template>
 
 <script>
-import api from '../utils/api';
-import socket from '../utils/socket.js';
+import api from '../utils/api'
+import socket from '../utils/socket.js'
 
 export default {
   data: () => ({
@@ -104,77 +104,77 @@ export default {
   }),
   methods: {
     async checkStatus() {
-      const runstatus = await api.getRunningState();
-      this.running = runstatus;
-      console.log('Running status:', runstatus);
+      const runstatus = await api.getRunningState()
+      this.running = runstatus
+      console.log('Running status:', runstatus)
     },
     async checkWorkspace() {
-      const workspace = await api.getWorkspace();
-      this.workspace = workspace;
-      console.log(`Workspace: ${this.workspace}`);
+      const workspace = await api.getWorkspace()
+      this.workspace = workspace
+      console.log(`Workspace: ${this.workspace}`)
     },
     async runCommand(command) {
-      this.isLoading[command] = true;
+      this.isLoading[command] = true
       try {
-        await api.runCommand(command);
-        await this.checkStatus();
+        await api.runCommand(command)
+        await this.checkStatus()
       } catch (e) {
-        console.log(e);
-        console.error('An error occurred!');
+        console.log(e)
+        console.error('An error occurred!')
       }
-      this.isLoading[command] = false;
-      console.log(`Command ${command} executed`);
+      this.isLoading[command] = false
+      console.log(`Command ${command} executed`)
     },
     async calculateStatistic() {
-      this.isLoading.statistic = true;
+      this.isLoading.statistic = true
       try {
-        await api.calculateStatistic();
+        await api.calculateStatistic()
       } catch (e) {
-        console.log(e);
-        console.error('An error occurred!');
+        console.log(e)
+        console.error('An error occurred!')
       }
-      this.isLoading.statistic = false;
-      console.log('Calculate statistic process started');
+      this.isLoading.statistic = false
+      console.log('Calculate statistic process started')
     },
     openLogsFor(command) {
-      window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`);
+      window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`)
     },
     logout() {
-      localStorage.removeItem('sessionToken');
-      api.setSessionToken('');
-      this.$router.push({ name: 'LoginPage' });
+      localStorage.removeItem('sessionToken')
+      api.setSessionToken('')
+      this.$router.push({ name: 'LoginPage' })
     },
     gotoWorkspace() {
-      this.$router.push({ name: 'WorkSpacePage' });
+      this.$router.push({ name: 'WorkSpacePage' })
     },
   },
   async created() {
-    this.sessionUser = localStorage.getItem('sessionUser');
-    this.checkStatus();
-    this.checkWorkspace();
-    this.logs = await api.getLastLogs();
+    this.sessionUser = localStorage.getItem('sessionUser')
+    this.checkStatus()
+    this.checkWorkspace()
+    this.logs = await api.getLastLogs()
     socket.subscibeForFolder('running.lock', (data) => {
-      console.log('running.lock: ', data);
-      if (data.event === 'unlink') this.running = false;
-      if (data.event === 'change') this.running = data.content;
-    });
+      console.log('running.lock: ', data)
+      if (data.event === 'unlink') this.running = false
+      if (data.event === 'change') this.running = data.content
+    })
     socket.subscibeForFolder('workspace.bat', (data) => {
-      console.log('workspace.bat: ', data);
-      if (data.event === 'unlink') this.workspace = false;
-      if (data.event === 'change') this.workspace = data.content;
-    });
+      console.log('workspace.bat: ', data)
+      if (data.event === 'unlink') this.workspace = false
+      if (data.event === 'change') this.workspace = data.content
+    })
 
     socket.subscribe('logfile', (obj) => {
       obj.forEach((o) => {
-        this.logs[o.file].lastLine = o.lastLine;
-      });
-    });
+        this.logs[o.file].lastLine = o.lastLine
+      })
+    })
   },
   async beforeDestroy() {
-    socket.unsubscribeForFolder('running.lock');
-    socket.unsubscribeForFolder('workspace.bat');
+    socket.unsubscribeForFolder('running.lock')
+    socket.unsubscribeForFolder('workspace.bat')
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>
