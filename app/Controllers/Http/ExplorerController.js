@@ -1,43 +1,43 @@
-'use strict'
-const Env = use('Env')
-const Statistic = use('Statistic')
-const path = require('path')
-const recursive = require('../../../src/recursive')
-const {promisify} = require('util')
-const fs = require('fs')
-const execFile = promisify(require('child_process').execFile)
-const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i)
-const readdir = promisify(fs.readdir)
-const lstat = promisify(fs.lstat)
-const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
-const unlink = promisify(fs.unlink)
-const rename = promisify(fs.rename)
-const exists = promisify(fs.exists)
-const mkdir = promisify(fs.mkdir)
-const readLastLines = require('read-last-lines')
-const config = require('../../../config/ui')
+'use strict';
+const Env = use('Env');
+const Statistic = use('Statistic');
+const path = require('path');
+const recursive = require('../../../src/recursive');
+const {promisify} = require('util');
+const fs = require('fs');
+const execFile = promisify(require('child_process').execFile);
+const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i);
+const readdir = promisify(fs.readdir);
+const lstat = promisify(fs.lstat);
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+const unlink = promisify(fs.unlink);
+const rename = promisify(fs.rename);
+const exists = promisify(fs.exists);
+const mkdir = promisify(fs.mkdir);
+const readLastLines = require('read-last-lines');
+const config = require('../../../config/ui');
 
-const logger = require('../../../logger')
-const pathSep = path.sep
+const logger = require('../../../logger');
+const pathSep = path.sep;
 
-const defaultCfgPath = path.join(__dirname, '../../../default.cfg')
-const highlightPrefix = '[HIGHLIGHT]'
+const defaultCfgPath = path.join(__dirname, '../../../default.cfg');
+const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
-const {hasPermissionWorkspaces} = require('../../utils/index')
+const {hasPermissionWorkspaces} = require('../../utils/index');
 
 
 // if file is landing under root directory
 // prevent access to that file
 const accessToFile = (root, file) => {
-  const relative = path.relative(root, file)
-  return relative.split(path.sep)[0] !== '..'
-}
+  const relative = path.relative(root, file);
+  return relative.split(path.sep)[0] !== '..';
+};
 
 const FTYPES = {
   folder: 'folder',
   file: 'file'
-}
+};
 
 const CONST_PATHS = {
   root: Env.get('ROOT_PATH'),
@@ -46,7 +46,7 @@ const CONST_PATHS = {
   commands: Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning')),
   commandNames: ['train', 'validate', 'test', 'export', 'stop', 'ExportImages'],
   ignoreFiles: ['.DS_Store']
-}
+};
 
 /**
  * Build statistic table for subfolders from directory
@@ -55,36 +55,36 @@ const CONST_PATHS = {
  * @returns {Object} Statistic table
  */
 const buildSubfolderTable = async (dir, subfolders) => {
-  if (subfolders.length === 0) return false
-  const table = {}
+  if (subfolders.length === 0) return false;
+  const table = {};
   // build a table for subfolders
   await Promise.all(
     subfolders.map(async subfolder => {
-      table[subfolder] = {}
+      table[subfolder] = {};
       await Promise.all(
         subfolders.map(async anotherSubfolder => {
           table[subfolder][anotherSubfolder] = {
             all: 0,
             exclude: 0
-          }
-          const flist = await readdir(path.join(dir, anotherSubfolder))
+          };
+          const flist = await readdir(path.join(dir, anotherSubfolder));
           await Promise.all(
             flist.map(async fileFromSF => {
-              const fileFromSF_lstat = await lstat(path.join(dir, anotherSubfolder, fileFromSF))
+              const fileFromSF_lstat = await lstat(path.join(dir, anotherSubfolder, fileFromSF));
               if (fileFromSF_lstat.isFile() && fileFromSF.toLowerCase().includes(subfolder.toLowerCase())) {
-                table[subfolder][anotherSubfolder].all += 1
+                table[subfolder][anotherSubfolder].all += 1;
                 if (!fileFromSF.includes('!')) {
-                  table[subfolder][anotherSubfolder].exclude += 1
+                  table[subfolder][anotherSubfolder].exclude += 1;
                 }
               }
             })
-          )
+          );
         })
-      )
+      );
     })
-  )
-  return table
-}
+  );
+  return table;
+};
 
 class ExplorerController {
 
@@ -107,22 +107,22 @@ class ExplorerController {
       }]
     }
   */
-  async all({request}) {
-    const dir = path.join(request.get().dir || CONST_PATHS.root)
-    console.log(`Send files for directory ${dir}, request get params:`, request.get())
-    if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied')
-    const result = {}
+  async all ({request}) {
+    const dir = path.join(request.get().dir || CONST_PATHS.root);
+    console.log(`Send files for directory ${dir}, request get params:`, request.get());
+    if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
+    const result = {};
 
-    const files = await readdir(dir)
+    const files = await readdir(dir);
 
-    result.folders = []
-    result.files = []
-    result.path = dir
+    result.folders = [];
+    result.files = [];
+    result.path = dir;
 
     for (let i = 0; i < files.length; ++i) {
-      const f = files[i]
-      const fPath = path.join(dir, f)
-      const flstat = await lstat(path.join(dir, f))
+      const f = files[i];
+      const fPath = path.join(dir, f);
+      const flstat = await lstat(path.join(dir, f));
       if (f)
         if (flstat.isDirectory()) {
           const folder = {
@@ -131,8 +131,8 @@ class ExplorerController {
             type: FTYPES.folder,
             image: false,
             match: false
-          }
-          result.folders.push(folder)
+          };
+          result.folders.push(folder);
         } else if (flstat.isFile()) {
           result.files.push({
             path: fPath,
@@ -141,12 +141,12 @@ class ExplorerController {
             type: FTYPES.file,
             image: regexpForImages.test(f),
             match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1
-          })
+          });
         } else {
-          console.log(`File ${f} in the directory ${dir} nor file neither directory.`)
+          console.log(`File ${f} in the directory ${dir} nor file neither directory.`);
         }
     }
-    return result
+    return result;
   }
 
   /*
@@ -160,23 +160,23 @@ class ExplorerController {
       access: true/false
     }
   */
-  async parent({request}) {
+  async parent ({request}) {
     try {
-      const dir = request.get().dir
-      if (!dir) throw new Error('Parameter "dir" is required')
+      const dir = request.get().dir;
+      if (!dir) throw new Error('Parameter "dir" is required');
 
-      let parent = dir.split(path.sep)
-      parent.splice(-1)
-      parent = parent.join(path.sep)
+      let parent = dir.split(path.sep);
+      parent.splice(-1);
+      parent = parent.join(path.sep);
 
       return {
         path: parent,
         name: path.basename(parent),
         type: 'folder',
         access: accessToFile(CONST_PATHS.root, parent)
-      }
+      };
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
@@ -186,14 +186,14 @@ class ExplorerController {
     Returns true when the file running.lock is exist
     and false when it is't exist
   */
-  async state() {
-    const dir = Env.get('COMMAND_FILES_PATH')
-    const runningFile = path.join(dir, CONST_PATHS.running)
+  async state () {
+    const dir = Env.get('COMMAND_FILES_PATH');
+    const runningFile = path.join(dir, CONST_PATHS.running);
     try {
-      return fs.existsSync(runningFile) ? fs.readFileSync(runningFile) : false
+      return fs.existsSync(runningFile) ? fs.readFileSync(runningFile) : false;
     } catch (e) {
-      console.log(e)
-      return null
+      console.log(e);
+      return null;
     }
   }
 
@@ -202,39 +202,39 @@ class ExplorerController {
 
     Returns the content of file workspace.bat
   */
-  async getWorkspace() {
-    const dir = Env.get('COMMAND_FILES_PATH')
-    const workspaceFile = path.join(dir, CONST_PATHS.workspace)
+  async getWorkspace () {
+    const dir = Env.get('COMMAND_FILES_PATH');
+    const workspaceFile = path.join(dir, CONST_PATHS.workspace);
     try {
-      return fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile) : false
+      return fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile) : false;
     } catch (e) {
-      console.log(e)
-      return null
+      console.log(e);
+      return null;
     }
   }
 
-  async getJsonConfig(path) {
-    let cfg = {}
+  async getJsonConfig (path) {
+    let cfg = {};
     try {
       if (fs.existsSync(path)) {
-        const fileContent = fs.readFileSync(path, 'utf-8')
-        cfg = JSON.parse(fileContent)
+        const fileContent = fs.readFileSync(path, 'utf-8');
+        cfg = JSON.parse(fileContent);
         if (cfg.hide === true) {
-          cfg = {}
+          cfg = {};
         }
       }
     } catch (e) {
-      cfg = {}
+      cfg = {};
     }
-    return cfg
+    return cfg;
   }
 
-  async getSystemConfig() {
-    const ws = await this.getWorkspace()
-    const wsPath = ws.toString()
-    const configPath = path.join(wsPath, '.cfg')
-    const cfg = await this.getJsonConfig(configPath)
-    return {...config, ...cfg, wsPath}
+  async getSystemConfig () {
+    const ws = await this.getWorkspace();
+    const wsPath = ws.toString();
+    const configPath = path.join(wsPath, '.cfg');
+    const cfg = await this.getJsonConfig(configPath);
+    return {...config, ...cfg, wsPath};
   }
 
 
@@ -243,12 +243,12 @@ class ExplorerController {
 
   Set the workspace
   */
-  async setWorkspace({request}) {
-    const {workspace} = request.post()
-    const workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace)
-    const newWorkspace = path.join(CONST_PATHS.root, workspace)
-    await writeFile(workspaceFile, newWorkspace)
-    return true
+  async setWorkspace ({request}) {
+    const {workspace} = request.post();
+    const workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace);
+    const newWorkspace = path.join(CONST_PATHS.root, workspace);
+    await writeFile(workspaceFile, newWorkspace);
+    return true;
   }
 
   /*
@@ -262,20 +262,28 @@ class ExplorerController {
     Return array of files which has deleted
     [ "/path/to/file1", "path/to/file2" ]
   */
-  async delete({request}) {
-    let {files} = request.post()
-    const currentCfg = await this.getSystemConfig()
-    const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles'
+  async delete ({request}) {
+    let {files} = request.post();
+    let dir = '';
+    if (files && files.length) {
+      dir = files[0];
+    }
+    const currentCfg = await this.getParentFolderConfig(dir);
+    const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles';
+    let workingRoot = CONST_PATHS.root
+    if (currentCfg.parentFolderPath) {
+      workingRoot = currentCfg.parentFolderPath
+    }
 
     // Create delete directory if not exist
-    const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination)
+    const absDestination = path.isAbsolute(destination) ? destination : path.join(workingRoot, destination);
     if (!fs.existsSync(absDestination)) {
       fs.mkdirSync(absDestination);
     }
 
-    const user = request.currentUser.username
-    const response = await this.moveFiles(files, destination, user, true)
-    return response
+    const user = request.currentUser.username;
+    const response = await this.moveFiles(files, absDestination, user, true);
+    return response;
   }
 
   /*
@@ -286,24 +294,24 @@ class ExplorerController {
 
     return array of files with new path
   */
-  async move({request}) {
-    let {files, destination} = request.post()
-    const user = request.currentUser.username
-    const response = await this.moveFiles(files, destination, user)
-    return response
+  async move ({request}) {
+    let {files, destination} = request.post();
+    const user = request.currentUser.username;
+    const response = await this.moveFiles(files, destination, user);
+    return response;
   }
 
-  async moveFiles(files, destination, user, isDelete = false) {
-    const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination)
+  async moveFiles (files, destination, user, isDelete = false) {
+    const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination);
     if (!accessToFile(CONST_PATHS.root, destination)) {
-      throw new Error(`Access denied to the directory ${destination}`)
+      throw new Error(`Access denied to the directory ${destination}`);
     }
 
     // skip files with no access
     files = files
       .filter(
         f => accessToFile(CONST_PATHS.root, f)
-      )
+      );
 
 
     await Promise.all(
@@ -313,20 +321,20 @@ class ExplorerController {
           path.join(absDestination, path.basename(f))
         )
       )
-    )
+    );
     if (isDelete) {
       for (const file of files) {
-        logger.info(`User ${user} has deleted file: "${file}"`)
+        logger.info(`User ${user} has deleted file: "${file}"`);
       }
     } else {
       for (const file of files) {
-        logger.info(`User ${user} has move file "${file}" to "${path.join(absDestination, path.basename(file))}"`)
+        logger.info(`User ${user} has move file "${file}" to "${path.join(absDestination, path.basename(file))}"`);
       }
     }
 
     return files.map(
       f => path.join(absDestination, path.basename(f))
-    )
+    );
   }
 
   /*
@@ -340,138 +348,138 @@ class ExplorerController {
       }
     ]
   */
-  async next({request}) {
-    const {dir} = request.get()
-    const result = []
+  async next ({request}) {
+    const {dir} = request.get();
+    const result = [];
 
-    if (!dir) throw new Error('The "path" parameter is needed')
+    if (!dir) throw new Error('The "path" parameter is needed');
 
-    const parentDirectory = path.join(dir, '../')
+    const parentDirectory = path.join(dir, '../');
 
     if (!accessToFile(CONST_PATHS.root, parentDirectory)) {
-      console.log(`Access denied for read next directory for folder ${dir}`)
-      return []
-      throw new Error(`Access denied for read directory ${parentDirectory}`)
+      console.log(`Access denied for read next directory for folder ${dir}`);
+      return [];
+      throw new Error(`Access denied for read directory ${parentDirectory}`);
     }
 
-    const files = await readdir(parentDirectory)
+    const files = await readdir(parentDirectory);
 
     for (let i = 0; i < files.length; ++i) {
-      const f = files[i]
-      const fPath = path.join(parentDirectory, f)
-      const flstat = await lstat(fPath)
+      const f = files[i];
+      const fPath = path.join(parentDirectory, f);
+      const flstat = await lstat(fPath);
       if (flstat.isDirectory()) {
         const folder = {
           path: fPath,
           name: f,
           icon: false,
-        }
-        const iconPath = path.join(fPath, iconName)
+        };
+        const iconPath = path.join(fPath, iconName);
         if (fs.existsSync(iconPath)) {
-          folder.icon = path.relative(CONST_PATHS.root, iconPath)
+          folder.icon = path.relative(CONST_PATHS.root, iconPath);
         }
-        result.push(folder)
+        result.push(folder);
       }
     }
 
-    return result
+    return result;
   }
 
   /*
     POST /saveFile
     save file specified in "path" parameter with "data" content
   */
-  async saveFile({request}) {
-    const {path, data} = request.post()
+  async saveFile ({request}) {
+    const {path, data} = request.post();
 
-    if (!path) throw new Error('The "path" parameter is needed')
+    if (!path) throw new Error('The "path" parameter is needed');
 
     if (!accessToFile(CONST_PATHS.root, path)) {
-      console.log(`Access denied for saving for file ${path}`)
-      throw new Error(`Access denied for saving for file ${path}`)
+      console.log(`Access denied for saving for file ${path}`);
+      throw new Error(`Access denied for saving for file ${path}`);
     }
 
-    return fs.writeFileSync(path, data)
+    return fs.writeFileSync(path, data);
   }
 
-  isValidFile(filename) {
-    const ext = path.extname(filename)
-    return ['.jpg', '.png', '.gif', '.bmp', '.jpeg'].includes(ext)
+  isValidFile (filename) {
+    const ext = path.extname(filename);
+    return ['.jpg', '.png', '.gif', '.bmp', '.jpeg'].includes(ext);
   }
 
-  async countSync(dir, name, unclassified = false) {
+  async countSync (dir, name, unclassified = false) {
     const result = {
       subFolders: [],
       unclassified: 0,
       classified: 0,
       name: name,
       path: dir
-    }
+    };
 
     // Read notes
-    const notesPath = path.join(dir, 'notes.txt')
+    const notesPath = path.join(dir, 'notes.txt');
     if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
       try {
-        let notes = fs.readFileSync(notesPath, 'utf-8')
-        result.notes = notes
-        result.notesPath = notesPath
+        let notes = fs.readFileSync(notesPath, 'utf-8');
+        result.notes = notes;
+        result.notesPath = notesPath;
       } catch (e) {
-        console.log(`can not read ${notesPath}`)
+        console.log(`can not read ${notesPath}`);
       }
     }
 
     //Read Cfg
-    const cfgPath = path.join(dir, '.cfg')
+    const cfgPath = path.join(dir, '.cfg');
     if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
       try {
-        let cfg = fs.readFileSync(cfgPath, 'utf-8')
-        let config = JSON.parse(cfg)
-        result.config = config
-        result.cfgPath = cfgPath
+        let cfg = fs.readFileSync(cfgPath, 'utf-8');
+        let config = JSON.parse(cfg);
+        result.config = config;
+        result.cfgPath = cfgPath;
       } catch (e) {
-        console.log(e)
-        console.log(`can not read ${cfgPath}`)
+        console.log(e);
+        console.log(`can not read ${cfgPath}`);
       }
     }
 
-    const files = await readdir(dir)
+    const files = await readdir(dir);
     for (const file of files) {
-      const flstat = await lstat(path.join(dir, file))
+      const flstat = await lstat(path.join(dir, file));
       if (flstat.isDirectory()) {
-        const nextDir = path.join(dir, file)
-        let subResult = {}
+        const nextDir = path.join(dir, file);
+        let subResult = {};
         if (file.toLowerCase() === 'unclassified' || unclassified) {
-          subResult = await this.countSync(nextDir, file, true)
+          subResult = await this.countSync(nextDir, file, true);
         } else {
-          subResult = await this.countSync(nextDir, file, false)
+          subResult = await this.countSync(nextDir, file, false);
         }
-        result.classified += subResult.classified
-        result.unclassified += subResult.unclassified
-        result.subFolders.push(subResult)
+        result.classified += subResult.classified;
+        result.unclassified += subResult.unclassified;
+        result.subFolders.push(subResult);
       } else if (this.isValidFile(file)) {
         if (unclassified) {
-          result.unclassified += 1
+          result.unclassified += 1;
         } else {
-          result.classified += 1
+          result.classified += 1;
         }
       }
     }
-    return result
+    return result;
   }
 
   /*
     GET /getSubfolders
     returns an array with subfolders of a specific folder
   */
-  async getSubfolders({request}) {
-    let {folder} = request.get()
-    if (folder === 'root') folder = CONST_PATHS.root
+  async getSubfolders ({request}) {
+    let {folder} = request.get();
+    if (folder === 'root') folder = CONST_PATHS.root;
 
-    if (!folder) throw new Error('The "folder" parameter is needed')
+    if (!folder) throw new Error('The "folder" parameter is needed');
 
     if (!accessToFile(CONST_PATHS.root, folder)) {
-      console.log(`Access denied for gettings subfolders for folder ${folder}`)
-      throw new Error(`Access denied for read directory ${folder}`)
+      console.log(`Access denied for gettings subfolders for folder ${folder}`);
+      throw new Error(`Access denied for read directory ${folder}`);
     }
 
     // const files = await readdir(folder)
@@ -484,48 +492,48 @@ class ExplorerController {
     //   }
     // }
 
-    return await this.countSync(folder, 'root')
+    return await this.countSync(folder, 'root');
   }
 
   /*
     GET /checkFolder
     returns a status of a specific folder: ok, not_found, access_denied
   */
-  async checkFolder({request}) {
-    const {folder} = request.get()
-    if (!folder) throw new Error('The "folder" parameter is needed')
+  async checkFolder ({request}) {
+    const {folder} = request.get();
+    if (!folder) throw new Error('The "folder" parameter is needed');
     if (!accessToFile(CONST_PATHS.root, folder)) {
-      return 'access_denied'
+      return 'access_denied';
     }
-    const isExist = await exists(folder)
+    const isExist = await exists(folder);
     if (!isExist) {
-      return 'not_found'
+      return 'not_found';
     }
-    return 'ok'
+    return 'ok';
   }
 
   /*
     POST /createFolder
     creates a new directory with specified name in a specified folder
   */
-  async createFolder({request}) {
-    let {name, folder} = request.post()
+  async createFolder ({request}) {
+    let {name, folder} = request.post();
     if (folder === 'root') {
-      folder = CONST_PATHS.root
+      folder = CONST_PATHS.root;
     }
-    if (!folder || !name) throw new Error('Parameters name and folder are needed')
+    if (!folder || !name) throw new Error('Parameters name and folder are needed');
     if (!accessToFile(CONST_PATHS.root, folder)) {
-      throw new Error(`You haven\'t access to ${folder} directory`)
+      throw new Error(`You haven\'t access to ${folder} directory`);
     }
     if (!fs.existsSync(folder)) {
-      throw new Error(`The directory ${folder} doesn't exist`)
+      throw new Error(`The directory ${folder} doesn't exist`);
     }
-    console.log(path.join(folder, name))
-    const newFolderPath = path.join(folder, name)
-    await mkdir(newFolderPath)
-    fs.copyFileSync(defaultCfgPath, path.join(newFolderPath, '.cfg'))
-    logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`)
-    return true
+    console.log(path.join(folder, name));
+    const newFolderPath = path.join(folder, name);
+    await mkdir(newFolderPath);
+    fs.copyFileSync(defaultCfgPath, path.join(newFolderPath, '.cfg'));
+    logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
+    return true;
   }
 
   /*
@@ -533,76 +541,76 @@ class ExplorerController {
     Execute command "name" in the folder with .bat files
     returns output logs
   */
-  async command({request}) {
-    const command = request.params.name
-    const commandsPath = CONST_PATHS.commands
+  async command ({request}) {
+    const command = request.params.name;
+    const commandsPath = CONST_PATHS.commands;
 
     if (!CONST_PATHS.commandNames.includes(command)) {
-      console.log(`Unknow command ${command}`)
-      throw new Error(`Unknow command ${command}`)
+      console.log(`Unknow command ${command}`);
+      throw new Error(`Unknow command ${command}`);
     }
 
-    const commandFilePath = path.join(commandsPath, command + '.bat')
+    const commandFilePath = path.join(commandsPath, command + '.bat');
     if (!fs.existsSync(commandFilePath)) {
-      console.log(`File ${commandFilePath} doesn't exist`)
-      throw new Error(`File ${commandFilePath} doesn't exist`)
+      console.log(`File ${commandFilePath} doesn't exist`);
+      throw new Error(`File ${commandFilePath} doesn't exist`);
     }
 
     try {
-      await execFile(commandFilePath)
+      await execFile(commandFilePath);
     } catch (e) {
-      console.log(`An error occurred when run command: ${command}`, e)
+      console.log(`An error occurred when run command: ${command}`, e);
     }
-    return true
+    return true;
   }
 
   /*
     GET /getStatistic?dir=
     Returns statistic for given directory
   */
-  async statistic({request}) {
-    const {dir} = request.get()
-    return Statistic.get(dir)
+  async statistic ({request}) {
+    const {dir} = request.get();
+    return Statistic.get(dir);
   }
 
   /*
     GET /calculateStatistic
     Run process for calculate statistic for each folder
   */
-  async calculate(context) {
+  async calculate (context) {
     try {
-      console.log('Start calculating statistic')
-      const missedFiles = []
-      const allFiles = []
-      const dirsObject = {}
-      const ignoreFunc = (_, lstat) => !lstat.isDirectory()
-      const dirs = await recursive(CONST_PATHS.root)
+      console.log('Start calculating statistic');
+      const missedFiles = [];
+      const allFiles = [];
+      const dirsObject = {};
+      const ignoreFunc = (_, lstat) => !lstat.isDirectory();
+      const dirs = await recursive(CONST_PATHS.root);
       // dirs.unshift(CONST_PATHS.root)
 
       await Promise.all(
         dirs.map(async dir => {
-          let dirname = path.basename(dir)
-          let files = await readdir(dir)
-          const subfolders = []
+          let dirname = path.basename(dir);
+          let files = await readdir(dir);
+          const subfolders = [];
           dirsObject[dir] = {
             missed: 0,
             matched: 0,
             missmatched: 0,
             classified: 0,
             unclassified: 0
-          }
+          };
           // count matches | missmatches
           await Promise.all(
             files.map(async f => {
-              let filepath = path.join(dir, f)
-              const isUnclassified = dir.toString().toLowerCase().includes('unclassified')
-              const stats = await lstat(filepath)
+              let filepath = path.join(dir, f);
+              const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
+              const stats = await lstat(filepath);
               if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
                 if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
-                  dirsObject[dir].matched++
+                  dirsObject[dir].matched++;
                 } else {
-                  dirsObject[dir].missmatched++
-                  missedFiles.push(filepath)
+                  dirsObject[dir].missmatched++;
+                  missedFiles.push(filepath);
                 }
                 if (regexpForImages.test(f)) {
 
@@ -610,62 +618,62 @@ class ExplorerController {
                   allFiles.push({
                     filepath,
                     isUnclassified
-                  })
+                  });
                 }
               }
               if (stats.isDirectory()) {
-                subfolders.push(f)
+                subfolders.push(f);
               }
             }) // end of map function for all files
-          ) // end of promise for all files
+          ); // end of promise for all files
 
           try {
-            dirsObject[dir].table = await buildSubfolderTable(dir, subfolders)
+            dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
           } catch (e) {
-            console.log(e)
+            console.log(e);
           }
         }) // end map function for all dirs
-      ) // end of promise for all dirs
+      ); // end of promise for all dirs
 
       Object.keys(dirsObject).forEach(dir => {
         dirsObject[dir].missed = missedFiles.filter(
           f => path.basename(f).toLowerCase().indexOf(path.basename(dir).toLowerCase()) > -1
-        ).length
+        ).length;
 
         for (let file of allFiles) {
-          const dirLength = dir.length
+          const dirLength = dir.length;
           if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
             if (file.isUnclassified) {
-              dirsObject[dir].unclassified += 1
+              dirsObject[dir].unclassified += 1;
             } else {
-              dirsObject[dir].classified += 1
+              dirsObject[dir].classified += 1;
             }
           }
         }
 
-        Statistic.write(dir, dirsObject[dir])
-      })
+        Statistic.write(dir, dirsObject[dir]);
+      });
 
-      await Statistic.save()
+      await Statistic.save();
       // await this.timeOutData(10000)
-      console.log('Finish calculating statistic')
-      return true
+      console.log('Finish calculating statistic');
+      return true;
     } catch (e) {
-      console.log('Calculate error')
-      console.log(e)
-      throw e
+      console.log('Calculate error');
+      console.log(e);
+      throw e;
     }
   }
 
-  timeOutData(s = 5000) {
+  timeOutData (s = 5000) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        resolve()
-      }, s)
-    })
+        resolve();
+      }, s);
+    });
   }
 
-  async getLastLogs() {
+  async getLastLogs () {
     try {
       const logs = {
         train: {},
@@ -674,196 +682,211 @@ class ExplorerController {
         export: {},
         stop: {},
         ExportImages: {}
-      }
+      };
       Object.keys(logs).forEach(f => {
-        let filePath = path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`)
-        logs[f].path = filePath
-        logs[f].lastLine = ''
-      })
+        let filePath = path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`);
+        logs[f].path = filePath;
+        logs[f].lastLine = '';
+      });
 
       await Promise.all(Object.keys(logs).map(async fileName => {
-        let lastLine = ''
+        let lastLine = '';
         try {
-          lastLine = (await readLastLines.read(logs[fileName].path, 2))
+          lastLine = (await readLastLines.read(logs[fileName].path, 2));
         } catch (e) {
         }
-        logs[fileName].lastLine = lastLine
-      }))
+        logs[fileName].lastLine = lastLine;
+      }));
 
-      return logs
+      return logs;
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
-  async logsFor({request, response}) {
-    let file = request.params.file
-    const stream = fs.createReadStream(path.join(Env.get('COMMAND_FILES_PATH'), `${file}.log`))
-    response.implicitEnd = false
-    response.response.setHeader('Content-type', 'text/plain; charset=utf-8')
-    stream.pipe(response.response)
+  async logsFor ({request, response}) {
+    let file = request.params.file;
+    const stream = fs.createReadStream(path.join(Env.get('COMMAND_FILES_PATH'), `${file}.log`));
+    response.implicitEnd = false;
+    response.response.setHeader('Content-type', 'text/plain; charset=utf-8');
+    stream.pipe(response.response);
   }
 
-  async getConfig({request, response}) {
-    const currentCfg = await this.getSystemConfig()
-    const user = request.currentUser
-    const resConfig = {...currentCfg, user, root: CONST_PATHS.root}
-    response.json(resConfig)
+  async getConfig ({request, response}) {
+    const currentCfg = await this.getSystemConfig();
+    const user = request.currentUser;
+    const resConfig = {...currentCfg, user, root: CONST_PATHS.root};
+    response.json(resConfig);
   }
 
-  async getExplorerConfig({request, response}) {
-    let dir = request.get().dir
-    let parentConfig = {}
-    const rootPath = CONST_PATHS.root
+  async getExplorerConfig ({request, response}) {
+    let dir = request.get().dir;
+    const resConfig = await this.getParentFolderConfig(dir, request.currentUser);
+    response.json(resConfig);
+  }
+
+  async getParentFolderConfig (dir, user={}) {
+    const selectedWorkSpaceConfig = await this.getSystemConfig();
+    let parentConfig = {};
+    const rootPath = CONST_PATHS.root;
     if (dir && dir.startsWith(rootPath)) {
-      dir = dir.substring(rootPath.length + 1)
-      const sepIndex = dir.indexOf(pathSep)
+      dir = dir.substring(rootPath.length + 1);
+      const sepIndex = dir.indexOf(pathSep);
       if (sepIndex) {
-        dir = dir.substring(0, sepIndex)
+        dir = dir.substring(0, sepIndex);
       }
-      const configPath = path.join(rootPath, dir, '.cfg')
-      parentConfig = await this.getJsonConfig(configPath)
+      const parentFolderPath = path.join(rootPath, dir)
+      const configPath = path.join(parentFolderPath, '.cfg');
+      parentConfig = await this.getJsonConfig(configPath);
+      parentConfig.parentFolderPath = parentFolderPath
     }
 
-    const user = request.currentUser
-    const resConfig = {...config, ...parentConfig, user, root: CONST_PATHS.root}
-    response.json(resConfig)
+    return {...selectedWorkSpaceConfig, ...parentConfig, user, root: CONST_PATHS.root};
   }
 
-  async doForwardOnly({request, response}) {
-    let {selectedFiles, notSelectedFiles} = request.post()
-    const currentCfg = await this.getSystemConfig()
-    const workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root
-    const selectedPath = currentCfg.selectedPath || 'Selected'
-    const absSelectedPath = path.join(workingRoot, selectedPath)
-    const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected'
-    const absNotSelectedPath = path.join(workingRoot, notSelectedPath)
+  async doForwardOnly ({request, response}) {
+    let {selectedFiles, notSelectedFiles} = request.post();
+    let dir = '';
+    if (selectedFiles && selectedFiles.length) {
+      dir = selectedFiles[0];
+    } else if (notSelected && notSelected.length) {
+      dir = notSelected[0];
+    }
+    const currentCfg = await this.getParentFolderConfig(dir);
+    let workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root;
+    if (currentCfg.parentFolderPath) {
+        workingRoot = currentCfg.parentFolderPath
+    }
+    const selectedPath = currentCfg.selectedPath || 'Selected';
+    const absSelectedPath = path.join(workingRoot, selectedPath);
+    const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected';
+    const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
 
-    const user = request.currentUser.username
+    const user = request.currentUser.username;
 
     // Create delete directory if not exist
     if (!fs.existsSync(absSelectedPath)) {
-      throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`)
+      throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`);
     }
 
     if (!fs.existsSync(absNotSelectedPath)) {
-      throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`)
+      throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`);
     }
 
-    const selected = await this.moveFiles(selectedFiles, absSelectedPath, user)
-    const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user)
+    const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
+    const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
     response.json({
       selected,
       notSelected
-    })
+    });
   }
 
-  async saveNotes({request, response}) {
-    const {path, highlight} = request.post()
-    let {notes} = request.post()
+  async saveNotes ({request, response}) {
+    const {path, highlight} = request.post();
+    let {notes} = request.post();
     if (highlight) {
-      notes = `${highlightPrefix}${notes}`
+      notes = `${highlightPrefix}${notes}`;
     }
-    fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'})
-    return true
+    fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'});
+    return true;
   }
 
-  async saveConfig({request, response}) {
-    const {path, config} = request.post()
-    const configStr = JSON.stringify(config)
-    if (!configStr) return false
+  async saveConfig ({request, response}) {
+    const {path, config} = request.post();
+    const configStr = JSON.stringify(config);
+    if (!configStr) return false;
     if (fs.existsSync(path)) {
-      fs.writeFileSync(path, configStr, {encoding: 'utf8'})
-      return true
+      fs.writeFileSync(path, configStr, {encoding: 'utf8'});
+      return true;
     }
-    return false
+    return false;
   }
 
-  isDirectory = source => lstatSync(source).isDirectory()
+  isDirectory = source => lstatSync(source).isDirectory();
 
-  async getSubFolderByPath({request, response}) {
-    let dir = request.get().dir || CONST_PATHS.root
+  async getSubFolderByPath ({request, response}) {
+    let dir = request.get().dir || CONST_PATHS.root;
 
-    let checkPermission = dir === CONST_PATHS.root
+    let checkPermission = dir === CONST_PATHS.root;
 
     if (!fs.existsSync(dir)) {
-      throw Error(`Folder ${dir} does not exist`)
+      throw Error(`Folder ${dir} does not exist`);
     }
     if (!fs.lstatSync(dir).isDirectory()) {
-      throw Error(`${dir} is not a folder`)
+      throw Error(`${dir} is not a folder`);
     }
-    const files = fs.readdirSync(dir)
-    const folders = []
+    const files = fs.readdirSync(dir);
+    const folders = [];
     const permissions = request.currentUser
       && request.currentUser.permissions
-      && request.currentUser.permissions.workspaces
+      && request.currentUser.permissions.workspaces;
     for (const name of files) {
       if (checkPermission) {
-        if (!hasPermissionWorkspaces(name, permissions)) continue
+        if (!hasPermissionWorkspaces(name, permissions)) continue;
       }
-      const subDir = path.join(dir, name)
+      const subDir = path.join(dir, name);
       if (fs.lstatSync(subDir).isDirectory()) {
         const file = {
           // subFolders: [],
           name,
           path: subDir,
           hasSubFolders: this.hasSubFolders(subDir)
-        }
-        const statistic = Statistic.get(subDir)
+        };
+        const statistic = Statistic.get(subDir);
         if (Number.isInteger(statistic.classified)) {
-          file.classified = statistic.classified
+          file.classified = statistic.classified;
         }
 
         if (Number.isInteger(statistic.unclassified)) {
-          file.unclassified = statistic.unclassified
+          file.unclassified = statistic.unclassified;
         }
 
-        const notesPath = path.join(subDir, 'notes.txt')
-        file.notes = ''
-        file.notesPath = notesPath
-        file.highlight = false
+        const notesPath = path.join(subDir, 'notes.txt');
+        file.notes = '';
+        file.notesPath = notesPath;
+        file.highlight = false;
         if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
           try {
-            let notes = fs.readFileSync(notesPath, 'utf-8')
+            let notes = fs.readFileSync(notesPath, 'utf-8');
             if (notes.startsWith(highlightPrefix)) {
-              file.notes = notes.substring(highlightPrefix.length)
-              file.highlight = true
+              file.notes = notes.substring(highlightPrefix.length);
+              file.highlight = true;
             } else {
-              file.notes = notes
+              file.notes = notes;
             }
           } catch (e) {
-            console.log(`can not read ${notesPath}`)
+            console.log(`can not read ${notesPath}`);
           }
         }
 
         //Read Cfg
-        const cfgPath = path.join(subDir, '.cfg')
+        const cfgPath = path.join(subDir, '.cfg');
         if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
           try {
-            let cfg = fs.readFileSync(cfgPath, 'utf-8')
-            let config = JSON.parse(cfg)
-            file.config = config
-            file.cfgPath = cfgPath
+            let cfg = fs.readFileSync(cfgPath, 'utf-8');
+            let config = JSON.parse(cfg);
+            file.config = config;
+            file.cfgPath = cfgPath;
           } catch (e) {
-            console.log(`Can not read ${cfgPath}`)
+            console.log(`Can not read ${cfgPath}`);
           }
         }
-        folders.push(file)
+        folders.push(file);
       }
     }
-    return folders
+    return folders;
   }
 
-  async listStatistic({request}) {
-    const {dirs} = request.post()
-    return Statistic.getList(dirs)
+  async listStatistic ({request}) {
+    const {dirs} = request.post();
+    return Statistic.getList(dirs);
   }
 
-  hasSubFolders(dir) {
+  hasSubFolders (dir) {
     return fs
       .readdirSync(dir, {withFileTypes: true})
-      .filter(file => file.isDirectory()).length > 0
+      .filter(file => file.isDirectory()).length > 0;
   }
 }
 
-module.exports = ExplorerController
+module.exports = ExplorerController;
