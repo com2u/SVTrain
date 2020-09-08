@@ -184,7 +184,7 @@ export default {
       cursor: pointer;
     }
 
-    z-index: 999;
+    z-index: 9999999;
   }
 
   .step-nav-item {

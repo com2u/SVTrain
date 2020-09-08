@@ -26,6 +26,8 @@ import EventBus from '../utils/eventbus'
 import PageFooter from '../components/PageFooter.vue'
 import StatisticPopup from '../components/StatisticPopup.vue'
 
+const ERROR_DISPLAY_DURATION = 10000
+
 export default {
   name: 'LoggedInLayout',
   components: {
@@ -73,12 +75,14 @@ export default {
       this.$notify({
         type: 'error',
         text: message,
+        duration: ERROR_DISPLAY_DURATION,
       })
     },
     handleErrorMessage(message) {
       this.$notify({
         type: 'error',
         text: message,
+        duration: ERROR_DISPLAY_DURATION,
       })
     },
 
@@ -86,6 +90,7 @@ export default {
       this.$notify({
         type: 'error',
         text: 'You need to login first',
+        duration: ERROR_DISPLAY_DURATION,
       })
       this.$router.push({ name: 'LoginPage' })
     },

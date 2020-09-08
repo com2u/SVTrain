@@ -133,7 +133,7 @@ class ExplorerController {
             match: false
           };
           result.folders.push(folder);
-        } else if (flstat.isFile()) {
+        } else if (flstat.isFile() && f !== iconName) {
           result.files.push({
             path: fPath,
             relativePath: path.relative(CONST_PATHS.root, fPath),
