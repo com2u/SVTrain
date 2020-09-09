@@ -3,7 +3,9 @@
     id="keyupevents"
     tabindex="0"
     @keyup.self.exact.shift.space="selectCurrent(true)"
+    @keyup.self.exact.107="zoomIn(true)"
     @keyup.self.exact.187="zoomIn(true)"
+    @keyup.self.exact.109="zoomOut(true)"
     @keyup.self.exact.189="zoomOut(true)"
     @keyup.self.exact.stop.prevent="onKeyUp"
   >
@@ -20,7 +22,7 @@
               v-b-popover.hover.html.top="'<b>-</b>'" title="Shortcut"
               icon-class="zoom-out" class="section-icon" @click="zoomOut"/>
             <svg-icon
-              v-b-popover.hover.html.top="'<b>=</b>'" title="Shortcut"
+              v-b-popover.hover.html.top="'<b>+</b>'" title="Shortcut"
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
             <b-button @click="showStatistic" :disabled="!canViewStatistics" class="statistic-btn">
@@ -309,13 +311,13 @@ export default {
         },
         {
           label: 'Select image by index',
-          keys: ['1-10'],
+          keys: ['1, 2, ...9, 0'],
         },
       ],
       right: [
         {
           label: 'Zoom Out',
-          keys: ['='],
+          keys: ['+'],
         },
         {
           label: 'Multiple select',

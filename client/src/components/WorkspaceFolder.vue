@@ -55,7 +55,7 @@
           </span>
           <span class="icon-wrapper">
 
-            <svg-icon icon-class="note" class="svg-icon clickable-icon"
+            <svg-icon :icon-class="info.highlight ? 'note-highlight': 'note'" class="svg-icon clickable-icon"
                       :class="info.highlight ? 'highlight': ''"
                       @click="showNotes"
             />
