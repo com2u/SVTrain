@@ -171,7 +171,7 @@ export default {
   }
 
   .notch {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 50%;
     height: 20px;
