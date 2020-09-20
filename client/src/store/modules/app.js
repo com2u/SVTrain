@@ -50,7 +50,6 @@ export default {
       commit('SET_STATISTIC_VISIBLE', visible)
     },
     toggleHeader: ({ commit, state }) => {
-      console.log('state', state)
       commit('SET_SHOW_HEADER', !state.showHeader)
     },
     setUser: ({ commit }, user) => {

@@ -22,5 +22,6 @@ const getters = {
   showNavigationIcon: (state) => state.app.explorerConfig.showNavigationIcon,
   imageFit: (state) => (state.app.explorerConfig.imageFit || 'fill').toLowerCase(),
   imageViewer: (state) => state.app.explorerConfig.imageViewer,
+  showHeader: (state) => state.app.showHeader,
 }
 export default getters
