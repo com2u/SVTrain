@@ -91,9 +91,7 @@ import { mapGetters } from 'vuex'
 
 export default {
   data() {
-    return {
-      showHeader: true,
-    }
+    return {}
   },
   computed: {
     user() {
@@ -105,11 +103,12 @@ export default {
       'canTrain',
       'canTest',
       'canValidate',
+      'showHeader',
     ]),
   },
   methods: {
     toggleHeader() {
-      this.showHeader = !this.showHeader
+      this.$store.dispatch('app/toggleHeader')
     },
     logout() {
       this.$store.dispatch('app/logout')

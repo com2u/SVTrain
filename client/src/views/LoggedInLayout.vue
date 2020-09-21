@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <Header/>
-    <div class="app-container">
+    <div class="app-container" :class="showHeader ? 'show-header' : ''">
       <router-view/>
       <notifications/>
 
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import Header from '../components/Header.vue'
 import EventBus from '../utils/eventbus'
 import PageFooter from '../components/PageFooter.vue'
@@ -40,7 +41,8 @@ export default {
       statisticVisible: false,
     }
   },
-  created() {
+  computed: {
+    ...mapGetters(['showHeader']),
   },
   mounted() {
     EventBus.$on('auth_api_error', this.handleApiError)
@@ -108,8 +110,13 @@ export default {
 
     .app-container {
       /*background: #fff;*/
-      margin: 80px 60px;
+      margin-left: 60px;
+      margin-right: 60px;
       /*margin-bottom: 50px;*/
+
+      &.show-header {
+        margin-top: 80px;
+      }
     }
 
     .title-container {

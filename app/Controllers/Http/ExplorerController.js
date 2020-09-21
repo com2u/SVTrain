@@ -749,8 +749,8 @@ class ExplorerController {
     let dir = '';
     if (selectedFiles && selectedFiles.length) {
       dir = selectedFiles[0];
-    } else if (notSelected && notSelected.length) {
-      dir = notSelected[0];
+    } else if (notSelectedFiles && notSelectedFiles.length) {
+      dir = notSelectedFiles[0];
     }
     const currentCfg = await this.getParentFolderConfig(dir);
     let workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root;
