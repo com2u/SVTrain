@@ -1,10 +1,10 @@
 import axios from 'axios'
+import { isProduction } from '@/utils/index'
 import EventBus from './eventbus'
 
 const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`
 const developmentUrl = 'http://localhost:3333/api/'
-const env = process.env.NODE_ENV || 'production'
-const baseurl = env === 'production' ? productionUrl : developmentUrl
+const baseurl = isProduction() ? productionUrl : developmentUrl
 
 const urls = {
   getFiles: (dir) => `${baseurl}getFiles?dir=${dir}`,

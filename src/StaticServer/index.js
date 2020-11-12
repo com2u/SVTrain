@@ -1,9 +1,9 @@
 const Env = use('Env')
-const staticServer = require('static-server')
+const StaticServer = require('static-server')
 
 module.exports = class Watcher {
   constructor() {
-    this.server = new staticServer({
+    this.server = new StaticServer({  
       rootPath: Env.get('ROOT_PATH'),
       port: Env.get('STATIC_SERVER_PORT', 2929),
       host: Env.get('STATIC_SERVER_HOST', 'localhost'),
