@@ -1,10 +1,9 @@
 <template>
   <div class="app">
-    <Header/>
+    <Header class="page-header"/>
     <div class="app-container" :class="showHeader ? 'show-header' : ''">
-      <router-view/>
+      <router-view class="wrapper"/>
       <notifications/>
-
       <b-modal
         v-model="statisticVisible"
         size="xl"
@@ -21,7 +20,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import {
+  mapGetters,
+} from 'vuex'
 import Header from '../components/Header.vue'
 import EventBus from '../utils/eventbus'
 import PageFooter from '../components/PageFooter.vue'
@@ -94,70 +95,92 @@ export default {
         text: 'You need to login first',
         duration: ERROR_DISPLAY_DURATION,
       })
-      this.$router.push({ name: 'LoginPage' })
+      this.$router.push({
+        name: 'LoginPage',
+      })
     },
     selectFolder(item) {
       this.statisticVisible = false
       const gotoDir = item.folder
-      this.$router.push({ name: 'explorer', query: { dir: gotoDir } })
+      this.$router.push({
+        name: 'explorer',
+        query: {
+          dir: gotoDir,
+        },
+      })
     },
   },
 }
 </script>
 <style lang="scss">
-  .app {
-    background: #fff;
+.app {
+  background: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 
-    .app-container {
-      /*background: #fff;*/
-      margin-left: 60px;
-      margin-right: 60px;
-      /*margin-bottom: 50px;*/
+  .app-container {
+    flex: 1;
+    /*background: #fff;*/
+    margin: 0 60px;
+    /*margin-bottom: 50px;*/
+    position: relative;
 
-      &.show-header {
-        margin-top: 80px;
-      }
+    .wrapper {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: -.5rem;
+      overflow: auto;
+      padding-right: .5rem;
     }
 
-    .title-container {
-      display: flex;
-      justify-content: space-between;
-      padding-bottom: 20px;
-    }
-
-    .cmd-main-menu {
-      .cmd {
-        padding-top: 10px;
-      }
-
-      .btn-stop-command {
-        background: #D9D4CF !important;
-        border: 1px solid #D9D4CF !important;
-        color: #000 !important;
-      }
-
-      .btn-command {
-        background: #0060FF !important;
-        border: 1px solid #0060FF !important;
-        color: #fff;
-      }
-
-      .svtrain-cmd-btn {
-        width: 200px;
-        text-align: left;
-      }
-    }
-
-  }
-  .statistic-footer {
-    .btn-secondary {
-      color: #000;
-      background: #D9D4CF;
-      border: 1px solid #D9D4CF;
-      &:hover, &:focus, &:active {
-        background: #D9D4CF !important;
-        color: #000 !important;
-      }
+    &.show-header {
     }
   }
+
+  .title-container {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 20px;
+  }
+
+  .cmd-main-menu {
+    .cmd {
+      padding-top: 10px;
+    }
+
+    .btn-stop-command {
+      background: #D9D4CF !important;
+      border: 1px solid #D9D4CF !important;
+      color: #000 !important;
+    }
+
+    .btn-command {
+      background: #0060FF !important;
+      border: 1px solid #0060FF !important;
+      color: #fff;
+    }
+
+    .svtrain-cmd-btn {
+      width: 200px;
+      text-align: left;
+    }
+  }
+
+}
+
+.statistic-footer {
+  .btn-secondary {
+    color: #000;
+    background: #D9D4CF;
+    border: 1px solid #D9D4CF;
+
+    &:hover, &:focus, &:active {
+      background: #D9D4CF !important;
+      color: #000 !important;
+    }
+  }
+}
 </style>
