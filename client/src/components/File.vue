@@ -15,8 +15,9 @@
               <img
                 v-bind:src="file.serverPath"
                 class="file-explorer-preview"
+                alt=""
                 :class="imageFit === 'fit' ? 'image-fit' : 'image-fill'"
-                v-bind:style="{width: size-15 + 'px', height: size-15 + 'px' }">
+                v-bind:style="{width: size.width - 15 + 'px', height: size.height - 15 + 'px' }">
             </div>
           </template>
           <template v-else-if="file.name.toLowerCase() === 'tfsettings.json'">
@@ -39,7 +40,7 @@
         other: !file.image
       }"
       :style="{
-        width: `${size}px`
+        width: zoomAble ? `${size.width}px` : undefined
       }"
       class="file-explorer-file-name">
       {{ file.name }}
@@ -53,18 +54,28 @@ import { mapGetters } from 'vuex'
 export default {
   props: {
     file: Object,
-    size: [String, Number],
+    size: {
+      type: Object,
+      default: () => ({
+        width: 100,
+        height: 100,
+      }),
+    },
     showFileName: {
       type: Boolean,
       default: true,
+    },
+    zoomAble: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
     ...mapGetters(['imageSpacing', 'imageFit']),
     imageStyles() {
       return {
-        width: `${this.size}px`,
-        height: `${this.size}px`,
+        width: `${this.size.width}px`,
+        height: `${this.file.image ? this.size.height : this.size.width}px`,
         marginBottom: `${this.imageSpacing}px`,
         marginRight: `${this.imageSpacing}px`,
       }
