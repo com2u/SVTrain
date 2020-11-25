@@ -3,6 +3,10 @@
     id="keyupevents"
     tabindex="0"
     @keyup.self.exact.shift.space="selectCurrent(true)"
+    @keyup.left="shiftingMove($event, 'left')"
+    @keyup.up="shiftingMove($event, 'up')"
+    @keyup.down="shiftingMove($event, 'down')"
+    @keyup.right="shiftingMove($event, 'right')"
     @keyup.self.exact.107="zoomIn(true)"
     @keyup.self.exact.187="zoomIn(true)"
     @keyup.self.exact.109="zoomOut(true)"
@@ -137,11 +141,11 @@
           </div>
         </div>
         <div class="file-explorer-grid bottom-border">
-
         </div>
-        <div v-if="systemConfig.forwardLocaltion === 'top'">
+        <div class="mb-2 mt-2" v-if="systemConfig.forwardLocaltion === 'top'">
           <div class="pagination-group">
             <b-button
+              class="mr-2"
               v-if="!forwardOnly"
               variant="primary"
               size="sm"
@@ -152,10 +156,12 @@
             <b-button variant="primary" size="sm" @click="forward()">Forward
               <b-icon icon="chevron-right"></b-icon>
             </b-button>
+            <span v-if="currentIndexPage()" class="ml-2">{{currentIndexPage()}}</span>
           </div>
         </div>
         <div class="file-explorer-grid">
           <file
+            zoom-able
             v-for="(file, index) in screenFiles"
             v-b-popover.hover.html.top="index < 10 ? `<b>${(index + 1) % 10}</b>` : null"
             :title="index< 10 ? 'Shortcut' : null"
@@ -163,7 +169,7 @@
             :id="`file_${file.path}`"
             :file="file"
             :key="file.path"
-            :size="fileSize"
+            :size="defaultFileSize"
             @click.native="setCursorAndSelect(file, $event)"
             @dblclick.native="openFile(file)"/>
         </div>
@@ -341,12 +347,12 @@ export default {
         },
       ],
     },
+    fileSizeRatio: 1,
   }),
   computed: {
     viewerImages() {
       return this.selectedFiles.map((file) => file.serverPath)
     },
-
     backgroundCalculating() {
       return this.$store.state.app.calculating
     },
@@ -374,7 +380,16 @@ export default {
       return this.$store.state.app.explorerConfig
     },
     defaultFileSize() {
-      return this.systemConfig.defaultPictureSize
+      if (typeof this.systemConfig.defaultPictureSize === 'object') {
+        return {
+          width: this.systemConfig.defaultPictureSize.width * this.fileSizeRatio,
+          height: this.systemConfig.defaultPictureSize.height * this.fileSizeRatio,
+        }
+      }
+      return {
+        width: this.systemConfig.defaultPictureSize * this.fileSizeRatio,
+        height: this.systemConfig.defaultPictureSize * this.fileSizeRatio,
+      }
     },
     relativeDir() {
       const { root } = this.systemConfig
@@ -397,37 +412,22 @@ export default {
       }
       this.calculatePage(this.page)
     },
-    defaultFileSize(size) {
-      if (Number.isInteger(size) && size > 0) {
-        this.fileSize = size
-      }
-    },
   },
-  mounted() {
-    const size = this.defaultFileSize
-    if (Number.isInteger(size) && size > 0) {
-      this.fileSize = size
-    }
-  },
+  mounted() {},
   methods: {
-
     showImageViewer() {
       if (this.selectedFiles.length) {
         this.viewerIndex = 0
       }
     },
-
     zoomIn(byShortCut = false) {
       if (!this.systemConfig.useShortcuts && byShortCut) return
-      const zoom = Math.floor((this.fileSize * 105) / 100)
-      this.fileSize = (zoom < this.maxFileSize) ? zoom : this.maxFileSize
+      this.fileSizeRatio += 0.05
     },
     zoomOut(byShortCut = false) {
       if (!this.systemConfig.useShortcuts && byShortCut) return
-      const zoom = Math.floor((this.fileSize * 95) / 100)
-      this.fileSize = (zoom > this.minFileSize) ? zoom : this.minFileSize
+      this.fileSizeRatio -= 0.05
     },
-
     showShortcutsModal() {
       this.showShortcuts = true
     },
@@ -488,24 +488,20 @@ export default {
           break
       }
     },
-
     selectFolderByLetter(letter) {
       console.log(`leteter: ${letter}`)
       const folder = this.folder.folders.find((f) => f.name.toLowerCase()
         .startsWith(letter))
       if (folder) this.goToTheFolder(folder)
     },
-
     selectFileByIndex(number) {
       const index = (number + 10) % 11
       if (this.screenFiles.length > index) {
         this.toggleSelect(this.screenFiles[index])
       }
     },
-
     openCurrentFile() {
-      const fileInFocus = this.screenFiles.find((f) => f.cursor)
-      this.viewingFile = fileInFocus
+      this.viewingFile = this.screenFiles.find((f) => f.cursor)
       this.$nextTick(() => this.$refs.FileViewing.show())
     },
     openFile(file) {
@@ -570,16 +566,15 @@ export default {
        * Move cursor with "up", "right", "down" and "left" directions
        * Call method scrollToFocusFile if cursor was moved
        * @param {String} to - Direction to move cursor
+       * @param {Boolean} isSelect - only cursor or select
        */
-    cursor(to) {
-      console.log('cursor to', to)
+    cursor(to, isSelect) {
       const fileInFocusIndex = this.screenFiles.findIndex((f) => f.cursor)
       let nextFileFocusIndex = null
       if (fileInFocusIndex === -1) {
         this.screenFiles[0].cursor = true
         return
       }
-
       let fileInFocusCoords = null
       switch (to) {
         case 'right':
@@ -623,11 +618,13 @@ export default {
         default:
           break
       }
-
       if (nextFileFocusIndex || nextFileFocusIndex === 0) {
         this.screenFiles[fileInFocusIndex].cursor = false
         this.screenFiles[nextFileFocusIndex].cursor = true
         this.scrollToFocusFile(nextFileFocusIndex)
+      }
+      if (isSelect) {
+        this.selectCurrent(true)
       }
     },
     selectCurrent(selectAll) {
@@ -638,7 +635,6 @@ export default {
         const different = fileInFocusIndex - this.lastSelectedFileIndex
         const beginFrom = Math.sign(different) > 0 ? this.lastSelectedFileIndex + 1 : fileInFocusIndex + 1
         const endWith = Math.sign(different) > 0 ? fileInFocusIndex - 1 : this.lastSelectedFileIndex - 1
-        console.log(beginFrom, endWith, 'kokoko')
         for (let i = beginFrom; i <= endWith; ++i) {
           this.toggleSelect(this.screenFiles[i], true)
         }
@@ -719,12 +715,8 @@ export default {
             }
           }
           if (this.filter.include) {
-            if (f.name.toLowerCase()
-              .includes(this.filter.include.toLowerCase())) {
-              includeFactor = true
-            } else {
-              includeFactor = false
-            }
+            includeFactor = f.name.toLowerCase()
+              .includes(this.filter.include.toLowerCase())
           }
           return includeFactor && excludeFactor
         })
@@ -779,7 +771,6 @@ export default {
         currentPath: content.path,
       }
     },
-
     calculatePage(page) {
       if (!this.perPage) {
         this.screenFiles = [...this.folder.files]
@@ -794,6 +785,12 @@ export default {
         this.screenFiles[0].cursor = true
       }
     },
+    currentIndexPage() {
+      if (!this.perPage) {
+        return false
+      }
+      return `${Math.round(this.folder.files.length / this.perPage) + 1} - ${this.screenFiles.length}`
+    },
     onPageChange(page) {
       this.page = page
       this.calculatePage(page)
@@ -804,7 +801,6 @@ export default {
         this.calculatePage(this.page)
       }
     },
-
     forward() {
       if (!this.forwardOnly) {
         if (this.page < this.page_count) {
@@ -815,7 +811,6 @@ export default {
         this.onForwardOnly()
       }
     },
-
     async onForwardOnly() {
       const selected = this.selectedFiles.map((f) => f.path)
       const notSelected = this.screenFiles.filter((f) => !selected.includes(f.path) && f.image)
@@ -823,7 +818,6 @@ export default {
       await api.doForwardOnly(selected, notSelected)
       this.loadFiles(this.path)
     },
-
     async goToTheFolder(file) {
       if (file.path === this.path) {
         socket.unsubscribeForFolder(this.openedPath)
@@ -940,6 +934,11 @@ export default {
     createNewFolder() {
       console.log('create new folder')
       EventBus.$emit('create-new-folder', this.path)
+    },
+    shiftingMove(e, flag) {
+      if (e && e.shiftKey) {
+        this.cursor(flag, true)
+      }
     },
   },
   async created() {
@@ -1074,7 +1073,7 @@ export default {
         margin-right: 5px;
         padding: 5px;
         border-radius: 2px;
-        box-shadow: 0px 1px 6px -2px #777;
+        box-shadow: 0 1px 6px -2px #777;
       }
     }
   }

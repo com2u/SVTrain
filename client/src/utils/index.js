@@ -25,4 +25,6 @@ export const updateCounting = (folders, statistics) => {
 
 export const getToken = () => localStorage.getItem('sessionToken', null)
 
-export const getFileServerPath = () => `http://${window.location.hostname}:2929/`
+export const isProduction = () => (process.env.NODE_ENV || 'production') === 'production'
+
+export const getFileServerPath = () => (isProduction() ? `https://images.${window.location.hostname}/` : `http://${window.location.hostname}:2929/`)

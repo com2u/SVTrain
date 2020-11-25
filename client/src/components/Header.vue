@@ -142,8 +142,6 @@ export default {
     -moz-box-shadow: 0px 2px 6px -7px #222222;
     box-shadow: 0px 2px 6px -7px #222222;
     */
-    position: fixed;
-    top: 0;
     width: 100%;
 
     .logo {

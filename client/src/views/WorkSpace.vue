@@ -29,7 +29,6 @@
         New Workspace
       </div>
     </div>
-
     <b-modal
       v-model="notesVisible"
       ok-title="Save"
@@ -66,7 +65,6 @@
       </template>
 
     </b-modal>
-
     <b-modal
       v-model="cfgVisible"
       ok-title="Save"
@@ -89,13 +87,11 @@
       </template>
 
     </b-modal>
-
     <creating-folder
       @folder-created="onFolderCreated"
       path="root"
       id="create-ws-folder"
     />
-
   </div>
 </template>
 <script>
