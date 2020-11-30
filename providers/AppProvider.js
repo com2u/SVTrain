@@ -17,23 +17,15 @@ class AppProvider extends ServiceProvider {
       return new Statistic()
     })
   }
-  _registerStaticServer() {
-    this.app.singleton('StaticServer', () => {
-      const StaticServer = require('../src/StaticServer/')
-      return new StaticServer()
-    })
-  }
 
   register () {
     this._registerStatistic()
     this._registerWatcher()
-    this._registerStaticServer()
   }
 
   async boot () {
     await use('Statistic').init()
     use('Watcher').init()
-    use('StaticServer').init()
   }
 }
 

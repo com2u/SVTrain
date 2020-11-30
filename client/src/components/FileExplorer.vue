@@ -271,7 +271,6 @@ export default {
     page_count: null,
     perPage: 10,
     staticServer: getFileServerPath(),
-    // staticServer: 'http://localhost:2929/',
     path: null,
     openedPath: null,
     moveDestination: null,
