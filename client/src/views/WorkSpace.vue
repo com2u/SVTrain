@@ -292,7 +292,6 @@ export default {
       padding-left: 10px;
       border-radius: 8px;
 
-
       .margin-keeper {
         margin-left: 18px;
       }

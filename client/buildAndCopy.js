@@ -15,7 +15,6 @@ function copyDist() {
   fsExtra.copySync(distDir, publicDir)
 }
 
-
 function buildAndCopy() {
   emptyPublicDir()
   copyDist()

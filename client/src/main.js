@@ -17,9 +17,7 @@ import router from './router'
 import './permissions'
 import App from './App.vue'
 
-
 Vue.component('VGallery', VueGallery)
-
 
 Vue.use(Notifications)
 Vue.use(BootstrapVue)

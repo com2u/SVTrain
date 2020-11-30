@@ -13,7 +13,6 @@ const Ws = use('Ws')
 const globalMiddleware = [
 ]
 
-
 /*
 |--------------------------------------------------------------------------
 | Named middleware
@@ -33,7 +32,6 @@ const globalMiddleware = [
 const namedMiddleware = {
   auth: 'App/Middleware/AuthMiddleware'
 }
-
 
 Ws
   .registerGlobal(globalMiddleware)

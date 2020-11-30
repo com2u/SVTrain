@@ -26,7 +26,6 @@ const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
 const {hasPermissionWorkspaces} = require('../../utils/index');
 
-
 // if file is landing under root directory
 // prevent access to that file
 const accessToFile = (root, file) => {
@@ -237,7 +236,6 @@ class ExplorerController {
     return {...config, ...cfg, wsPath};
   }
 
-
   /*
   POST /setWorkspace
 
@@ -312,7 +310,6 @@ class ExplorerController {
       .filter(
         f => accessToFile(CONST_PATHS.root, f)
       );
-
 
     await Promise.all(
       files.map(
@@ -613,8 +610,6 @@ class ExplorerController {
                   missedFiles.push(filepath);
                 }
                 if (regexpForImages.test(f)) {
-
-
                   allFiles.push({
                     filepath,
                     isUnclassified

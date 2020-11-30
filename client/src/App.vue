@@ -27,7 +27,6 @@ export default {
 }
 </script>
 
-
 <template>
   <div class="maxheight">
     <router-view>

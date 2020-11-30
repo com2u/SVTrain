@@ -20,7 +20,6 @@ const lstat = promisify(fs.lstat)
 // }
 //
 
-
 const readDirRecursiveSync = async function (dir) {
   let result = [dir]
   const files = await readdir(dir)
@@ -34,6 +33,5 @@ const readDirRecursiveSync = async function (dir) {
   }
   return result
 }
-
 
 module.exports = readDirRecursiveSync;

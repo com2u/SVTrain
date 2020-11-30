@@ -22,7 +22,6 @@ function hasPermissionWorkspaces(folderName, workspaceRules) {
   return false
 }
 
-
 module.exports.getUsers = getUsers
 module.exports.getRoles = getRoles
 module.exports.matchRuleShort = matchRuleShort

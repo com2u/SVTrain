@@ -7,7 +7,6 @@ export const get = (obj, path, defaultValue) => {
   return result === undefined || result === obj ? defaultValue : result
 }
 
-
 export const updateCounting = (folders, statistics) => {
   const res = folders.slice()
   res.forEach((file, i) => {
