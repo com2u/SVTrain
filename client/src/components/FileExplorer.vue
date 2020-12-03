@@ -175,7 +175,6 @@
         </div>
       </template>
     </window-splitting>
-
     <show-file
       ref="FileViewing"
       v-if="viewingFile"
@@ -190,7 +189,6 @@
       v-on:hidden="onCloseModal"
       v-bind:path="openedPath || path"
     />
-
     <b-modal v-model="showShortcuts" title="Shortcuts" size="lg">
       <div>
         <b-row>
@@ -789,7 +787,9 @@ export default {
       if (!this.perPage) {
         return false
       }
-      return `${Math.round(this.folder.files.length / this.perPage) + 1} - ${this.screenFiles.length}`
+      const first = this.page * this.perPage - this.perPage
+      const last = first + this.screenFiles.length
+      return `${first} - ${last} of ${this.folder.files.length}`
     },
     onPageChange(page) {
       this.page = page

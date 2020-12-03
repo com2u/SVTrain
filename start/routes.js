@@ -34,10 +34,7 @@ Route.group(() => {
   Route.post('/setWorkspace', 'ExplorerController.setWorkspace').middleware('auth')
   Route.get('/getLastLogs', 'ExplorerController.getLastLogs').middleware('auth')
   Route.get('/logs/:file', 'ExplorerController.logsFor').middleware('auth')
-
-
   Route.post('/login', 'LoginController.login')
-
   Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
   Route.get('/explorerConfig', 'ExplorerController.getExplorerConfig').middleware('auth')
   Route.post('/forward-only', 'ExplorerController.doForwardOnly').middleware('auth')
@@ -45,6 +42,7 @@ Route.group(() => {
   Route.post('/save-config', 'ExplorerController.saveConfig').middleware('auth')
   Route.get('/get-folders', 'ExplorerController.getSubFolderByPath').middleware('auth')
   Route.post('/list-statistics', 'ExplorerController.listStatistic').middleware('auth')
+  Route.post('/fetch-confusion-matrix', 'ExplorerController.confusionMatrix').middleware('auth')
 }).prefix('api')
 Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))
 
