@@ -86,6 +86,30 @@ const buildSubfolderTable = async (dir, subfolders) => {
   return table;
 };
 
+const folderTravel = async (dir_str, flag, fileExtensions) => {
+  const dir = path.join(dir_str)
+  if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
+  let out = []
+  const files = await readdir(dir);
+  for (let i = 0; i < files.length; ++i) {
+    const f = files[i];
+    const fPath = path.join(dir, f);
+    const flStat = await lstat(path.join(dir, f));
+    if (f) {
+      out.push({
+        path: fPath,
+        name: f,
+        type: flStat.isDirectory() ? FTYPES.folder : flStat.isFile() && f !== iconName ? FTYPES.file : null,
+        files: flStat.isDirectory() && flag ? await folderTravel(fPath, false, fileExtensions) : []
+      })
+    }
+  }
+  if (!flag && fileExtensions && fileExtensions.length) {
+    out = out.filter(x => fileExtensions.includes(x.path.split('.').pop()) && x.type === FTYPES.file)
+  }
+  return out
+}
+
 class ExplorerController {
 
   /*
@@ -107,7 +131,7 @@ class ExplorerController {
       }]
     }
   */
-  async all ({request}) {
+  async all({request}) {
     const dir = path.join(request.get().dir || CONST_PATHS.root);
     console.log(`Send files for directory ${dir}, request get params:`, request.get());
     if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
@@ -160,7 +184,7 @@ class ExplorerController {
       access: true/false
     }
   */
-  async parent ({request}) {
+  async parent({request}) {
     try {
       const dir = request.get().dir;
       if (!dir) throw new Error('Parameter "dir" is required');
@@ -186,7 +210,7 @@ class ExplorerController {
     Returns true when the file running.lock is exist
     and false when it is't exist
   */
-  async state () {
+  async state() {
     const dir = Env.get('COMMAND_FILES_PATH');
     const runningFile = path.join(dir, CONST_PATHS.running);
     try {
@@ -202,7 +226,7 @@ class ExplorerController {
 
     Returns the content of file workspace.bat
   */
-  async getWorkspace () {
+  async getWorkspace() {
     const dir = Env.get('COMMAND_FILES_PATH');
     const workspaceFile = path.join(dir, CONST_PATHS.workspace);
     try {
@@ -213,7 +237,7 @@ class ExplorerController {
     }
   }
 
-  async getJsonConfig (path) {
+  async getJsonConfig(path) {
     let cfg = {};
     try {
       if (fs.existsSync(path)) {
@@ -229,7 +253,7 @@ class ExplorerController {
     return cfg;
   }
 
-  async getSystemConfig () {
+  async getSystemConfig() {
     const ws = await this.getWorkspace();
     const wsPath = ws.toString();
     const configPath = path.join(wsPath, '.cfg');
@@ -237,13 +261,12 @@ class ExplorerController {
     return {...config, ...cfg, wsPath};
   }
 
-
   /*
   POST /setWorkspace
 
   Set the workspace
   */
-  async setWorkspace ({request}) {
+  async setWorkspace({request}) {
     const {workspace} = request.post();
     const workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace);
     const newWorkspace = path.join(CONST_PATHS.root, workspace);
@@ -262,7 +285,7 @@ class ExplorerController {
     Return array of files which has deleted
     [ "/path/to/file1", "path/to/file2" ]
   */
-  async delete ({request}) {
+  async delete({request}) {
     let {files} = request.post();
     let dir = '';
     if (files && files.length) {
@@ -294,14 +317,14 @@ class ExplorerController {
 
     return array of files with new path
   */
-  async move ({request}) {
+  async move({request}) {
     let {files, destination} = request.post();
     const user = request.currentUser.username;
     const response = await this.moveFiles(files, destination, user);
     return response;
   }
 
-  async moveFiles (files, destination, user, isDelete = false) {
+  async moveFiles(files, destination, user, isDelete = false) {
     const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination);
     if (!accessToFile(CONST_PATHS.root, destination)) {
       throw new Error(`Access denied to the directory ${destination}`);
@@ -348,7 +371,7 @@ class ExplorerController {
       }
     ]
   */
-  async next ({request}) {
+  async next({request}) {
     const {dir} = request.get();
     const result = [];
 
@@ -389,7 +412,7 @@ class ExplorerController {
     POST /saveFile
     save file specified in "path" parameter with "data" content
   */
-  async saveFile ({request}) {
+  async saveFile({request}) {
     const {path, data} = request.post();
 
     if (!path) throw new Error('The "path" parameter is needed');
@@ -402,12 +425,12 @@ class ExplorerController {
     return fs.writeFileSync(path, data);
   }
 
-  isValidFile (filename) {
+  isValidFile(filename) {
     const ext = path.extname(filename);
     return ['.jpg', '.png', '.gif', '.bmp', '.jpeg'].includes(ext);
   }
 
-  async countSync (dir, name, unclassified = false) {
+  async countSync(dir, name, unclassified = false) {
     const result = {
       subFolders: [],
       unclassified: 0,
@@ -471,7 +494,7 @@ class ExplorerController {
     GET /getSubfolders
     returns an array with subfolders of a specific folder
   */
-  async getSubfolders ({request}) {
+  async getSubfolders({request}) {
     let {folder} = request.get();
     if (folder === 'root') folder = CONST_PATHS.root;
 
@@ -499,7 +522,7 @@ class ExplorerController {
     GET /checkFolder
     returns a status of a specific folder: ok, not_found, access_denied
   */
-  async checkFolder ({request}) {
+  async checkFolder({request}) {
     const {folder} = request.get();
     if (!folder) throw new Error('The "folder" parameter is needed');
     if (!accessToFile(CONST_PATHS.root, folder)) {
@@ -516,7 +539,7 @@ class ExplorerController {
     POST /createFolder
     creates a new directory with specified name in a specified folder
   */
-  async createFolder ({request}) {
+  async createFolder({request}) {
     let {name, folder} = request.post();
     if (folder === 'root') {
       folder = CONST_PATHS.root;
@@ -541,7 +564,7 @@ class ExplorerController {
     Execute command "name" in the folder with .bat files
     returns output logs
   */
-  async command ({request}) {
+  async command({request}) {
     const command = request.params.name;
     const commandsPath = CONST_PATHS.commands;
 
@@ -568,7 +591,7 @@ class ExplorerController {
     GET /getStatistic?dir=
     Returns statistic for given directory
   */
-  async statistic ({request}) {
+  async statistic({request}) {
     const {dir} = request.get();
     return Statistic.get(dir);
   }
@@ -577,7 +600,7 @@ class ExplorerController {
     GET /calculateStatistic
     Run process for calculate statistic for each folder
   */
-  async calculate (context) {
+  async calculate(context) {
     try {
       console.log('Start calculating statistic');
       const missedFiles = [];
@@ -665,7 +688,7 @@ class ExplorerController {
     }
   }
 
-  timeOutData (s = 5000) {
+  timeOutData(s = 5000) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve();
@@ -673,7 +696,7 @@ class ExplorerController {
     });
   }
 
-  async getLastLogs () {
+  async getLastLogs() {
     try {
       const logs = {
         train: {},
@@ -704,7 +727,7 @@ class ExplorerController {
     }
   }
 
-  async logsFor ({request, response}) {
+  async logsFor({request, response}) {
     let file = request.params.file;
     const stream = fs.createReadStream(path.join(Env.get('COMMAND_FILES_PATH'), `${file}.log`));
     response.implicitEnd = false;
@@ -712,20 +735,20 @@ class ExplorerController {
     stream.pipe(response.response);
   }
 
-  async getConfig ({request, response}) {
+  async getConfig({request, response}) {
     const currentCfg = await this.getSystemConfig();
     const user = request.currentUser;
     const resConfig = {...currentCfg, user, root: CONST_PATHS.root};
     response.json(resConfig);
   }
 
-  async getExplorerConfig ({request, response}) {
+  async getExplorerConfig({request, response}) {
     let dir = request.get().dir;
     const resConfig = await this.getParentFolderConfig(dir, request.currentUser);
     response.json(resConfig);
   }
 
-  async getParentFolderConfig (dir, user={}) {
+  async getParentFolderConfig(dir, user = {}) {
     const selectedWorkSpaceConfig = await this.getSystemConfig();
     let parentConfig = {};
     const rootPath = CONST_PATHS.root;
@@ -744,7 +767,7 @@ class ExplorerController {
     return {...selectedWorkSpaceConfig, ...parentConfig, user, root: CONST_PATHS.root};
   }
 
-  async doForwardOnly ({request, response}) {
+  async doForwardOnly({request, response}) {
     let {selectedFiles, notSelectedFiles} = request.post();
     let dir = '';
     if (selectedFiles && selectedFiles.length) {
@@ -755,7 +778,7 @@ class ExplorerController {
     const currentCfg = await this.getParentFolderConfig(dir);
     let workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root;
     if (currentCfg.parentFolderPath) {
-        workingRoot = currentCfg.parentFolderPath
+      workingRoot = currentCfg.parentFolderPath
     }
     const selectedPath = currentCfg.selectedPath || 'Selected';
     const absSelectedPath = path.join(workingRoot, selectedPath);
@@ -781,7 +804,7 @@ class ExplorerController {
     });
   }
 
-  async saveNotes ({request, response}) {
+  async saveNotes({request, response}) {
     const {path, highlight} = request.post();
     let {notes} = request.post();
     if (highlight) {
@@ -791,7 +814,7 @@ class ExplorerController {
     return true;
   }
 
-  async saveConfig ({request, response}) {
+  async saveConfig({request, response}) {
     const {path, config} = request.post();
     const configStr = JSON.stringify(config);
     if (!configStr) return false;
@@ -804,7 +827,7 @@ class ExplorerController {
 
   isDirectory = source => lstatSync(source).isDirectory();
 
-  async getSubFolderByPath ({request, response}) {
+  async getSubFolderByPath({request, response}) {
     let dir = request.get().dir || CONST_PATHS.root;
 
     let checkPermission = dir === CONST_PATHS.root;
@@ -877,15 +900,24 @@ class ExplorerController {
     return folders;
   }
 
-  async listStatistic ({request}) {
+  async listStatistic({request}) {
     const {dirs} = request.post();
     return Statistic.getList(dirs);
   }
 
-  hasSubFolders (dir) {
+  hasSubFolders(dir) {
     return fs
       .readdirSync(dir, {withFileTypes: true})
       .filter(file => file.isDirectory()).length > 0;
+  }
+
+  async confusionMatrix({request}) {
+    const {left, right} = request.post()
+    const cog = await this.getJsonConfig(path.join(right, '.cfg'))
+    return {
+      left: (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder),
+      right: (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder),
+    }
   }
 }
 

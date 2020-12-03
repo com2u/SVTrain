@@ -72,7 +72,6 @@
       @shown="onModalShow"
     >
       <template v-slot:modal-title>Config folder {{ $store.state.notes.folder.name }}</template>
-
       <div>
         <div id="wsjsoneditor"/>
       </div>
@@ -85,7 +84,6 @@
           Save
         </b-button>
       </template>
-
     </b-modal>
     <creating-folder
       @folder-created="onFolderCreated"
@@ -187,6 +185,7 @@ export default {
       if (this.editor) {
         config = this.editor.get()
       }
+      console.log(config)
       this.$store.dispatch('wsconfig/save', config)
         .then(() => {
           this.loadFoldersByPath()
