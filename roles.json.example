@@ -15,7 +15,8 @@
       "*",
       "Kuchen Linescan",
       "Deleted"
-    ]
+    ],
+    "showConfusionMatrix": true
   },
   "operator": {
     "editConfig": false,
