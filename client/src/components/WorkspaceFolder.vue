@@ -42,7 +42,6 @@
               :value="progress">
             </b-progress-bar>
           </b-progress>
-
         </div>
         <div>
           <span class="icon-wrapper">
@@ -54,11 +53,33 @@
             />
           </span>
           <span class="icon-wrapper">
-
             <svg-icon :icon-class="info.highlight ? 'note-highlight': 'note'" class="svg-icon clickable-icon"
                       :class="info.highlight ? 'highlight': ''"
                       @click="showNotes"
             />
+          </span>
+          <span v-if="depth === 0" class="icon-wrapper clickable" @click="showConfusionMatrix()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 100 103"
+                 preserveAspectRatio="xMidYMid meet">
+              <g transform="translate(0.000000,103.000000) scale(0.100000,-0.100000)"
+                 :fill="wsPath !== info.path ? wsPath === info.path ? '#FFF' : '#000' : '#DDD'" stroke="none">
+                <path d="M35 988 c-3 -7 -4 -229 -3 -493 l3 -480 473 -3 472 -2 0 495 0 495
+                -470 0 c-367 0 -472 -3 -475 -12z m443 -483 l-3 -446 -198 0 -197 0 -3 446 -2
+                445 203 0 202 0 -2 -445z m460 0 l-3 -446 -198 -2 -197 -2 0 448 0 447 200 0
+                200 0 -2 -445z"/>
+                <path d="M191 859 l-24 -30 29 -30 28 -29 -29 -30 -29 -30 29 -30 29 -30 27
+                33 28 32 31 -31 32 -31 30 31 30 30 -33 29 -33 30 34 29 33 30 -31 30 -30 31
+                -30 -34 -30 -33 -27 32 c-15 18 -30 32 -33 31 -4 0 -18 -14 -31 -30z"/>
+                <path d="M120 470 l0 -40 160 0 160 0 0 40 0 40 -160 0 -160 0 0 -40z"/>
+                <path d="M120 310 l0 -40 160 0 160 0 0 40 0 40 -160 0 -160 0 0 -40z"/>
+                <path d="M120 150 l0 -40 160 0 160 0 0 40 0 40 -160 0 -160 0 0 -40z"/>
+                <path d="M768 823 l-47 -47 -18 22 -18 21 -31 -28 -32 -29 52 -51 52 -51 73
+                74 74 75 -29 30 -30 30 -46 -46z"/>
+                <path d="M580 470 l0 -40 155 0 155 0 0 40 0 40 -155 0 -155 0 0 -40z"/>
+                <path d="M580 310 l0 -40 155 0 155 0 0 40 0 40 -155 0 -155 0 0 -40z"/>
+                <path d="M580 150 l0 -40 155 0 155 0 0 40 0 40 -155 0 -155 0 0 -40z"/>
+              </g>
+            </svg>
           </span>
           <span class="icon-wrapper">
             <b-icon
@@ -193,6 +214,11 @@ export default {
     },
     createNewFolder() {
       EventBus.$emit('create-new-folder', this.info.path)
+    },
+    showConfusionMatrix() {
+      if (this.wsPath !== this.info.path) {
+        EventBus.$emit('show-confusion-matrix', this.info.path)
+      }
     },
   },
 }

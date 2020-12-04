@@ -10,9 +10,9 @@
         cancel-title="Close"
         footer-class="statistic-footer"
       >
-        <template v-slot:modal-title>Statistic</template>
-        <statistic-popup ref="statistic"/>
-
+        <template v-slot:modal-title>{{modalShow === 'statistic' ? 'Statistic' : 'Confusion Matrix'}}</template>
+        <statistic-popup v-if="modalShow === 'statistic'" ref="statistic"/>
+        <confusion-matrix v-else ref="matrix"></confusion-matrix>
       </b-modal>
     </div>
     <page-footer/>
@@ -27,12 +27,14 @@ import Header from '../components/Header.vue'
 import EventBus from '../utils/eventbus'
 import PageFooter from '../components/PageFooter.vue'
 import StatisticPopup from '../components/StatisticPopup.vue'
+import ConfusionMatrix from '../components/ConfusionMatrix.vue'
 
 const ERROR_DISPLAY_DURATION = 10000
 
 export default {
   name: 'LoggedInLayout',
   components: {
+    ConfusionMatrix,
     Header,
     PageFooter,
     StatisticPopup,
@@ -40,6 +42,7 @@ export default {
   data() {
     return {
       statisticVisible: false,
+      modalShow: 'statistic',
     }
   },
   computed: {
@@ -50,6 +53,7 @@ export default {
     EventBus.$on('notify-error', this.handleErrorMessage)
     EventBus.$on('login', this.handleLogin)
     EventBus.$on('show-statistic', this.showStatistic)
+    EventBus.$on('show-confusion-matrix', this.showConfusionMatrix)
     EventBus.$on('statistic-folder-selected', this.selectFolder)
   },
   destroyed() {
@@ -57,11 +61,22 @@ export default {
     EventBus.$off('notify-error')
     EventBus.$off('login')
     EventBus.$off('show-statistic')
+    EventBus.$off('show-confusion-matrix')
     EventBus.$off('statistic-folder-selected')
   },
   methods: {
+    showConfusionMatrix(dir) {
+      this.statisticVisible = true
+      this.modalShow = 'matrix'
+      this.$nextTick(() => {
+        if (this.$refs.matrix) {
+          this.$refs.matrix.load(dir)
+        }
+      })
+    },
     showStatistic(dir) {
       this.statisticVisible = true
+      this.modalShow = 'statistic'
       this.$nextTick(() => {
         if (this.$refs.statistic) {
           this.$refs.statistic.open(dir)
@@ -88,7 +103,6 @@ export default {
         duration: ERROR_DISPLAY_DURATION,
       })
     },
-
     handleLogin() {
       this.$notify({
         type: 'error',
