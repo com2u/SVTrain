@@ -44,5 +44,8 @@ Route.group(() => {
   Route.post('/list-statistics', 'ExplorerController.listStatistic').middleware('auth')
   Route.post('/fetch-confusion-matrix', 'ExplorerController.confusionMatrix').middleware('auth')
 }).prefix('api')
+Route.group(() => {
+  Route.get('/:filePath*', 'FileController.download').middleware('auth')
+}).prefix('data');
 Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))
 
