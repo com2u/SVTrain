@@ -58,7 +58,7 @@
                       @click="showNotes"
             />
           </span>
-          <span v-if="depth === 0" class="icon-wrapper clickable" @click="showConfusionMatrix()">
+          <span v-if="canSeeConfusionMatrix && depth === 0" class="icon-wrapper clickable" @click="showConfusionMatrix()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 100 103"
                  preserveAspectRatio="xMidYMid meet">
               <g transform="translate(0.000000,103.000000) scale(0.100000,-0.100000)"
@@ -172,6 +172,7 @@ export default {
       'canViewStatistics',
       'subFolderFontSize',
       'newWorkspace',
+      'canSeeConfusionMatrix',
     ]),
   },
   methods: {
