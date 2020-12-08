@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <div v-if="matrix && col && row" class="right-side-section">
+      <div v-if="matrix && cols.length && rows.length" class="right-side-section">
         <div class="caption">
           <div v-if="calculated">
             Matched: {{calculated.matched}}
@@ -13,28 +13,30 @@
           <b-thead>
             <b-tr>
               <b-th colspan="2" rowspan="2" class="input-conner"></b-th>
-              <b-th class="header" :colspan="col.length">{{ getDirName(dir) }}</b-th>
+              <b-th class="header" :colspan="cols.length">{{ getDirName(dir) }}</b-th>
             </b-tr>
             <b-tr>
-              <b-th class="header" v-for="folder in col" :key="folder.name">{{folder.name}}</b-th>
+              <b-th class="header" v-for="col in cols" :key="col">{{col}}</b-th>
             </b-tr>
           </b-thead>
           <b-tbody>
-            <b-tr v-for="(folderLeft, index1) in row" :key="index1">
-              <b-td style="width: 50px" v-if="index1 === 0" class="header header-rotation"  :rowspan="row.length">
+            <b-tr v-for="(row, index1) in rows" :key="index1">
+              <b-td style="width: 50px" v-if="index1 === 0" class="header header-rotation"  :rowspan="rows.length">
                 <span class="rotation">{{getDirName(currentWS)}}</span>
               </b-td>
-              <b-td style="width: 20%" class="header">{{folderLeft.name}}</b-td>
-              <b-td v-for="(folderRight, index2) in col" :key="index2" :class="{'main-diagonal': index1 === index2}">
-                <span v-if="matrix[index2][index1] && row[index1].files.length" class="gray-text">
-                  {{ (matrix[index2][index1] * 100 / (row[index1].files.length)).toFixed(1)}}%
+              <b-td style="width: 20%" class="header">{{row}}</b-td>
+              <b-td v-for="(col, index2) in cols" :key="index2" :class="{'main-diagonal': index1 === index2}">
+                <span v-if="matrix[index2][index1]" class="gray-text">{{ (matrix[index2][index1] * 100).toFixed(1) }}%
                 </span>
               </b-td>
             </b-tr>
           </b-tbody>
         </b-table-simple>
       </div>
-      <div v-else class="right-side-section">Statistic didn't calculated</div>
+      <div v-else class="right-side-section">
+        <span v-if="isLoading">Data are loading...</span>
+        <span>Data is empty!</span>
+      </div>
     </div>
   </div>
 </template>
@@ -49,8 +51,8 @@ export default {
       isLoading: false,
       dir: '',
       matrix: [],
-      col: null,
-      row: null,
+      cols: [],
+      rows: [],
     }
   },
   computed: {
@@ -63,26 +65,13 @@ export default {
   },
   methods: {
     async load(dir) {
+      this.isLoading = true
       this.dir = dir
-      const { left, right } = await api.fetchConfusionMatrix(dir, this.$store.state.app.config.wsPath)
-      this.col = left
-      this.row = right
-      // eslint-disable-next-line no-plusplus
-      for (let i = 0; i < this.col.length; i++) {
-        this.matrix[i] = []
-        // eslint-disable-next-line no-plusplus
-        for (let j = 0; j < this.row.length; j++) {
-          let count = 0
-          const colFiles = this.col[i].files.map((x) => x.name)
-          const rowFiles = this.row[j].files.map((x) => x.name)
-          rowFiles.forEach((f1) => {
-            if (colFiles.includes(f1)) {
-              count += 1
-            }
-          })
-          this.matrix[i][j] = count
-        }
-      }
+      const { matrix, compareNames } = await api.fetchConfusionMatrix(dir, this.$store.state.app.config.wsPath)
+      this.matrix = matrix
+      this.cols = compareNames
+      this.rows = compareNames.concat('Order')
+      this.isLoading = false
     },
     getDirName(dir) {
       return dir.split('/')[dir.split('/').length - 1]

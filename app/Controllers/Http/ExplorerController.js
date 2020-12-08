@@ -912,11 +912,50 @@ class ExplorerController {
   }
 
   async confusionMatrix({request}) {
-    const {left, right} = request.post()
-    const cog = await this.getJsonConfig(path.join(right, '.cfg'))
+    const {left, right} = request.post();
+    const cog = await this.getJsonConfig(path.join(right, '.cfg'));
+    const compare_folders = (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+    const active_folders = (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
+    const compare_names = compare_folders.map(x => x.name);
+    const active_names = active_folders.map(x => x.name);
+    let new_active_folders = []
+    for (let i = 0; i < compare_names.length; i++) {
+      let test = active_names.indexOf(compare_names[i])
+      if (test >= 0) {
+        new_active_folders[i] = active_folders[test]
+      } else {
+        new_active_folders[i] = {
+          name: compare_names[i],
+          files: []
+        }
+      }
+    }
+    new_active_folders[compare_names.length] = {
+      name: "order",
+      files: []
+    }
+    active_folders.filter(x => compare_names.includes[x.name]).forEach(x => {
+      new_active_folders[compare_names.length].files = new_active_folders[compare_names.length].files.concat(x.files)
+    })
+
+    let matrix = [];
+    for (let i = 0; i < compare_folders.length; i++) {
+      matrix[i] = []
+      for (let j = 0; j < new_active_folders.length; j++) {
+        let count = 0
+        const colFiles = compare_folders[i].files.map((x) => x.name)
+        const rowFiles = new_active_folders[j].files.map((x) => x.name)
+        colFiles.forEach((f1) => {
+          if (rowFiles.includes(f1)) {
+            count += 1
+          }
+        })
+        matrix[i][j] = rowFiles.length ? count / rowFiles.length : 0
+      }
+    }
     return {
-      left: (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder),
-      right: (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder),
+      matrix,
+      compareNames: compare_names,
     }
   }
 }
