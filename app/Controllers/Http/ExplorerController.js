@@ -930,14 +930,15 @@ class ExplorerController {
         }
       }
     }
-    new_active_folders[compare_names.length] = {
+    new_active_folders.push({
       name: "order",
       files: []
-    }
-    active_folders.filter(x => compare_names.includes[x.name]).forEach(x => {
-      new_active_folders[compare_names.length].files = new_active_folders[compare_names.length].files.concat(x.files)
     })
-
+    let others = active_folders.filter(x => !compare_names.includes(x.name))
+    others.forEach(x => {
+      let index = new_active_folders.length - 1;
+      new_active_folders[index].files = new_active_folders[index].files.concat(x.files)
+    })
     let matrix = [];
     for (let i = 0; i < compare_folders.length; i++) {
       matrix[i] = []
@@ -950,7 +951,7 @@ class ExplorerController {
             count += 1
           }
         })
-        matrix[i][j] = rowFiles.length ? count / rowFiles.length : 0
+        matrix[i][j] = count
       }
     }
     return {
