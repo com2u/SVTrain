@@ -24,3 +24,32 @@ Create new browser window and type http://HOST:PORT/index.html
 ## Logging
 
 Check user activities in file "SVTrain.log"
+
+## Docker
+
+You can also use Docker to run the SVTrain application. To do so under Linux or macOS, use the following steps.
+
+First, build the docker image:
+
+```
+docker build -t svtrain .
+```
+
+Now, prepare your local configuration:
+1. Copy `.env.example` to `.env` and adapt accordingly, esp. `ROOT_PATH` and `COMMAND_FILES_PATH`. It is recommended to use `/data/root` and `/data`, respectiveley. Make sure to change the docker run commend below, in case you use different values.
+2. Copy `roles.json.example` to `roles.json`. Adapt if needed.
+3. Generate a `user.json` file by running `node setPassword`
+4. Prepare and empty data dir by running `mkdir -p ./data/root/`
+
+Now you can run the docker image as follows:
+
+```
+docker run \
+    -p 2929:2929 \
+    -p 3333:3333 \
+    -v "$(pwd)/data:/data" \
+    -v "$(pwd)/.env:/app/.env" \
+    -v "$(pwd)/roles.json:/app/roles.json" \
+    -v "$(pwd)/users.json:/app/users.json" \
+    -it --rm svtrain
+```
