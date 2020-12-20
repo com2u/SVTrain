@@ -744,8 +744,19 @@ class ExplorerController {
 
   async getExplorerConfig({request, response}) {
     let dir = request.get().dir;
+    let notes = null
+    if (fs.existsSync(`${dir}/notes.txt`) && fs.lstatSync(`${dir}/notes.txt`).isFile()) {
+      try {
+        notes = fs.readFileSync(`${dir}/notes.txt`, 'utf-8');
+      } catch (e) {
+        console.log('Notes not found');
+      }
+    }
     const resConfig = await this.getParentFolderConfig(dir, request.currentUser);
-    response.json(resConfig);
+    response.json({
+      ...resConfig,
+      notes
+    });
   }
 
   async getParentFolderConfig(dir, user = {}) {
@@ -763,7 +774,6 @@ class ExplorerController {
       parentConfig = await this.getJsonConfig(configPath);
       parentConfig.parentFolderPath = parentFolderPath
     }
-
     return {...selectedWorkSpaceConfig, ...parentConfig, user, root: CONST_PATHS.root};
   }
 

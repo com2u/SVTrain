@@ -3,6 +3,7 @@ const getPermissions = (state) => state.app.user && state.app.user.permissions
 const getters = {
   canEditNote: (state) => getPermissions(state) && state.app.user.permissions.editNote,
   canEditConfig: (state) => getPermissions(state) && state.app.user.permissions.editConfig,
+  showExplorerNotes: (state) => getPermissions(state) && state.app.user.permissions.showExplorerNotes,
   canViewStatistics: (state) => getPermissions(state) && state.app.user.permissions.viewStatistics,
   newWorkspace: (state) => getPermissions(state) && state.app.user.permissions.newWorkspace,
   newFolder: (state) => getPermissions(state) && state.app.user.permissions.newFolder,
@@ -12,11 +13,11 @@ const getters = {
   canValidate: (state) => getPermissions(state) && state.app.user.permissions.validate,
   canSeeMoveMenu: (state) => getPermissions(state) && state.app.user.permissions.moveMenu,
   canSeeConfusionMatrix: (state) => getPermissions(state) && state.app.user.permissions.showConfusionMatrix,
+  editConfigUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigUI,
   currentWs: (state) => {
     const { wsPath, root } = state.app.config
     return wsPath ? wsPath.substring(root.length) : 'Root'
   },
-
   imageSpacing: (state) => state.app.explorerConfig.imageSpacing || 10,
   workspaceFontSize: (state) => state.app.config.workspaceFontSize,
   subFolderFontSize: (state) => state.app.config.subFolderFontSize,

@@ -33,7 +33,7 @@
       </div>
       <div class="options">
         <div class="option-progress"
-             v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
+             v-if="(showSubFolderProgress || depth === 0) && Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
           <span class="file-nums option-progress-text">{{totalFiles}} files</span>
           <span class="option-progress-text">{{progress}}%</span>
           <b-progress :max="100" class="ws-progress">
@@ -58,11 +58,11 @@
                       @click="showNotes"
             />
           </span>
-          <span v-if="canSeeConfusionMatrix && depth === 0" class="icon-wrapper clickable" @click="showConfusionMatrix()">
+          <span v-if="canSeeConfusionMatrix" class="icon-wrapper clickable" @click="showConfusionMatrix()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 100 103"
                  preserveAspectRatio="xMidYMid meet">
               <g transform="translate(0.000000,103.000000) scale(0.100000,-0.100000)"
-                 :fill="wsPath !== info.path ? wsPath === info.path ? '#FFF' : '#000' : '#DDD'" stroke="none">
+                 :fill="depth === 0 && wsPath !== info.path ? wsPath === info.path ? '#FFF' : '#000' : '#999'" stroke="none">
                 <path d="M35 988 c-3 -7 -4 -229 -3 -493 l3 -480 473 -3 472 -2 0 495 0 495
                 -470 0 c-367 0 -472 -3 -475 -12z m443 -483 l-3 -446 -198 0 -197 0 -3 446 -2
                 445 203 0 202 0 -2 -445z m460 0 l-3 -446 -198 -2 -197 -2 0 448 0 447 200 0
@@ -99,6 +99,7 @@
         :depth="depth + 1"
         :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
+        :show-sub-folder-progress="showSubFolderProgress"
       />
       <div
         class="new-ws"
@@ -132,6 +133,10 @@ export default {
     keyPath: {
       type: String,
       default: '',
+    },
+    showSubFolderProgress: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -178,6 +183,10 @@ export default {
   methods: {
     toggleShowChildren() {
       this.showChildren = !this.showChildren
+      this.$store.commit('app/ADD_EXPANDED', {
+        path: this.info.path,
+        flag: this.showChildren,
+      })
       if (!this.info.subFolders) {
         this.loadingChildren = true
         EventBus
@@ -217,10 +226,15 @@ export default {
       EventBus.$emit('create-new-folder', this.info.path)
     },
     showConfusionMatrix() {
-      if (this.wsPath !== this.info.path) {
+      if (this.wsPath !== this.info.path && this.depth === 0) {
         EventBus.$emit('show-confusion-matrix', this.info.path)
       }
     },
+  },
+  mounted() {
+    if (this.$store.state.app.expanded.includes(this.info.path)) {
+      this.toggleShowChildren()
+    }
   },
 }
 </script>

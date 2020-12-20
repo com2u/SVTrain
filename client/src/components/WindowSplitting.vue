@@ -1,11 +1,11 @@
 <template>
   <div class="main-wrapper" v-on:mousemove="onMouseMoveOnWrapper" v-on:mouseup="onMouseUpOnWrapper">
-    <div class="main-side" :style="{paddingRight: `${displayedWidth + 10}px`}">
+    <div class="main-side" :style="{paddingRight: `${displayedWidth - 20 + marginLeft}px`}">
       <slot name="main"/>
     </div>
     <div
       class="border"
-      v-bind:style="{ right: `${displayedWidth + 10}px` }"
+      v-bind:style="{ right: `${displayedWidth - 20 + marginLeft}px` }"
       v-on:mousedown="onMouseDownOnBorder"
       v-on:mouseup.prevent="onMouseUpOnBorder"
     />
@@ -37,6 +37,13 @@ export default {
     },
     displayedWidth() {
       return this.sideWidth || this.configSideWidth
+    },
+    marginLeft() {
+      const { config } = this.$store.state.app
+      if (config.rightMenu && config.rightMenu.marginLeft) {
+        return config.rightMenu.marginLeft
+      }
+      return 0
     },
   },
   methods: {
@@ -89,10 +96,21 @@ export default {
   .border {
     height: 100%;
     position: absolute;
-    width: 10px;
-    background: silver;
+    width: 7px;
+    background: #E8E8E8;
     top: 0;
     cursor: ew-resize;
+
+    &:before {
+      content: "";
+      position: absolute;
+      top: calc(50% - 35px);
+      left: -5.5px;
+      display: inline-block;
+      width: 15px; height: 70px;
+      background: #E8E8E8;
+      border: 1px solid #dee2e6;
+    }
   }
 }
 </style>

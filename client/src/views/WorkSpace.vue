@@ -2,11 +2,7 @@
   <div>
     <div class="title-container">
       <div>
-        <h1
-          :style="{
-            fontSize: workspaceFontSize
-            }"
-        >Work Spaces</h1>
+        <h1 :style="{ fontSize: workspaceFontSize }">Work Spaces</h1>
       </div>
     </div>
     <div>
@@ -18,6 +14,7 @@
         :info="folder"
         :key-path="`[${index}]`"
         :key="folder.path"
+        :show-sub-folder-progress="folder.config && folder.config.showSubFolderProgress"
         @select-workspace="setWorkspace(folder)"
       />
       <div
@@ -29,13 +26,8 @@
         New Workspace
       </div>
     </div>
-    <b-modal
-      v-model="notesVisible"
-      ok-title="Save"
-      cancel-title="Back"
-    >
+    <b-modal v-model="notesVisible" ok-title="Save" cancel-title="Back">
       <template v-slot:modal-title>Notes for {{ $store.state.notes.folder.name }}</template>
-
       <div>
         <b-form-textarea
           id="textarea"
@@ -63,16 +55,13 @@
         </div>
 
       </template>
-
     </b-modal>
-    <b-modal
-      v-model="cfgVisible"
-      ok-title="Save"
-      cancel-title="Back"
-      @shown="onModalShow"
-    >
+    <b-modal v-model="cfgVisible" ok-title="Save" cancel-title="Back" @shown="onModalShow">
       <template v-slot:modal-title>Config folder {{ $store.state.notes.folder.name }}</template>
-      <div>
+      <div v-if="editConfigUI">
+        <w-s-option ref="ws-option" :value="$store.state.wsconfig.folder.config"></w-s-option>
+      </div>
+      <div v-else>
         <div id="wsjsoneditor"/>
       </div>
       <template v-slot:modal-footer>
@@ -96,6 +85,7 @@
 import JSONEditor from 'jsoneditor'
 import _set from 'lodash.set'
 import { mapGetters } from 'vuex'
+import WSOption from '@/components/WSOption'
 import api from '../utils/api'
 import WorkspaceFolder from '../components/WorkspaceFolder.vue'
 import CreatingFolder from '../components/CreatingFolder.vue'
@@ -105,6 +95,7 @@ import { updateCounting } from '../utils'
 export default {
   name: 'WorkSpace',
   components: {
+    WSOption,
     WorkspaceFolder,
     CreatingFolder,
   },
@@ -157,6 +148,7 @@ export default {
       'canEditConfig',
       'newWorkspace',
       'workspaceFontSize',
+      'editConfigUI',
     ]),
   },
   methods: {
@@ -182,23 +174,26 @@ export default {
     },
     saveConfig() {
       let config
-      if (this.editor) {
+      if (this.editor && !this.editConfigUI) {
         config = this.editor.get()
+      } else {
+        config = this.$refs['ws-option'].data
       }
-      console.log(config)
       this.$store.dispatch('wsconfig/save', config)
         .then(() => {
           this.loadFoldersByPath()
         })
     },
     onModalShow() {
-      const container = document.getElementById('wsjsoneditor')
-      const options = {
-        mode: 'code',
+      if (!this.editConfigUI) {
+        const container = document.getElementById('wsjsoneditor')
+        const options = {
+          mode: 'code',
+        }
+        const editor = new JSONEditor(container, options)
+        this.editor = editor
+        editor.set(this.$store.state.wsconfig.folder.config)
       }
-      const editor = new JSONEditor(container, options)
-      this.editor = editor
-      editor.set(this.$store.state.wsconfig.folder.config)
     },
     async setWorkspace(folder) {
       await api.setWorkspace(folder.name)
@@ -326,6 +321,7 @@ export default {
           .option-progress-text {
             color: #BFB8AF;
             min-width: 45px;
+            text-align: right;
           }
         }
 
@@ -344,8 +340,8 @@ export default {
 
         .ws-progress {
           width: 150px;
-          margin-right: 30px;
-          margin-top: 23px;
+          margin-right: 10px;
+          margin-top: 22px;
           margin-left: 5px;
 
           .black-bar {

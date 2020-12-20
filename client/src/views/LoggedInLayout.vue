@@ -6,11 +6,11 @@
       <notifications/>
       <b-modal
         v-model="statisticVisible"
-        size="xl"
+        size="xxl"
         cancel-title="Close"
         footer-class="statistic-footer"
       >
-        <template v-slot:modal-title>{{modalShow === 'statistic' ? 'Statistic' : 'Confusion Matrix'}}</template>
+        <template v-slot:modal-title>{{ modalShow === 'statistic' ? 'Statistic' : 'Confusion Matrix' }}</template>
         <statistic-popup v-if="modalShow === 'statistic'" ref="statistic"/>
         <confusion-matrix v-else ref="matrix"></confusion-matrix>
       </b-modal>
@@ -124,6 +124,12 @@ export default {
       })
     },
   },
+  async created() {
+    const wsExpandedStr = localStorage.getItem('ws_expanded')
+    if (wsExpandedStr) {
+      await this.$store.commit('app/SET_EXPANDED', wsExpandedStr.split(','))
+    }
+  },
 }
 </script>
 <style lang="scss">
@@ -136,7 +142,7 @@ export default {
   .app-container {
     flex: 1;
     /*background: #fff;*/
-    margin: 0 60px;
+    margin: 0 30px;
     /*margin-bottom: 50px;*/
     position: relative;
 
@@ -197,4 +203,22 @@ export default {
     }
   }
 }
+
+@media (min-width: 576px) {
+  .modal-dialog.modal-xxl {
+    max-width: calc(100vw - 3.5rem);
+    margin: 1.75rem auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  .modal-dialog.modal-xxl {
+    .modal-content {
+      margin: 0 auto;
+      min-width: 1100px;
+      width: fit-content;
+    }
+  }
+}
+
 </style>

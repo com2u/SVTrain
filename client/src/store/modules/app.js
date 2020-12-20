@@ -11,6 +11,7 @@ export default {
     calculating: false,
     statisticVisible: false,
     explorerConfig: {},
+    expanded: [],
   },
   mutations: {
     SET_CONFIG: (state, config) => {
@@ -37,7 +38,22 @@ export default {
     SET_CALCULATING: (state, calculating) => {
       state.calculating = calculating
     },
-
+    SET_EXPANDED: (state, val) => {
+      state.expanded = val
+    },
+    ADD_EXPANDED: (state, { flag, path }) => {
+      const filtered = state.expanded.filter((x) => (flag ? x === path : x.includes(path)))
+      if (flag) {
+        if (filtered.length === 0) {
+          state.expanded.push(path)
+        }
+      } else {
+        filtered.forEach((x) => {
+          state.expanded.splice(state.expanded.indexOf(x), 1)
+        })
+      }
+      localStorage.setItem('ws_expanded', state.expanded)
+    },
   },
   actions: {
     setConfig: ({ commit }, config) => {

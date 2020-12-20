@@ -13,11 +13,7 @@
     @keyup.self.exact.189="zoomOut(true)"
     @keyup.self.exact.stop.prevent="onKeyUp"
   >
-    <div
-      tabindex="0"
-    >
-
-    </div>
+    <div tabindex="0"></div>
     <window-splitting ref="WindowSplitting">
       <template v-slot:side>
         <div class="right-side-section">
@@ -30,10 +26,7 @@
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
             <b-button @click="showStatistic" :disabled="!canViewStatistics" class="statistic-btn">
-
-              <b-icon
-                icon="bar-chart-fill"
-              />
+              <b-icon icon="bar-chart-fill"/>
               <span> Statistic</span>
             </b-button>
           </div>
@@ -41,7 +34,6 @@
             <b-button variant="primary" :disabled="!viewerImages.length" @click="showImageViewer">Show selected images</b-button>
           </div>
         </div>
-
         <div v-if="systemConfig.moveMenu" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
           <div v-if="selectedFiles.length > 0 && canSeeMoveMenu">
@@ -65,8 +57,7 @@
                   <svg-icon icon-class="unknown"/>
                 </span>
                 </span>
-                <span class="folder-name"
-                      :style="{fontSize: fontSize}">{{f.name}}</span>
+                <span class="folder-name" :style="{fontSize: fontSize}">{{f.name}}</span>
               </div>
               <div>
                 <span v-if="showNavigationIcon">
@@ -86,7 +77,7 @@
           </div>
 
         </div>
-        <div v-if="systemConfig.forwardLocaltion === 'right'" class="right-side-section">
+        <div v-if="systemConfig.forwardLocation === 'right'" class="right-side-section">
           <div class="pagination-group">
             <template v-if="forwardOnly">
               <b-button
@@ -115,9 +106,15 @@
             </template>
           </div>
         </div>
+        <div v-if="showExplorerNotes" class="right-side-section">
+          <b-form-textarea :disabled="!systemConfig['editExplorerNotes']" id="textarea" v-model="notesContent" rows="3" placeholder="Note"/>
+        </div>
+        <div v-if="showExplorerNotes && systemConfig['editExplorerNotes']" class="right-side-section">
+          <b-button size="sm" variant="primary" @click="saveNotes()">Save notes</b-button>
+        </div>
       </template>
       <template v-slot:main>
-        <div>
+        <div class="mb-2">
           <div><strong>{{relativeDir}}</strong></div>
           <div v-if="systemConfig.newFolder && newFolder">
             <new-folder-button @click.native="createNewFolder"/>
@@ -140,9 +137,7 @@
             </span>
           </div>
         </div>
-        <div class="file-explorer-grid bottom-border">
-        </div>
-        <div class="mb-2 mt-2" v-if="systemConfig.forwardLocaltion === 'top'">
+        <div class="mb-2 mt-2" v-if="systemConfig.forwardLocation === 'top'">
           <div class="pagination-group">
             <b-button
               class="mr-2"
@@ -213,9 +208,7 @@
       </div>
       <template v-slot:modal-footer><span></span></template>
     </b-modal>
-    <v-gallery :images="viewerImages"
-               :index="viewerIndex"
-               @close="viewerIndex = null" />
+    <v-gallery :images="viewerImages" :index="viewerIndex" @close="viewerIndex = null" />
   </div>
 </template>
 
@@ -347,6 +340,14 @@ export default {
     fileSizeRatio: 1,
   }),
   computed: {
+    notesContent: {
+      get() {
+        return this.$store.state.notes.folder.notes
+      },
+      set(val) {
+        this.$store.dispatch('notes/setContent', val)
+      },
+    },
     viewerImages() {
       return this.selectedFiles.map((file) => file.serverPath)
     },
@@ -398,6 +399,7 @@ export default {
       'canSeeMoveMenu',
       'imageViewer',
       'showNavigationIcon',
+      'showExplorerNotes',
     ]),
   },
   watch: {
@@ -412,6 +414,9 @@ export default {
   },
   mounted() {},
   methods: {
+    saveNotes() {
+      this.$store.dispatch('notes/save')
+    },
     showImageViewer() {
       if (this.selectedFiles.length) {
         this.viewerIndex = 0
@@ -945,17 +950,13 @@ export default {
     const { currentPath } = await this.loadFiles(this.dir || null)
     this.createdFolders = this.folder.folders
     await this.loadStatistic(this.dir || currentPath || this.path || null)
-
     // set current path if he hasn't defined
     this.path = currentPath
     this.openedPath = currentPath
-
     // subscribe for that folder
     socket.subscibeForFolder(this.path, this.fileChanged())
-
     // set focus on keyupevents
     this.setFocusOnFiles()
-
     // get status
     this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
@@ -963,19 +964,24 @@ export default {
       if (data.event === 'unlink') this.status = false
     })
     this.enablePreventingScrolling()
+    this.$store.commit('notes/SET_FOLDER', {
+      notesPath: `${currentPath}/notes.txt`,
+      notes: this.systemConfig.notes || null,
+      highlight: false,
+    })
   },
   beforeDestroy() {
     socket.unsubscribeForFolder(this.path)
     socket.unsubscribeForFolder('running.lock')
   },
 }
-
-
 </script>
 
 <style lang="scss">
   #keyupevents {
     outline: none;
+    min-height: 100%;
+    display: flex;
   }
 
   .file-container {
