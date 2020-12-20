@@ -2,7 +2,6 @@
   <footer class="page-footer">
     <div class="logo">
       <img src="../assets/footer.png" alt="footer">
-      seidenader solutions
     </div>
     <div>&copy; Seidenader Maschinenbau GmbH. All rights reserved.</div>
   </footer>

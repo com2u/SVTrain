@@ -16,7 +16,9 @@
       "Kuchen Linescan",
       "Deleted"
     ],
-    "showConfusionMatrix": true
+    "showConfusionMatrix": true,
+    "editConfigUI": true,
+    "showExplorerNotes": true,
   },
   "operator": {
     "editConfig": false,

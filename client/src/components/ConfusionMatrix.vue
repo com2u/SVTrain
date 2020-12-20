@@ -26,8 +26,12 @@
               </b-td>
               <b-td style="width: 20%" class="header">{{row}}</b-td>
               <b-td v-for="(col, index2) in cols" :key="index2" :class="{'main-diagonal': index1 === index2}">
-                <span v-if="matrix[index2][index1]" class="gray-text">{{ matrix[index2][index1] }}
+                <span v-if="matrix[index2][index1] > 0" class="clickable-text">
+                  <a href="javascript:;" v-on:click="select(col, row)">
+                    <span>{{ matrix[index2][index1] }}</span>
+                  </a>
                 </span>
+                <span v-else class="gray-text">0</span>
               </b-td>
             </b-tr>
           </b-tbody>
@@ -42,6 +46,7 @@
 </template>
 
 <script>
+import EventBus from '@/utils/eventbus'
 import api from '../utils/api'
 
 export default {
@@ -75,6 +80,17 @@ export default {
     },
     getDirName(dir) {
       return dir.split('/')[dir.split('/').length - 1]
+    },
+    select(dir1, dir2) {
+      const gotoDir = `${this.dir}/${dir1}`
+      console.log(gotoDir)
+      EventBus.$emit('statistic-folder-selected', {
+        folder: gotoDir,
+        filter: {
+          include: dir2,
+          exclude: this.exclude ? '!' : null,
+        },
+      })
     },
   },
 }

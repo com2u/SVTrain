@@ -16,10 +16,10 @@ import store from './store'
 import router from './router'
 import './permissions'
 import App from './App.vue'
-
+import SField from './components/field/Index.vue'
 
 Vue.component('VGallery', VueGallery)
-
+Vue.component('SField', SField)
 
 Vue.use(Notifications)
 Vue.use(BootstrapVue)
