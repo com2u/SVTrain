@@ -22,7 +22,6 @@ export default {
       commit('SET_FOLDER', folder)
     },
     showFolder: ({ commit }, folder) => {
-      console.log(folder)
       commit('SET_FOLDER', folder)
       commit('SET_VISIBLE', true)
     },

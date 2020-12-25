@@ -752,10 +752,18 @@ class ExplorerController {
         console.log('Notes not found');
       }
     }
+    let noteData, isHighlight
+    if (notes && notes.startsWith(highlightPrefix)) {
+      noteData = notes.substring(highlightPrefix.length);
+      isHighlight = true;
+    } else {
+      noteData = notes;
+    }
     const resConfig = await this.getParentFolderConfig(dir, request.currentUser);
     response.json({
       ...resConfig,
-      notes
+      notes: noteData,
+      highlight: isHighlight
     });
   }
 
