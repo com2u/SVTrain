@@ -109,6 +109,9 @@
         <div v-if="showExplorerNotes" class="right-side-section">
           <b-form-textarea :disabled="!systemConfig['editExplorerNotes']" id="textarea" v-model="notesContent" rows="3" placeholder="Note"/>
         </div>
+        <div class="right-side-section">
+          <b-form-checkbox v-model="notesHighlight" :disabled="! (showExplorerNotes && systemConfig['editExplorerNotes'])">Highlight Note</b-form-checkbox>
+        </div>
         <div v-if="showExplorerNotes && systemConfig['editExplorerNotes']" class="right-side-section">
           <b-button size="sm" variant="primary" @click="saveNotes()">Save notes</b-button>
         </div>
@@ -346,6 +349,14 @@ export default {
       },
       set(val) {
         this.$store.dispatch('notes/setContent', val)
+      },
+    },
+    notesHighlight: {
+      get() {
+        return this.$store.state.notes.folder.highlight
+      },
+      set(val) {
+        this.$store.dispatch('notes/setHighlight', val)
       },
     },
     viewerImages() {
@@ -967,7 +978,7 @@ export default {
     this.$store.commit('notes/SET_FOLDER', {
       notesPath: `${currentPath}/notes.txt`,
       notes: this.systemConfig.notes || null,
-      highlight: false,
+      highlight: Boolean(this.systemConfig.highlight),
     })
   },
   beforeDestroy() {

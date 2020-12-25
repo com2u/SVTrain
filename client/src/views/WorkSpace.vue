@@ -181,7 +181,8 @@ export default {
       }
       this.$store.dispatch('wsconfig/save', config)
         .then(() => {
-          this.loadFoldersByPath()
+          const index = this.folders.map((x) => x.path).indexOf(this.$store.state.wsconfig.folder.path)
+          this.$set(this.folders[index], 'config', config)
         })
     },
     onModalShow() {
