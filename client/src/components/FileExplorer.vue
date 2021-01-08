@@ -117,7 +117,7 @@
         </div>
       </template>
       <template v-slot:main>
-        <div class="mb-2">
+        <div class="mb-2 d-flex flex-column">
           <div><strong>{{relativeDir}}</strong></div>
           <div v-if="systemConfig.newFolder && newFolder">
             <new-folder-button @click.native="createNewFolder"/>

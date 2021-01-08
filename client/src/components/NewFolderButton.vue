@@ -12,9 +12,11 @@
   word-wrap:break-word;
   padding: 5px;
   cursor: pointer;
+  float: left;
   .text {
     font-size: 12px;
     padding: 1px;
+    margin-left: .25rem;
   }
 }
 </style>
