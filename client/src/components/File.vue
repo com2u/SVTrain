@@ -13,7 +13,7 @@
           <template v-if="file.image">
             <div>
               <img
-                v-auth-image="file.serverPath"
+                :src="file.serverPath"
                 class="file-explorer-preview"
                 alt=""
                 :class="imageFit === 'fit' ? 'image-fit' : 'image-fill'"

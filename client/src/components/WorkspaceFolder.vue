@@ -34,8 +34,8 @@
       <div class="options">
         <div class="option-progress" v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
           <span class="file-nums option-progress-text">{{totalFiles}} files</span>
-          <span class="option-progress-text">{{progress}}%</span>
-          <b-progress :max="100" class="ws-progress" v-if="(showSubFolderProgress || depth === 0)">
+          <span class="option-progress-text" v-bind:class="{'opacity-0': !(showSubFolderProgress || depth === 0)}">{{progress}}%</span>
+          <b-progress :max="100" class="ws-progress" v-bind:class="{'opacity-0': !(showSubFolderProgress || depth === 0)}">
             <b-progress-bar
               class="black-bar"
               :value="progress">

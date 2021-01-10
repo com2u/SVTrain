@@ -39,7 +39,7 @@
       </div>
       <div v-else class="right-side-section">
         <span v-if="isLoading">Data are loading...</span>
-        <span>Data is empty!</span>
+        <span v-else>Data is empty!</span>
       </div>
     </div>
   </div>
