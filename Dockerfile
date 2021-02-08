@@ -17,11 +17,20 @@ RUN cd /app/ && \
   yarn install --production && \
   apk del native-deps
 
-COPY . /app/
+WORKDIR /app
+COPY . .
 RUN rm -rf /app/client/
 COPY --from=frontend-build /build/dist/ /app/public/
 
-VOLUME [ "/data", "/app/.env", "/app/roles.json", "/app/users.json", "/app/sessions.json" ]
+# Use VOLUME for directories only.
+VOLUME [ "/data" ]
+# Do not use `VOLUME` for files, but instead
+# initialize them with sane values here
+RUN touch /app/.env
+RUN echo '{}' > /app/roles.json
+RUN echo '{}' > /app/sessions.json
+RUN echo '{}' > /app/users.json
 
-WORKDIR /app
+RUN adduser -D svtrain
+USER svtrain
 ENTRYPOINT [ "npm", "start" ]
