@@ -9,18 +9,25 @@ RUN npm run build
 
 FROM node:12-alpine
 
-COPY package.json /app/
-COPY yarn.lock /app/
-RUN cd /app/ && \
-  apk --no-cache add --virtual native-deps \
+WORKDIR /app
+
+RUN adduser -D svtrain
+RUN chown svtrain: .
+
+COPY package.json .
+COPY yarn.lock .
+RUN apk --no-cache add --virtual native-deps \
   g++ gcc libgcc libstdc++ linux-headers make python && \
   yarn install --production && \
   apk del native-deps
 
-WORKDIR /app
 COPY . .
+
+# remove client dir as we copy the dist file from the build stage
 RUN rm -rf /app/client/
 COPY --from=frontend-build /build/dist/ /app/public/
+
+USER svtrain
 
 # Use VOLUME for directories only.
 VOLUME [ "/data" ]
@@ -31,6 +38,4 @@ RUN echo '{}' > /app/roles.json
 RUN echo '{}' > /app/sessions.json
 RUN echo '{}' > /app/users.json
 
-RUN adduser -D svtrain
-USER svtrain
 ENTRYPOINT [ "npm", "start" ]
