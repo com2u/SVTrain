@@ -83,9 +83,10 @@ export default {
     },
     select(dir1, dir2) {
       const gotoDir = `${this.dir}/${dir1}`
-      console.log(gotoDir)
+      const to = `${this.getDirName(this.$store.state.app.config.wsPath)}/${dir2}`
       EventBus.$emit('statistic-folder-selected', {
         folder: gotoDir,
+        to,
         filter: {
           include: dir2,
           exclude: this.exclude ? '!' : null,

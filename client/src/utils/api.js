@@ -7,7 +7,7 @@ const developmentUrl = 'http://localhost:3333/api/'
 const baseurl = isProduction() ? productionUrl : developmentUrl
 
 const urls = {
-  getFiles: (dir) => `${baseurl}getFiles?dir=${dir}`,
+  getFiles: (dir, to) => `${baseurl}getFiles?dir=${dir}&to=${to || ''}`,
   getRunningState: `${baseurl}getState`,
   getStatistic: (dir) => `${baseurl}getStatistic?dir=${dir}`,
   getNextFolders: (dir) => `${baseurl}nextDirectories?dir=${dir}`,
@@ -35,7 +35,7 @@ const urls = {
 }
 
 export default {
-  getFiles: async (path) => (await axios.get(urls.getFiles(path || ''))).data,
+  getFiles: async (path, to) => (await axios.get(urls.getFiles(path || '', to))).data,
   getParent: async (path) => (await axios.get(urls.getParentDirectory(path))).data,
   getNextFolders: async (path) => (await axios.get(urls.getNextFolders(path))).data,
   getStatistic: async (path) => (await axios.get(urls.getStatistic(path))).data,

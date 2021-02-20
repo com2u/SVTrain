@@ -119,11 +119,8 @@
       <template v-slot:main>
         <div class="mb-2 d-flex flex-column">
           <div><strong>{{relativeDir}}</strong></div>
-          <div v-if="systemConfig.newFolder && newFolder">
-            <new-folder-button @click.native="createNewFolder"/>
-          </div>
           <div class="list-folders">
-            <span v-for="file in folder.folders" :key="file.path">
+            <div class="list-folder-item" v-for="file in folder.folders" :key="file.path">
               <file
                 v-if="file.shortcut"
                 v-b-popover.hover.html.top="`<b>${file.shortcut}</b>`" title="Shortcut"
@@ -135,9 +132,13 @@
                 v-else
                 class="folder"
                 v-bind:file="file"
+                :icon-name="file.name ? null: 'arrow-alt-circle-left'"
                 v-on:click.native="goToTheFolder(file)">
               </file>
-            </span>
+            </div>
+            <div class="list-folder-item" v-if="systemConfig.newFolder && newFolder">
+              <new-folder-button @click.native="createNewFolder"/>
+            </div>
           </div>
         </div>
         <div class="mb-2 mt-2" v-if="systemConfig.forwardLocation === 'top'">
@@ -179,6 +180,7 @@
       v-bind:file="viewingFile"
       v-on:shown="onOpenModal"
       v-on:hidden="onCloseModal"
+      @navigate="imageShowNavigate"
     />
     <!-- </b-modal> -->
     <creating-folder
@@ -423,8 +425,23 @@ export default {
       this.calculatePage(this.page)
     },
   },
-  mounted() {},
+  mounted() {
+    const c = this.systemConfig && this.systemConfig.imgContrast ? this.systemConfig.imgContrast : 100
+    const b = this.systemConfig && this.systemConfig.imgBrightness ? this.systemConfig.imgBrightness : 100
+    document.getElementsByTagName('body')[0].style.setProperty('--image--filter', `contrast(${c}%) brightness(${b}%)`)
+  },
   methods: {
+    imageShowNavigate(flag) {
+      const files = this.screenFiles.filter((x) => !x.selected || x.path === this.viewingFile.path)
+      const index = files.map((x) => x.path).indexOf(this.viewingFile.path)
+      let next = 0
+      if (flag === 'prev') {
+        next = index > 0 ? index - 1 : files.length - 1
+      } else {
+        next = index < files.length - 1 ? index + 1 : 0
+      }
+      this.viewingFile = files[next]
+    },
     saveNotes() {
       this.$store.dispatch('notes/save')
     },
@@ -502,7 +519,6 @@ export default {
       }
     },
     selectFolderByLetter(letter) {
-      console.log(`leteter: ${letter}`)
       const folder = this.folder.folders.find((f) => f.name.toLowerCase()
         .startsWith(letter))
       if (folder) this.goToTheFolder(folder)
@@ -518,7 +534,6 @@ export default {
       this.$nextTick(() => this.$refs.FileViewing.show())
     },
     openFile(file) {
-      console.log(file)
       this.viewingFile = file
       this.$nextTick(() => this.$refs.FileViewing.show())
     },
@@ -527,7 +542,6 @@ export default {
       try {
         await api.calculateStatistic()
       } catch (e) {
-        console.log(e)
         console.error('An error occurred!')
       }
       await this.loadStatistic(this.path)
@@ -536,7 +550,6 @@ export default {
     async selectFolder({ folder, filter }) {
       const folderFromArray = this.createdFolders.find((f) => f.name === folder)
       const openedPath = folderFromArray.path
-      console.log(folderFromArray)
       this.filter = filter || {}
       socket.unsubscribeForFolder(this.openedPath)
       await this.loadFiles(folderFromArray.path)
@@ -661,7 +674,6 @@ export default {
       console.log('selected')
     },
     toggleSelect(file, doNotUpdateLastSelectedFileIndex) {
-      console.log(`File ${file.path} ${file.selected ? 'unselected' : 'selected'}`)
       file.selected = !file.selected
       if (file.selected) {
         this.selectedFiles.push(file)
@@ -755,7 +767,6 @@ export default {
       if (parentDir.access) {
         this.folder.folders.unshift({
           path: parentDir.path,
-          name: '../',
           type: 'folder',
         })
       }
@@ -875,7 +886,6 @@ export default {
     fileChanged() {
       const self = this
       return (file) => {
-        console.log(file)
         if (file.event === 'add' && file.type === 'file') {
           file.selected = false
           file.serverPath = this.staticServer + file.relativePath
@@ -1154,16 +1164,31 @@ export default {
   }
 
   .list-folders {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -.25rem;
+    margin-right: -.25rem;
+    .list-folder-item {
+      margin-left: .25rem;
+      margin-right: .25rem;
+      margin-bottom: .5rem;
+      .file-explorer-file-name {
+        margin-left: .125rem;
+      }
+      .new-folder-button {
+        padding: unset;
+      }
+    }
+
     .folder {
       display: inline;
       cursor: pointer;
     }
 
     .file-explorer-item {
-      display: inline;
-      padding: 5px 0 5px 5px;
-      padding-left: 10px;
       margin-right: 0 !important;
+      padding: 0;
+      display: contents;
     }
   }
   .link-current-folder {

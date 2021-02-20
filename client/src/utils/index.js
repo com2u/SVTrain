@@ -27,4 +27,4 @@ export const getToken = () => localStorage.getItem('sessionToken', null)
 
 export const isProduction = () => (process.env.NODE_ENV || 'production') === 'production'
 
-export const getFileServerPath = () => `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/data/`
+export const getFileServerPath = () => `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${(process.env.NODE_ENV || 'production') === 'production' ? window.location.port : 3333}` : ''}/data/`

@@ -21,14 +21,14 @@
             </div>
           </template>
           <template v-else-if="file.name.toLowerCase() === 'tfsettings.json'">
-            <v-icon name="cogs" class="text-primary" scale="2"/>
+            <v-icon :name="iconName || 'cogs'" class="text-primary" scale="2"/>
           </template>
           <template v-else>
-            <v-icon name="file" scale=2></v-icon>
+            <v-icon :name="iconName || 'file'" scale=2></v-icon>
           </template>
         </template>
         <template v-else>
-          <v-icon name="folder" scale=2></v-icon>
+          <v-icon :name="iconName || 'folder'" scale=2></v-icon>
         </template>
       </template>
     </div>
@@ -68,6 +68,10 @@ export default {
     zoomAble: {
       type: Boolean,
       default: false,
+    },
+    iconName: {
+      type: String,
+      default: null,
     },
   },
   computed: {
