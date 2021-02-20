@@ -19,6 +19,8 @@
     "showConfusionMatrix": true,
     "editConfigUI": true,
     "showExplorerNotes": true,
+    "editConfigUI": false,
+    "leaveWorkspace": false
   },
   "operator": {
     "editConfig": false,
@@ -34,6 +36,8 @@
     "validate": false,
     "workspaces": [
       "*"
-    ]
+    ],
+    "editConfigUI": false,
+    "leaveWorkspace": false
   }
 }

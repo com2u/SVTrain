@@ -133,7 +133,7 @@
                 class="folder"
                 v-bind:file="file"
                 :icon-name="file.name ? null: 'arrow-alt-circle-left'"
-                v-on:click.native="goToTheFolder(file)">
+                v-on:click.native="goToTheFolder(file, !Boolean(file.name))">
               </file>
             </div>
             <div class="list-folder-item" v-if="systemConfig.newFolder && newFolder">
@@ -149,8 +149,7 @@
               variant="primary"
               size="sm"
               @click="backward()">
-              <b-icon icon="chevron-left"></b-icon>
-              Backward
+              <b-icon icon="chevron-left"></b-icon>Backward
             </b-button>
             <b-button variant="primary" size="sm" @click="forward()">Forward
               <b-icon icon="chevron-right"></b-icon>
@@ -405,6 +404,11 @@ export default {
     relativeDir() {
       const { root } = this.systemConfig
       return this.dir && root ? this.dir.substring(root.length) : this.dir
+    },
+    allowLeaveBack() {
+      const { permissions } = this.$store.state.app.user
+      const wpPath = permissions.workspaces.map((x) => this.systemConfig.root + x)
+      return permissions.workspaces.includes('*') || permissions.leaveWorkspace || !wpPath.includes(this.path)
     },
     ...mapGetters([
       'newFolder',
@@ -706,7 +710,6 @@ export default {
       this.statistic.missed = missed
       this.statistic.missmatched = missmatched
       this.statistic.table = table
-      console.log('statistic table: ', this.statistic.table)
     },
     onFolderCreated() {
       this.loadFiles(this.openedPath)
@@ -842,9 +845,10 @@ export default {
       const notSelected = this.screenFiles.filter((f) => !selected.includes(f.path) && f.image)
         .map((f) => f.path)
       await api.doForwardOnly(selected, notSelected)
-      this.loadFiles(this.path)
+      await this.loadFiles(this.path)
     },
-    async goToTheFolder(file) {
+    async goToTheFolder(file, isBack) {
+      if (!this.allowLeaveBack && isBack) return
       if (file.path === this.path) {
         socket.unsubscribeForFolder(this.openedPath)
         socket.subscibeForFolder(this.path, this.fileChanged())
@@ -860,14 +864,13 @@ export default {
           filter: {},
         })
       }
-      this.$router.push({
+      await this.$router.push({
         name: 'explorer',
         query: { dir: file.path },
       })
     },
     async deleteFiles() {
       if (this.selectedFiles.length === 0) return
-      console.log('Delete files')
       this.isLoading.deleting = true
       await api.deleteFiles(this.selectedFiles.map((f) => f.path))
       this.isLoading.deleting = false
@@ -936,7 +939,6 @@ export default {
       }
     },
     setFocusOnFiles() {
-      console.log('set focus on files')
       window.document.getElementById('keyupevents')
         .focus()
     },
