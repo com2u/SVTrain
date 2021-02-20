@@ -10,7 +10,7 @@
         cancel-title="Close"
         footer-class="statistic-footer"
       >
-        <template v-slot:modal-title>{{ modalShow === 'statistic' ? 'Statistic' : 'Confusion Matrix' }}</template>
+        <template v-slot:modal-title>{{ modalShow === 'statistic' ? 'Statistic' : 'Compare Workspaces' }}</template>
         <statistic-popup v-if="modalShow === 'statistic'" ref="statistic"/>
         <confusion-matrix v-else ref="matrix"></confusion-matrix>
       </b-modal>
@@ -120,6 +120,7 @@ export default {
         name: 'explorer',
         query: {
           dir: gotoDir,
+          to: item.to,
         },
       })
     },
@@ -222,5 +223,76 @@ export default {
 }
 .opacity-0 {
   opacity: 0;
+}
+
+.drift-zoom-pane {
+  z-index: 9999!important;
+  position: fixed!important;
+}
+
+.inline-round-zoomer-base-container .thumb-list {
+  display: none!important;
+}
+.inline-round-zoomer-base-container {
+  display: block!important;
+  margin: 0 auto;
+  height: auto!important;
+  width: auto!important;
+
+  img.responsive-image {
+    width: var(--img--zoom);
+  }
+}
+
+.scroller-at-bottom img {
+  width: 100%;
+}
+
+.drift-zoom-pane.drift-inline {
+  border-radius: 0!important;
+  overflow: hidden;
+  width: 200px;
+
+  image-rendering: pixelated;
+  filter: var(--image--filter);
+}
+
+img.responsive-image,
+img.file-explorer-preview {
+  filter: var(--image--filter);
+}
+
+.file-control {
+  .prev,
+  .next {
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -23px;
+    font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-size: 60px;
+    font-weight: 100;
+    line-height: 30px;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 0 2px #000;
+    text-align: center;
+    background: #222;
+    background: rgba(0,0,0,.5);
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box;
+    border: 3px solid #fff;
+    border-radius: 23px;
+    opacity: .5;
+    cursor: pointer;
+    position: fixed;
+  }
+  .prev {
+    left: 15px;
+  }
+
+  .next {
+    right: 15px;
+  }
 }
 </style>

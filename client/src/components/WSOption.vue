@@ -285,6 +285,24 @@ export default {
           type: types.BOOLEAN,
           options: {},
         },
+        {
+          label: 'Image contrast',
+          field: 'imgContrast',
+          type: types.SLIDER,
+          options: {
+            max: 200,
+            min: 100,
+          },
+        },
+        {
+          label: 'Image brightness',
+          field: 'imgBrightness',
+          type: types.SLIDER,
+          options: {
+            max: 200,
+            min: 100,
+          },
+        },
       ],
       data: {
         ...cloneDeep(this.value),
