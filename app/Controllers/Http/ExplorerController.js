@@ -133,22 +133,24 @@ class ExplorerController {
   */
   async all({request}) {
     const dir = path.join(request.get().dir || CONST_PATHS.root);
-    console.log(`Send files for directory ${dir}, request get params:`, request.get());
     if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
     const result = {};
-
     const files = await readdir(dir);
-
     result.folders = [];
     result.files = [];
     result.path = dir;
-
+    const permissions = request.currentUser
+      && request.currentUser.permissions
+      && request.currentUser.permissions.workspaces;
     for (let i = 0; i < files.length; ++i) {
       const f = files[i];
       const fPath = path.join(dir, f);
       const flstat = await lstat(path.join(dir, f));
       if (f)
         if (flstat.isDirectory()) {
+          if ((CONST_PATHS.root === `${dir}/`) &&
+            !(hasPermissionWorkspaces(f, permissions) || request.currentUser.permissions.leaveWorkspace)
+          ) continue;
           const folder = {
             path: fPath,
             name: f,
