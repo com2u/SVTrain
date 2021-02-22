@@ -133,7 +133,7 @@
                 class="folder"
                 v-bind:file="file"
                 :icon-name="file.name ? null: 'arrow-alt-circle-left'"
-                v-on:click.native="goToTheFolder(file, !Boolean(file.name))">
+                v-on:click.native="goToTheFolder(file)">
               </file>
             </div>
             <div class="list-folder-item" v-if="systemConfig.newFolder && newFolder">
@@ -404,11 +404,6 @@ export default {
     relativeDir() {
       const { root } = this.systemConfig
       return this.dir && root ? this.dir.substring(root.length) : this.dir
-    },
-    allowLeaveBack() {
-      const { permissions } = this.$store.state.app.user
-      const wpPath = permissions.workspaces.map((x) => this.systemConfig.root + x)
-      return permissions.workspaces.includes('*') || permissions.leaveWorkspace || !wpPath.includes(this.path)
     },
     ...mapGetters([
       'newFolder',
@@ -847,8 +842,7 @@ export default {
       await api.doForwardOnly(selected, notSelected)
       await this.loadFiles(this.path)
     },
-    async goToTheFolder(file, isBack) {
-      if (!this.allowLeaveBack && isBack) return
+    async goToTheFolder(file) {
       if (file.path === this.path) {
         socket.unsubscribeForFolder(this.openedPath)
         socket.subscibeForFolder(this.path, this.fileChanged())
