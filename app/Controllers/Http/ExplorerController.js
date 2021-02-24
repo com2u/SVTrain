@@ -148,7 +148,7 @@ class ExplorerController {
       const flstat = await lstat(path.join(dir, f));
       if (f)
         if (flstat.isDirectory()) {
-          if ((CONST_PATHS.root === `${dir}/`) &&
+          if ((CONST_PATHS.root === `${dir}`) &&
             !(hasPermissionWorkspaces(f, permissions) || request.currentUser.permissions.leaveWorkspace)
           ) continue;
           const folder = {
