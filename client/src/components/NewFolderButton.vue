@@ -1,5 +1,5 @@
 <template>
-  <div class="new-folder-button text-success">
+  <div class="new-folder-button text-primary">
     <v-icon name="folder-plus" scale=2 />
     <span class="text">New Folder</span>
   </div>
