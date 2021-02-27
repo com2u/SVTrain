@@ -131,6 +131,7 @@
               <file
                 v-else
                 class="folder"
+                v-bind:class="{'text-primary': !file.name}"
                 v-bind:file="file"
                 :icon-name="file.name ? null: 'arrow-alt-circle-left'"
                 v-on:click.native="goToTheFolder(file)">
