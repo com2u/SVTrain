@@ -3,9 +3,9 @@ FROM node:12-alpine AS frontend-build
 WORKDIR /build
 COPY ./client/package.json /build/
 COPY ./client/yarn.lock /build/
-RUN yarn install
+RUN yarn install --frozen-lockfile
 COPY ./client /build/
-RUN npm run build
+RUN yarn build
 
 FROM node:12-alpine
 
@@ -38,4 +38,4 @@ RUN echo '{}' > /app/roles.json
 RUN echo '{}' > /app/sessions.json
 RUN echo '{}' > /app/users.json
 
-ENTRYPOINT [ "npm", "start" ]
+ENTRYPOINT [ "yarn", "start" ]
