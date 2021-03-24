@@ -14,6 +14,7 @@ const getters = {
   canSeeMoveMenu: (state) => getPermissions(state) && state.app.user.permissions.moveMenu,
   canSeeConfusionMatrix: (state) => getPermissions(state) && state.app.user.permissions.showConfusionMatrix,
   editConfigUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigUI,
+  editConfigAI: (state) => getPermissions(state) && state.app.user.permissions.editConfigAI,
   currentWs: (state) => {
     const { wsPath, root } = state.app.config
     return wsPath ? wsPath.substring(root.length) : 'Root'

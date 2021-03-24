@@ -164,22 +164,6 @@ export default {
           },
         },
         {
-          label: 'Default epoch',
-          field: 'defaultEpoch',
-          type: types.NUMBER,
-          options: {
-            help: 'A default setting for the training mechanism.',
-          },
-        },
-        {
-          label: 'Default learning rate',
-          field: 'defaultLearningRate',
-          type: types.NUMBER,
-          options: {
-            help: 'A default setting for the training mechanism.',
-          },
-        },
-        {
           label: 'Forward location',
           field: 'forwardLocation',
           type: types.SELECT,

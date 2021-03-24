@@ -7,27 +7,17 @@
     </div>
     <div class="cmd-main-menu">
       <div>Workspace: <strong>{{ currentWs}}</strong></div>
-      <div>
-        Running status:
-        <strong>
-          <template v-if="running !== null">
-            {{ running ? `${running}%` : 'idle' }}
-          </template>
-          <template v-else>
-            no info
-          </template>
-        </strong>
-      </div>
+      <div v-if="running !== null" v-html="running || 'idle'"></div>
+      <b v-else>no info</b>
       <div v-for="command in commands" :key="command.value" class="cmd">
         <b-button
           class="svtrain-cmd-btn"
           :class="command.value === 'stop' ? 'btn-stop-command' : 'btn-command'"
           v-bind:disabled="!!isLoading[command.value] || command.value === 'stop' && !running || command.value !== 'stop' && !!running"
-          v-on:click="runCommand(command.value)">
+          v-on:click="runCommand(command.value, workspace)">
           <v-icon v-bind:name="command.value === 'stop' ? 'stop' : 'play'"/>
-          {{command.label}}
+          <span class="ml-2">{{command.label}}</span>
         </b-button>
-
         <span v-if="isLoading[command.value]">Running...</span>
         <pre
           style="padding-left: 10px"
@@ -37,6 +27,7 @@
           v-html="logs[command.value].lastLine"/>
         <div style="clear: both"/>
       </div>
+      <pre class="py-4" v-html="logs.test.lastLine"></pre>
     </div>
   </div>
 </template>
@@ -50,11 +41,11 @@ export default {
     return {
       commands: [
         {
-          value: 'test',
+          value: 'script_test',
           label: 'Run test batch',
         },
         {
-          value: 'stop',
+          value: 'script_stop_test',
           label: 'Stop running test',
         },
       ],

@@ -16,13 +16,10 @@
   "forwardOnly": true,
   "buttonFontSize": "1rem",
   "titleFontSize": "1rem",
-  "defaultEpoch": 1,
-  "defaultLearningRate": 1,
   "forwardLocaltion": "right",
   "moveMenu": false,
   "newFolder": true,
   "newWorkspace": true,
-
   "showNavigationIcon": true,
   "imageFit": "fit",
   "imageViewer": true

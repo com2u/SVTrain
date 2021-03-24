@@ -5,18 +5,41 @@ const fs = require('fs')
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i)
 const readLastLines = require('read-last-lines')
 
+async function getLogNames(path) {
+  let data = {
+    "training": Env.get('PATH_LOG_TRAINING'),
+    "test": Env.get('PATH_LOG_TEST'),
+    "validate": Env.get('PATH_LOG_VALIDATE'),
+    "export_model": Env.get('OUT_FILE_EXPORT_MODEL'),
+    "export_results": Env.get('OUT_FILE_EXPORT_RESULTS'),
+    "export_images": Env.get('OUT_FOLDER_EXPORT_IMAGES')
+  };
+  try {
+    if (fs.existsSync(`${path}/TFSettings.json`)) {
+      const fileContent = fs.readFileSync(`${path}/TFSettings.json`, 'utf-8');
+      const jData = JSON.parse(fileContent);
+      data["training"] = jData["path_log_training"] || Env.get('PATH_LOG_TRAINING')
+      data["test"] = jData["path_log_test"] || Env.get('PATH_LOG_TEST')
+      data["validate"] = jData["path_log_validate"] || Env.get('PATH_LOG_VALIDATE')
+      data["export_model"] = jData["path_field_export_model"] || Env.get('OUT_FILE_EXPORT_MODEL')
+      data["export_results"] = jData["path_field_export_results"] || Env.get('OUT_FILE_EXPORT_RESULTS')
+      data["export_images"] = jData["path_field_export_images"] || Env.get('OUT_FOLDER_EXPORT_IMAGES')
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return data;
+}
+
 module.exports = class Watcher {
   constructor() {
-
     this.folders = {}
-
   }
 
   subscribeForFolder(path, id, socket) {
     // delete from previous pathes
     Object.keys(this.folders).map( path => {
       if ( this.folders[path][id] && Date.now() - this.folders[path][id].subscribedTime > 1000 ) {
-        // console.log(`socket ${id} deleted from ${path}`)
         delete this.folders[path][id]
       }
     })
@@ -36,18 +59,27 @@ module.exports = class Watcher {
     })
   }
 
+  getSocket(id) {
+    for (let i = 0; i < Object.keys(this.folders).length; i++) {
+      if ( this.folders[Object.keys(this.folders)[i]][id] ) {
+        return this.folders[Object.keys(this.folders)[i]][id]
+      }
+    }
+    return null
+  }
+
   changedRunningLock (type, pathname) {
     const object = {}
     object.event = type === 'add' || type === 'change' ? 'change' : 'unlink'
     if (object.event === 'change') {
       object.content = fs.readFileSync(pathname).toString()
     }
-    if (!this.folders['running.lock']) return
-    Object.keys(this.folders['running.lock']).map( socketid => {
-      console.log(`${socketid} emit event running.lock with`, object)
-      this.folders['running.lock'][socketid].emit(`folder_running.lock`, object)
+    if (!this.folders['lock.txt']) return
+    Object.keys(this.folders['lock.txt']).map( socketid => {
+      this.folders['lock.txt'][socketid].emit(`lock.txt`, object)
     })
   }
+
   changedWorkspace (type, pathname) {
     const object = {}
     object.event = type === 'add' || type === 'change' ? 'change' : 'unlink'
@@ -56,8 +88,7 @@ module.exports = class Watcher {
     }
     if (!this.folders['workspace.bat']) return
     Object.keys(this.folders['workspace.bat']).map( socketid => {
-      console.log(`${socketid} emit event workspace.bat with`, object)
-      this.folders['workspace.bat'][socketid].emit(`folder_workspace.bat`, object)
+      this.folders['workspace.bat'][socketid].emit(`workspace.bat`, object)
     })
   }
 
@@ -66,29 +97,23 @@ module.exports = class Watcher {
       lastLine: '',
       pathname
     }
-    if (!this.folders['running.lock']) return
+    if (!this.folders['lock.txt']) return
     if (type !== 'change' && type !== 'add') return;
     object.lastLine = await readLastLines.read(pathname, 2)
-    Object.keys(this.folders['running.lock']).map( socketid => {
-      this.folders['running.lock'][socketid].emit(`logfile`, object)
+    Object.keys(this.folders['lock.txt']).map( socketid => {
+      this.folders['lock.txt'][socketid].emit(`logfile`, object)
     })
   }
 
   fireChange(type) {
     const self = this
     return pathname => {
-      if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'running.lock')) === path.normalize(pathname)) {
+      if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'lock.txt')) === path.normalize(pathname)) {
         return this.changedRunningLock(type, pathname)
       }
       if (path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat')) === path.normalize(pathname)) {
         return this.changedWorkspace(type, pathname)
       }
-      // const batFiles = ['train', 'test', 'validate', 'export', 'ExportImages', 'stop']
-      // const normalizeBatFiles = batFiles.map(f => path.normalize(path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`)))
-      // if (normalizeBatFiles.includes(path.normalize(pathname))) {
-        // return this.changeBatFileLog(type, pathname)
-      // }
-      console.log(`Event ${type} fired on file ${pathname}`)
 
       const file = path.parse(pathname)
       let dir = file.dir
@@ -147,7 +172,6 @@ module.exports = class Watcher {
       }
     )
     if (!isChildOf(Env.get('COMMAND_FILES_PATH'), Env.get('ROOT_PATH'))) {
-      console.log('Add command files for watching')
       this.watcher.add(Env.get('COMMAND_FILES_PATH'))
     }
 
@@ -160,32 +184,44 @@ module.exports = class Watcher {
       console.log('Watcher is ready to send events')
     })
 
-    const updateLogList = [
-      'train',
-      'test',
-      'validate',
-      'export',
-      'ExportImages',
-      'stop'
-    ]
-    let interval = setInterval(async () => {
-      if (!this.folders['running.lock']) return
-
-      let lastLines = await Promise.all(updateLogList.map(async fileType => {
+    let logNames = {}
+    setInterval(async () => {
+      const wsPath = path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat')
+      const currentWS = fs.existsSync(wsPath) ? fs.readFileSync(wsPath).toString() : null
+      if (currentWS) {
+        logNames = await getLogNames(currentWS)
+      }
+      if (!this.folders['lock.txt']) return
+      let lastLines = await Promise.all(['training', 'test', 'validate'].map(async name => {
         let line = null
         try {
-          line = await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), `${fileType}.log`), 2)
+          line = await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), logNames[name]), 2)
         } catch(e) {
           return null
         }
         return {
-          file: fileType,
+          file: name,
           lastLine: line
         }
       }))
-      lastLines = lastLines.filter(o => o !== null)
-      Object.keys(this.folders['running.lock']).map( socketid => {
-        this.folders['running.lock'][socketid].emit(`logfile`, lastLines)
+      let exports = {
+        export_model: null,
+        export_results: null,
+        export_images: null
+      }
+      for (const fileName of Object.keys(exports)) {
+        if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]))) {
+          exports[fileName] = logNames[fileName]
+        } else {
+          exports[fileName] = null
+        }
+      }
+
+      Object.keys(this.folders['lock.txt']).map( socketid => {
+        this.folders['lock.txt'][socketid].emit(`logfile`, lastLines)
+      })
+      Object.keys(this.folders['lock.txt']).map( socketid => {
+        this.folders['lock.txt'][socketid].emit(`exportFile`, exports)
       })
     }, 1000)
   }

@@ -92,8 +92,11 @@ export default {
       },
       deep: true,
     },
-    value() {
-      this.term = this.value
+    value: {
+      handler() {
+        this.term = this.value
+      },
+      deep: true,
     },
   },
   methods: {

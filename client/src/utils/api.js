@@ -40,7 +40,11 @@ export default {
   getNextFolders: async (path) => (await axios.get(urls.getNextFolders(path))).data,
   getStatistic: async (path) => (await axios.get(urls.getStatistic(path))).data,
   getRunningState: async () => (await axios.get(urls.getRunningState)).data,
-  runCommand: async (command) => (await axios.get(urls.runCommand(command))).data,
+  runCommand: async (command, ws) => (await axios.get(urls.runCommand(command), {
+    params: {
+      ws,
+    },
+  })).data,
   // files array like ["/path/to/file1", "/path/to/file2"]
   deleteFiles: async (files) => (await axios.post(urls.deleteFiles, { files })).data,
   // files array like [{ file: "/path/to/file", moveTo: "/path/to/folder" }]
@@ -49,13 +53,10 @@ export default {
     destination,
   })).data,
   calculateStatistic: async () => (await axios.get(urls.calculateStatistic)).data,
-  saveFile: async (path, data) => {
-    console.log(path, data)
-    return (await axios.post(urls.saveFile, {
-      path,
-      data,
-    })).data
-  },
+  saveFile: async (path, data) => (await axios.post(urls.saveFile, {
+    path,
+    data,
+  })).data,
   checkFolder: async (path) => (await axios.get(urls.checkFolder(path))).data,
   getSubfolders: async (folder) => (await axios.get(urls.getSubfolders(folder))).data,
   createFolder: async (folder, name) => (await axios.post(urls.createFolder, {

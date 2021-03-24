@@ -41,10 +41,23 @@ const FTYPES = {
 
 const CONST_PATHS = {
   root: Env.get('ROOT_PATH'),
-  running: 'running.lock',
+  running: 'lock.txt',
   workspace: 'workspace.bat',
   commands: Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning')),
-  commandNames: ['train', 'validate', 'test', 'export', 'stop', 'ExportImages'],
+  // commandNames: ['train', 'validate', 'test', 'export', 'stop', 'ExportImages'],
+  commandNames: {
+    script_training: "SCRIPT_TRAINING",
+    script_test: "SCRIPT_TEST",
+    script_validate: "SCRIPT_VALIDATE",
+    script_stop_training: "SCRIPT_STOP_TEST",
+    script_stop_test: "SCRIPT_STOP_TRAINING",
+    script_stop_validate: "SCRIPT_STOP_VALIDATE",
+    script_export_model: "SCRIPT_EXPORT_MODEL",
+    script_export_result: "SCRIPT_EXPORT_RESULT",
+    script_export_image: "SCRIPT_EXPORT_IMAGE",
+    script_report: "SCRIPT_REPORT",
+    script_split_data: "SCRIPT_SPLIT_DATA"
+  },
   ignoreFiles: ['.DS_Store']
 };
 
@@ -568,14 +581,15 @@ class ExplorerController {
   */
   async command({request}) {
     const command = request.params.name;
-    const commandsPath = CONST_PATHS.commands;
-
-    if (!CONST_PATHS.commandNames.includes(command)) {
+    if (!CONST_PATHS.commandNames[command]) {
       console.log(`Unknow command ${command}`);
       throw new Error(`Unknow command ${command}`);
     }
-
-    const commandFilePath = path.join(commandsPath, command + '.bat');
+    const {ws} = request.get();
+    const configPath = path.join(ws, '/TFSettings.json');
+    const cfg = await this.getJsonConfig(configPath);
+    const cmdName = cfg[command] || Env.get(CONST_PATHS.commandNames[command])
+    const commandFilePath = path.join(Env.get('COMMAND_FILES_PATH'), cmdName);
     if (!fs.existsSync(commandFilePath)) {
       console.log(`File ${commandFilePath} doesn't exist`);
       throw new Error(`File ${commandFilePath} doesn't exist`);
@@ -699,33 +713,52 @@ class ExplorerController {
   }
 
   async getLastLogs() {
+    const logs = {
+      training: {},
+      test: {},
+      validate: {},
+      export_model: null,
+      export_results: null,
+      export_images: null
+    };
     try {
-      const logs = {
-        train: {},
-        test: {},
-        validate: {},
-        export: {},
-        stop: {},
-        ExportImages: {}
-      };
-      Object.keys(logs).forEach(f => {
-        let filePath = path.join(Env.get('COMMAND_FILES_PATH'), `${f}.log`);
-        logs[f].path = filePath;
-        logs[f].lastLine = '';
-      });
+      const ws = await this.getWorkspace();
+      const wsPath = ws.toString();
+      const configPath = path.join(wsPath, 'TFSettings.json');
+      const cfg = await this.getJsonConfig(configPath);
 
-      await Promise.all(Object.keys(logs).map(async fileName => {
+      let logNames = {
+        "training": cfg["path_log_test"] || Env.get('PATH_LOG_TEST'),
+        "test": cfg["path_log_training"] || Env.get('PATH_LOG_TRAINING'),
+        "validate": cfg["path_log_validate"] || Env.get('PATH_LOG_VALIDATE'),
+      };
+      let exportNames = {
+        export_model: cfg["path_field_export_model"] || Env.get('OUT_FILE_EXPORT_MODEL'),
+        export_results: cfg["path_field_export_results"] || Env.get('OUT_FILE_EXPORT_RESULTS'),
+        export_images: cfg["path_field_export_images"] || Env.get('OUT_FOLDER_EXPORT_IMAGES')
+      }
+      await Promise.all(['training', 'test', 'validate'].map(async fileName => {
         let lastLine = '';
         try {
-          lastLine = (await readLastLines.read(logs[fileName].path, 2));
+          lastLine = (await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]), 2));
         } catch (e) {
         }
-        logs[fileName].lastLine = lastLine;
+        logs[fileName] = {
+          path: path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]),
+          lastLine
+        }
       }));
-
+      await Promise.all(['export_model', 'export_results', 'export_images'].map(async fileName => {
+        if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), exportNames[fileName]))) {
+          logs[fileName] = exportNames[fileName]
+        } else {
+          logs[fileName] = null
+        }
+      }));
       return logs;
     } catch (e) {
       console.log(e);
+      return logs;
     }
   }
 
