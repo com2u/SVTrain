@@ -14,7 +14,7 @@
       :base-zoomer-options="options"
     />
     <div v-else class="mb-4 inline-round-zoomer-base-container">
-      <img :src="file.serverPath" class="responsive-image" alt="">
+      <img v-auth-image="file.serverPath" class="responsive-image" alt="">
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>

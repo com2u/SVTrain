@@ -1,8 +1,6 @@
 'use strict';
 const Env = use('Env');
 const Drive = use('Drive');
-const { promisify } = require('util');
-const fs = require('fs');
 
 
 const rootPath = Env.get('ROOT_PATH');
