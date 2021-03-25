@@ -65,10 +65,9 @@ export default {
         return
       }
 
-      let data = null
       try {
         this.loading = true
-        data = await api.login(this.userLogin, this.userPassword)
+        const data = await api.login(this.userLogin, this.userPassword)
         localStorage.setItem('sessionToken', data.sessionToken)
         localStorage.setItem('sessionUser', data.login)
         // this.$store.dispatch('app/setUser', data.login);
