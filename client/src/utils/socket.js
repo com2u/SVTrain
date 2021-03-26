@@ -1,12 +1,13 @@
+import { isProduction } from '@/utils/index'
 import Ws from '@adonisjs/websocket-client'
 
 export default {
   async init() {
     return new Promise((resolve, reject) => {
-      this.ws = Ws(null, { query: { sessionToken: localStorage.getItem('sessionToken') } })
+      this.ws = Ws(isProduction() ? '' : 'ws://127.0.0.1:3333', { query: { sessionToken: localStorage.getItem('sessionToken') } })
       this.ws.connect()
       this.ws.on('open', () => {
-        console.log('Connect open')
+        console.log('Connect opened')
         this.explorer = this.ws.subscribe('explorer')
         this.listeners = {}
         this.explorer.on('ready', () => {
@@ -29,7 +30,6 @@ export default {
   },
 
   subscibeForFolder(path, callback) {
-    console.log(`Subcribe for folder ${path}`)
     if (this.explorer) {
       this.explorer.emit('subscribeForFolder', { path })
       this.explorer.on(`folder_${path}`, callback)
@@ -47,6 +47,7 @@ export default {
       this.listeners[channel] = callback
     }
   },
+
   unsubscribe(channel, callback) {
     if (this.explorer) {
       this.explorer.off(channel, callback)
@@ -57,7 +58,6 @@ export default {
   },
 
   unsubscribeForFolder(path) {
-    console.log(`Unsibscribe for folder ${path}`)
     try {
       this.explorer.off(`folder_${path}`, this.listeners[path])
     } catch (e) {

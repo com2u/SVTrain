@@ -20,7 +20,8 @@
     "editConfigUI": true,
     "showExplorerNotes": true,
     "editConfigUI": false,
-    "leaveWorkspace": false
+    "leaveWorkspace": false,
+    "editConfigAI": false
   },
   "operator": {
     "editConfig": false,
@@ -38,6 +39,7 @@
       "*"
     ],
     "editConfigUI": false,
-    "leaveWorkspace": false
+    "leaveWorkspace": false,
+    "editConfigAI": false
   }
 }
