@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     convertURIPath(p) {
-      return p.replace('#', '{hash_tag}')
+      return p.replaceAll('#', '{hash_tag}')
     },
   },
 }

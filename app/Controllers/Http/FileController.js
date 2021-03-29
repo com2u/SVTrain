@@ -9,7 +9,7 @@ const scriptPath = Env.get('COMMAND_FILES_PATH');
 
 class FileController {
   async download({ request, params, response }) {
-    params.filePath = params.filePath.map(x => x.replace("%7Bhash_tag%7D", "#"))
+    params.filePath = params.filePath.map(x => x.replaceAll("%7Bhash_tag%7D", "#"))
     const { is_export, sessionToken, field } = request.get()
     if (is_export) {
       const fullPath = `${scriptPath}/${params.filePath.join('/')}`
