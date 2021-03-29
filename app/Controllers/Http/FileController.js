@@ -7,10 +7,16 @@ const Watcher = use('Watcher')
 const rootPath = Env.get('ROOT_PATH');
 const scriptPath = Env.get('COMMAND_FILES_PATH');
 
+String.prototype.replaceAll = function (str1, str2, ignore) {
+  return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
+}
+
 class FileController {
-  async download({ request, params, response }) {
-    params.filePath = params.filePath.map(x => x.replaceAll("%7Bhash_tag%7D", "#"))
-    const { is_export, sessionToken, field } = request.get()
+  async download({request, params, response}) {
+    params.filePath = params.filePath.filter(x => Boolean(x)).map(x => {
+      return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
+    })
+    const {is_export, sessionToken, field} = request.get()
     if (is_export) {
       const fullPath = `${scriptPath}/${params.filePath.join('/')}`
       if (fs.existsSync(fullPath)) {
@@ -21,9 +27,9 @@ class FileController {
           } else {
             const output = fs.createWriteStream(zipFilePath);
             const archive = archiver('zip', {
-              zlib: { level: 9 }
+              zlib: {level: 9}
             });
-            output.on('close', function() {
+            output.on('close', function () {
               const socket = Watcher.getSocket(sessionToken)
               if (socket) {
                 socket.emit('zipDone', {
@@ -46,7 +52,7 @@ class FileController {
       const isExist = await Drive.exists(filePath);
       if (isExist) {
         return response.download(`${rootPath}/${filePath}`);
-      } else if (new RegExp("TFSettings.json"+"$").test(filePath)) {
+      } else if (new RegExp("TFSettings.json" + "$").test(filePath)) {
         return response.json({
           "script_training": Env.get("SCRIPT_TRAINING"),
           "script_test": Env.get('SCRIPT_TEST'),
