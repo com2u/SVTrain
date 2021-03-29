@@ -16,10 +16,10 @@
       <div v-for="command in commands" :key="command.value" class="cmd">
         <b-button
           class="svtrain-cmd-btn"
-          :class="command.value === 'stop' ? 'btn-stop-command' : 'btn-command'"
-          v-bind:disabled="!!isLoading[command.value] || command.value === 'stop' && !running || command.value !== 'stop' && !!running"
+          :class="command.value === 'script_stop_training' ? 'btn-stop-command' : 'btn-command'"
+          v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_training' && !running || command.value !== 'script_stop_training' && !!running"
           v-on:click="runCommand(command.value, workspace)">
-          <v-icon v-bind:name="command.value === 'stop' ? 'stop' : 'play'"/>
+          <v-icon v-bind:name="command.value === 'script_stop_training' ? 'stop' : 'play'"/>
           <span class="ml-2">{{command.label}}</span>
         </b-button>
         <span v-if="isLoading[command.value]">Running...</span>
