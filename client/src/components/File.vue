@@ -12,10 +12,7 @@
         <template v-if="file.type === 'file'">
           <template v-if="file.image">
             <div>
-              <img
-                v-auth-image="file.serverPath"
-                class="file-explorer-preview"
-                alt=""
+              <img :src="convertURIPath(file.serverPath)" class="file-explorer-preview" alt=""
                 :class="imageFit === 'fit' ? 'image-fit' : 'image-fill'"
                 v-bind:style="{width: size.width - 15 + 'px', height: size.height - 15 + 'px' }">
             </div>
@@ -83,6 +80,11 @@ export default {
         marginBottom: `${this.imageSpacing}px`,
         marginRight: `${this.imageSpacing}px`,
       }
+    },
+  },
+  methods: {
+    convertURIPath(p) {
+      return p.replace('#', '{hash_tag}')
     },
   },
 }
