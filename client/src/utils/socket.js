@@ -58,13 +58,15 @@ export default {
   },
 
   unsubscribeForFolder(path) {
-    try {
-      this.explorer.off(`folder_${path}`, this.listeners[path])
-    } catch (e) {
-      console.log('error on adonis ws client: ', e)
-    }
-    if (this.listeners) {
-      delete this.listeners[path]
+    if (this.listeners[path]) {
+      try {
+        this.explorer.off(`folder_${path}`, this.listeners[path])
+      } catch (e) {
+        console.log('error on adonis ws client: ', e)
+      }
+      if (this.listeners) {
+        delete this.listeners[path]
+      }
     }
   },
 

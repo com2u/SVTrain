@@ -75,7 +75,6 @@
           <div v-else>
             (select one or more files for show control buttons)
           </div>
-
         </div>
         <div v-if="systemConfig.forwardLocation === 'right'" class="right-side-section">
           <div class="pagination-group">
@@ -119,7 +118,7 @@
       <template v-slot:main>
         <div class="mb-2 d-flex flex-column">
           <div><strong>{{relativeDir}}</strong></div>
-          <div class="list-folders">
+          <div v-if="!['defectclass', 'batch', 'ws'].includes(type)" class="list-folders">
             <div class="list-folder-item" v-for="file in folder.folders" :key="file.path">
               <file
                 v-if="file.shortcut"
@@ -241,6 +240,7 @@ function preventDefaultScrolling(e) {
 export default {
   props: [
     'dir',
+    'type',
   ],
   components: {
     File,
@@ -718,11 +718,9 @@ export default {
       this.selectedFiles = []
 
       // load data
-      const content = await api.getFiles(path)
-
+      const content = await api.getFiles(path, null, this.type, this.$route.query.batch)
       // prepare files
       this.folder.files = content.files.map((f) => {
-        f.type = 'file'
         f.selected = false
         f.serverPath = this.staticServer + f.relativePath
         f.cursor = false
@@ -750,7 +748,6 @@ export default {
       // prepare folders
       let previousLetter = '-'
       this.folder.folders = content.folders.map((f) => {
-        f.type = 'folder'
         f.selected = false
         const lowerName = f.name.toLowerCase()
         const firstLetter = lowerName.substring(0, 1)
@@ -762,16 +759,16 @@ export default {
       })
 
       // add parent dir to folder list
-      const parentDir = await api.getParent(path)
+      const parentDir = await api.getParent(path, this.type, this.$route.query.batch)
       if (parentDir.access) {
         this.folder.folders.unshift({
           path: parentDir.path,
-          type: 'folder',
+          type: parentDir.type,
         })
       }
 
       // prepare next folder for move
-      this.nextFolders = await api.getNextFolders(path)
+      this.nextFolders = await api.getNextFolders(path, this.type, this.$route.query.ws)
 
       // prepare to show page
       if (!this.page) {
@@ -840,7 +837,8 @@ export default {
       const selected = this.selectedFiles.map((f) => f.path)
       const notSelected = this.screenFiles.filter((f) => !selected.includes(f.path) && f.image)
         .map((f) => f.path)
-      await api.doForwardOnly(selected, notSelected)
+      const { type, batch } = this.$route.query
+      await api.doForwardOnly(selected, notSelected, type, batch)
       await this.loadFiles(this.path)
     },
     async goToTheFolder(file) {
@@ -861,13 +859,18 @@ export default {
       }
       await this.$router.push({
         name: 'explorer',
-        query: { dir: file.path },
+        query: {
+          dir: file.path,
+          type: file.type,
+          batch: file.batch,
+        },
       })
     },
     async deleteFiles() {
       if (this.selectedFiles.length === 0) return
       this.isLoading.deleting = true
-      await api.deleteFiles(this.selectedFiles.map((f) => f.path))
+      const { type, batch } = this.$route.query
+      await api.deleteFiles(this.selectedFiles.map((f) => f.path), type, batch)
       this.isLoading.deleting = false
       // delete that files from folder
       await this.loadFiles(this.path)
@@ -876,7 +879,7 @@ export default {
       if (this.selectedFiles.length === 0) return
       if (this.nextFolders.length === 0) return
       this.isLoading.moving = true
-      await api.moveFiles(this.selectedFiles.map((f) => f.path), dest)
+      await api.moveFiles(this.selectedFiles.map((f) => f.path), dest, this.type)
       this.isLoading.moving = false
       // move files
       await this.loadFiles(this.path)
@@ -1148,6 +1151,7 @@ export default {
     font-size: 12px;
     padding: 1px;
     display: inline-block;
+    word-break: break-word;
 
     &.matched {
       background: #a0fcac;

@@ -15,6 +15,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@adonisjs/ace": "5.0.8",
     "@adonisjs/auth": "^3.0.7",
     "@adonisjs/bodyparser": "^2.0.5",
     "@adonisjs/cors": "^1.0.7",
@@ -33,7 +34,7 @@
     "password-hash": "^1.2.2",
     "read-last-lines": "^1.7.1",
     "recursive-readdir": "^2.2.2",
-    "sqlite3": "^4.2.0",
+    "sqlite3": "^5.0.2",
     "static-server": "^2.2.1",
     "uuid": "^3.3.2",
     "uuid4": "^1.1.4"

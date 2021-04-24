@@ -80,6 +80,15 @@
               </g>
             </svg>
           </span>
+          <span v-if="canSyncDB" class="icon-wrapper">
+            <b-icon
+              :animation="DBSyncing ? 'fade': undefined"
+              :class="info.isDB ? 'gray-icon' : 'clickable-icon'"
+              icon="shuffle"
+              font-scale="1.5"
+              @click="syncDB"
+            />
+          </span>
           <span class="icon-wrapper">
             <b-icon
               :class="info.config && canEditConfig ? 'clickable-icon': 'gray-icon'"
@@ -99,6 +108,7 @@
         :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
         :show-sub-folder-progress="showSubFolderProgress"
+        @select-workspace="$emit('select-workspace', $event)"
       />
       <div
         class="new-ws"
@@ -116,6 +126,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import api from '@/utils/api'
 import EventBus from '../utils/eventbus'
 
 export default {
@@ -142,6 +153,7 @@ export default {
     return {
       showChildren: false,
       loadingChildren: false,
+      DBSyncing: false,
     }
   },
   computed: {
@@ -177,6 +189,7 @@ export default {
       'subFolderFontSize',
       'newWorkspace',
       'canSeeConfusionMatrix',
+      'canSyncDB',
     ]),
   },
   methods: {
@@ -207,12 +220,20 @@ export default {
       }
     },
     setWorkspace() {
-      if (!this.depth) {
-        this.$emit('select-workspace')
+      if (['ws', 'batch'].includes(this.info.type)) return
+      if (!this.depth || this.info.type === 'defectclass') {
+        this.$emit('select-workspace', this.info.type === 'defectclass' ? {
+          name: 'explorer',
+          query: {
+            dir: this.info.path, type: this.info.type, batch: this.info.batch, ws: this.info.ws,
+          },
+        } : undefined)
       } else {
         this.$router.push({
           name: 'explorer',
-          query: { dir: this.info.path },
+          query: {
+            dir: this.info.path, type: this.info.type, batch: this.info.batch, ws: this.info.ws,
+          },
         })
       }
     },
@@ -229,6 +250,14 @@ export default {
         EventBus.$emit('show-confusion-matrix', this.info.path)
       }
     },
+    async syncDB() {
+      this.DBSyncing = true
+      const { status } = await api.syncDB(this.info.name)
+      if (status) {
+        this.$emit('sync-done')
+      }
+      this.DBSyncing = false
+    },
   },
   mounted() {
     if (this.$store.state.app.expanded.includes(this.info.path)) {
@@ -237,3 +266,17 @@ export default {
   },
 }
 </script>
+<style>
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.b-icon-animation-fade {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>

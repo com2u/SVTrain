@@ -7,15 +7,15 @@ const developmentUrl = 'http://localhost:3333/api/'
 const baseurl = isProduction() ? productionUrl : developmentUrl
 
 const urls = {
-  getFiles: (dir, to) => `${baseurl}getFiles?dir=${dir}&to=${to || ''}`,
+  getFiles: `${baseurl}getFiles`,
   getRunningState: `${baseurl}getState`,
   getStatistic: (dir) => `${baseurl}getStatistic?dir=${dir}`,
-  getNextFolders: (dir) => `${baseurl}nextDirectories?dir=${dir}`,
+  getNextFolders: `${baseurl}nextDirectories`,
   runCommand: (c) => `${baseurl}runCommand/${c}`,
   calculateStatistic: `${baseurl}calculateStatistic`,
   moveFiles: `${baseurl}moveFiles`,
   deleteFiles: `${baseurl}deleteFiles`,
-  getParentDirectory: (dir) => `${baseurl}getParent?dir=${dir}`,
+  getParentDirectory: `${baseurl}getParent`,
   saveFile: `${baseurl}saveFile`,
   checkFolder: (folder) => `${baseurl}checkFolder?folder=${folder}`,
   getSubfolders: (folder) => `${baseurl}getSubfolders?folder=${folder}`,
@@ -31,13 +31,31 @@ const urls = {
   saveConfig: `${baseurl}save-config`,
   listStatistics: `${baseurl}list-statistics`,
   confusionMatrix: `${baseurl}fetch-confusion-matrix`,
-  getFoldersByPath: (dir) => (dir ? `${baseurl}get-folders?dir=${dir}` : `${baseurl}get-folders`),
+  syncDB: `${baseurl}convert-to-database`,
+  getFoldersByPath: `${baseurl}get-folders`,
 }
 
 export default {
-  getFiles: async (path, to) => (await axios.get(urls.getFiles(path || '', to))).data,
-  getParent: async (path) => (await axios.get(urls.getParentDirectory(path))).data,
-  getNextFolders: async (path) => (await axios.get(urls.getNextFolders(path))).data,
+  getFiles: async (path, to, type, batch) => (await axios.get(urls.getFiles, {
+    params: {
+      dir: path,
+      to,
+      type,
+      batch,
+    },
+  })).data,
+  getParent: async (path, type, batch) => (await axios.get(urls.getParentDirectory, {
+    params: {
+      dir: path,
+      type,
+      batch,
+    },
+  })).data,
+  getNextFolders: async (dir, type, ws) => (await axios.get(urls.getNextFolders, {
+    params: {
+      dir, type, ws,
+    },
+  })).data,
   getStatistic: async (path) => (await axios.get(urls.getStatistic(path))).data,
   getRunningState: async () => (await axios.get(urls.getRunningState)).data,
   runCommand: async (command, ws) => (await axios.get(urls.runCommand(command), {
@@ -46,11 +64,19 @@ export default {
     },
   })).data,
   // files array like ["/path/to/file1", "/path/to/file2"]
-  deleteFiles: async (files) => (await axios.post(urls.deleteFiles, { files })).data,
+  deleteFiles: async (files, type, batch) => (await axios.post(urls.deleteFiles, { files }, {
+    params: {
+      type, batch,
+    },
+  })).data,
   // files array like [{ file: "/path/to/file", moveTo: "/path/to/folder" }]
-  moveFiles: async (files, destination) => (await axios.post(urls.moveFiles, {
+  moveFiles: async (files, destination, type) => (await axios.post(urls.moveFiles, {
     files,
     destination,
+  }, {
+    params: {
+      type,
+    },
   })).data,
   calculateStatistic: async () => (await axios.get(urls.calculateStatistic)).data,
   saveFile: async (path, data) => (await axios.post(urls.saveFile, {
@@ -64,7 +90,7 @@ export default {
     name,
   })).data,
   getWorkspace: async () => (await axios.get(urls.getWorkspace)).data,
-  setWorkspace: async (workspace) => (await axios.post(urls.setWorkspace, { workspace })).data,
+  setWorkspace: async (workspace, isDB) => (await axios.post(urls.setWorkspace, { workspace, isDB })).data,
   getLastLogs: async () => (await axios.get(urls.getLastLogs)).data,
   login: async (login, password) => {
     let response = null
@@ -86,11 +112,19 @@ export default {
   setSessionToken: (token) => {
     axios.defaults.headers.common.Authorization = token
   },
-  getConfig: async () => (await axios.get(urls.getConfig)).data,
-  getExplorerConfig: async (dir) => (await axios.get(urls.getExplorerConfig, { params: { dir } })).data,
-  doForwardOnly: async (selectedFiles, notSelectedFiles) => (await axios.post(urls.forwardOnly, {
+  getConfig: async (isDB) => (await axios.get(urls.getConfig, {
+    params: {
+      isDB,
+    },
+  })).data,
+  getExplorerConfig: async (dir, type) => (await axios.get(urls.getExplorerConfig, { params: { dir, type } })).data,
+  doForwardOnly: async (selectedFiles, notSelectedFiles, type, batch) => (await axios.post(urls.forwardOnly, {
     selectedFiles,
     notSelectedFiles,
+  }, {
+    params: {
+      type, batch,
+    },
   })).data,
   saveNotes: async (path, notes, highlight) => (await axios.post(urls.saveNotes, {
     path,
@@ -101,13 +135,20 @@ export default {
     path,
     config,
   })).data,
-  getFoldersByPath: async (dir = null) => (await axios.get(urls.getFoldersByPath(dir))).data,
+  getFoldersByPath: async (dir, type, ws) => (await axios.get(urls.getFoldersByPath, {
+    params: {
+      dir, type, ws,
+    },
+  })).data,
   listStatistics: async (dirs = []) => (await axios.post(urls.listStatistics, {
     dirs,
   })).data,
   fetchConfusionMatrix: async (left, right) => (await axios.post(urls.confusionMatrix, {
     left,
     right,
+  })).data,
+  syncDB: async (wsName) => (await axios.post(urls.syncDB, {
+    wsName,
   })).data,
 }
 

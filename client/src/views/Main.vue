@@ -109,8 +109,7 @@ export default {
       console.log('Running status:', runstatus)
     },
     async checkWorkspace() {
-      const workspace = await api.getWorkspace()
-      this.workspace = workspace
+      this.workspace = await api.getWorkspace()
       console.log(`Workspace: ${this.workspace}`)
     },
     async runCommand(command) {

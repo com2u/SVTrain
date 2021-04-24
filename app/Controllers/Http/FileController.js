@@ -1,4 +1,5 @@
 'use strict';
+const path = require('path');
 const Env = use('Env');
 const Drive = use('Drive');
 const fs = require('fs');
@@ -6,6 +7,7 @@ const archiver = require('archiver');
 const Watcher = use('Watcher')
 const rootPath = Env.get('ROOT_PATH');
 const scriptPath = Env.get('COMMAND_FILES_PATH');
+const storagePath = Env.get('STORAGE_PATH');
 
 String.prototype.replaceAll = function (str1, str2, ignore) {
   return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
@@ -50,8 +52,11 @@ class FileController {
     } else {
       const filePath = decodeURI(params.filePath.join('/'));
       const isExist = await Drive.exists(filePath);
+      const storageImagePath = path.join(storagePath, filePath)
       if (isExist) {
         return response.download(`${rootPath}/${filePath}`);
+      } else if (fs.existsSync(storageImagePath)) {
+        return response.download(storageImagePath);
       } else if (new RegExp("TFSettings.json" + "$").test(filePath)) {
         return response.json({
           "script_training": Env.get("SCRIPT_TRAINING"),
