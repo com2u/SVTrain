@@ -9,23 +9,24 @@ const execFile = promisify(require('child_process').execFile);
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i);
 const readdir = promisify(fs.readdir);
 const lstat = promisify(fs.lstat);
-const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
-const unlink = promisify(fs.unlink);
 const rename = promisify(fs.rename);
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
 const readLastLines = require('read-last-lines');
 const config = require('../../../config/ui');
-
 const logger = require('../../../logger');
 const pathSep = path.sep;
-
+const Database = use('Database')
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg');
 const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
-const {hasPermissionWorkspaces} = require('../../utils/index');
+const {hasPermissionWorkspaces, readDirRecursive} = require('../../utils/index');
 
+const Workspace = use('App/Models/Workspace');
+const DefectClass = use('App/Models/DefectClass');
+const ImageDefectClass = use('App/Models/ImageDefectClass');
+const Batch = use('App/Models/Batch');
 
 // if file is landing under root directory
 // prevent access to that file
@@ -124,7 +125,6 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
 }
 
 class ExplorerController {
-
   /*
     GET /getFiles?path=path/to/folder
 
@@ -145,45 +145,131 @@ class ExplorerController {
     }
   */
   async all({request}) {
-    const dir = path.join(request.get().dir || CONST_PATHS.root);
-    if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
-    const result = {};
-    const files = await readdir(dir);
-    result.folders = [];
-    result.files = [];
-    result.path = dir;
-    const permissions = request.currentUser
-      && request.currentUser.permissions
-      && request.currentUser.permissions.workspaces;
-    for (let i = 0; i < files.length; ++i) {
-      const f = files[i];
-      const fPath = path.join(dir, f);
-      const flstat = await lstat(path.join(dir, f));
-      if (f)
-        if (flstat.isDirectory()) {
-          if ((CONST_PATHS.root === `${dir}`) &&
-            !(hasPermissionWorkspaces(f, permissions) || request.currentUser.permissions.leaveWorkspace)
-          ) continue;
-          const folder = {
-            path: fPath,
-            name: f,
-            type: FTYPES.folder,
-            image: false,
-            match: false
-          };
-          result.folders.push(folder);
-        } else if (flstat.isFile() && f !== iconName) {
+    let {dir, type, batch} = request.get();
+    if (!dir) dir = CONST_PATHS.root
+    const result = {
+      folders: [],
+      files: [],
+      path: dir
+    }
+    if (type === 'ws') {
+      const wsDB = await Workspace.findBy("name", dir)
+      const ws = wsDB.toJSON()
+      if (!ws.settings) ws.settings = {};
+      const cfg = JSON.parse(ws.settings)
+      const pis = path.join(Env.get("STORAGE_PATH"), cfg['imageStorage'] ? cfg['imageStorage'] : ws.name);
+      const batches = (await wsDB.batches().fetch()).toJSON()
+      for (let batch of batches) {
+        result.folders.push({
+          path: batch.name,
+          name: batch.name,
+          type: 'batch',
+          image: false,
+          match: false
+        })
+      }
+      const images = await Database.table('image_defect_classes')
+        .innerJoin('batches', 'image_defect_classes.batch_no', 'batches.no')
+        .where("batches.work_space_no", wsDB.toJSON().no).groupBy("image_defect_classes.file_name")
+      for (let file of images) {
+        result.files.push({
+          path: path.join(pis, file.file_name),
+          relativePath: path.join(cfg['imageStorage'] ? cfg['imageStorage'] : ws.name, file.file_name),
+          name: file.file_name,
+          type: FTYPES.file,
+          image: true,
+          match: false
+        });
+      }
+    } else if (type === 'batch') {
+      const batch = await Batch.findBy("name", dir)
+      const batch_child = (await Batch.query().where("parent", batch.toJSON().no).fetch()).toJSON()
+      let defect_classes = (await batch.defect_classes().fetch()).toJSON()
+      defect_classes = await Database
+        .table('defect_classes')
+        .innerJoin('image_defect_classes', 'defect_classes.no', 'image_defect_classes.defect_classes_no')
+        .where("image_defect_classes.batch_no", batch.toJSON().no).groupBy("defect_classes.no")
+      for (let df of defect_classes) {
+        result.folders.push({
+          path: df.name,
+          name: df.name,
+          type: 'defectclass',
+          image: false,
+          match: false,
+          batch: dir
+        })
+      }
+      for (let df of batch_child) {
+        result.folders.push({
+          path: df.name,
+          name: df.name,
+          type: 'batch',
+          image: false,
+          match: false,
+        })
+      }
+    } else if (type === 'defectclass') {
+      const bt = await Batch.findBy("name", batch)
+      const df = await DefectClass.findBy("name", dir)
+      if (df && batch) {
+        const ws = (await Workspace.findBy('no', bt.work_space_no)).toJSON()
+        if (!ws.settings) ws.settings = {};
+        const cfg = JSON.parse(ws.settings)
+        const pis = path.join(Env.get("STORAGE_PATH"), cfg['imageStorage'] ? cfg['imageStorage'] : ws.name);
+        const qs = await ImageDefectClass.query()
+          .where('batch_no', bt.toJSON().no)
+          .where('defect_classes_no', df.toJSON().no)
+          .fetch()
+        for (let file of qs.toJSON()) {
           result.files.push({
-            path: fPath,
-            relativePath: path.relative(CONST_PATHS.root, fPath),
-            name: f,
+            path: path.join(pis, file.file_name),
+            relativePath: path.join(cfg['imageStorage'] ? cfg['imageStorage'] : ws.name, file.file_name),
+            name: file.file_name,
             type: FTYPES.file,
-            image: regexpForImages.test(f),
-            match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1
+            image: true,
+            match: false
           });
-        } else {
-          console.log(`File ${f} in the directory ${dir} nor file neither directory.`);
         }
+      }
+    } else {
+      if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
+      const files = await readdir(dir);
+      result.folders = [];
+      result.files = [];
+      result.path = dir;
+      const permissions = request.currentUser
+        && request.currentUser.permissions
+        && request.currentUser.permissions.workspaces;
+      for (let i = 0; i < files.length; ++i) {
+        const f = files[i];
+        const fPath = path.join(dir, f);
+        const flstat = await lstat(path.join(dir, f));
+        if (f)
+          if (flstat.isDirectory()) {
+            if ((CONST_PATHS.root === `${dir}`) &&
+              !(hasPermissionWorkspaces(f, permissions) || request.currentUser.permissions.leaveWorkspace)
+            ) continue;
+            const folder = {
+              path: fPath,
+              name: f,
+              type: FTYPES.folder,
+              image: false,
+              match: false
+            };
+            result.folders.push(folder);
+          } else if (flstat.isFile() && f !== iconName) {
+            result.files.push({
+              path: fPath,
+              relativePath: path.relative(CONST_PATHS.root, fPath),
+              name: f,
+              type: FTYPES.file,
+              image: regexpForImages.test(f),
+              match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1
+            });
+          } else {
+            console.log(`File ${f} in the directory ${dir} nor file neither directory.`);
+          }
+      }
     }
     return result;
   }
@@ -200,23 +286,53 @@ class ExplorerController {
     }
   */
   async parent({request}) {
-    try {
-      const dir = request.get().dir;
-      if (!dir) throw new Error('Parameter "dir" is required');
-
-      let parent = dir.split(path.sep);
-      parent.splice(-1);
-      parent = parent.join(path.sep);
-
-      return {
-        path: parent,
-        name: path.basename(parent),
-        type: 'folder',
-        access: accessToFile(CONST_PATHS.root, parent)
-      };
-    } catch (e) {
-      console.log(e);
+    let {dir, type, batch} = request.get();
+    if (!type) type = "folder";
+    let parent = null
+    let name = null
+    let access = null
+    if (type === 'ws') {
+      access = false
+    } else if (type === 'batch') {
+      let batch = await Batch.findBy('name', dir)
+      if (batch) {
+        let test
+        batch = batch.toJSON()
+        if (batch.parent) {
+          test = (await Batch.findBy('no', batch.parent)).toJSON()
+          type = "batch"
+        } else {
+          type = "ws"
+          test = (await Workspace.findBy('no', batch.work_space_no)).toJSON()
+        }
+        name = test.name
+        parent = test.name
+        access = true
+      }
+    } else if (type === 'defectclass') {
+      parent = batch
+      name = batch
+      type = "batch"
+      access = true
+    } else {
+      try {
+        if (dir) {
+          parent = dir.split(path.sep);
+          parent.splice(-1);
+          parent = parent.join(path.sep);
+          name = path.basename(parent);
+          access = accessToFile(CONST_PATHS.root, parent);
+        }
+      } catch (e) {
+        console.log(e);
+      }
     }
+    return {
+      path: parent,
+      name: name,
+      type: type,
+      access: access
+    };
   }
 
   /*
@@ -270,10 +386,21 @@ class ExplorerController {
 
   async getSystemConfig() {
     const ws = await this.getWorkspace();
-    const wsPath = ws.toString();
-    const configPath = path.join(wsPath, '.cfg');
-    const cfg = await this.getJsonConfig(configPath);
-    return {...config, ...cfg, wsPath};
+    let wsPath = ws.toString();
+    let configPath, cfg = config, isDB;
+    if (wsPath.startsWith("db:")) {
+      wsPath = wsPath.replace("db:", "")
+      let wsInstance = await Workspace.findBy("name", wsPath)
+      if (wsInstance) {
+        isDB = true
+        let cfgStr = wsInstance.toJSON().settings
+        if (cfgStr && Object.keys(JSON.parse(cfgStr)).length) cfg = JSON.parse(cfgStr)
+      }
+    } else {
+      configPath = path.join(wsPath, '.cfg');
+      cfg = await this.getJsonConfig(configPath);
+    }
+    return {...config, ...cfg, wsPath, isDB};
   }
 
   /*
@@ -282,9 +409,14 @@ class ExplorerController {
   Set the workspace
   */
   async setWorkspace({request}) {
-    const {workspace} = request.post();
-    const workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace);
-    const newWorkspace = path.join(CONST_PATHS.root, workspace);
+    const {workspace, isDB} = request.post();
+    let workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace);
+    let newWorkspace;
+    if (isDB) {
+      newWorkspace = `db:${workspace}`
+    } else {
+      newWorkspace = path.join(CONST_PATHS.root, workspace);
+    }
     await writeFile(workspaceFile, newWorkspace);
     return true;
   }
@@ -301,27 +433,35 @@ class ExplorerController {
     [ "/path/to/file1", "path/to/file2" ]
   */
   async delete({request}) {
+    let {type} = request.get();
     let {files} = request.post();
-    let dir = '';
-    if (files && files.length) {
-      dir = files[0];
+    if (type === 'defectclass') {
+      const currentCfg = await this.getSystemConfig();
+      const dfName = currentCfg.deleteDefaultFolder || 'DeletedFiles';
+      const df = await DefectClass.findOrCreate({name: dfName})
+      for (let file of files) {
+        const file_name = file.split(path.sep)[file.split(path.sep).length - 1]
+        await ImageDefectClass.query().where('file_name', file_name).update({ defect_classes_no: df.toJSON().no })
+      }
+    } else {
+      let dir = '';
+      if (files && files.length) {
+        dir = files[0];
+      }
+      const currentCfg = await this.getParentFolderConfig(dir);
+      const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles';
+      let workingRoot = CONST_PATHS.root
+      if (currentCfg.parentFolderPath) {
+        workingRoot = currentCfg.parentFolderPath
+      }
+      // Create delete directory if not exist
+      const absDestination = path.isAbsolute(destination) ? destination : path.join(workingRoot, destination);
+      if (!fs.existsSync(absDestination)) {
+        fs.mkdirSync(absDestination);
+      }
+      const user = request.currentUser.username;
+      return await this.moveFiles(files, absDestination, user, true);
     }
-    const currentCfg = await this.getParentFolderConfig(dir);
-    const destination = currentCfg.deleteDefaultFolder || 'DeletedFiles';
-    let workingRoot = CONST_PATHS.root
-    if (currentCfg.parentFolderPath) {
-      workingRoot = currentCfg.parentFolderPath
-    }
-
-    // Create delete directory if not exist
-    const absDestination = path.isAbsolute(destination) ? destination : path.join(workingRoot, destination);
-    if (!fs.existsSync(absDestination)) {
-      fs.mkdirSync(absDestination);
-    }
-
-    const user = request.currentUser.username;
-    const response = await this.moveFiles(files, absDestination, user, true);
-    return response;
   }
 
   /*
@@ -333,10 +473,22 @@ class ExplorerController {
     return array of files with new path
   */
   async move({request}) {
+    let {type} = request.get();
     let {files, destination} = request.post();
     const user = request.currentUser.username;
-    const response = await this.moveFiles(files, destination, user);
-    return response;
+    if (type === 'defectclass') {
+      const defectClass = (await DefectClass.findBy('name', destination)).toJSON()
+      for (let file of files) {
+        const name = file.split(path.sep)[file.split(path.sep).length - 1]
+        await ImageDefectClass
+          .query()
+          .where('file_name', name)
+          .update({ defect_classes_no: defectClass.no })
+      }
+      return true
+    } else {
+      return await this.moveFiles(files, destination, user);
+    }
   }
 
   async moveFiles(files, destination, user, isDelete = false) {
@@ -344,14 +496,11 @@ class ExplorerController {
     if (!accessToFile(CONST_PATHS.root, destination)) {
       throw new Error(`Access denied to the directory ${destination}`);
     }
-
     // skip files with no access
     files = files
       .filter(
         f => accessToFile(CONST_PATHS.root, f)
       );
-
-
     await Promise.all(
       files.map(
         async f => await rename(
@@ -369,7 +518,6 @@ class ExplorerController {
         logger.info(`User ${user} has move file "${file}" to "${path.join(absDestination, path.basename(file))}"`);
       }
     }
-
     return files.map(
       f => path.join(absDestination, path.basename(f))
     );
@@ -387,39 +535,62 @@ class ExplorerController {
     ]
   */
   async next({request}) {
-    const {dir} = request.get();
-    const result = [];
-
-    if (!dir) throw new Error('The "path" parameter is needed');
-
-    const parentDirectory = path.join(dir, '../');
-
-    if (!accessToFile(CONST_PATHS.root, parentDirectory)) {
-      console.log(`Access denied for read next directory for folder ${dir}`);
-      return [];
-      throw new Error(`Access denied for read directory ${parentDirectory}`);
-    }
-
-    const files = await readdir(parentDirectory);
-
-    for (let i = 0; i < files.length; ++i) {
-      const f = files[i];
-      const fPath = path.join(parentDirectory, f);
-      const flstat = await lstat(fPath);
-      if (flstat.isDirectory()) {
-        const folder = {
-          path: fPath,
-          name: f,
-          icon: false,
-        };
-        const iconPath = path.join(fPath, iconName);
-        if (fs.existsSync(iconPath)) {
-          folder.icon = path.relative(CONST_PATHS.root, iconPath);
+    const {dir, type, ws} = request.get();
+    let result = [];
+    if (type === 'ws' || type === 'defectclass') {
+      let wsDB = null
+      if (type === 'ws') {
+        wsDB = await Workspace.findBy("name", dir)
+      } else {
+        wsDB = await Workspace.findBy("no", ws)
+      }
+      const currentCfg = await this.getSystemConfig();
+      const dfDeleted = currentCfg.selectedPath || 'DeletedFiles';
+      const dfSelected = currentCfg.selectedPath || 'Selected';
+      const dfNotSelected = currentCfg.notSelectedPath || 'NotSelected';
+      const wsInstance = wsDB.toJSON()
+      const defect_classes = await Database
+        .table('defect_classes')
+        .innerJoin('image_defect_classes', 'defect_classes.no', 'image_defect_classes.defect_classes_no')
+        .innerJoin('batches', 'image_defect_classes.batch_no', 'batches.no')
+        .where("batches.work_space_no", wsInstance.no).groupBy("defect_classes.name")
+        .distinct(["defect_classes.name", "defect_classes.icon"])
+      defect_classes.forEach(x => {
+        if (![dfDeleted, dfSelected, dfNotSelected].includes(x.name)) {
+          result.push({
+            name: x.name,
+            path: x.name,
+            icon: x.icon,
+          })
         }
-        result.push(folder);
+      })
+    } else {
+      if (!dir) throw new Error('The "path" parameter is needed');
+      const parentDirectory = path.join(dir, '../');
+      if (!accessToFile(CONST_PATHS.root, parentDirectory)) {
+        console.log(`Access denied for read next directory for folder ${dir}`);
+        return [];
+        throw new Error(`Access denied for read directory ${parentDirectory}`);
+      }
+      const files = await readdir(parentDirectory);
+      for (let i = 0; i < files.length; ++i) {
+        const f = files[i];
+        const fPath = path.join(parentDirectory, f);
+        const flstat = await lstat(fPath);
+        if (flstat.isDirectory()) {
+          const folder = {
+            path: fPath,
+            name: f,
+            icon: false,
+          };
+          const iconPath = path.join(fPath, iconName);
+          if (fs.existsSync(iconPath)) {
+            folder.icon = path.relative(CONST_PATHS.root, iconPath);
+          }
+          result.push(folder);
+        }
       }
     }
-
     return result;
   }
 
@@ -778,27 +949,43 @@ class ExplorerController {
   }
 
   async getExplorerConfig({request, response}) {
-    let dir = request.get().dir;
-    let notes = null
-    if (fs.existsSync(`${dir}/notes.txt`) && fs.lstatSync(`${dir}/notes.txt`).isFile()) {
-      try {
-        notes = fs.readFileSync(`${dir}/notes.txt`, 'utf-8');
-      } catch (e) {
-        console.log('Notes not found');
+    let {dir, type} = request.get();
+    let noteData, isHighlight, resConfig = config, isDB
+    if (['ws', 'batch', 'defectclass'].includes(type)) {
+      const ws = await this.getWorkspace();
+      let wsPath = ws.toString();
+      wsPath = wsPath.replace("db:", "")
+      let wsInstance = await Workspace.findBy("name", wsPath)
+      if (wsInstance) {
+        const wsiJson = wsInstance.toJSON()
+        let cfgStr = wsiJson.settings
+        if (cfgStr && Object.keys(JSON.parse(cfgStr)).length) resConfig = JSON.parse(cfgStr)
+        noteData = wsiJson.notes
+        isHighlight = wsiJson.highlight
+        isDB = true
       }
-    }
-    let noteData, isHighlight
-    if (notes && notes.startsWith(highlightPrefix)) {
-      noteData = notes.substring(highlightPrefix.length);
-      isHighlight = true;
     } else {
-      noteData = notes;
+      let notes = null
+      if (fs.existsSync(`${dir}/notes.txt`) && fs.lstatSync(`${dir}/notes.txt`).isFile()) {
+        try {
+          notes = fs.readFileSync(`${dir}/notes.txt`, 'utf-8');
+        } catch (e) {
+          console.log('Notes not found');
+        }
+      }
+      if (notes && notes.startsWith(highlightPrefix)) {
+        noteData = notes.substring(highlightPrefix.length);
+        isHighlight = true;
+      } else {
+        noteData = notes;
+      }
+      resConfig = await this.getParentFolderConfig(dir, request.currentUser);
     }
-    const resConfig = await this.getParentFolderConfig(dir, request.currentUser);
     response.json({
       ...resConfig,
       notes: noteData,
-      highlight: isHighlight
+      highlight: isHighlight,
+      isDB
     });
   }
 
@@ -821,49 +1008,73 @@ class ExplorerController {
   }
 
   async doForwardOnly({request, response}) {
+    let {type} = request.get();
     let {selectedFiles, notSelectedFiles} = request.post();
-    let dir = '';
-    if (selectedFiles && selectedFiles.length) {
-      dir = selectedFiles[0];
-    } else if (notSelectedFiles && notSelectedFiles.length) {
-      dir = notSelectedFiles[0];
+    if (type === 'defectclass') {
+      const currentCfg = await this.getSystemConfig();
+      const dfSelected = currentCfg.selectedPath || 'Selected';
+      const dfNotSelected = currentCfg.notSelectedPath || 'NotSelected';
+      let df = await DefectClass.findOrCreate({name: dfSelected})
+      for (let file of selectedFiles) {
+        const file_name = file.split(path.sep)[file.split(path.sep).length - 1]
+        await ImageDefectClass.query().where('file_name', file_name).update({ defect_classes_no: df.toJSON().no })
+      }
+      df = await DefectClass.findOrCreate({name: dfNotSelected})
+      for (let file of notSelectedFiles) {
+        const file_name = file.split(path.sep)[file.split(path.sep).length - 1]
+        await ImageDefectClass.query().where('file_name', file_name).update({ defect_classes_no: df.toJSON().no })
+      }
+      return response.json({
+        selected: selectedFiles,
+        notSelected: notSelectedFiles
+      });
+    } else {
+      let dir = '';
+      if (selectedFiles && selectedFiles.length) {
+        dir = selectedFiles[0];
+      } else if (notSelectedFiles && notSelectedFiles.length) {
+        dir = notSelectedFiles[0];
+      }
+      const currentCfg = await this.getParentFolderConfig(dir);
+      let workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root;
+      if (currentCfg.parentFolderPath) {
+        workingRoot = currentCfg.parentFolderPath
+      }
+      const selectedPath = currentCfg.selectedPath || 'Selected';
+      const absSelectedPath = path.join(workingRoot, selectedPath);
+      const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected';
+      const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
+      const user = request.currentUser.username;
+      // Create delete directory if not exist
+      if (!fs.existsSync(absSelectedPath)) {
+        throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`);
+      }
+      if (!fs.existsSync(absNotSelectedPath)) {
+        throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`);
+      }
+      const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
+      const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
+      response.json({
+        selected,
+        notSelected
+      });
     }
-    const currentCfg = await this.getParentFolderConfig(dir);
-    let workingRoot = currentCfg && currentCfg.wsPath ? currentCfg.wsPath : CONST_PATHS.root;
-    if (currentCfg.parentFolderPath) {
-      workingRoot = currentCfg.parentFolderPath
-    }
-    const selectedPath = currentCfg.selectedPath || 'Selected';
-    const absSelectedPath = path.join(workingRoot, selectedPath);
-    const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected';
-    const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
-
-    const user = request.currentUser.username;
-
-    // Create delete directory if not exist
-    if (!fs.existsSync(absSelectedPath)) {
-      throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`);
-    }
-
-    if (!fs.existsSync(absNotSelectedPath)) {
-      throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`);
-    }
-
-    const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
-    const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
-    response.json({
-      selected,
-      notSelected
-    });
   }
 
   async saveNotes({request, response}) {
     const {path, highlight} = request.post();
     let {notes} = request.post();
-    if (highlight) {
-      notes = `${highlightPrefix}${notes}`;
+    if (path.startsWith("DB:")) {
+      const wsPath = path.replace("DB:", "")
+      await Workspace.query()
+        .where('name', wsPath)
+        .update({ notes: notes, highlight: Boolean(highlight) })
+    } else {
+      if (highlight) {
+        notes = `${highlightPrefix}${notes}`;
+      }
+      fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'});
     }
-    fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'});
     return true;
   }
 
@@ -871,9 +1082,16 @@ class ExplorerController {
     const {path, config} = request.post();
     const configStr = JSON.stringify(config);
     if (!configStr) return false;
-    if (fs.existsSync(path)) {
-      fs.writeFileSync(path, configStr, {encoding: 'utf8'});
-      return true;
+    if (path.startsWith("DB:")) {
+      const wsPath = path.replace("DB:", "")
+      await Workspace.query()
+        .where('name', wsPath)
+        .update({ settings: configStr })
+    } else {
+      if (fs.existsSync(path)) {
+        fs.writeFileSync(path, configStr, {encoding: 'utf8'});
+        return true;
+      }
     }
     return false;
   }
@@ -881,73 +1099,166 @@ class ExplorerController {
   isDirectory = source => lstatSync(source).isDirectory();
 
   async getSubFolderByPath({request, response}) {
-    let dir = request.get().dir || CONST_PATHS.root;
-
-    let checkPermission = dir === CONST_PATHS.root;
-
-    if (!fs.existsSync(dir)) {
-      throw Error(`Folder ${dir} does not exist`);
+    let {dir, type, ws} = request.get()
+    if (!dir) {
+      dir = CONST_PATHS.root
     }
-    if (!fs.lstatSync(dir).isDirectory()) {
-      throw Error(`${dir} is not a folder`);
+    let wsDB
+    if (type === 'ws') {
+      wsDB = await Workspace.findBy("name", dir)
+    } else if (['batch', 'defectclass'].includes(type)) {
+      wsDB = await Workspace.findBy("no", ws)
     }
-    const files = fs.readdirSync(dir);
     const folders = [];
-    const permissions = request.currentUser
-      && request.currentUser.permissions
-      && request.currentUser.permissions.workspaces;
-    for (const name of files) {
-      if (checkPermission) {
-        if (!hasPermissionWorkspaces(name, permissions)) continue;
+    if (type === 'ws') {
+      const batches = (await wsDB.batches().withCount('image_defect_classes').fetch()).toJSON()
+      for (let batch of batches) {
+        folders.push({
+          ws: wsDB.toJSON().no,
+          type: 'batch',
+          name: batch.name,
+          path: batch.name,
+          hasSubFolders: true,
+          notes: '',
+          notesPath: null,
+          highlight: false,
+          classified: batch.__meta__.image_defect_classes_count,
+          unclassified: 0
+        })
       }
-      const subDir = path.join(dir, name);
-      if (fs.lstatSync(subDir).isDirectory()) {
-        const file = {
-          // subFolders: [],
-          name,
-          path: subDir,
-          hasSubFolders: this.hasSubFolders(subDir)
-        };
-        const statistic = Statistic.get(subDir);
-        if (Number.isInteger(statistic.classified)) {
-          file.classified = statistic.classified;
+    } else if (type === 'batch') {
+      // const currentCfg = await this.getSystemConfig();
+      // const dfDeleted = currentCfg.selectedPath || 'DeletedFiles';
+      // const dfSelected = currentCfg.selectedPath || 'Selected';
+      // const dfNotSelected = currentCfg.notSelectedPath || 'NotSelected';
+      const batch = await wsDB.batches().where("name", dir).first()
+      const batch_child = (await Batch.query().where("parent", batch.toJSON().no).fetch()).toJSON()
+      let defect_classes = (await batch.defect_classes().withCount('image_defect_classes', (builder) => {
+        builder.where('batch_no', batch.toJSON().no)
+      }).fetch()).toJSON()
+      for (let df of defect_classes) {
+        folders.push({
+          ws: ws,
+          type: 'defectclass',
+          name: df.name,
+          path: df.name,
+          hasSubFolders: false,
+          notes: '',
+          notesPath: null,
+          highlight: false,
+          classified: df.__meta__.image_defect_classes_count,
+          unclassified: 0,
+          batch: batch.toJSON().name
+        })
+      }
+      for (let df of batch_child) {
+        folders.push({
+          ws: ws,
+          type: 'batch',
+          name: df.name,
+          path: df.name,
+          hasSubFolders: true,
+          notes: '',
+          notesPath: null,
+          highlight: false,
+          classified: 0,
+          unclassified: 0
+        })
+      }
+    } else {
+      let checkPermission = dir === CONST_PATHS.root;
+      if (!fs.existsSync(dir)) {
+        throw Error(`Folder ${dir} does not exist`);
+      }
+      if (!fs.lstatSync(dir).isDirectory()) {
+        throw Error(`${dir} is not a folder`);
+      }
+      const files = fs.readdirSync(dir);
+      const permissions = request.currentUser
+        && request.currentUser.permissions
+        && request.currentUser.permissions.workspaces;
+      const queryset = (await Workspace.query().withCount('batches').fetch()).toJSON();
+      for (let ws of queryset) {
+        const images = await Database.table('image_defect_classes')
+          .innerJoin('batches', 'image_defect_classes.batch_no', 'batches.no')
+          .where("batches.work_space_no", ws.no)
+        folders.push({
+          id: ws.no,
+          name: ws.name,
+          path: ws.name,
+          hasSubFolders: Boolean(ws.__meta__.batches_count),
+          notes: ws.notes,
+          notesPath: `DB:${ws.name}`,
+          highlight: ws.highlight,
+          classified: images.length,
+          unclassified: 0,
+          isDB: true,
+          config: Object.keys(JSON.parse(ws.settings)).length ? JSON.parse(ws.settings) : config,
+          cfgPath: `DB:${ws.name}`,
+          type: 'ws'
+        })
+      }
+      for (const name of files) {
+        if (dir === CONST_PATHS.root) {
+          if (fs.existsSync(path.join(dir, name, '.legacy'))) {
+            continue
+          }
         }
-
-        if (Number.isInteger(statistic.unclassified)) {
-          file.unclassified = statistic.unclassified;
+        if (checkPermission) {
+          if (!hasPermissionWorkspaces(name, permissions)) continue;
         }
+        const subDir = path.join(dir, name);
+        if (fs.lstatSync(subDir).isDirectory()) {
+          const file = {
+            name,
+            path: subDir,
+            hasSubFolders: this.hasSubFolders(subDir),
+            notes: '',
+            notesPath: null,
+            highlight: false,
+            classified: 0,
+            unclassified: 0
+          };
+          const statistic = Statistic.get(subDir);
+          if (Number.isInteger(statistic.classified)) {
+            file.classified = statistic.classified;
+          }
 
-        const notesPath = path.join(subDir, 'notes.txt');
-        file.notes = '';
-        file.notesPath = notesPath;
-        file.highlight = false;
-        if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
-          try {
-            let notes = fs.readFileSync(notesPath, 'utf-8');
-            if (notes.startsWith(highlightPrefix)) {
-              file.notes = notes.substring(highlightPrefix.length);
-              file.highlight = true;
-            } else {
-              file.notes = notes;
+          if (Number.isInteger(statistic.unclassified)) {
+            file.unclassified = statistic.unclassified;
+          }
+
+          const notesPath = path.join(subDir, 'notes.txt');
+          file.notes = '';
+          file.notesPath = notesPath;
+          file.highlight = false;
+          if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
+            try {
+              let notes = fs.readFileSync(notesPath, 'utf-8');
+              if (notes.startsWith(highlightPrefix)) {
+                file.notes = notes.substring(highlightPrefix.length);
+                file.highlight = true;
+              } else {
+                file.notes = notes;
+              }
+            } catch (e) {
+              console.log(`can not read ${notesPath}`);
             }
-          } catch (e) {
-            console.log(`can not read ${notesPath}`);
           }
-        }
 
-        //Read Cfg
-        const cfgPath = path.join(subDir, '.cfg');
-        if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
-          try {
-            let cfg = fs.readFileSync(cfgPath, 'utf-8');
-            let config = JSON.parse(cfg);
-            file.config = config;
-            file.cfgPath = cfgPath;
-          } catch (e) {
-            console.log(`Can not read ${cfgPath}`);
+          //Read Cfg
+          const cfgPath = path.join(subDir, '.cfg');
+          if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
+            try {
+              let cfg = fs.readFileSync(cfgPath, 'utf-8');
+              file.config = JSON.parse(cfg);
+              file.cfgPath = cfgPath;
+            } catch (e) {
+              console.log(`Can not read ${cfgPath}`);
+            }
           }
+          folders.push(file);
         }
-        folders.push(file);
       }
     }
     return folders;
@@ -1010,6 +1321,81 @@ class ExplorerController {
     return {
       matrix,
       compareNames: compare_names,
+    }
+  }
+
+  async convert2DB({request}) {
+    const {wsName} = request.post();
+    const ws = path.join(Env.get("ROOT_PATH"), wsName)
+    const pathConfig = path.join(ws, '.cfg');
+    const pathNotes = path.join(ws, 'notes.txt');
+    const config = await this.getJsonConfig(pathConfig)
+    const pathImageStorage = path.join(Env.get("STORAGE_PATH"), config['imageStorage'] ? config['imageStorage'] : wsName);
+    let notes = {
+      content: null,
+      highlight: false
+    }
+    if (fs.existsSync(pathNotes) && fs.lstatSync(pathNotes).isFile()) {
+      try {
+        const fileContent = fs.readFileSync(pathNotes, 'utf-8');
+        notes = {
+          content: fileContent,
+          highlight: fileContent.startsWith(highlightPrefix)
+        }
+      } catch (e) {
+        console.log('ERROR WHEN READ NOTES');
+      }
+    }
+    if (!fs.existsSync(pathImageStorage)) {
+      await fs.mkdirSync(pathImageStorage);
+    }
+    const files = readDirRecursive(ws)
+    let wsInstance = await Workspace.findBy('name', wsName)
+    if (!wsInstance) {
+      await Workspace.create({
+        name: wsName,
+        notes: notes.highlight ? notes.content.replace(highlightPrefix, "") : notes.content,
+        highlight: notes.highlight,
+        settings: JSON.stringify(config)
+      })
+      wsInstance = await Workspace.findBy('name', wsName)
+      for (let file of files) {
+        // COPY FILE
+        const newDestination = path.join(pathImageStorage, file.nameGUID);
+        await fs.copyFileSync(file.absolutePath, newDestination);
+        // SYNC DATABASE
+        /* CREATE BATCH */
+        let batchInstance = null;
+        for (let batch of file.batchName) {
+          batchInstance = (await Batch.findOrCreate({
+            parent: batchInstance ? batchInstance.no || batchInstance.id : null,
+            work_space_no: wsInstance.no || wsInstance.id,
+            name: batch,
+            user: request.currentUser ? request.currentUser.username : 'defaultUser'
+          }, {
+            parent: batchInstance ? batchInstance.no || batchInstance.id : null,
+            work_space_no: wsInstance.no || wsInstance.id,
+            name: batch,
+            user: request.currentUser ? request.currentUser.username : 'defaultUser',
+            date: new Date(),
+          })).toJSON()
+        }
+        /* CREATE DEFECT CLASS */
+        let defectClassInstance = (await DefectClass.findOrCreate(
+          {name: file.defectClass},
+          {name: file.defectClass}
+        )).toJSON();
+        /* CREATE IMAGE DEFECT CLASS */
+        await ImageDefectClass.findOrCreate({
+            batch_no: batchInstance.no || batchInstance.id,
+            defect_classes_no: defectClassInstance.no || defectClassInstance.id,
+            file_name: file.nameGUID
+          })
+      }
+      fs.writeFileSync(path.join(ws, '.legacy'), '', {encoding: 'utf8', flag: 'w'});
+    }
+    return {
+      status: "DONE"
     }
   }
 }

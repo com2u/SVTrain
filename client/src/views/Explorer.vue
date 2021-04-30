@@ -1,6 +1,6 @@
 <template>
   <div>
-    <file-explorer v-bind:dir="dir" :key="$route.fullPath"></file-explorer>
+    <file-explorer v-bind:dir="dir" v-bind:type="type" :key="$route.fullPath"></file-explorer>
   </div>
 </template>
 
@@ -11,6 +11,7 @@ import EventBus from '../utils/eventbus'
 export default {
   props: [
     'dir',
+    'type',
   ],
   components: {
     FileExplorer,

@@ -1,5 +1,9 @@
+const fs = require('fs');
+const path = require('path');
 const roles = require('../../roles.json')
 const users = require('../../users.json')
+const Env = use('Env');
+const uuid4 = require('uuid4');
 
 function getRoles() {
   return roles
@@ -22,9 +26,56 @@ function hasPermissionWorkspaces(folderName, workspaceRules) {
   return false
 }
 
+function removeExt(fileName) {
+  return (fileName + '').replace(path.extname(fileName), '');
+}
+
+function getExt(fileName) {
+  return path.extname(fileName + '').toLowerCase();
+}
+
+function readDirRecursive(options) {
+  if (typeof options === 'string') {
+    options = {path: options};
+  }
+  if (!options.path) {
+    throw new Error('Path option is required.');
+  }
+  options = Object.assign({}, {
+    extensions: ['.jpg', '.png', '.jpeg', '.bmp'],
+    excludes: ['.', '..']
+  }, options);
+  let results = [];
+  fs.readdirSync(options.path)
+    .forEach(file => {
+      const fullFilePath = path.join(options.path, file);
+      if (fs.statSync(fullFilePath).isDirectory()) {
+        results = results.concat(readDirRecursive(Object.assign({}, options, {path: fullFilePath})));
+        return;
+      }
+      if ((!options.extensions.length || options.extensions.includes(path.extname(file))) && (!options.excludes.length || !options.excludes.includes(file))) {
+        let relativePath = path.relative(Env.get('ROOT_PATH'), fullFilePath);
+        let temp = path.dirname(relativePath).split(path.sep);
+        let workspace = temp.shift();
+        let defectClass = temp.pop();
+        results.push({
+          absolutePath: fullFilePath,
+          relativePath: relativePath,
+          workspace: workspace,
+          defectClass: defectClass,
+          batchName: temp.length ? temp : ["default"],
+          fileName: removeExt(path.basename(fullFilePath)),
+          nameGUID: `${removeExt(path.basename(fullFilePath))}_${uuid4().toUpperCase()}${getExt(fullFilePath)}`,
+          ext: getExt(fullFilePath)
+        });
+      }
+    });
+  return results;
+}
+
 
 module.exports.getUsers = getUsers
 module.exports.getRoles = getRoles
 module.exports.matchRuleShort = matchRuleShort
 module.exports.hasPermissionWorkspaces = hasPermissionWorkspaces
-
+module.exports.readDirRecursive = readDirRecursive

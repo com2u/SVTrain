@@ -33,9 +33,8 @@ router.beforeEach(async (to, from, next) => {
       const permission = to.meta && to.meta.permission
       if (!permission || config.user.permissions[permission]) {
         if (to.name === 'explorer') {
-          const explorerConfig = await api.getExplorerConfig(to.query.dir)
+          const explorerConfig = await api.getExplorerConfig(to.query.dir, to.query.type)
           await store.dispatch('app/setExplorerConfig', explorerConfig)
-          console.log(explorerConfig)
         }
         next()
       } else {
@@ -51,7 +50,6 @@ router.beforeEach(async (to, from, next) => {
     next('/login')
   }
 })
-
 
 router.afterEach(() => {
   // finish progress bar

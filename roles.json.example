@@ -21,7 +21,8 @@
     "showExplorerNotes": true,
     "editConfigUI": false,
     "leaveWorkspace": false,
-    "editConfigAI": false
+    "editConfigAI": false,
+    "ConvertToDatabase": false
   },
   "operator": {
     "editConfig": false,
@@ -40,6 +41,7 @@
     ],
     "editConfigUI": false,
     "leaveWorkspace": false,
-    "editConfigAI": false
+    "editConfigAI": false,
+    "ConvertToDatabase": false
   }
 }

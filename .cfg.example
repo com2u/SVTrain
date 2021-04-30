@@ -22,5 +22,6 @@
   "newWorkspace": true,
   "showNavigationIcon": true,
   "imageFit": "fit",
-  "imageViewer": true
+  "imageViewer": true,
+  "imageStorage: "ws"
 }

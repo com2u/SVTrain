@@ -15,7 +15,8 @@
         :key-path="`[${index}]`"
         :key="folder.path"
         :show-sub-folder-progress="folder.config && folder.config.showSubFolderProgress"
-        @select-workspace="setWorkspace(folder)"
+        @select-workspace="setWorkspace($event, folder)"
+        @sync-done="loadFoldersByPath"
       />
       <div
         class="new-ws"
@@ -53,7 +54,6 @@
             </b-button>
           </div>
         </div>
-
       </template>
     </b-modal>
     <b-modal v-model="cfgVisible" ok-title="Save" cancel-title="Back" @shown="onModalShow">
@@ -196,15 +196,15 @@ export default {
         editor.set(this.$store.state.wsconfig.folder.config)
       }
     },
-    async setWorkspace(folder) {
-      await api.setWorkspace(folder.name)
-      api.getConfig()
+    async setWorkspace(e, folder) {
+      await api.setWorkspace(folder.name, folder.isDB)
+      api.getConfig(folder.isDB)
         .then((data) => {
           this.$store.dispatch('app/setConfig', data)
         })
-      this.$router.push({
+      await this.$router.push(e || {
         name: 'explorer',
-        query: { dir: folder.path },
+        query: { dir: folder.path, type: folder.isDB ? 'ws' : undefined },
       })
     },
     onFolderCreated() {
@@ -214,7 +214,7 @@ export default {
       this.$router.push({ name: 'main' })
     },
     async loadSubfolder(item) {
-      const subFolders = await api.getFoldersByPath(item.info.path)
+      const subFolders = await api.getFoldersByPath(item.info.path, item.info.type, item.info.ws)
       subFolders.forEach((f) => {
         this.populatedFolders.push(f.path)
       })
