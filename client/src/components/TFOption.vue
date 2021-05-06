@@ -138,19 +138,19 @@ export default {
         },
         {
           label: 'Path to exported model file',
-          field: 'path_file_export_model',
+          field: 'path_field_export_model',
           type: types.TEXT,
           options: { help: 'path_file_export_model' },
         },
         {
           label: 'Path to exported results file',
-          field: 'path_file_export_results',
+          field: 'path_field_export_results',
           type: types.TEXT,
           options: { help: 'path_file_export_results' },
         },
         {
           label: 'Path to exported images folder',
-          field: 'path_file_export_images',
+          field: 'path_field_export_images',
           type: types.TEXT,
           options: { help: 'path_file_export_images' },
         },

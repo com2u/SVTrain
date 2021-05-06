@@ -535,7 +535,8 @@ class ExplorerController {
     ]
   */
   async next({request}) {
-    const {dir, type, ws} = request.get();
+    let {dir, type, ws} = request.get();
+    if (!dir) dir = CONST_PATHS.root
     let result = [];
     if (type === 'ws' || type === 'defectclass') {
       let wsDB = null
@@ -906,7 +907,7 @@ class ExplorerController {
       let exportNames = {
         export_model: cfg["path_field_export_model"] || Env.get('OUT_FILE_EXPORT_MODEL'),
         export_results: cfg["path_field_export_results"] || Env.get('OUT_FILE_EXPORT_RESULTS'),
-        export_images: cfg["path_field_export_images"] || Env.get('OUT_FOLDER_EXPORT_IMAGES')
+        export_images: [null, undefined].includes(cfg["path_field_export_images"]) ? Env.get('OUT_FOLDER_EXPORT_IMAGES') : cfg["path_field_export_images"]
       }
       await Promise.all(['training', 'test', 'validate'].map(async fileName => {
         let lastLine = '';
@@ -920,10 +921,20 @@ class ExplorerController {
         }
       }));
       await Promise.all(['export_model', 'export_results', 'export_images'].map(async fileName => {
-        if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), exportNames[fileName]))) {
-          logs[fileName] = exportNames[fileName]
+        if (fileName === 'export_images') {
+          const ws = await this.getWorkspace();
+          let wsPath = ws.toString();
+          if (fs.existsSync(path.join(wsPath, exportNames[fileName]))) {
+            logs[fileName] = exportNames[fileName]
+          } else {
+            logs[fileName] = null
+          }
         } else {
-          logs[fileName] = null
+          if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), exportNames[fileName]))) {
+            logs[fileName] = exportNames[fileName]
+          } else {
+            logs[fileName] = null
+          }
         }
       }));
       return logs;

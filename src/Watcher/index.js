@@ -23,7 +23,7 @@ async function getLogNames(path) {
       data["validate"] = jData["path_log_validate"] || Env.get('PATH_LOG_VALIDATE')
       data["export_model"] = jData["path_field_export_model"] || Env.get('OUT_FILE_EXPORT_MODEL')
       data["export_results"] = jData["path_field_export_results"] || Env.get('OUT_FILE_EXPORT_RESULTS')
-      data["export_images"] = jData["path_field_export_images"] || Env.get('OUT_FOLDER_EXPORT_IMAGES')
+      data["export_images"] = [null, undefined].includes(jData["path_field_export_images"]) ? Env.get('OUT_FOLDER_EXPORT_IMAGES') : jData["path_field_export_images"]
     }
   } catch (e) {
     console.log(e);
@@ -210,10 +210,19 @@ module.exports = class Watcher {
         export_images: null
       }
       for (const fileName of Object.keys(exports)) {
-        if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]))) {
-          exports[fileName] = logNames[fileName]
-        } else {
-          exports[fileName] = null
+        if (fileName === 'export_images') {
+          if (fs.existsSync(path.join(currentWS, logNames[fileName]))) {
+            exports[fileName] = logNames[fileName]
+          } else {
+            exports[fileName] = null
+          }
+        }
+        else {
+          if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]))) {
+            exports[fileName] = logNames[fileName]
+          } else {
+            exports[fileName] = null
+          }
         }
       }
 
