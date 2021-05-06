@@ -61,8 +61,15 @@ export default {
     await this.checkWorkspace()
     this.logs = await api.getLastLogs()
     socket.subscibeForFolder('lock.txt', (data) => {
-      if (data.event === 'unlink') this.running = false
-      if (data.event === 'change') this.running = data.content
+      if (data.event === 'unlink') {
+        this.running = false
+      }
+      if (data.event === 'change') {
+        this.running = data.content
+      }
+      this.isLoading.train = Boolean(this.running)
+      this.isLoading.test = Boolean(this.running)
+      this.isLoading.validate = Boolean(this.running)
     })
     socket.subscibeForFolder('workspace.bat', (data) => {
       if (data.event === 'unlink') this.workspace = false

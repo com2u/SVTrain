@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="title-container">
       <div>
-        <h4>SVTrain v0.10</h4>
+        <h4>SVTrain v1.2</h4>
       </div>
     </div>
     <div class="cmd-main-menu">

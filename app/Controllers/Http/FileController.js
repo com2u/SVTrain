@@ -8,6 +8,7 @@ const Watcher = use('Watcher')
 const rootPath = Env.get('ROOT_PATH');
 const scriptPath = Env.get('COMMAND_FILES_PATH');
 const storagePath = Env.get('STORAGE_PATH');
+const child_process = require("child_process");
 
 String.prototype.replaceAll = function (str1, str2, ignore) {
   return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
@@ -15,38 +16,43 @@ String.prototype.replaceAll = function (str1, str2, ignore) {
 
 class FileController {
   async download({request, params, response}) {
-    params.filePath = params.filePath.filter(x => Boolean(x)).map(x => {
+    params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
-    })
+    }) : []
     const {is_export, sessionToken, field} = request.get()
     if (is_export) {
-      const fullPath = `${scriptPath}/${params.filePath.join('/')}`
-      if (fs.existsSync(fullPath)) {
+      if (field === 'export_images') {
+        let ws
+        const dir = Env.get('COMMAND_FILES_PATH');
+        const workspaceFile = path.join(dir, 'workspace.bat');
+        try {
+          ws = fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile) : false;
+        } catch (e) {
+          ws = null
+        }
+        if (!ws) {
+          return response.status(404)
+        }
+        let fullPath = `${ws.toString()}/${params.filePath.join('/')}`
         if (fs.lstatSync(fullPath).isDirectory()) {
+          const last = fullPath.substr(fullPath.length - 1)
+          if (last === '/') {
+            fullPath = fullPath.slice(0, -1)
+          }
           const zipFilePath = `${fullPath}.zip`
           if (fs.existsSync(zipFilePath)) {
             return response.status(200).attachment(zipFilePath);
           } else {
-            const output = fs.createWriteStream(zipFilePath);
-            const archive = archiver('zip', {
-              zlib: {level: 9}
+            await child_process.execSync(`zip -r ${zipFilePath} *`, {
+              cwd: fullPath
             });
-            output.on('close', function () {
-              const socket = Watcher.getSocket(sessionToken)
-              if (socket) {
-                socket.emit('zipDone', {
-                  field: field,
-                  path: params.filePath.join('/')
-                })
-              }
-            });
-            archive.pipe(output)
-            archive.directory(fullPath, false)
-            await archive.finalize();
-            return response.status(205).attachment(zipFilePath)
+            return response.status(200).attachment(zipFilePath);
           }
-        } else {
-          return response.status(200).attachment(fullPath);
+        }
+      } else {
+        const fullPath = `${scriptPath}/${params.filePath.join('/')}`
+        if (fs.existsSync(fullPath)) {
+          return response.attachment(fullPath);
         }
       }
     } else {

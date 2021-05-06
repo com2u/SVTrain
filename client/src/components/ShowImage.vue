@@ -74,19 +74,19 @@ export default {
         thumbs: [
           {
             id: 1,
-            url: this.file.serverPath,
+            url: this.convertURIPath(this.file.serverPath),
           },
         ],
         normal_size: [
           {
             id: 1,
-            url: this.file.serverPath,
+            url: this.convertURIPath(this.file.serverPath),
           },
         ],
         large_size: [
           {
             id: 1,
-            url: this.file.serverPath,
+            url: this.convertURIPath(this.file.serverPath),
           },
         ],
       }

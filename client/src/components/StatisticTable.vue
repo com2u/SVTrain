@@ -78,7 +78,7 @@ export default {
   },
   methods: {
     select(dir1, dir2) {
-      const gotoDir = `${this.folder}\\${dir1}`
+      const gotoDir = `${this.folder}/${dir1}`
       console.log(' goto dir', gotoDir)
       EventBus.$emit('statistic-folder-selected', {
         folder: gotoDir,
