@@ -46,6 +46,9 @@ export default {
     }
   },
   methods: {
+    convertURIPath(p) {
+      return p.replaceAll('#', '{hash_tag}')
+    },
     onKeyUp(key) {
       let flag = false
       if (key.keyCode === 187 && this.options.zoomFactor < 8) {
