@@ -5,14 +5,19 @@ const sessionsFilePath = path.join(__dirname, '../../../sessions.json')
 const passwordHash = require('password-hash')
 const uuid4 = require('uuid4')
 
+const { promisify } = require("util")
+const exists = promisify(fs.exists)
+const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
+
 class LoginController {
   async login ({ request, response }) {
     const { login, password } = request.post()
-    if (!fs.existsSync(usersFilePath)) {
+    if (!await exists(usersFilePath)) {
       response.unauthorized('Invalid password or login')
       return
     }
-    const users = JSON.parse(fs.readFileSync(usersFilePath))
+    const users = JSON.parse(await readFile(usersFilePath))
 
     if (!users[login]) {
       response.unauthorized('Invalid password or login')
@@ -24,15 +29,15 @@ class LoginController {
       return
     }
 
-    return { login, sessionToken: newSession(login) }
+    return { login, sessionToken: await newSession(login) }
   }
 }
 
-function newSession (login) {
+async function newSession (login) {
   let uuid = uuid4()
   let sessions = {}
-  if (fs.existsSync(sessionsFilePath)) {
-    sessions = JSON.parse(fs.readFileSync(sessionsFilePath))
+  if (await exists(sessionsFilePath)) {
+    sessions = JSON.parse(await readFile(sessionsFilePath))
     // delete expired sessions
     Object.keys(sessions).forEach(suid => {
       if (typeof sessions[suid].expiredTime !== 'number') {
@@ -50,7 +55,7 @@ function newSession (login) {
     login,
     expiredTime
   }
-  fs.writeFileSync(sessionsFilePath, JSON.stringify(sessions, null, 4))
+  await writeFile(sessionsFilePath, JSON.stringify(sessions, null, 4))
   return uuid
 }
 
