@@ -24,7 +24,8 @@ const Database = use('Database')
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg');
 const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
-const {hasPermissionWorkspaces, readDirRecursive} = require('../../utils/index');
+const {hasPermissionWorkspaces } = require('../../utils/index');
+const { readDirRecursive } = require("../../../src/recursive.js")
 
 const Workspace = use('App/Models/Workspace');
 const DefectClass = use('App/Models/DefectClass');
