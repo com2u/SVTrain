@@ -97,6 +97,14 @@
               @click="showConfig"
             />
           </span>
+          <span v-if="canBackup" class="icon-wrapper">
+            <b-icon
+              class="clickable-icon"
+              icon="server"
+              font-scale="1.5"
+              @click="backup()"
+            />
+          </span>
         </div>
       </div>
     </div>
@@ -154,6 +162,7 @@ export default {
       showChildren: false,
       loadingChildren: false,
       DBSyncing: false,
+      backuping: false,
     }
   },
   computed: {
@@ -190,6 +199,7 @@ export default {
       'newWorkspace',
       'canSeeConfusionMatrix',
       'canSyncDB',
+      'canBackup',
     ]),
   },
   methods: {
@@ -257,6 +267,14 @@ export default {
         this.$emit('sync-done')
       }
       this.DBSyncing = false
+    },
+    async backup() {
+      this.backuping = true
+      const { status } = await api.backup(this.info.name)
+      if (status) {
+        this.$emit('backup-done')
+      }
+      this.backuping = false
     },
   },
   mounted() {

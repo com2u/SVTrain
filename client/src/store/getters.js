@@ -14,6 +14,7 @@ const getters = {
   canSeeMoveMenu: (state) => getPermissions(state) && state.app.user.permissions.moveMenu,
   canSeeConfusionMatrix: (state) => getPermissions(state) && state.app.user.permissions.showConfusionMatrix,
   canSyncDB: (state) => getPermissions(state) && state.app.user.permissions.ConvertToDatabase,
+  canBackup: (state) => getPermissions(state) && state.app.user.permissions.canBackup,
   editConfigUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigUI,
   editConfigAI: (state) => getPermissions(state) && state.app.user.permissions.editConfigAI,
   currentWs: (state) => {

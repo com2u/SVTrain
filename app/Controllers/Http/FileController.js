@@ -9,6 +9,7 @@ const rootPath = Env.get('ROOT_PATH');
 const scriptPath = Env.get('COMMAND_FILES_PATH');
 const storagePath = Env.get('STORAGE_PATH');
 const child_process = require("child_process");
+const logger = require('../../../logger');
 
 String.prototype.replaceAll = function (str1, str2, ignore) {
   return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
@@ -21,6 +22,7 @@ class FileController {
     }) : []
     const {is_export, sessionToken, field} = request.get()
     if (is_export) {
+      logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
         let ws
         const dir = Env.get('COMMAND_FILES_PATH');

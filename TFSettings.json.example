@@ -60,5 +60,6 @@
   "path_test": "test",
   "path_validate": "validate",
   "defaultEpoch": null,
-  "defaultLearningRate": null
+  "defaultLearningRate": null,
+  "ViewLogLines": 2
 }

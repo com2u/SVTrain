@@ -4,6 +4,7 @@ const usersFilePath = path.join(__dirname, '../../../users.json')
 const sessionsFilePath = path.join(__dirname, '../../../sessions.json')
 const passwordHash = require('password-hash')
 const uuid4 = require('uuid4')
+const logger = require('../../../logger');
 
 class LoginController {
   async login ({ request, response }) {
@@ -23,7 +24,7 @@ class LoginController {
       response.unauthorized('Invalid password or login')
       return
     }
-
+    logger.info(`User ${login} has logon`);
     return { login, sessionToken: newSession(login) }
   }
 }

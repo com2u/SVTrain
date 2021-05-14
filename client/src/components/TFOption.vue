@@ -172,6 +172,12 @@ export default {
           type: types.TEXT,
           options: { help: 'path_validate' },
         },
+        {
+          label: 'The numbers of lines to be displayed',
+          field: 'ViewLogLines',
+          type: types.NUMBER,
+          options: { help: 'ViewLogLines' },
+        },
       ],
       data: {},
       fields: {
