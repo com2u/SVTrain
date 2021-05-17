@@ -1,4 +1,7 @@
 const fs = require('fs')
+const { promisify } = require("util")
+const readFile = promisify(fs.readFile)
+const exists = promisify(fs.exists)
 const path = require('path')
 const sessionsFilePath = path.join(__dirname, '../../sessions.json')
 const {getUsers, getRoles} = require('../utils')
@@ -11,12 +14,12 @@ class AuthMiddleware {
       response.unauthorized('LoginFirst')
       return
     }
-    if (!fs.existsSync(sessionsFilePath)) {
+    if (!await exists(sessionsFilePath)) {
       console.log('sessions file is empty')
       response.unauthorized('InvalidToken')
       return
     }
-    let sessions = JSON.parse(fs.readFileSync(sessionsFilePath))
+    let sessions = JSON.parse(await readFile(sessionsFilePath))
     if (!sessions[sessionToken]) {
       console.log('token doesn exist')
       response.unauthorized('InvalidToken')
@@ -57,13 +60,13 @@ class AuthMiddleware {
       next(new Error('LoginFirst'))
       return
     }
-    if (!fs.existsSync(sessionsFilePath)) {
+    if (!await exists(sessionsFilePath)) {
       console.log('ws sessions file is empty')
       throw new Error('LoginFirst')
       next(new Error('InvalidToken'))
       return
     }
-    let sessions = JSON.parse(fs.readFileSync(sessionsFilePath))
+    let sessions = JSON.parse(await readFile(sessionsFilePath))
     if (!sessions[sessionToken]) {
       console.log('ws token doesn exist')
       throw new Error('LoginFirst')

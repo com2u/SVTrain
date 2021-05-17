@@ -1,4 +1,7 @@
 const fs = require('fs');
+const { promisify } = require("util")
+const readdir = promisify(fs.readdir)
+const stat = promisify(fs.stat)
 const path = require('path');
 const roles = require('../../roles.json')
 const users = require('../../users.json')
@@ -34,7 +37,7 @@ function getExt(fileName) {
   return path.extname(fileName + '').toLowerCase();
 }
 
-function readDirRecursive(options) {
+async function readDirRecursive(options) {
   if (typeof options === 'string') {
     options = {path: options};
   }
@@ -46,11 +49,10 @@ function readDirRecursive(options) {
     excludes: ['.', '..']
   }, options);
   let results = [];
-  fs.readdirSync(options.path)
-    .forEach(file => {
+    for(const file of await readdir(options.path)) {
       const fullFilePath = path.join(options.path, file);
-      if (fs.statSync(fullFilePath).isDirectory()) {
-        results = results.concat(readDirRecursive(Object.assign({}, options, {path: fullFilePath})));
+      if ((await stat(fullFilePath)).isDirectory()) {
+        results = results.concat(await readDirRecursive(Object.assign({}, options, {path: fullFilePath})));
         return;
       }
       if ((!options.extensions.length || options.extensions.includes(path.extname(file))) && (!options.excludes.length || !options.excludes.includes(file))) {
@@ -69,7 +71,7 @@ function readDirRecursive(options) {
           ext: getExt(fullFilePath)
         });
       }
-    });
+    }
   return results;
 }
 

@@ -2,6 +2,10 @@ const chokidar = require('chokidar')
 const Env = use('Env')
 const path = require('path')
 const fs = require('fs')
+const { promisify } = require("util")
+const exists = promisify(fs.exists)
+const readFile = promisify(fs.readFile)
+
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i)
 const readLastLines = require('read-last-lines')
 
@@ -15,8 +19,8 @@ async function getLogNames(path) {
     "export_images": Env.get('OUT_FOLDER_EXPORT_IMAGES')
   };
   try {
-    if (fs.existsSync(`${path}/TFSettings.json`)) {
-      const fileContent = fs.readFileSync(`${path}/TFSettings.json`, 'utf-8');
+    if (await exists(`${path}/TFSettings.json`)) {
+      const fileContent = await readFile(`${path}/TFSettings.json`, 'utf-8');
       const jData = JSON.parse(fileContent);
       data["training"] = jData["path_log_training"] || Env.get('PATH_LOG_TRAINING')
       data["test"] = jData["path_log_test"] || Env.get('PATH_LOG_TEST')
@@ -68,11 +72,11 @@ module.exports = class Watcher {
     return null
   }
 
-  changedRunningLock (type, pathname) {
+  async changedRunningLock (type, pathname) {
     const object = {}
     object.event = type === 'add' || type === 'change' ? 'change' : 'unlink'
     if (object.event === 'change') {
-      object.content = fs.readFileSync(pathname).toString()
+      object.content = (await readFile(pathname)).toString()
     }
     if (!this.folders['lock.txt']) return
     Object.keys(this.folders['lock.txt']).map( socketid => {
@@ -80,11 +84,11 @@ module.exports = class Watcher {
     })
   }
 
-  changedWorkspace (type, pathname) {
+  async changedWorkspace (type, pathname) {
     const object = {}
     object.event = type === 'add' || type === 'change' ? 'change' : 'unlink'
     if (object.event === 'change') {
-      object.content = fs.readFileSync(pathname).toString()
+      object.content = (await readFile(pathname)).toString()
     }
     if (!this.folders['workspace.bat']) return
     Object.keys(this.folders['workspace.bat']).map( socketid => {
@@ -158,7 +162,7 @@ module.exports = class Watcher {
     }
   }
 
-  init() {
+  async init() {
     const isChildOf = (child, parent) => {
       if (child === parent) return false
       const parentTokens = parent.split(path.sep).filter(i => i.length)
@@ -187,7 +191,7 @@ module.exports = class Watcher {
     let logNames = {}
     setInterval(async () => {
       const wsPath = path.join(Env.get('COMMAND_FILES_PATH'), 'workspace.bat')
-      const currentWS = fs.existsSync(wsPath) ? fs.readFileSync(wsPath).toString() : null
+      const currentWS = await exists(wsPath) ? (await readFile(wsPath)).toString() : null
       if (currentWS) {
         logNames = await getLogNames(currentWS)
       }
@@ -211,14 +215,14 @@ module.exports = class Watcher {
       }
       for (const fileName of Object.keys(exports)) {
         if (fileName === 'export_images') {
-          if (fs.existsSync(path.join(currentWS, logNames[fileName]))) {
+          if (await exists(path.join(currentWS, logNames[fileName]))) {
             exports[fileName] = logNames[fileName]
           } else {
             exports[fileName] = null
           }
         }
         else {
-          if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]))) {
+          if (await exists(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]))) {
             exports[fileName] = logNames[fileName]
           } else {
             exports[fileName] = null
