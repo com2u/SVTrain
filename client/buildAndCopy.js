@@ -1,24 +1,26 @@
 const fs = require('fs')
 const fsExtra = require('fs-extra')
 const path = require('path')
+const { promisify } = require("util")
+const exists = promisify(fs.exists)
+const copy = promisify(fsExtra.copy)
 
 const publicDir = path.join(__dirname, '..', 'public')
 const distDir = path.join(__dirname, 'dist')
 
-function emptyPublicDir() {
-  if (fs.existsSync(publicDir)) {
-    fsExtra.removeSync(publicDir)
+async function emptyPublicDir() {
+  if (await exists(publicDir)) {
+    await fsExtra.remove(publicDir)
   }
 }
 
 function copyDist() {
-  fsExtra.copySync(distDir, publicDir)
+  return copy(distDir, publicDir)
 }
 
 
 function buildAndCopy() {
-  emptyPublicDir()
-  copyDist()
+  emptyPublicDir().then(() =>  copyDist())
 }
 
 buildAndCopy()

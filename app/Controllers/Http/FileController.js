@@ -3,6 +3,10 @@ const path = require('path');
 const Env = use('Env');
 const Drive = use('Drive');
 const fs = require('fs');
+const { promisify } = require("util")
+const exists = promisify(fs.exists)
+const readFile = promisify(fs.readFile)
+const lstat = promisify(fs.lstat)
 const archiver = require('archiver');
 const Watcher = use('Watcher')
 const rootPath = Env.get('ROOT_PATH');
@@ -28,7 +32,7 @@ class FileController {
         const dir = Env.get('COMMAND_FILES_PATH');
         const workspaceFile = path.join(dir, 'workspace.bat');
         try {
-          ws = fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile) : false;
+          ws = await exists(workspaceFile) ? await readFile(workspaceFile) : false;
         } catch (e) {
           ws = null
         }
@@ -36,13 +40,13 @@ class FileController {
           return response.status(404)
         }
         let fullPath = `${ws.toString()}/${params.filePath.join('/')}`
-        if (fs.lstatSync(fullPath).isDirectory()) {
+        if ((await lstat(fullPath)).isDirectory()) {
           const last = fullPath.substr(fullPath.length - 1)
           if (last === '/') {
             fullPath = fullPath.slice(0, -1)
           }
           const zipFilePath = `${fullPath}.zip`
-          if (fs.existsSync(zipFilePath)) {
+          if (await exists(zipFilePath)) {
             return response.status(200).attachment(zipFilePath);
           } else {
             await child_process.execSync(`zip -r ${zipFilePath} *`, {
@@ -53,7 +57,7 @@ class FileController {
         }
       } else {
         const fullPath = `${scriptPath}/${params.filePath.join('/')}`
-        if (fs.existsSync(fullPath)) {
+        if (await exists(fullPath)) {
           return response.attachment(fullPath);
         }
       }
@@ -63,7 +67,7 @@ class FileController {
       const storageImagePath = path.join(storagePath, filePath)
       if (isExist) {
         return response.download(`${rootPath}/${filePath}`);
-      } else if (fs.existsSync(storageImagePath)) {
+      } else if (await exists(storageImagePath)) {
         return response.download(storageImagePath);
       } else if (new RegExp("TFSettings.json" + "$").test(filePath)) {
         return response.json({

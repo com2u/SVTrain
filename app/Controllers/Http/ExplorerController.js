@@ -14,6 +14,9 @@ const writeFile = promisify(fs.writeFile);
 const rename = promisify(fs.rename);
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
+const readFile = promisify(fs.readFile)
+const copyFile = promisify(fs.copyFile)
+
 const readLastLines = require('read-last-lines');
 const config = require('../../../config/ui');
 const logger = require('../../../logger');
@@ -22,7 +25,8 @@ const Database = use('Database')
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg');
 const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
-const {hasPermissionWorkspaces, readDirRecursive} = require('../../utils/index');
+const {hasPermissionWorkspaces } = require('../../utils/index');
+const { readDirRecursive } = require("../../../src/recursive.js")
 
 const Workspace = use('App/Models/Workspace');
 const DefectClass = use('App/Models/DefectClass');
@@ -356,7 +360,7 @@ class ExplorerController {
     const dir = Env.get('COMMAND_FILES_PATH');
     const runningFile = path.join(dir, CONST_PATHS.running);
     try {
-      return fs.existsSync(runningFile) ? fs.readFileSync(runningFile) : false;
+      return (await exists(runningFile)) ? await readFile(runningFile) : false;
     } catch (e) {
       console.log(e);
       return null;
@@ -372,7 +376,7 @@ class ExplorerController {
     const dir = Env.get('COMMAND_FILES_PATH');
     const workspaceFile = path.join(dir, CONST_PATHS.workspace);
     try {
-      return fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile) : false;
+      return (await exists(workspaceFile)) ? await readFile(workspaceFile) : false;
     } catch (e) {
       console.log(e);
       return null;
@@ -382,8 +386,8 @@ class ExplorerController {
   async getJsonConfig(path) {
     let cfg = {};
     try {
-      if (fs.existsSync(path)) {
-        const fileContent = fs.readFileSync(path, 'utf-8');
+      if (await exists(path)) {
+        const fileContent = await readFile(path, 'utf-8');
         cfg = JSON.parse(fileContent);
         if (cfg.hide === true) {
           cfg = {};
@@ -468,8 +472,8 @@ class ExplorerController {
       }
       // Create delete directory if not exist
       const absDestination = path.isAbsolute(destination) ? destination : path.join(workingRoot, destination);
-      if (!fs.existsSync(absDestination)) {
-        fs.mkdirSync(absDestination);
+      if (!await exists(absDestination)) {
+        await mkdir(absDestination);
       }
       const user = request.currentUser.username;
       return await this.moveFiles(files, absDestination, user, true);
@@ -597,7 +601,7 @@ class ExplorerController {
             icon: false,
           };
           const iconPath = path.join(fPath, iconName);
-          if (fs.existsSync(iconPath)) {
+          if (await exists(iconPath)) {
             folder.icon = path.relative(CONST_PATHS.root, iconPath);
           }
           result.push(folder);
@@ -622,7 +626,7 @@ class ExplorerController {
     if (path.includes("TFSettings.json")) {
       logger.info(`User ${request.currentUser.username} has changed the TFSettings file "${path}"`);
     }
-    return fs.writeFileSync(path, data);
+    await writeFile(path, data);
   }
 
   isValidFile(filename) {
@@ -641,9 +645,9 @@ class ExplorerController {
 
     // Read notes
     const notesPath = path.join(dir, 'notes.txt');
-    if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
+    if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
       try {
-        let notes = fs.readFileSync(notesPath, 'utf-8');
+        let notes = await readFile(notesPath, 'utf-8');
         result.notes = notes;
         result.notesPath = notesPath;
       } catch (e) {
@@ -653,9 +657,9 @@ class ExplorerController {
 
     //Read Cfg
     const cfgPath = path.join(dir, '.cfg');
-    if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
+    if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
       try {
-        let cfg = fs.readFileSync(cfgPath, 'utf-8');
+        let cfg = await readFile(cfgPath, 'utf-8');
         let config = JSON.parse(cfg);
         result.config = config;
         result.cfgPath = cfgPath;
@@ -715,7 +719,7 @@ class ExplorerController {
     //   }
     // }
 
-    return await this.countSync(folder, 'root');
+    return this.countSync(folder, 'root');
   }
 
   /*
@@ -748,13 +752,13 @@ class ExplorerController {
     if (!accessToFile(CONST_PATHS.root, folder)) {
       throw new Error(`You haven\'t access to ${folder} directory`);
     }
-    if (!fs.existsSync(folder)) {
+    if (!await exists(folder)) {
       throw new Error(`The directory ${folder} doesn't exist`);
     }
     console.log(path.join(folder, name));
     const newFolderPath = path.join(folder, name);
     await mkdir(newFolderPath);
-    fs.copyFileSync(defaultCfgPath, path.join(newFolderPath, '.cfg'));
+    await copyFile(defaultCfgPath, path.join(newFolderPath, '.cfg'));
     logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
     return true;
   }
@@ -776,7 +780,7 @@ class ExplorerController {
     const cfg = await this.getJsonConfig(configPath);
     const cmdName = cfg[command] || Env.get(CONST_PATHS.commandNames[command])
     const commandFilePath = path.join(Env.get('COMMAND_FILES_PATH'), cmdName);
-    if (!fs.existsSync(commandFilePath)) {
+    if (!await exists(commandFilePath)) {
       console.log(`File ${commandFilePath} doesn't exist`);
       throw new Error(`File ${commandFilePath} doesn't exist`);
     }
@@ -939,13 +943,13 @@ class ExplorerController {
         if (fileName === 'export_images') {
           const ws = await this.getWorkspace();
           let wsPath = ws.toString();
-          if (fs.existsSync(path.join(wsPath, exportNames[fileName]))) {
+          if (await exists(path.join(wsPath, exportNames[fileName]))) {
             logs[fileName] = exportNames[fileName]
           } else {
             logs[fileName] = null
           }
         } else {
-          if (fs.existsSync(path.join(Env.get('COMMAND_FILES_PATH'), exportNames[fileName]))) {
+          if (await exists(path.join(Env.get('COMMAND_FILES_PATH'), exportNames[fileName]))) {
             logs[fileName] = exportNames[fileName]
           } else {
             logs[fileName] = null
@@ -992,9 +996,9 @@ class ExplorerController {
       }
     } else {
       let notes = null
-      if (fs.existsSync(`${dir}/notes.txt`) && fs.lstatSync(`${dir}/notes.txt`).isFile()) {
+      if (await exists(`${dir}/notes.txt`) && (await lstat(`${dir}/notes.txt`)).isFile()) {
         try {
-          notes = fs.readFileSync(`${dir}/notes.txt`, 'utf-8');
+          notes = await readFile(`${dir}/notes.txt`, 'utf-8');
         } catch (e) {
           console.log('Notes not found');
         }
@@ -1072,10 +1076,10 @@ class ExplorerController {
       const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
       const user = request.currentUser.username;
       // Create delete directory if not exist
-      if (!fs.existsSync(absSelectedPath)) {
+      if (!await exists(absSelectedPath)) {
         throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`);
       }
-      if (!fs.existsSync(absNotSelectedPath)) {
+      if (!await exists(absNotSelectedPath)) {
         throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`);
       }
       const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
@@ -1099,7 +1103,7 @@ class ExplorerController {
       if (highlight) {
         notes = `${highlightPrefix}${notes}`;
       }
-      fs.writeFileSync(path, notes, {encoding: 'utf8', flag: 'w'});
+      await writeFile(path, notes, {encoding: 'utf8', flag: 'w'});
     }
     return true;
   }
@@ -1114,16 +1118,16 @@ class ExplorerController {
         .where('name', wsPath)
         .update({ settings: configStr })
     } else {
-      if (fs.existsSync(path)) {
+      if (await exists(path)) {
         logger.info(`User ${request.currentUser.username} has changed the .cfg file "${path}"`);
-        fs.writeFileSync(path, configStr, {encoding: 'utf8'});
+        await writeFile(path, configStr, {encoding: 'utf8'});
         return true;
       }
     }
     return false;
   }
 
-  isDirectory = source => lstatSync(source).isDirectory();
+  isDirectory = async (source) => lstat(source).then(stat => stat.isDirectory());
 
   async getSubFolderByPath({request, response}) {
     let {dir, type, ws} = request.get()
@@ -1194,13 +1198,13 @@ class ExplorerController {
       }
     } else {
       let checkPermission = dir === CONST_PATHS.root;
-      if (!fs.existsSync(dir)) {
+      if (!await exists(dir)) {
         throw Error(`Folder ${dir} does not exist`);
       }
-      if (!fs.lstatSync(dir).isDirectory()) {
+      if (!(await lstat(dir)).isDirectory()) {
         throw Error(`${dir} is not a folder`);
       }
-      const files = fs.readdirSync(dir);
+      const files = await readdir(dir);
       const permissions = request.currentUser
         && request.currentUser.permissions
         && request.currentUser.permissions.workspaces;
@@ -1227,7 +1231,7 @@ class ExplorerController {
       }
       for (const name of files) {
         if (dir === CONST_PATHS.root) {
-          if (fs.existsSync(path.join(dir, name, '.legacy'))) {
+          if (await exists(path.join(dir, name, '.legacy'))) {
             continue
           }
         }
@@ -1235,11 +1239,11 @@ class ExplorerController {
           if (!hasPermissionWorkspaces(name, permissions)) continue;
         }
         const subDir = path.join(dir, name);
-        if (fs.lstatSync(subDir).isDirectory()) {
+        if ((await lstat(subDir)).isDirectory()) {
           const file = {
             name,
             path: subDir,
-            hasSubFolders: this.hasSubFolders(subDir),
+            hasSubFolders: await this.hasSubFolders(subDir),
             notes: '',
             notesPath: null,
             highlight: false,
@@ -1259,9 +1263,9 @@ class ExplorerController {
           file.notes = '';
           file.notesPath = notesPath;
           file.highlight = false;
-          if (fs.existsSync(notesPath) && fs.lstatSync(notesPath).isFile()) {
+          if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
             try {
-              let notes = fs.readFileSync(notesPath, 'utf-8');
+              let notes = await readFile(notesPath, 'utf-8');
               if (notes.startsWith(highlightPrefix)) {
                 file.notes = notes.substring(highlightPrefix.length);
                 file.highlight = true;
@@ -1275,9 +1279,9 @@ class ExplorerController {
 
           //Read Cfg
           const cfgPath = path.join(subDir, '.cfg');
-          if (fs.existsSync(cfgPath) && fs.lstatSync(cfgPath).isFile()) {
+          if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
             try {
-              let cfg = fs.readFileSync(cfgPath, 'utf-8');
+              let cfg = await readFile(cfgPath, 'utf-8');
               file.config = JSON.parse(cfg);
               file.cfgPath = cfgPath;
             } catch (e) {
@@ -1296,10 +1300,9 @@ class ExplorerController {
     return Statistic.getList(dirs);
   }
 
-  hasSubFolders(dir) {
-    return fs
-      .readdirSync(dir, {withFileTypes: true})
-      .filter(file => file.isDirectory()).length > 0;
+  async hasSubFolders(dir) {
+    const files = await readdir(dir, {withFileTypes: true})
+    return files.filter(file => file.isDirectory()).length > 0;
   }
 
   async confusionMatrix({request}) {
@@ -1363,9 +1366,9 @@ class ExplorerController {
       content: null,
       highlight: false
     }
-    if (fs.existsSync(pathNotes) && fs.lstatSync(pathNotes).isFile()) {
+    if (await exists(pathNotes) && (await lstat(pathNotes).isFile())) {
       try {
-        const fileContent = fs.readFileSync(pathNotes, 'utf-8');
+        const fileContent = await readFile(pathNotes, 'utf-8');
         notes = {
           content: fileContent,
           highlight: fileContent.startsWith(highlightPrefix)
@@ -1374,10 +1377,10 @@ class ExplorerController {
         console.log('ERROR WHEN READ NOTES');
       }
     }
-    if (!fs.existsSync(pathImageStorage)) {
-      await fs.mkdirSync(pathImageStorage);
+    if (!await exists(pathImageStorage)) {
+      await mkdir(pathImageStorage);
     }
-    const files = readDirRecursive(ws)
+    const files = await readDirRecursive(ws)
     let wsInstance = await Workspace.findBy('name', wsName)
     if (!wsInstance) {
       await Workspace.create({
@@ -1390,7 +1393,7 @@ class ExplorerController {
       for (let file of files) {
         // COPY FILE
         const newDestination = path.join(pathImageStorage, file.nameGUID);
-        await fs.copyFileSync(file.absolutePath, newDestination);
+        await copyFile(file.absolutePath, newDestination);
         // SYNC DATABASE
         /* CREATE BATCH */
         let batchInstance = null;
@@ -1420,7 +1423,7 @@ class ExplorerController {
             file_name: file.nameGUID
           })
       }
-      fs.writeFileSync(path.join(ws, '.legacy'), '', {encoding: 'utf8', flag: 'w'});
+      await writeFile(path.join(ws, '.legacy'), '', {encoding: 'utf8', flag: 'w'});
     }
     return {
       status: "DONE"
