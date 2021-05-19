@@ -287,6 +287,14 @@ export default {
             min: 100,
           },
         },
+        {
+          label: 'Backup path',
+          field: 'backupPath',
+          type: types.TEXT,
+          options: {
+            help: 'Path to define the backup location',
+          },
+        },
       ],
       data: {
         ...cloneDeep(this.value),

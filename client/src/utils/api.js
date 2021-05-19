@@ -32,6 +32,7 @@ const urls = {
   listStatistics: `${baseurl}list-statistics`,
   confusionMatrix: `${baseurl}fetch-confusion-matrix`,
   syncDB: `${baseurl}convert-to-database`,
+  backup: `${baseurl}backup`,
   getFoldersByPath: `${baseurl}get-folders`,
 }
 
@@ -148,6 +149,9 @@ export default {
     right,
   })).data,
   syncDB: async (wsName) => (await axios.post(urls.syncDB, {
+    wsName,
+  })).data,
+  backup: async (wsName) => (await axios.post(urls.backup, {
     wsName,
   })).data,
 }

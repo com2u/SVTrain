@@ -71,6 +71,7 @@ export default {
       this.$nextTick(() => {
         if (this.$refs.matrix) {
           this.$refs.matrix.load(dir)
+          this.$refs.matrix.dir = dir
         }
       })
     },

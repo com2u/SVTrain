@@ -16,7 +16,8 @@ async function getLogNames(path) {
     "validate": Env.get('PATH_LOG_VALIDATE'),
     "export_model": Env.get('OUT_FILE_EXPORT_MODEL'),
     "export_results": Env.get('OUT_FILE_EXPORT_RESULTS'),
-    "export_images": Env.get('OUT_FOLDER_EXPORT_IMAGES')
+    "export_images": Env.get('OUT_FOLDER_EXPORT_IMAGES'),
+    "ViewLogLines": 2
   };
   try {
     if (await exists(`${path}/TFSettings.json`)) {
@@ -28,6 +29,7 @@ async function getLogNames(path) {
       data["export_model"] = jData["path_field_export_model"] || Env.get('OUT_FILE_EXPORT_MODEL')
       data["export_results"] = jData["path_field_export_results"] || Env.get('OUT_FILE_EXPORT_RESULTS')
       data["export_images"] = [null, undefined].includes(jData["path_field_export_images"]) ? Env.get('OUT_FOLDER_EXPORT_IMAGES') : jData["path_field_export_images"]
+      data["ViewLogLines"] = jData["ViewLogLines"] || 2
     }
   } catch (e) {
     console.log(e);
@@ -199,7 +201,7 @@ module.exports = class Watcher {
       let lastLines = await Promise.all(['training', 'test', 'validate'].map(async name => {
         let line = null
         try {
-          line = await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), logNames[name]), 2)
+          line = await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), logNames[name]), logNames['ViewLogLines'])
         } catch(e) {
           return null
         }

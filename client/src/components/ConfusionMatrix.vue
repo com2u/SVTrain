@@ -13,10 +13,10 @@
           <b-thead>
             <b-tr>
               <b-th colspan="2" rowspan="2" class="input-conner"></b-th>
-              <b-th class="header" :colspan="cols.length">{{ getDirName(dir) }}</b-th>
+              <b-th class="header" :colspan="cols.length" @click="loadSub(null)" :class="{'clickable': subPaths.length}">{{ getDirName(dir) }}</b-th>
             </b-tr>
             <b-tr>
-              <b-th class="header" v-for="col in cols" :key="col">{{col}}</b-th>
+              <b-th class="header clickable underline" v-for="col in cols" :key="col" @click="loadSub(col)">{{col}}</b-th>
             </b-tr>
           </b-thead>
           <b-tbody>
@@ -55,6 +55,8 @@ export default {
     return {
       isLoading: false,
       dir: '',
+      subPaths: [],
+      currentRight: '',
       matrix: [],
       cols: [],
       rows: [],
@@ -69,24 +71,49 @@ export default {
     },
   },
   methods: {
+    async loadSub(subDir) {
+      if (subDir) {
+        this.subPaths.push(subDir)
+      } else {
+        this.subPaths.pop()
+      }
+
+      await this.load(this.dir)
+    },
     async load(dir) {
       this.isLoading = true
-      this.dir = dir
-      const { matrix, compareNames } = await api.fetchConfusionMatrix(dir, this.$store.state.app.config.wsPath)
+      let left = dir
+      let right = this.$store.state.app.config.wsPath
+      if (this.subPaths.length) {
+        const subPath = this.subPaths.join('/')
+        left = `${left}/${subPath}`
+        right = `${right}/${subPath}`
+      }
+      const { matrix, compareNames } = await api.fetchConfusionMatrix(left, right)
       this.matrix = matrix
       this.cols = compareNames
       this.rows = compareNames.concat('Order')
       this.isLoading = false
     },
     getDirName(dir) {
+      if (this.subPaths.length > 1) {
+        return this.subPaths[this.subPaths.length - 2]
+      }
       return dir.split('/')[dir.split('/').length - 1]
     },
     select(dir1, dir2) {
-      const gotoDir = `${this.dir}/${dir1}`
-      const to = `${this.getDirName(this.$store.state.app.config.wsPath)}/${dir2}`
+      let left = `${this.dir}`
+      let right = `${this.getDirName(this.$store.state.app.config.wsPath)}`
+      if (this.subPaths.length) {
+        const subPath = this.subPaths.join('/')
+        left = `${left}/${subPath}`
+        right = `${right}/${subPath}`
+      }
+      left = `${left}/${dir1}`
+      right = `${right}/${dir1}`
       EventBus.$emit('statistic-folder-selected', {
-        folder: gotoDir,
-        to,
+        folder: left,
+        to: right,
         filter: {
           include: dir2,
           exclude: this.exclude ? '!' : null,
@@ -189,5 +216,9 @@ td.title {
 }
 .table-striped tbody tr:nth-of-type(even) {
   background-color: #F4F3F2;
+}
+
+.underline {
+  text-decoration: underline;
 }
 </style>

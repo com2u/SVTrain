@@ -1,5 +1,6 @@
 'use strict';
 const Env = use('Env');
+const child_process = require("child_process");
 const Statistic = use('Statistic');
 const path = require('path');
 const recursive = require('../../../src/recursive');
@@ -108,7 +109,10 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
   const dir = path.join(dir_str)
   if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
   let out = []
-  const files = await readdir(dir);
+  let files = [];
+  if (fs.existsSync(dir)) {
+    files = await readdir(dir)
+  }
   for (let i = 0; i < files.length; ++i) {
     const f = files[i];
     const fPath = path.join(dir, f);
@@ -148,8 +152,8 @@ class ExplorerController {
       }]
     }
   */
-  async all({request}) {
-    let {dir, type, batch} = request.get();
+  async all({request})  {
+    let {dir, type, batch, to} = request.get();
     if (!dir) dir = CONST_PATHS.root
     const result = {
       folders: [],
@@ -238,6 +242,10 @@ class ExplorerController {
     } else {
       if (!accessToFile(CONST_PATHS.root, dir)) throw new Error('Access denied');
       const files = await readdir(dir);
+      let compareFiles = []
+      if (to && fs.existsSync(path.join(CONST_PATHS.root, to))) {
+        compareFiles = await readdir(path.join(CONST_PATHS.root, to));
+      }
       result.folders = [];
       result.files = [];
       result.path = dir;
@@ -245,6 +253,9 @@ class ExplorerController {
         && request.currentUser.permissions
         && request.currentUser.permissions.workspaces;
       for (let i = 0; i < files.length; ++i) {
+        if (to && !compareFiles.includes(files[i])) {
+          continue
+        }
         const f = files[i];
         const fPath = path.join(dir, f);
         const flstat = await lstat(path.join(dir, f));
@@ -422,6 +433,7 @@ class ExplorerController {
       newWorkspace = path.join(CONST_PATHS.root, workspace);
     }
     await writeFile(workspaceFile, newWorkspace);
+    logger.info(`User ${request.currentUser.username} has changed the workspace to ${newWorkspace}`);
     return true;
   }
 
@@ -605,14 +617,15 @@ class ExplorerController {
   */
   async saveFile({request}) {
     const {path, data} = request.post();
-
     if (!path) throw new Error('The "path" parameter is needed');
 
     if (!accessToFile(CONST_PATHS.root, path)) {
       console.log(`Access denied for saving for file ${path}`);
       throw new Error(`Access denied for saving for file ${path}`);
     }
-
+    if (path.includes("TFSettings.json")) {
+      logger.info(`User ${request.currentUser.username} has changed the TFSettings file "${path}"`);
+    }
     await writeFile(path, data);
   }
 
@@ -757,6 +770,7 @@ class ExplorerController {
   */
   async command({request}) {
     const command = request.params.name;
+    logger.info(`User ${request.currentUser.username} has started script: "${command}"`);
     if (!CONST_PATHS.commandNames[command]) {
       console.log(`Unknow command ${command}`);
       throw new Error(`Unknow command ${command}`);
@@ -785,6 +799,7 @@ class ExplorerController {
   */
   async statistic({request}) {
     const {dir} = request.get();
+    logger.info(`User ${request.currentUser.username} has shown statistic of "${dir}"`);
     return Statistic.get(dir);
   }
 
@@ -916,7 +931,7 @@ class ExplorerController {
       await Promise.all(['training', 'test', 'validate'].map(async fileName => {
         let lastLine = '';
         try {
-          lastLine = (await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]), 2));
+          lastLine = (await readLastLines.read(path.join(Env.get('COMMAND_FILES_PATH'), logNames[fileName]), cfg["ViewLogLines"] || 2));
         } catch (e) {
         }
         logs[fileName] = {
@@ -1104,6 +1119,7 @@ class ExplorerController {
         .update({ settings: configStr })
     } else {
       if (await exists(path)) {
+        logger.info(`User ${request.currentUser.username} has changed the .cfg file "${path}"`);
         await writeFile(path, configStr, {encoding: 'utf8'});
         return true;
       }
@@ -1291,6 +1307,7 @@ class ExplorerController {
 
   async confusionMatrix({request}) {
     const {left, right} = request.post();
+    logger.info(`User ${request.currentUser.username} has compared workspace between ${left} and ${right}`);
     const cog = await this.getJsonConfig(path.join(right, '.cfg'));
     const compare_folders = (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
     const active_folders = (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
@@ -1408,6 +1425,24 @@ class ExplorerController {
       }
       await writeFile(path.join(ws, '.legacy'), '', {encoding: 'utf8', flag: 'w'});
     }
+    return {
+      status: "DONE"
+    }
+  }
+
+  async backup({request}) {
+    const {wsName} = request.post();
+    const ws = path.join(Env.get("ROOT_PATH"), wsName)
+    const pathConfig = path.join(ws, '.cfg');
+    const config = await this.getJsonConfig(pathConfig)
+    const backupPath = path.join(Env.get("STORAGE_PATH"), config['backupPath'] ? config['backupPath'] : wsName);
+    if (!fs.existsSync(backupPath)) {
+      await fs.mkdirSync(backupPath);
+    }
+    logger.info(`User ${request.currentUser.username} has backup workspace: "${wsName}"`);
+    child_process.execSync(`zip -r ${backupPath}/${(new Date()).getTime()}.zip *`, {
+      cwd: ws
+    });
     return {
       status: "DONE"
     }

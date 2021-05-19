@@ -4,6 +4,7 @@ const usersFilePath = path.join(__dirname, '../../../users.json')
 const sessionsFilePath = path.join(__dirname, '../../../sessions.json')
 const passwordHash = require('password-hash')
 const uuid4 = require('uuid4')
+const logger = require('../../../logger');
 
 const { promisify } = require("util")
 const exists = promisify(fs.exists)
@@ -28,7 +29,7 @@ class LoginController {
       response.unauthorized('Invalid password or login')
       return
     }
-
+    logger.info(`User ${login} has logon`);
     return { login, sessionToken: await newSession(login) }
   }
 }
