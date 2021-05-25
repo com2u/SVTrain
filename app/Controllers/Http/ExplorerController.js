@@ -16,7 +16,6 @@ const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
 const readFile = promisify(fs.readFile)
 const copyFile = promisify(fs.copyFile)
-
 const readLastLines = require('read-last-lines');
 const config = require('../../../config/ui');
 const logger = require('../../../logger');
@@ -25,8 +24,8 @@ const Database = use('Database')
 const defaultCfgPath = path.join(__dirname, '../../../default.cfg');
 const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
-const {hasPermissionWorkspaces } = require('../../utils/index');
-const { readDirRecursive } = require("../../../src/recursive.js")
+const {hasPermissionWorkspaces} = require('../../utils/index');
+const {readDirRecursive} = require("../../utils")
 
 const Workspace = use('App/Models/Workspace');
 const DefectClass = use('App/Models/DefectClass');
@@ -117,12 +116,15 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
     const f = files[i];
     const fPath = path.join(dir, f);
     const flStat = await lstat(path.join(dir, f));
-    if (f) {
+    if (f && flStat.isDirectory()) {
+      let files = await readDirRecursive(fPath)
+      if (!files) files = []
+      files = files.map(x => x.fileName + x.ext)
       out.push({
         path: fPath,
         name: f,
-        type: flStat.isDirectory() ? FTYPES.folder : flStat.isFile() && f !== iconName ? FTYPES.file : null,
-        files: flStat.isDirectory() && flag ? await folderTravel(fPath, false, fileExtensions) : []
+        type: FTYPES.folder,
+        files: files
       })
     }
   }
@@ -152,7 +154,7 @@ class ExplorerController {
       }]
     }
   */
-  async all({request})  {
+  async all({request}) {
     let {dir, type, batch, to} = request.get();
     if (!dir) dir = CONST_PATHS.root
     const result = {
@@ -457,7 +459,7 @@ class ExplorerController {
       const df = await DefectClass.findOrCreate({name: dfName})
       for (let file of files) {
         const file_name = file.split(path.sep)[file.split(path.sep).length - 1]
-        await ImageDefectClass.query().where('file_name', file_name).update({ defect_classes_no: df.toJSON().no })
+        await ImageDefectClass.query().where('file_name', file_name).update({defect_classes_no: df.toJSON().no})
       }
     } else {
       let dir = '';
@@ -499,7 +501,7 @@ class ExplorerController {
         await ImageDefectClass
           .query()
           .where('file_name', name)
-          .update({ defect_classes_no: defectClass.no })
+          .update({defect_classes_no: defectClass.no})
       }
       return true
     } else {
@@ -1047,12 +1049,12 @@ class ExplorerController {
       let df = await DefectClass.findOrCreate({name: dfSelected})
       for (let file of selectedFiles) {
         const file_name = file.split(path.sep)[file.split(path.sep).length - 1]
-        await ImageDefectClass.query().where('file_name', file_name).update({ defect_classes_no: df.toJSON().no })
+        await ImageDefectClass.query().where('file_name', file_name).update({defect_classes_no: df.toJSON().no})
       }
       df = await DefectClass.findOrCreate({name: dfNotSelected})
       for (let file of notSelectedFiles) {
         const file_name = file.split(path.sep)[file.split(path.sep).length - 1]
-        await ImageDefectClass.query().where('file_name', file_name).update({ defect_classes_no: df.toJSON().no })
+        await ImageDefectClass.query().where('file_name', file_name).update({defect_classes_no: df.toJSON().no})
       }
       return response.json({
         selected: selectedFiles,
@@ -1098,7 +1100,7 @@ class ExplorerController {
       const wsPath = path.replace("DB:", "")
       await Workspace.query()
         .where('name', wsPath)
-        .update({ notes: notes, highlight: Boolean(highlight) })
+        .update({notes: notes, highlight: Boolean(highlight)})
     } else {
       if (highlight) {
         notes = `${highlightPrefix}${notes}`;
@@ -1116,7 +1118,7 @@ class ExplorerController {
       const wsPath = path.replace("DB:", "")
       await Workspace.query()
         .where('name', wsPath)
-        .update({ settings: configStr })
+        .update({settings: configStr})
     } else {
       if (await exists(path)) {
         logger.info(`User ${request.currentUser.username} has changed the .cfg file "${path}"`);
@@ -1339,8 +1341,8 @@ class ExplorerController {
       matrix[i] = []
       for (let j = 0; j < new_active_folders.length; j++) {
         let count = 0
-        const colFiles = compare_folders[i].files.map((x) => x.name)
-        const rowFiles = new_active_folders[j].files.map((x) => x.name)
+        const colFiles = compare_folders[i].files
+        const rowFiles = new_active_folders[j].files
         colFiles.forEach((f1) => {
           if (rowFiles.includes(f1)) {
             count += 1
@@ -1418,10 +1420,10 @@ class ExplorerController {
         )).toJSON();
         /* CREATE IMAGE DEFECT CLASS */
         await ImageDefectClass.findOrCreate({
-            batch_no: batchInstance.no || batchInstance.id,
-            defect_classes_no: defectClassInstance.no || defectClassInstance.id,
-            file_name: file.nameGUID
-          })
+          batch_no: batchInstance.no || batchInstance.id,
+          defect_classes_no: defectClassInstance.no || defectClassInstance.id,
+          file_name: file.nameGUID
+        })
       }
       await writeFile(path.join(ws, '.legacy'), '', {encoding: 'utf8', flag: 'w'});
     }

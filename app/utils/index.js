@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { promisify } = require("util")
+const {promisify} = require("util")
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
 const path = require('path');
@@ -49,29 +49,28 @@ async function readDirRecursive(options) {
     excludes: ['.', '..']
   }, options);
   let results = [];
-    for(const file of await readdir(options.path)) {
-      const fullFilePath = path.join(options.path, file);
-      if ((await stat(fullFilePath)).isDirectory()) {
-        results = results.concat(await readDirRecursive(Object.assign({}, options, {path: fullFilePath})));
-        return;
-      }
-      if ((!options.extensions.length || options.extensions.includes(path.extname(file))) && (!options.excludes.length || !options.excludes.includes(file))) {
-        let relativePath = path.relative(Env.get('ROOT_PATH'), fullFilePath);
-        let temp = path.dirname(relativePath).split(path.sep);
-        let workspace = temp.shift();
-        let defectClass = temp.pop();
-        results.push({
-          absolutePath: fullFilePath,
-          relativePath: relativePath,
-          workspace: workspace,
-          defectClass: defectClass,
-          batchName: temp.length ? temp : ["default"],
-          fileName: removeExt(path.basename(fullFilePath)),
-          nameGUID: `${removeExt(path.basename(fullFilePath))}_${uuid4().toUpperCase()}${getExt(fullFilePath)}`,
-          ext: getExt(fullFilePath)
-        });
-      }
+  for (const file of await readdir(options.path)) {
+    const fullFilePath = path.join(options.path, file);
+    if ((await stat(fullFilePath)).isDirectory()) {
+      results = results.concat(await readDirRecursive(Object.assign({}, options, {path: fullFilePath})));
     }
+    if ((!options.extensions.length || options.extensions.includes(path.extname(file))) && (!options.excludes.length || !options.excludes.includes(file))) {
+      let relativePath = path.relative(Env.get('ROOT_PATH'), fullFilePath);
+      let temp = path.dirname(relativePath).split(path.sep);
+      let workspace = temp.shift();
+      let defectClass = temp.pop();
+      results.push({
+        absolutePath: fullFilePath,
+        relativePath: relativePath,
+        workspace: workspace,
+        defectClass: defectClass,
+        batchName: temp.length ? temp : ["default"],
+        fileName: removeExt(path.basename(fullFilePath)),
+        nameGUID: `${removeExt(path.basename(fullFilePath))}_${uuid4().toUpperCase()}${getExt(fullFilePath)}`,
+        ext: getExt(fullFilePath)
+      });
+    }
+  }
   return results;
 }
 
