@@ -110,7 +110,7 @@ export default {
         right = `${right}/${subPath}`
       }
       left = `${left}/${dir1}`
-      right = `${right}/${dir1}`
+      right = `${right}/${dir2}`
       EventBus.$emit('statistic-folder-selected', {
         folder: left,
         to: right,

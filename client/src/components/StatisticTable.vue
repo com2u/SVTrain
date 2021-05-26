@@ -21,7 +21,7 @@
                 <label for="excludeFalse">All</label>
               </div>
             </b-th>
-            <b-th class="header" :colspan="names.length">User classification</b-th>
+            <b-th class="header" :colspan="names.length">AI classification</b-th>
           </b-tr>
           <b-tr>
             <b-th class="header" v-for="name in names" :key="name"> {{name}}</b-th>
@@ -30,7 +30,7 @@
         <b-tbody>
           <b-tr v-for="(name1, index1) in names" :key="name1">
             <b-td v-if="index1 === 0" class="header header-rotation"  :rowspan="names.length">
-              <span class="rotation">AI classification</span>
+              <span class="rotation">User classification</span>
             </b-td>
             <b-td class="header">{{name1}}</b-td>
             <b-td v-for="(name2, index2) in names" :key="name2" :class="{'main-diagonal': index1 === index2}">
