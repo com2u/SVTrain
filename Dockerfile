@@ -22,6 +22,8 @@ RUN apk --no-cache add --virtual native-deps \
   yarn install --production && \
   apk del native-deps
 
+RUN apk add bash curl
+
 COPY . .
 
 # remove client dir as we copy the dist file from the build stage
