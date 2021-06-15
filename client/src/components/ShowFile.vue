@@ -21,6 +21,12 @@
           class="ml-4 mb-2 mr-sm-2 mb-sm-0"
           :options="[{ text: 'Off', value: 1 }, { text: '2x', value: 2 }, { text: '4x', value: 4 }, { text: '8x', value: 8 }]"
         ></b-form-select>
+        <b-form-select
+          v-model="magnify"
+          id="inline-form-custom-select-pref"
+          class="ml-4 mb-2 mr-sm-2 mb-sm-0"
+          :options="[{ text: 'Off', value: 1 }, { text: '2x', value: 2 }, { text: '4x', value: 4 }, { text: '8x', value: 8 }]"
+        ></b-form-select>
       </b-form>
     </div>
     <ShowImage ref="show_image" v-if="fileType===types.image" v-bind:file="file" @zoom-change="magnify = $event"/>

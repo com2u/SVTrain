@@ -1,6 +1,6 @@
 <template>
   <b-modal v-on:shown="onOpen" size="md" ref="modal" title="AI Settings">
-    <template v-if="editorText">
+    <template v-if="!canEditConfigAIUI">
       <div id="wsjsoneditor" style="height: 400px;"/>
     </template>
     <template v-else>
@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import axios from 'axios'
 import api from '@/utils/api'
 import { getFileServerPath } from '@/utils'
@@ -37,146 +38,262 @@ export default {
     return {
       schemas: [
         {
-          label: 'Default epoch',
-          field: 'defaultEpoch',
+          label: 'Max Train Steps',
+          field: 'max_train_steps',
           type: types.NUMBER,
-          options: {
-            help: 'A default setting for the training mechanism.',
-          },
+          options: {},
         },
         {
-          label: 'Default learning rate',
-          field: 'defaultLearningRate',
+          label: 'Training Classes',
+          field: 'classes',
+          type: types.T_ARRAY,
+          options: {},
+        },
+        {
+          label: 'Model directory',
+          field: 'model_dir',
+          type: types.TEXT,
+          options: {},
+        },
+        {
+          label: 'Batch Size',
+          field: 'batch_size',
           type: types.NUMBER,
-          options: {
-            help: 'A default setting for the training mechanism.',
-          },
+          options: {},
+        },
+        {
+          label: 'Input width',
+          field: 'input_width',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Input height',
+          field: 'input_height',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Input depth',
+          field: 'input_depth',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Augmentation noise std',
+          field: 'augmentation_noise_std',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Augmentation brightness delta',
+          field: 'augmentation_brightness_delta',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Learning rate',
+          field: 'learning_rate',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Enable linear stretch images',
+          field: 'enable_linear_stretch_images',
+          type: types.BOOLEAN,
+          options: {},
+        },
+        {
+          label: 'Enable augmentation noise',
+          field: 'enable_augmentation_noise',
+          type: types.BOOLEAN,
+          options: {},
+        },
+        {
+          label: 'Enable augmentation mirror',
+          field: 'enable_augmentation_mirror',
+          type: types.BOOLEAN,
+          options: {},
+        },
+        {
+          label: 'Enable augmentation brigthness',
+          field: 'enable_augmentation_brigthness',
+          type: types.BOOLEAN,
+          options: {},
+        },
+        {
+          label: 'Rename',
+          field: 'rename',
+          type: types.BOOLEAN,
+          options: {},
+        },
+        {
+          label: 'Network architecture',
+          field: 'network_architecture',
+          type: types.TEXT,
+          options: {},
+        },
+        {
+          label: 'Good class',
+          field: 'good_class',
+          type: types.TEXT,
+          options: {},
+        },
+        {
+          label: 'Log every n steps',
+          field: 'log_every_n_steps',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Workspace path',
+          field: 'workspace',
+          type: types.TEXT,
+          options: {},
         },
         {
           label: 'Train script name',
           field: 'script_training',
           type: types.TEXT,
-          options: { help: 'script_training' },
+          options: {},
         },
         {
           label: 'Test script name',
           field: 'script_test',
           type: types.TEXT,
-          options: { help: 'script_test' },
+          options: {},
         },
         {
           label: 'Validate script name',
           field: 'script_validate',
           type: types.TEXT,
-          options: { help: 'script_validate' },
+          options: {},
         },
         {
           label: 'Stop train script name',
           field: 'script_stop_train',
           type: types.TEXT,
-          options: { help: 'script_stop_train' },
+          options: {},
         },
         {
           label: 'Stop test script name',
           field: 'script_stop_test',
           type: types.TEXT,
-          options: { help: 'script_stop_test' },
+          options: {},
         },
         {
           label: 'Stop validate script name',
           field: 'script_stop_validate',
           type: types.TEXT,
-          options: { help: 'script_stop_validate' },
+          options: {},
         },
         {
           label: 'Export model script name',
           field: 'script_export_model',
           type: types.TEXT,
-          options: { help: 'script_export_model' },
+          options: {},
         },
         {
           label: 'Export result script name',
           field: 'script_export_result',
           type: types.TEXT,
-          options: { help: 'script_export_result' },
+          options: {},
         },
         {
           label: 'Export images script name',
           field: 'script_export_image',
           type: types.TEXT,
-          options: { help: 'script_export_image' },
+          options: {},
         },
         {
           label: 'Create report script name',
           field: 'script_report',
           type: types.TEXT,
-          options: { help: 'script_report' },
+          options: {},
         },
         {
           label: 'split data script name',
           field: 'script_split_data',
           type: types.TEXT,
-          options: { help: 'script_split_data' },
+          options: {},
         },
         {
           label: 'Path to log training file',
           field: 'path_log_training',
           type: types.TEXT,
-          options: { help: 'path_log_training' },
+          options: {},
         },
         {
           label: 'Path to log test file',
           field: 'path_log_test',
           type: types.TEXT,
-          options: { help: 'path_log_test' },
+          options: {},
         },
         {
           label: 'Path to log validate file',
           field: 'path_log_validate',
           type: types.TEXT,
-          options: { help: 'path_log_validate' },
+          options: {},
         },
         {
           label: 'Path to exported model file',
           field: 'path_field_export_model',
           type: types.TEXT,
-          options: { help: 'path_file_export_model' },
+          options: {},
         },
         {
           label: 'Path to exported results file',
           field: 'path_field_export_results',
           type: types.TEXT,
-          options: { help: 'path_file_export_results' },
+          options: {},
         },
         {
           label: 'Path to exported images folder',
           field: 'path_field_export_images',
           type: types.TEXT,
-          options: { help: 'path_file_export_images' },
+          options: {},
         },
         {
           label: 'Path to train folder',
           field: 'path_train',
           type: types.TEXT,
-          options: { help: 'path_train' },
+          options: {},
         },
         {
           label: 'Path to test folder',
           field: 'path_test',
           type: types.TEXT,
-          options: { help: 'path_test' },
+          options: {},
         },
         {
           label: 'Path to validate folder',
           field: 'path_validate',
           type: types.TEXT,
-          options: { help: 'path_validate' },
+          options: {},
         },
         {
           label: 'The numbers of lines to be displayed',
           field: 'ViewLogLines',
           type: types.NUMBER,
-          options: { help: 'ViewLogLines' },
+          options: {},
+        },
+        {
+          label: 'Default epoch',
+          field: 'defaultEpoch',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Default learning rate',
+          field: 'defaultLearningRate',
+          type: types.NUMBER,
+          options: {},
+        },
+        {
+          label: 'Tenser Board Url',
+          field: 'LiveViewURL',
+          type: types.TEXT,
+          options: {},
         },
       ],
       data: {},
@@ -222,9 +339,9 @@ export default {
         path_validate: null,
         defaultEpoch: null,
         defaultLearningRate: null,
+        LiveViewURL: null,
       },
       fetchCount: 1,
-      editorText: true,
       editor: null,
     }
   },
@@ -237,7 +354,7 @@ export default {
       })
       this.fetchCount += 1
       this.data = typeof data === 'object' ? data : {}
-      if (this.editorText) {
+      if (!this.canEditConfigAIUI) {
         const container = document.getElementById('wsjsoneditor')
         const options = {
           mode: 'code',
@@ -248,7 +365,7 @@ export default {
       }
     },
     async saveFile() {
-      if (this.editorText && this.editor) {
+      if (!this.canEditConfigAIUI && this.editor) {
         this.data = this.editor.get()
       }
       const data = {
@@ -262,6 +379,11 @@ export default {
     onOpen() {
       this.loadFile()
     },
+  },
+  computed: {
+    ...mapGetters([
+      'canEditConfigAIUI',
+    ]),
   },
 }
 </script>

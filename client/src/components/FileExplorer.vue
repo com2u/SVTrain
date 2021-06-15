@@ -73,7 +73,7 @@
             </div>
           </div>
           <div v-else>
-            (select one or more files for show control buttons)
+            (Select one or more images to show defect class buttons)
           </div>
         </div>
         <div v-if="systemConfig.forwardLocation === 'right'" class="right-side-section">
