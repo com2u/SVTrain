@@ -23,6 +23,7 @@ const urls = {
   getWorkspace: `${baseurl}getWorkspace`,
   setWorkspace: `${baseurl}setWorkspace`,
   getLastLogs: `${baseurl}getLastLogs`,
+  getLogFor: `${baseurl}logs`,
   login: `${baseurl}login`,
   getConfig: `${baseurl}config`,
   getExplorerConfig: `${baseurl}explorerConfig`,
@@ -93,6 +94,7 @@ export default {
   getWorkspace: async () => (await axios.get(urls.getWorkspace)).data,
   setWorkspace: async (workspace, isDB) => (await axios.post(urls.setWorkspace, { workspace, isDB })).data,
   getLastLogs: async () => (await axios.get(urls.getLastLogs)).data,
+  getLogFor: async (filename) => (await axios.get(`${urls.getLogFor}/${filename}`)).data,
   login: async (login, password) => {
     let response = null
     try {

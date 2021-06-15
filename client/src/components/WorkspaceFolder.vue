@@ -32,7 +32,7 @@
         >{{info.name}}</span>
       </div>
       <div class="options">
-        <div class="option-progress" v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)">
+        <div class="option-progress" v-if="Number.isInteger(info.classified) && Number.isInteger(info.unclassified)" v-b-tooltip.hover title="Percentage Classified">
           <span class="file-nums option-progress-text">{{totalFiles}} files</span>
           <span class="option-progress-text" v-if="showSubFolderProgress">{{progress}}%</span>
           <b-progress :max="100" class="ws-progress" v-bind:class="{'opacity-0': !(showSubFolderProgress || depth === 0)}">
@@ -43,21 +43,21 @@
           </b-progress>
         </div>
         <div>
-          <span class="icon-wrapper">
+          <div class="icon-wrapper" v-b-tooltip.hover title="AI Statistic">
             <b-icon
               icon="bar-chart-fill"
               :class="canViewStatistics ? 'clickable-icon': 'gray-icon'"
               font-scale="1.5"
               @click="showStatistic"
             />
-          </span>
-          <span class="icon-wrapper">
+          </div>
+          <div class="icon-wrapper" v-b-tooltip.hover title="Notes">
             <svg-icon :icon-class="info.highlight ? 'note-highlight': 'note'" class="svg-icon clickable-icon"
                       :class="info.highlight ? 'highlight': ''"
                       @click="showNotes"
             />
-          </span>
-          <span v-if="canSeeConfusionMatrix" class="icon-wrapper clickable" @click="showConfusionMatrix()">
+          </div>
+          <div v-if="canSeeConfusionMatrix" class="icon-wrapper clickable" @click="showConfusionMatrix()" v-b-tooltip.hover title="Compare Workspaces">
             <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 100 103"
                  preserveAspectRatio="xMidYMid meet">
               <g transform="translate(0.000000,103.000000) scale(0.100000,-0.100000)"
@@ -79,8 +79,8 @@
                 <path d="M580 150 l0 -40 155 0 155 0 0 40 0 40 -155 0 -155 0 0 -40z"/>
               </g>
             </svg>
-          </span>
-          <span v-if="canSyncDB" class="icon-wrapper">
+          </div>
+          <div v-if="canSyncDB" class="icon-wrapper" v-b-tooltip.hover title="Convert to Database">
             <b-icon
               :animation="DBSyncing ? 'fade': undefined"
               :class="info.isDB ? 'gray-icon' : 'clickable-icon'"
@@ -88,23 +88,23 @@
               font-scale="1.5"
               @click="syncDB"
             />
-          </span>
-          <span class="icon-wrapper">
+          </div>
+          <div class="icon-wrapper" v-b-tooltip.hover title="Workspace Settings">
             <b-icon
               :class="info.config && canEditConfig ? 'clickable-icon': 'gray-icon'"
               icon="gear-fill"
               font-scale="1.5"
               @click="showConfig"
             />
-          </span>
-          <span v-if="canBackup" class="icon-wrapper">
+          </div>
+          <div v-if="canBackup" class="icon-wrapper" v-b-tooltip.hover title="Backup Workspace">
             <b-icon
               class="clickable-icon"
               icon="server"
               font-scale="1.5"
               @click="backup()"
             />
-          </span>
+          </div>
         </div>
       </div>
     </div>
@@ -296,5 +296,9 @@ export default {
 
 .b-icon-animation-fade {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.tooltip{
+  opacity: 1;
 }
 </style>

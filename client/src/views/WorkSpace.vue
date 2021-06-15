@@ -355,9 +355,8 @@ export default {
         }
 
         .icon-wrapper {
-          width: 15px;
           display: inline-block;
-          margin-right: 20px;
+          margin-right: .5rem;
 
           .svg-icon {
             font-size: 25px;

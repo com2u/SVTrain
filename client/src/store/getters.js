@@ -28,5 +28,6 @@ const getters = {
   imageFit: (state) => (state.app.explorerConfig.imageFit || 'fill').toLowerCase(),
   imageViewer: (state) => state.app.explorerConfig.imageViewer,
   showHeader: (state) => state.app.showHeader,
+  canEditConfigAIUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigAIUI,
 }
 export default getters

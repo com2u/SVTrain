@@ -23,7 +23,8 @@
     "leaveWorkspace": false,
     "editConfigAI": false,
     "ConvertToDatabase": false,
-    "canBackup": false
+    "canBackup": false,
+    "editConfigAIUI": false
   },
   "operator": {
     "editConfig": false,
@@ -44,6 +45,7 @@
     "leaveWorkspace": false,
     "editConfigAI": false,
     "ConvertToDatabase": false,
-    "canBackup": false
+    "canBackup": false,
+    "editConfigAIUI": false
   }
 }
