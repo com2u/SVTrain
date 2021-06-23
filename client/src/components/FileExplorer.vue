@@ -718,7 +718,7 @@ export default {
       this.selectedFiles = []
 
       // load data
-      const content = await api.getFiles(path, this.$route.query.to, this.type, this.$route.query.batch)
+      const content = await api.getFiles(path, this.$route.query.to, this.type, this.$route.query.batch, this.$route.query.isStatistic)
       // prepare files
       this.folder.files = content.files.map((f) => {
         f.selected = false

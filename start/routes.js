@@ -45,6 +45,7 @@ Route.group(() => {
   Route.post('/fetch-confusion-matrix', 'ExplorerController.confusionMatrix').middleware('auth')
   Route.post('/convert-to-database', 'ExplorerController.convert2DB').middleware('auth')
   Route.post('/backup', 'ExplorerController.backup').middleware('auth')
+  Route.get('/visualize-heatmap', 'ExplorerController.visualizeHeatmap').middleware('auth')
 }).prefix('api')
 Route.group(() => {
   Route.get('/:filePath*', 'FileController.download')

@@ -22,14 +22,15 @@
           :options="[{ text: 'Off', value: 1 }, { text: '2x', value: 2 }, { text: '4x', value: 4 }, { text: '8x', value: 8 }]"
         ></b-form-select>
         <b-form-select
-          v-model="magnify"
+          v-if="showModes.length"
+          v-model="showMode"
           id="inline-form-custom-select-pref"
           class="ml-4 mb-2 mr-sm-2 mb-sm-0"
-          :options="[{ text: 'Off', value: 1 }, { text: '2x', value: 2 }, { text: '4x', value: 4 }, { text: '8x', value: 8 }]"
+          :options="showModes"
         ></b-form-select>
       </b-form>
     </div>
-    <ShowImage ref="show_image" v-if="fileType===types.image" v-bind:file="file" @zoom-change="magnify = $event"/>
+    <ShowImage ref="show_image" v-if="fileType===types.image" v-bind:file="file" @zoom-change="magnify = $event" :showMode="showMode"/>
     <ShowJSON v-if="fileType===types.json" v-on:saved="closeModal" v-bind:file="file"/>
     <ShowTFSettings v-if="fileType===types.tfsettings" v-on:saved="closeModal" v-bind:file="file"/>
     <div v-if="fileType===types.unsupported">Files with that type aren't supported</div>
@@ -45,6 +46,9 @@
 </template>
 
 <script>
+import axios from 'axios'
+import { getFileServerPath } from '@/utils'
+import { mapGetters } from 'vuex'
 import ShowImage from './ShowImage.vue'
 import ShowJSON from './ShowJSON.vue'
 import ShowTFSettings from './ShowTFSettings.vue'
@@ -65,6 +69,8 @@ export default {
         unsupported: 'unsupported',
       },
       magnify: 1,
+      showMode: 'Original',
+      showModes: [],
     }
   },
   methods: {
@@ -99,11 +105,21 @@ export default {
       }
       return this.types.unsupported
     },
+    ...mapGetters(['currentWs']),
   },
   watch: {
     magnify() {
       this.$refs.show_image.options.zoomFactor = this.magnify
     },
+  },
+  async created() {
+    const ws = this.currentWs.split('/').pop()
+    await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
+      if (data) {
+        console.log(data.classes)
+        this.showModes = (data.classes || []).map((x) => ({ text: x, value: x }))
+      }
+    })
   },
 }
 </script>

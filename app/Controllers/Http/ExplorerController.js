@@ -150,7 +150,7 @@ class ExplorerController {
     }
   */
   async all({request}) {
-    let {dir, type, batch, to} = request.get();
+    let {dir, type, batch, to, isStatistic} = request.get();
     if (!dir) dir = CONST_PATHS.root
     const result = {
       folders: [],
@@ -243,7 +243,7 @@ class ExplorerController {
       }
       const files = await readdir(dir);
       let compareFiles = []
-      if (to && fs.existsSync(path.join(CONST_PATHS.root, to))) {
+      if (to && !isStatistic && fs.existsSync(path.join(CONST_PATHS.root, to))) {
         compareFiles = await readdir(path.join(CONST_PATHS.root, to));
       }
       result.folders = [];
@@ -253,7 +253,10 @@ class ExplorerController {
         && request.currentUser.permissions
         && request.currentUser.permissions.workspaces;
       for (let i = 0; i < files.length; ++i) {
-        if (to && !compareFiles.includes(files[i])) {
+        if (to && !isStatistic && !compareFiles.includes(files[i])) {
+          continue
+        }
+        if (to && isStatistic && !files[i].includes(to)) {
           continue
         }
         const f = files[i];
@@ -854,8 +857,6 @@ class ExplorerController {
                   missedFiles.push(filepath);
                 }
                 if (regexpForImages.test(f)) {
-
-
                   allFiles.push({
                     filepath,
                     isUnclassified
@@ -982,8 +983,10 @@ class ExplorerController {
       try {
         const p = path.join(Env.get('COMMAND_FILES_PATH'), cfg["path_log_training"] || Env.get('PATH_LOG_TRAINING'))
         logs = await readLastLines.read(p);
-      } catch (e) {}
-    } catch (e) {}
+      } catch (e) {
+      }
+    } catch (e) {
+    }
     return logs;
   }
 
@@ -1485,6 +1488,30 @@ class ExplorerController {
     return {
       status: "DONE"
     }
+  }
+
+  async visualizeHeatmap({request, response}) {
+    const COMMAND_FILES_PATH = Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning'))
+    const SCRIPT_VISUALIZE_HEATMAP = Env.get("SCRIPT_VISUALIZE_HEATMAP", "script-visualize-heatmap.sh")
+    const HEATMAP_FOLDER_PATH = path.join(COMMAND_FILES_PATH, "heatmaps")
+    const commandFilePath = path.join(COMMAND_FILES_PATH, SCRIPT_VISUALIZE_HEATMAP)
+    const {image} = request.get();
+    const imageHeatMapPath = path.join(HEATMAP_FOLDER_PATH, image)
+    if (await exists(imageHeatMapPath)) {
+      return response.attachment(imageHeatMapPath);
+    } else {
+      if (!await exists(commandFilePath)) {
+        logger.error(`File ${commandFilePath} doesn't exist`);
+        throw new Error(`File ${commandFilePath} doesn't exist`);
+      }
+      try {
+        await execFile(commandFilePath, [image]);
+        return response.status(200)
+      } catch (e) {
+        logger.error(`File ${commandFilePath} doesn't exist`);
+      }
+    }
+    return response.status(400)
   }
 }
 
