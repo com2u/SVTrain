@@ -14,7 +14,7 @@
       :base-zoomer-options="options"
     />
     <div v-else class="mb-4 inline-round-zoomer-base-container">
-      <img v-auth-image="file.serverPath.replaceAll('#', '{hash_tag}')" class="responsive-image" alt="">
+      <img v-auth-image="srcIMG" class="responsive-image" alt="">
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
@@ -22,10 +22,14 @@
 </template>
 
 <script>
+import { getFileServerPath } from '@/utils'
+import axios from 'axios'
+
 export default {
   name: 'ShowImage',
   props: {
     file: { type: Object, required: true },
+    showMode: { type: String, default: 'Original' },
   },
   data() {
     return {
@@ -43,6 +47,7 @@ export default {
         scroller_position: 'bottom',
       },
       zoomKey: 1,
+      srcIMG: this.file.serverPath.replaceAll('#', '{hash_tag}'),
     }
   },
   methods: {
@@ -112,6 +117,15 @@ export default {
     },
     file() {
       this.zoomKey += 1
+    },
+    async showMode() {
+      if (this.showMode === 'Original') {
+        this.srcIMG = this.file.serverPath.replaceAll('#', '{hash_tag}')
+      } else {
+        const uri = `${getFileServerPath().replace('data', 'api')}visualize-heatmap?image=${this.file.relativePath}`
+        console.log(uri)
+        this.srcIMG = await axios.get(uri).then(() => uri).catch(() => this.file.serverPath.replaceAll('#', '{hash_tag}'))
+      }
     },
   },
 }

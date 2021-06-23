@@ -38,12 +38,13 @@ const urls = {
 }
 
 export default {
-  getFiles: async (path, to, type, batch) => (await axios.get(urls.getFiles, {
+  getFiles: async (path, to, type, batch, isStatistic) => (await axios.get(urls.getFiles, {
     params: {
       dir: path,
       to,
       type,
       batch,
+      isStatistic,
     },
   })).data,
   getParent: async (path, type, batch) => (await axios.get(urls.getParentDirectory, {

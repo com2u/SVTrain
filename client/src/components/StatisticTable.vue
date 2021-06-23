@@ -82,6 +82,8 @@ export default {
       console.log(' goto dir', gotoDir)
       EventBus.$emit('statistic-folder-selected', {
         folder: gotoDir,
+        to: dir2,
+        isStatistic: true,
         filter: {
           include: dir2,
           exclude: this.exclude ? '!' : null,

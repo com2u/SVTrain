@@ -122,6 +122,7 @@ export default {
         query: {
           dir: gotoDir,
           to: item.to,
+          isStatistic: item.isStatistic,
         },
       })
     },
