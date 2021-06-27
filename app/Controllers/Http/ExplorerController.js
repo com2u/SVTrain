@@ -1001,7 +1001,11 @@ class ExplorerController {
     } else {
       file = `${file}.log`
     }
-    const stream = fs.createReadStream(path.join(Env.get('COMMAND_FILES_PATH'), file));
+    const logPath = path.join(Env.get('COMMAND_FILES_PATH'), file);
+    if (!await exists(logPath)) {
+      return ""
+    }
+    const stream = fs.createReadStream(logPath);
     response.implicitEnd = false;
     response.response.setHeader('Content-type', 'text/plain; charset=utf-8');
     stream.pipe(response.response);
