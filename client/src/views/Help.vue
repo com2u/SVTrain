@@ -433,7 +433,7 @@ export default {
   name: 'Help',
   data() {
     return {
-      version: '1.2',
+      version: '1.3',
     }
   },
 }

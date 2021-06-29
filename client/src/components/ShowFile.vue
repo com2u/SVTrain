@@ -112,12 +112,14 @@ export default {
       this.$refs.show_image.options.zoomFactor = this.magnify
     },
   },
-  async created() {
+  created() {
     const ws = this.currentWs.split('/').pop()
-    await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
+    this.showModes = [{ text: 'Original', value: 'Original' }]
+    axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
       if (data) {
-        console.log(data.classes)
-        this.showModes = (data.classes || []).map((x) => ({ text: x, value: x }))
+        const resModes = (data.classes || []).map((x) => ({ text: x, value: x }))
+        console.log(resModes)
+        this.showModes = this.showModes.concat(resModes)
       }
     })
   },
