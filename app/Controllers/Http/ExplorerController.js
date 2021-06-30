@@ -1500,6 +1500,7 @@ class ExplorerController {
     const cfg = await this.getJsonConfig(PATH_CONFIG);
     const COMMAND_FILES_PATH = Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning'))
     const SCRIPT_VISUALIZE_HEATMAP = cfg['script_visualize_heatmap'] || Env.get("SCRIPT_VISUALIZE_HEATMAP", "script-visualize-heatmap.sh")
+    const PATH_MODEL = path.join(COMMAND_FILES_PATH, cfg['path_field_export_model'] || Env.get("OUT_FILE_EXPORT_MODEL", "export_model.pb"))
     const HEATMAP_FOLDER_PATH = path.join(COMMAND_FILES_PATH, "heatmaps")
     const commandFilePath = path.join(COMMAND_FILES_PATH, SCRIPT_VISUALIZE_HEATMAP)
     const {image} = request.get();
@@ -1512,7 +1513,7 @@ class ExplorerController {
         throw new Error(`File ${commandFilePath} doesn't exist`);
       }
       try {
-        await execFile(commandFilePath, [image, PATH_CONFIG]);
+        await execFile(commandFilePath, [PATH_MODEL, image, PATH_CONFIG]);
         return response.status(200)
       } catch (e) {
         logger.error(`File ${commandFilePath} doesn't exist`);
