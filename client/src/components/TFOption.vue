@@ -218,6 +218,12 @@ export default {
           options: {},
         },
         {
+          label: 'Heatmap generation script',
+          field: 'script_visualize_heatmap',
+          type: types.TEXT,
+          options: {},
+        },
+        {
           label: 'Path to log training file',
           field: 'path_log_training',
           type: types.TEXT,
@@ -328,6 +334,7 @@ export default {
         script_export_image: null,
         script_report: null,
         script_split_data: null,
+        script_visualize_heatmap: null,
         path_log_training: null,
         path_log_test: null,
         path_log_validate: null,
