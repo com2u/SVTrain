@@ -91,7 +91,7 @@ export default {
   },
   methods: {
     fetch() {
-      api.getLogFor('training').then((res) => {
+      api.getLogFor('training.log').then((res) => {
         this.trainLog = res
       })
       if (this.workspace) {

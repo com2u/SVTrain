@@ -61,5 +61,6 @@
   "path_validate": "validate",
   "defaultEpoch": null,
   "defaultLearningRate": null,
-  "ViewLogLines": 2
+  "ViewLogLines": 2,
+  "LiveViewURL": https://ejectx.de
 }
