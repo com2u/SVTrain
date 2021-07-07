@@ -34,7 +34,7 @@
               v-html="logs[command.value].lastLine"/>
             <div style="clear: both"/>
           </div>
-          <pre class="py-4" v-html="logs.training.lastLine"></pre>
+          <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
         <t-f-option ref="modal" :ws="workspace"/>
       </b-col>
