@@ -336,7 +336,7 @@ export default {
 
         .gray-icon {
           cursor: default;
-          color: #999;
+          color: #DDD;
         }
 
         .ws-progress {

@@ -1183,6 +1183,7 @@ class ExplorerController {
       wsDB = await Workspace.findBy("no", ws)
     }
     const folders = [];
+
     if (type === 'ws') {
       const batches = (await wsDB.batches().withCount('image_defect_classes').fetch()).toJSON()
       for (let batch of batches) {
@@ -1252,27 +1253,6 @@ class ExplorerController {
       const permissions = request.currentUser
         && request.currentUser.permissions
         && request.currentUser.permissions.workspaces;
-      const queryset = (await Workspace.query().withCount('batches').fetch()).toJSON();
-      for (let ws of queryset) {
-        const images = await Database.table('image_defect_classes')
-          .innerJoin('batches', 'image_defect_classes.batch_no', 'batches.no')
-          .where("batches.work_space_no", ws.no)
-        folders.push({
-          id: ws.no,
-          name: ws.name,
-          path: ws.name,
-          hasSubFolders: Boolean(ws.__meta__.batches_count),
-          notes: ws.notes,
-          notesPath: `DB:${ws.name}`,
-          highlight: ws.highlight,
-          classified: images.length,
-          unclassified: 0,
-          isDB: true,
-          config: Object.keys(JSON.parse(ws.settings)).length ? JSON.parse(ws.settings) : config,
-          cfgPath: `DB:${ws.name}`,
-          type: 'ws'
-        })
-      }
       for (const name of files) {
         if (dir === CONST_PATHS.root) {
           if (await exists(path.join(dir, name, '.legacy'))) {
