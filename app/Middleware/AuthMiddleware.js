@@ -8,7 +8,11 @@ const {getUsers, getRoles} = require('../utils')
 
 class AuthMiddleware {
   async handle({request, response}, next, properties) {
-    let sessionToken = request.header('Authorization') || request.get().sessionToken
+    let sessionToken = request.header('Authorization') || request.get().sessionToken;
+    if (!sessionToken) {
+      let {token} = request.get()
+      sessionToken = token;
+    }
     if (!sessionToken) {
       console.log("where is sessionToken")
       response.unauthorized('LoginFirst')

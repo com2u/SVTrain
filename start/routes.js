@@ -35,6 +35,7 @@ Route.group(() => {
   Route.get('/getLastLogs', 'ExplorerController.getLastLogs').middleware('auth')
   Route.get('/logs/:file', 'ExplorerController.logsFor').middleware('auth')
   Route.post('/login', 'LoginController.login')
+  Route.post('/logout', 'LoginController.logout')
   Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
   Route.get('/explorerConfig', 'ExplorerController.getExplorerConfig').middleware('auth')
   Route.post('/forward-only', 'ExplorerController.doForwardOnly').middleware('auth')
@@ -48,7 +49,7 @@ Route.group(() => {
   Route.get('/visualize-heatmap', 'ExplorerController.visualizeHeatmap').middleware('auth')
 }).prefix('api')
 Route.group(() => {
-  Route.get('/:filePath*', 'FileController.download')
+  Route.get('/:filePath*', 'FileController.download').middleware('auth')
 }).prefix('data');
 Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))
 

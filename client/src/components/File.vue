@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     convertURIPath(p) {
-      return p.replaceAll('#', '{hash_tag}')
+      return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem('sessionToken', null)}`
     },
   },
 }
