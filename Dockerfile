@@ -11,18 +11,29 @@ RUN apk --no-cache add --virtual native-deps \
 COPY ./client /build/
 RUN yarn build
 
-FROM node:12-alpine
+FROM node:14
 
 WORKDIR /app
 
 COPY package.json .
 COPY yarn.lock .
-RUN apk --no-cache add --virtual native-deps \
-  g++ gcc libgcc libstdc++ linux-headers make python && \
-  yarn install --production && \
-  apk del native-deps
 
-RUN apk add bash curl
+RUN apt update
+RUN apt install -y python3 python3-pip bash curl
+
+# RUN apk --no-cache add --virtual native-deps \
+#   g++ gcc libgcc libstdc++ linux-headers make && \
+#   yarn install --production && \
+#   apk del native-deps
+
+RUN apt install -y g++ && yarn install --production
+
+RUN pip3 install \
+  tensorflow==1.5.0 \
+  scikit-build \
+  scikit-learn \
+  scikit-image \
+  opencv-python==4.2.0.34
 
 COPY . .
 
@@ -30,7 +41,7 @@ COPY . .
 RUN rm -rf /app/client/
 COPY --from=frontend-build /build/dist/ /app/public/
 
-RUN adduser -D svtrain
+RUN adduser --disabled-password svtrain
 RUN chown -R svtrain: .
 USER svtrain
 
