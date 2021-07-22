@@ -44,10 +44,10 @@ export default {
       this.workspace = await api.getWorkspace()
       console.log(`Workspace: ${this.workspace}`)
     },
-    async runCommand(command, ws) {
+    async runCommand(command) {
       this.isLoading[command] = true
       try {
-        await api.runCommand(command, ws)
+        await api.runCommand(command)
         await this.checkStatus()
       } catch (e) {
         console.log(e)
