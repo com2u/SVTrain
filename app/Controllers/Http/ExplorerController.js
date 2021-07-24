@@ -1489,7 +1489,8 @@ class ExplorerController {
     const PATH_MODEL = path.join(COMMAND_FILES_PATH, cfg['path_field_export_model'] || Env.get("OUT_FILE_EXPORT_MODEL", "export_model.pb"))
     const HEATMAP_FOLDER_PATH = path.join(COMMAND_FILES_PATH, "heatmaps")
     const commandFilePath = path.join(COMMAND_FILES_PATH, SCRIPT_VISUALIZE_HEATMAP)
-    const {image} = request.get();
+    let {image} = request.get();
+    image = image.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     const imageHeatMapPath = path.join(HEATMAP_FOLDER_PATH, image)
     if (await exists(imageHeatMapPath)) {
       return response.attachment(imageHeatMapPath);
