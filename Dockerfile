@@ -55,4 +55,7 @@ RUN echo '{}' > /app/sessions.json
 RUN echo '{}' > /app/users.json
 RUN echo '{}' > /app/statistic.data
 
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
 ENTRYPOINT [ "yarn", "start" ]
