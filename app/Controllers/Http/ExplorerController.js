@@ -1478,13 +1478,16 @@ class ExplorerController {
     const ws = await this.getWorkspace();
     const PATH_CONFIG = path.join(ws.toString(), '/TFSettings.json');
     const cfg = await this.getJsonConfig(PATH_CONFIG);
-    const COMMAND_FILES_PATH = Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning'))
-    const SCRIPT_VISUALIZE_HEATMAP = cfg['script_visualize_heatmap'] || Env.get("SCRIPT_VISUALIZE_HEATMAP", "script-visualize-heatmap.sh")
-    const PATH_MODEL = path.join(COMMAND_FILES_PATH, cfg['path_field_export_model'] || Env.get("OUT_FILE_EXPORT_MODEL", "export_model.pb"))
-    const HEATMAP_FOLDER_PATH = path.join(COMMAND_FILES_PATH, "heatmaps")
-    const commandFilePath = path.join(COMMAND_FILES_PATH, SCRIPT_VISUALIZE_HEATMAP)
-    const {image} = request.get();
-    const imageHeatMapPath = path.join(HEATMAP_FOLDER_PATH, image)
+    const COMMAND_FILES_PATH = Env.get('COMMAND_FILES_PATH', path.join(Env.get('ROOT_PATH'), 'DeepLearning'));
+    const SCRIPT_VISUALIZE_HEATMAP = cfg['script_visualize_heatmap'] || Env.get("SCRIPT_VISUALIZE_HEATMAP", "script-visualize-heatmap.sh");
+    // model path from config is relative to the workspace directory
+    const PATH_MODEL = path.join(ws.toString(), cfg['path_field_export_model'] || Env.get("OUT_FILE_EXPORT_MODEL", "export_model.pb"));
+    // heatmap_dir shpuld be defined with absolute path
+    const HEATMAP_FOLDER_PATH = cfg['heatmap_dir'];
+    const commandFilePath = path.join(COMMAND_FILES_PATH, SCRIPT_VISUALIZE_HEATMAP);
+    const {mode, image} = request.get();
+    const imageName = image.split("/").pop();
+    const imageHeatMapPath = path.join(HEATMAP_FOLDER_PATH,`overlay_${mode}_${imageName}.png`);
     if (await exists(imageHeatMapPath)) {
       return response.attachment(imageHeatMapPath);
     } else {
@@ -1493,10 +1496,10 @@ class ExplorerController {
         throw new Error(`File ${commandFilePath} doesn't exist`);
       }
       try {
-        await execFile(commandFilePath, [PATH_MODEL, image, PATH_CONFIG]);
-        return response.status(200)
+        await execFile(commandFilePath, [PATH_MODEL, image, PATH_CONFIG, mode]);
+        return response.attachment(imageHeatMapPath);
       } catch (e) {
-        logger.error(`File ${commandFilePath} doesn't exist`);
+        logger.error(`Problems executing ${commandFilePath}: ${e.message}`);
       }
     }
     return response.status(400)
