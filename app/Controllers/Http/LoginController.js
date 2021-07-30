@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const usersFilePath = path.join(__dirname, '../../../users.json')
 const sessionsFilePath = path.join(__dirname, '../../../sessions.json')
-const bcrypt = require('bcrypt')
+const passwordHash = require('password-hash')
 const uuid4 = require('uuid4')
 const logger = require('../../../logger');
 
@@ -24,24 +24,13 @@ class LoginController {
       response.unauthorized('Invalid password or login')
       return
     }
-    const match = await bcrypt.compare(password, users[login].passwordHash);
-    if (!match) {
+
+    if (!passwordHash.verify(password, users[login].passwordHash)) {
       response.unauthorized('Invalid password or login')
       return
     }
     logger.info(`User ${login} has logon`);
     return { login, sessionToken: await newSession(login) }
-  }
-
-  async logout({request, response}) {
-    let sessionToken = request.header('Authorization') || request.get().sessionToken
-    console.log(sessionToken);
-    let sessions = JSON.parse(await readFile(sessionsFilePath))
-    if (sessionToken &&sessions && sessions[sessionToken]) {
-      delete sessions[sessionToken]
-      await writeFile(sessionsFilePath, JSON.stringify(sessions, null, 4))
-    }
-    return response.status(204)
   }
 }
 

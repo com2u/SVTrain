@@ -77,6 +77,7 @@ export default {
       localStorage.removeItem('sessionToken')
       api.setSessionToken('')
     },
+
     calculateStatistic({ commit }) {
       commit('SET_CALCULATING', true)
       return new Promise((resolve, reject) => {
@@ -91,6 +92,7 @@ export default {
           })
       })
     },
+
   },
   getters: {
     showHeader: (state) => state.showHeader,

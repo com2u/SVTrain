@@ -25,7 +25,6 @@ const urls = {
   getLastLogs: `${baseurl}getLastLogs`,
   getLogFor: `${baseurl}logs`,
   login: `${baseurl}login`,
-  logout: `${baseurl}logout`,
   getConfig: `${baseurl}config`,
   getExplorerConfig: `${baseurl}explorerConfig`,
   forwardOnly: `${baseurl}forward-only`,
@@ -62,7 +61,11 @@ export default {
   })).data,
   getStatistic: async (path) => (await axios.get(urls.getStatistic(path))).data,
   getRunningState: async () => (await axios.get(urls.getRunningState)).data,
-  runCommand: async (command) => (await axios.get(urls.runCommand(command))).data,
+  runCommand: async (command, ws) => (await axios.get(urls.runCommand(command), {
+    params: {
+      ws,
+    },
+  })).data,
   // files array like ["/path/to/file1", "/path/to/file2"]
   deleteFiles: async (files, type, batch) => (await axios.post(urls.deleteFiles, { files }, {
     params: {
@@ -110,10 +113,7 @@ export default {
       throw e
     }
   },
-  setSessionToken: async (token) => {
-    if (!token) {
-      await axios.post(urls.logout)
-    }
+  setSessionToken: (token) => {
     axios.defaults.headers.common.Authorization = token
   },
   getConfig: async (isDB) => (await axios.get(urls.getConfig, {

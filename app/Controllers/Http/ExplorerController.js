@@ -151,11 +151,7 @@ class ExplorerController {
   */
   async all({request}) {
     let {dir, type, batch, to, isStatistic} = request.get();
-    if (!dir) {
-      dir = CONST_PATHS.root
-    } else {
-      dir = path.join(CONST_PATHS.root, dir)
-    }
+    if (!dir) dir = CONST_PATHS.root
     const result = {
       folders: [],
       files: [],
@@ -252,7 +248,7 @@ class ExplorerController {
       }
       result.folders = [];
       result.files = [];
-      result.path = dir.replace(CONST_PATHS.root, "");
+      result.path = dir;
       const permissions = request.currentUser
         && request.currentUser.permissions
         && request.currentUser.permissions.workspaces;
@@ -272,7 +268,7 @@ class ExplorerController {
               !(hasPermissionWorkspaces(f, permissions) || request.currentUser.permissions.leaveWorkspace)
             ) continue;
             const folder = {
-              path: fPath.replace(CONST_PATHS.root, ""),
+              path: fPath,
               name: f,
               type: FTYPES.folder,
               image: false,
@@ -281,7 +277,7 @@ class ExplorerController {
             result.folders.push(folder);
           } else if (flstat.isFile() && f !== iconName) {
             result.files.push({
-              path: fPath.replace(CONST_PATHS.root, ""),
+              path: fPath,
               relativePath: path.relative(CONST_PATHS.root, fPath),
               name: f,
               type: FTYPES.file,
@@ -347,6 +343,7 @@ class ExplorerController {
         }
       } catch (e) {
         logger.error(e.message);
+        console.log(e);
       }
     }
     return {
@@ -433,9 +430,6 @@ class ExplorerController {
   */
   async setWorkspace({request}) {
     const {workspace, isDB} = request.post();
-    if (!workspace) {
-      logger.error("Workspace is blank when user set new workspace");
-    }
     let workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace);
     let newWorkspace;
     if (isDB) {
@@ -521,8 +515,7 @@ class ExplorerController {
   async moveFiles(files, destination, user, isDelete = false) {
     const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination);
     if (!accessToFile(CONST_PATHS.root, destination)) {
-      logger.error(`Access denied to the directory ${destination}`)
-      throw new Error(`Access denied`);
+      throw new Error(`Access denied to the directory ${destination}`);
     }
     // skip files with no access
     files = files
@@ -594,14 +587,13 @@ class ExplorerController {
         }
       })
     } else {
-      if (!dir) {
-        logger.error(`ExplorerController.next: The "path" parameter is needed`);
-        throw new Error('The "path" parameter is needed');
-      }
+      if (!dir) throw new Error('The "path" parameter is needed');
       const parentDirectory = path.join(dir, '../');
       if (!accessToFile(CONST_PATHS.root, parentDirectory)) {
-        logger.error(`ExplorerController.next: Access denied for read next directory for folder ${dir}`);
+        logger.error(`Access denied for read next directory for folder ${dir}`);
         return [];
+        throw new Error(`Access denied for read directory ${parentDirectory}`);
+
       }
       const files = await readdir(parentDirectory);
       for (let i = 0; i < files.length; ++i) {
@@ -632,12 +624,12 @@ class ExplorerController {
   async saveFile({request}) {
     const {path, data} = request.post();
     if (!path) {
-      logger.error('ExplorerController.saveFile: The "path" parameter is needed');
+      logger.error('The "path" parameter is needed');
       throw new Error('The "path" parameter is needed');
     }
     if (!accessToFile(CONST_PATHS.root, path)) {
-      logger.error(`ExplorerController.saveFile: Access denied for saving for file ${path}`);
-      throw new Error(`Access denied`);
+      logger.error(`Access denied for saving for file ${path}`);
+      throw new Error(`Access denied for saving for file ${path}`);
     }
     if (path.includes("TFSettings.json")) {
       logger.info(`User ${request.currentUser.username} has changed the TFSettings file "${path}"`);
@@ -676,10 +668,12 @@ class ExplorerController {
     if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
       try {
         let cfg = await readFile(cfgPath, 'utf-8');
-        result.config = JSON.parse(cfg);
+        let config = JSON.parse(cfg);
+        result.config = config;
         result.cfgPath = cfgPath;
       } catch (e) {
-        logger.error(`ExplorerController.countSync: ${e.message}`);
+        console.log(e);
+        console.log(`can not read ${cfgPath}`);
       }
     }
 
@@ -719,8 +713,8 @@ class ExplorerController {
     if (!folder) throw new Error('The "folder" parameter is needed');
 
     if (!accessToFile(CONST_PATHS.root, folder)) {
-      logger.error(`ExplorerController.getSubfolders: Access denied for gettings subfolders for folder ${folder}`);
-      throw new Error(`Access denied`);
+      logger.error(`Access denied for gettings subfolders for folder ${folder}`);
+      throw new Error(`Access denied for read directory ${folder}`);
     }
 
     // const files = await readdir(folder)
@@ -747,12 +741,12 @@ class ExplorerController {
       throw new Error('The "folder" parameter is needed')
     }
     if (!accessToFile(CONST_PATHS.root, folder)) {
-      logger.error(`ExplorerController.checkFolder: Access denied to ${folder}`);
-      return 'Access denied';
+      logger.error(`Access denied to ${folder}`);
+      return 'access_denied';
     }
     const isExist = await exists(folder);
     if (!isExist) {
-      logger.error(`ExplorerController.checkFolder: ${folder} was not found`);
+      logger.error(`${folder} was not found`);
       return 'not_found';
     }
     return 'ok';
@@ -767,14 +761,14 @@ class ExplorerController {
     if (folder === 'root') {
       folder = CONST_PATHS.root;
     }
-    if (!folder || !name) throw new Error('ExplorerController.createFolder: Parameters name and folder are needed');
+    if (!folder || !name) throw new Error('Parameters name and folder are needed');
     if (!accessToFile(CONST_PATHS.root, folder)) {
-      logger.error(`ExplorerController.createFolder: ${request.currentUser.username} had\'t access to ${folder} directory`);
-      throw new Error(`Access denied`);
+      logger.error(`${request.currentUser.username} had\'t access to ${folder} directory`);
+      throw new Error(`You haven\'t access to ${folder} directory`);
     }
     if (!await exists(folder)) {
-      logger.error(`ExplorerController.createFolder: The directory ${folder} doesn't exist`);
-      throw new Error(`Doesn't exist`);
+      logger.error(`The directory ${folder} doesn't exist`);
+      throw new Error(`The directory ${folder} doesn't exist`);
     }
     const newFolderPath = path.join(folder, name);
     await mkdir(newFolderPath);
@@ -792,23 +786,23 @@ class ExplorerController {
     const command = request.params.name;
     logger.info(`User ${request.currentUser.username} has started script: "${command}"`);
     if (!CONST_PATHS.commandNames[command]) {
-      logger.error(`ExplorerController.command: Unknown command ${command}`);
-      throw new Error(`Unknown command`);
+      console.log(`Unknow command ${command}`);
+      throw new Error(`Unknow command ${command}`);
     }
-    const ws = await this.getWorkspace();
-    const wsPath = ws.toString();
-    const configPath = path.join(wsPath, '/TFSettings.json');
+    const {ws} = request.get();
+    const configPath = path.join(ws, '/TFSettings.json');
     const cfg = await this.getJsonConfig(configPath);
     const cmdName = cfg[command] || Env.get(CONST_PATHS.commandNames[command])
     const commandFilePath = path.join(Env.get('COMMAND_FILES_PATH'), cmdName);
     if (!await exists(commandFilePath)) {
-      logger.error(`ExplorerController.command: File ${commandFilePath} doesn't exist`);
-      throw new Error(`Doesn't exist`);
+      logger.error(`File ${commandFilePath} doesn't exist`);
+      throw new Error(`File ${commandFilePath} doesn't exist`);
     }
+
     try {
       await execFile(commandFilePath);
     } catch (e) {
-      logger.error(`ExplorerController.command: An error occurred when run command: ${command}`, e);
+      logger.error(`An error occurred when run command: ${command}`, e);
     }
     return true;
   }
@@ -829,6 +823,7 @@ class ExplorerController {
   */
   async calculate(context) {
     try {
+      console.log('Start calculating statistic');
       const missedFiles = [];
       const allFiles = [];
       const dirsObject = {};
@@ -906,7 +901,7 @@ class ExplorerController {
       console.log('Finish calculating statistic');
       return true;
     } catch (e) {
-      logger.error(`ExplorerController.calculate: ${e.message}`);
+      logger.error(e.message);
       throw e;
     }
   }
@@ -973,7 +968,7 @@ class ExplorerController {
       }));
       return logs;
     } catch (e) {
-      logger.error(`ExplorerController.getLastLogs: ${e.message}`);
+      logger.error(e.message);
       return logs;
     }
   }
@@ -989,10 +984,8 @@ class ExplorerController {
         const p = path.join(Env.get('COMMAND_FILES_PATH'), cfg["path_log_training"] || Env.get('PATH_LOG_TRAINING'))
         logs = await readLastLines.read(p);
       } catch (e) {
-        logger.error(`ExplorerController.getTrainLogs: ${e.message}`);
       }
     } catch (e) {
-      logger.error(`ExplorerController.getTrainLogs: ${e.message}`);
     }
     return logs;
   }
@@ -1047,7 +1040,7 @@ class ExplorerController {
         try {
           notes = await readFile(`${dir}/notes.txt`, 'utf-8');
         } catch (e) {
-          logger.error(`ExplorerController.getExplorerConfig: Notes not found`);
+          console.log('Notes not found');
         }
       }
       if (notes && notes.startsWith(highlightPrefix)) {
@@ -1124,12 +1117,12 @@ class ExplorerController {
       const user = request.currentUser.username;
       // Create delete directory if not exist
       if (!await exists(absSelectedPath)) {
-        logger.error(`ExplorerController.doForwardOnly: Folder ${absSelectedPath} does not exist, cannot move files`);
-        throw Error(`Does not exist`);
+        logger.error(`Folder ${absSelectedPath} does not exist, cannot move files`);
+        throw Error(`Folder ${absSelectedPath} does not exist, cannot move files`);
       }
       if (!await exists(absNotSelectedPath)) {
-        logger.error(`ExplorerController.doForwardOnly: Folder ${absSelectedPath} does not exist, cannot move files`);
-        throw Error(`Does not exist`);
+        logger.error(`Folder ${absSelectedPath} does not exist, cannot move files`);
+        throw Error(`Folder ${absNotSelectedPath} does not exist, cannot move files`);
       }
       const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
       const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
@@ -1141,13 +1134,10 @@ class ExplorerController {
   }
 
   async saveNotes({request, response}) {
-    const data = request.post();
-    let notes = data.notes;
-    let highlight = data.highlight;
-    let xpath = data.path;
-    xpath = path.join(CONST_PATHS.root, xpath)
-    if (xpath.startsWith("DB:")) {
-      const wsPath = xpath.replace("DB:", "")
+    const {path, highlight} = request.post();
+    let {notes} = request.post();
+    if (path.startsWith("DB:")) {
+      const wsPath = path.replace("DB:", "")
       await Workspace.query()
         .where('name', wsPath)
         .update({notes: notes, highlight: Boolean(highlight)})
@@ -1155,26 +1145,24 @@ class ExplorerController {
       if (highlight) {
         notes = `${highlightPrefix}${notes}`;
       }
-      await writeFile(xpath, notes, {encoding: 'utf8', flag: 'w'});
+      await writeFile(path, notes, {encoding: 'utf8', flag: 'w'});
     }
     return true;
   }
 
   async saveConfig({request, response}) {
-    const data = request.post();
-    let config = data.config;
-    let xpath = path.join(CONST_PATHS.root, data.path);
+    const {path, config} = request.post();
     const configStr = JSON.stringify(config);
     if (!configStr) return false;
-    if (xpath.startsWith("DB:")) {
-      const wsPath = xpath.replace("DB:", "")
+    if (path.startsWith("DB:")) {
+      const wsPath = path.replace("DB:", "")
       await Workspace.query()
         .where('name', wsPath)
         .update({settings: configStr})
     } else {
-      if (await exists(xpath)) {
-        logger.info(`User ${request.currentUser.username} has changed the .cfg file "${xpath}"`);
-        await writeFile(xpath, configStr, {encoding: 'utf8'});
+      if (await exists(path)) {
+        logger.info(`User ${request.currentUser.username} has changed the .cfg file "${path}"`);
+        await writeFile(path, configStr, {encoding: 'utf8'});
         return true;
       }
     }
@@ -1195,6 +1183,7 @@ class ExplorerController {
       wsDB = await Workspace.findBy("no", ws)
     }
     const folders = [];
+
     if (type === 'ws') {
       const batches = (await wsDB.batches().withCount('image_defect_classes').fetch()).toJSON()
       for (let batch of batches) {
@@ -1253,12 +1242,12 @@ class ExplorerController {
     } else {
       let checkPermission = dir === CONST_PATHS.root;
       if (!await exists(dir)) {
-        logger.error(`ExplorerController.getSubFolderByPath: Folder ${dir} does not exist`)
-        throw Error(`Does not exist`);
+        logger.error(`Folder ${dir} does not exist`)
+        throw Error(`Folder ${dir} does not exist`);
       }
       if (!(await lstat(dir)).isDirectory()) {
-        logger.error(`ExplorerController.getSubFolderByPath: ${dir} is not a folder`)
-        throw Error(`Not a folder`);
+        logger.error(`${dir} is not a folder`)
+        throw Error(`${dir} is not a folder`);
       }
       const files = await readdir(dir);
       const permissions = request.currentUser
@@ -1277,7 +1266,7 @@ class ExplorerController {
         if ((await lstat(subDir)).isDirectory()) {
           const file = {
             name,
-            path: subDir.replace(CONST_PATHS.root, ""),
+            path: subDir,
             hasSubFolders: await this.hasSubFolders(subDir),
             notes: '',
             notesPath: null,
@@ -1289,12 +1278,14 @@ class ExplorerController {
           if (Number.isInteger(statistic.classified)) {
             file.classified = statistic.classified;
           }
+
           if (Number.isInteger(statistic.unclassified)) {
             file.unclassified = statistic.unclassified;
           }
+
           const notesPath = path.join(subDir, 'notes.txt');
           file.notes = '';
-          file.notesPath = notesPath.replace(CONST_PATHS.root, "");
+          file.notesPath = notesPath;
           file.highlight = false;
           if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
             try {
@@ -1309,15 +1300,16 @@ class ExplorerController {
               console.log(`can not read ${notesPath}`);
             }
           }
+
           //Read Cfg
           const cfgPath = path.join(subDir, '.cfg');
           if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
             try {
               let cfg = await readFile(cfgPath, 'utf-8');
               file.config = JSON.parse(cfg);
-              file.cfgPath = cfgPath.replace(CONST_PATHS.root, "");
+              file.cfgPath = cfgPath;
             } catch (e) {
-              logger.error(`ExplorerController.getSubFolderByPath: Can not read ${cfgPath}`);
+              console.log(`Can not read ${cfgPath}`);
             }
           }
           folders.push(file);
@@ -1343,6 +1335,8 @@ class ExplorerController {
     const cog = await this.getJsonConfig(path.join(right, '.cfg'));
     const compare_folders = (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
     const active_folders = (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
+    console.log(compare_folders);
+    console.log(active_folders);
     const compare_names = compare_folders.map(x => x.name);
     const active_names = active_folders.map(x => x.name);
     let new_active_folders = []
@@ -1495,14 +1489,14 @@ class ExplorerController {
       return response.attachment(imageHeatMapPath);
     } else {
       if (!await exists(commandFilePath)) {
-        logger.error(`ExplorerController.visualizeHeatmap: File ${commandFilePath} doesn't exist`);
+        logger.error(`File ${commandFilePath} doesn't exist`);
         throw new Error(`File ${commandFilePath} doesn't exist`);
       }
       try {
         await execFile(commandFilePath, [PATH_MODEL, image, PATH_CONFIG]);
         return response.status(200)
       } catch (e) {
-        logger.error(`ExplorerController.visualizeHeatmap: File ${commandFilePath} doesn't exist`);
+        logger.error(`File ${commandFilePath} doesn't exist`);
       }
     }
     return response.status(400)
