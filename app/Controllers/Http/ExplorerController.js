@@ -1,5 +1,6 @@
 'use strict';
 const Env = use('Env');
+const kue = require('kue');
 const child_process = require("child_process");
 const Statistic = use('Statistic');
 const path = require('path');
@@ -32,6 +33,7 @@ const DefectClass = use('App/Models/DefectClass');
 const ImageDefectClass = use('App/Models/ImageDefectClass');
 const Batch = use('App/Models/Batch');
 
+const queue = kue.createQueue();
 // if file is landing under root directory
 // prevent access to that file
 const accessToFile = (root, file) => {
@@ -128,6 +130,84 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
   }
   return out
 }
+
+const calculate = async (job, done) => {
+  try {
+    const missedFiles = [];
+    const allFiles = [];
+    const dirsObject = {};
+    const ignoreFunc = (_, lstat) => !lstat.isDirectory();
+    const dirs = await recursive(CONST_PATHS.root);
+    await Promise.all(
+      dirs.map(async dir => {
+        let dirname = path.basename(dir);
+        let files = await readdir(dir);
+        const subfolders = [];
+        dirsObject[dir] = {
+          missed: 0,
+          matched: 0,
+          missmatched: 0,
+          classified: 0,
+          unclassified: 0
+        };
+        // count matches | missmatches
+        await Promise.all(
+          files.map(async f => {
+            let filepath = path.join(dir, f);
+            const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
+            const stats = await lstat(filepath);
+            if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
+              if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
+                dirsObject[dir].matched++;
+              } else {
+                dirsObject[dir].missmatched++;
+                missedFiles.push(filepath);
+              }
+              if (regexpForImages.test(f)) {
+                allFiles.push({
+                  filepath,
+                  isUnclassified
+                });
+              }
+            }
+            if (stats.isDirectory()) {
+              subfolders.push(f);
+            }
+          }) // end of map function for all files
+        ); // end of promise for all files
+        try {
+          dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
+        } catch (e) {
+          console.log(e);
+        }
+      })
+    );
+    Object.keys(dirsObject).forEach(dir => {
+      dirsObject[dir].missed = missedFiles.filter(
+        f => path.basename(f).toLowerCase().indexOf(path.basename(dir).toLowerCase()) > -1
+      ).length;
+      for (let file of allFiles) {
+        const dirLength = dir.length;
+        if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
+          if (file.isUnclassified) {
+            dirsObject[dir].unclassified += 1;
+          } else {
+            dirsObject[dir].classified += 1;
+          }
+        }
+      }
+      Statistic.write(dir, dirsObject[dir]);
+    });
+    await Statistic.save();
+    done()
+    return true;
+  } catch (e) {
+    logger.error(`ExplorerController.calculate: ${e.message}`);
+    throw e;
+  }
+}
+
+queue.process('asyncCalculate', 1, calculate)
 
 class ExplorerController {
   /*
@@ -827,88 +907,11 @@ class ExplorerController {
     GET /calculateStatistic
     Run process for calculate statistic for each folder
   */
-  async calculate(context) {
-    try {
-      const missedFiles = [];
-      const allFiles = [];
-      const dirsObject = {};
-      const ignoreFunc = (_, lstat) => !lstat.isDirectory();
-      const dirs = await recursive(CONST_PATHS.root);
-      // dirs.unshift(CONST_PATHS.root)
-
-      await Promise.all(
-        dirs.map(async dir => {
-          let dirname = path.basename(dir);
-          let files = await readdir(dir);
-          const subfolders = [];
-          dirsObject[dir] = {
-            missed: 0,
-            matched: 0,
-            missmatched: 0,
-            classified: 0,
-            unclassified: 0
-          };
-          // count matches | missmatches
-          await Promise.all(
-            files.map(async f => {
-              let filepath = path.join(dir, f);
-              const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
-              const stats = await lstat(filepath);
-              if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
-                if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
-                  dirsObject[dir].matched++;
-                } else {
-                  dirsObject[dir].missmatched++;
-                  missedFiles.push(filepath);
-                }
-                if (regexpForImages.test(f)) {
-                  allFiles.push({
-                    filepath,
-                    isUnclassified
-                  });
-                }
-              }
-              if (stats.isDirectory()) {
-                subfolders.push(f);
-              }
-            }) // end of map function for all files
-          ); // end of promise for all files
-
-          try {
-            dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
-          } catch (e) {
-            console.log(e);
-          }
-        }) // end map function for all dirs
-      ); // end of promise for all dirs
-
-      Object.keys(dirsObject).forEach(dir => {
-        dirsObject[dir].missed = missedFiles.filter(
-          f => path.basename(f).toLowerCase().indexOf(path.basename(dir).toLowerCase()) > -1
-        ).length;
-
-        for (let file of allFiles) {
-          const dirLength = dir.length;
-          if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
-            if (file.isUnclassified) {
-              dirsObject[dir].unclassified += 1;
-            } else {
-              dirsObject[dir].classified += 1;
-            }
-          }
-        }
-
-        Statistic.write(dir, dirsObject[dir]);
-      });
-
-      await Statistic.save();
-      // await this.timeOutData(10000)
-      console.log('Finish calculating statistic');
-      return true;
-    } catch (e) {
-      logger.error(`ExplorerController.calculate: ${e.message}`);
-      throw e;
-    }
+  async calculate({request, response}) {
+    queue.create('asyncCalculate', {}).save(function(error) {
+      if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
+    });
+    return true
   }
 
   timeOutData(s = 5000) {
