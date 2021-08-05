@@ -34,14 +34,14 @@ class LoginController {
   }
 
   async logout({request, response}) {
-    let sessionToken = request.header('Authorization') || request.get().sessionToken
-    console.log(sessionToken);
-    let sessions = JSON.parse(await readFile(sessionsFilePath))
-    if (sessionToken &&sessions && sessions[sessionToken]) {
+    const sessionToken = request.header('Authorization') || request.get().sessionToken
+    const f = await readFile(sessionsFilePath);
+    let sessions = JSON.parse(f.toString());
+    if (sessionToken && sessions && sessions[sessionToken]) {
       delete sessions[sessionToken]
       await writeFile(sessionsFilePath, JSON.stringify(sessions, null, 4))
     }
-    return response.status(204)
+    return true
   }
 }
 

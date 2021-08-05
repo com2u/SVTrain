@@ -1190,6 +1190,8 @@ class ExplorerController {
     let {dir, type, ws} = request.get()
     if (!dir) {
       dir = CONST_PATHS.root
+    } else {
+      dir = path.join(CONST_PATHS.root, dir)
     }
     let wsDB
     if (type === 'ws') {
@@ -1344,8 +1346,8 @@ class ExplorerController {
     const {left, right} = request.post();
     logger.info(`User ${request.currentUser.username} has compared workspace between ${left} and ${right}`);
     const cog = await this.getJsonConfig(path.join(right, '.cfg'));
-    const compare_folders = (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-    const active_folders = (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
+    const compare_folders = (await folderTravel(path.join(CONST_PATHS.root, left), true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+    const active_folders = (await folderTravel(path.join(CONST_PATHS.root, right), true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
     const compare_names = compare_folders.map(x => x.name);
     const active_names = active_folders.map(x => x.name);
     let new_active_folders = []

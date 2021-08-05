@@ -83,7 +83,7 @@ export default {
     async load(dir) {
       this.isLoading = true
       let left = dir
-      let right = this.$store.state.app.config.wsPath
+      let right = this.$store.getters.currentWs
       if (this.subPaths.length) {
         const subPath = this.subPaths.join('/')
         left = `${left}/${subPath}`
