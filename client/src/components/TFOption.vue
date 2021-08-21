@@ -4,9 +4,13 @@
       <div id="wsjsoneditor" style="height: 400px;"/>
     </template>
     <template v-else>
-      <s-field v-for="schema in schemas" :key="`${schema.field}-${fetchCount}`"
-               :schema="schema" :value="data[schema.field]"
-               @input="data[schema.field] = $event"/>
+      <template v-for="schema in schemas">
+        <s-field
+          v-if="canEditConfigFullAIUI || limitAIUI.includes(schema.field)"
+          :key="`${schema.field}-${fetchCount}`"
+          :schema="schema" :value="data[schema.field]"
+          @input="data[schema.field] = $event"/>
+      </template>
     </template>
     <template v-slot:modal-footer>
       <b-button variant="primary" @click="saveFile">Save</b-button>
@@ -36,6 +40,16 @@ export default {
   },
   data() {
     return {
+      limitAIUI: [
+        'max_train_steps',
+        'classes',
+        'batch_size',
+        'input_width',
+        'input_height',
+        'input_depth',
+        'ViewLogLines',
+        'heatmap_types',
+      ],
       schemas: [
         {
           label: 'Max Train Steps',
@@ -78,6 +92,19 @@ export default {
           field: 'input_depth',
           type: types.NUMBER,
           options: {},
+        },
+        {
+          label: 'Heatmap types',
+          field: 'heatmap_types',
+          type: types.SELECT,
+          options: {
+            dataset: [
+              {
+                value: 'overlay',
+                label: 'Overlay',
+              },
+            ],
+          },
         },
         {
           label: 'Augmentation noise std',
@@ -166,6 +193,24 @@ export default {
         {
           label: 'Validate script name',
           field: 'script_validate',
+          type: types.TEXT,
+          options: {},
+        },
+        {
+          label: 'Cleanup',
+          field: 'script_training2',
+          type: types.TEXT,
+          options: {},
+        },
+        {
+          label: 'Prepare Data',
+          field: 'script_test2',
+          type: types.TEXT,
+          options: {},
+        },
+        {
+          label: 'Backup',
+          field: 'script_validate2',
           type: types.TEXT,
           options: {},
         },
@@ -326,6 +371,9 @@ export default {
         script_training: null,
         script_test: null,
         script_validate: null,
+        script_training2: null,
+        script_test2: null,
+        script_validate2: null,
         script_stop_training: null,
         script_stop_test: null,
         script_stop_validation: null,
@@ -390,6 +438,7 @@ export default {
   computed: {
     ...mapGetters([
       'canEditConfigAIUI',
+      'canEditConfigFullAIUI',
     ]),
   },
 }

@@ -4,7 +4,7 @@
       <b-col>
         <div class="title-container">
           <div>
-            <h4>SVTrain v1.2</h4>
+            <h4>SVTrain</h4>
           </div>
         </div>
         <div class="cmd-main-menu">
@@ -15,25 +15,27 @@
             <v-icon name="cogs"/>
             <span class="ml-2">Settings</span>
           </b-button>
-          <div v-for="command in commands" :key="command.value" class="cmd">
-            <b-button
-              class="svtrain-cmd-btn"
-              :class="command.value === 'script_stop_training' ? 'btn-stop-command' : 'btn-command'"
-              v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_training' && !running || command.value !== 'script_stop_training' && !!running"
-              v-on:click="runCommand(command.value, workspace)">
-              <v-icon v-if="!command.icon" v-bind:name="command.value === 'script_stop_training' ? 'stop' : 'play'"/>
-              <svg-icon v-else :icon-class="command.icon"></svg-icon>
-              <span class="ml-2">{{command.label}}</span>
-            </b-button>
-            <span v-if="isLoading[command.value]">Running...</span>
-            <pre
-              style="padding-left: 10px"
-              v-if="logs[command.value] && logs[command.value].lastLine"
-              class="log-line"
-              @click="openLogsFor(command.value)"
-              v-html="logs[command.value].lastLine"/>
-            <div style="clear: both"/>
-          </div>
+          <template v-for="command in commands">
+            <div v-if="aiOptions[command.value]" :key="command.value" class="cmd">
+              <b-button
+                class="svtrain-cmd-btn"
+                :class="command.value === 'script_stop_training' ? 'btn-stop-command' : 'btn-command'"
+                v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_training' && !running || command.value !== 'script_stop_training' && !!running"
+                v-on:click="runCommand(command.value, workspace)">
+                <v-icon v-if="!command.icon" v-bind:name="command.value === 'script_stop_training' ? 'stop' : 'play'"/>
+                <svg-icon v-else :icon-class="command.icon"></svg-icon>
+                <span class="ml-2">{{command.label}}</span>
+              </b-button>
+              <span v-if="isLoading[command.value]">Running...</span>
+              <pre
+                style="padding-left: 10px"
+                v-if="logs[command.value] && logs[command.value].lastLine"
+                class="log-line"
+                @click="openLogsFor(command.value)"
+                v-html="logs[command.value].lastLine"/>
+              <div style="clear: both"/>
+            </div>
+          </template>
           <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
         <t-f-option ref="modal" :ws="workspace"/>
@@ -79,6 +81,10 @@ export default {
           value: 'script_stop_training',
           label: 'Stop running train',
         },
+        {
+          value: 'script_training2',
+          label: 'Cleanup',
+        },
       ],
       trainLog: null,
       tenserBoard: null,
@@ -90,13 +96,13 @@ export default {
     ]),
   },
   methods: {
-    fetch() {
-      api.getLogFor('training.log').then((res) => {
+    async fetch(flag) {
+      await api.getLogFor('training.log').then((res) => {
         this.trainLog = res
       })
-      if (this.workspace) {
+      if (this.workspace && flag) {
         const ws = this.workspace.split('/').pop()
-        axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
+        await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
           if (data) {
             this.tenserBoard = data.LiveViewURL
           }
@@ -109,11 +115,12 @@ export default {
   },
   watch: {
     workspace() {
-      this.fetch()
+      this.fetch(true)
     },
   },
   mounted() {
-    this.fetch()
+    this.fetch(true)
+    setInterval(this.fetch, 2000)
   },
 }
 </script>

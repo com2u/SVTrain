@@ -24,7 +24,8 @@
     "editConfigAI": false,
     "ConvertToDatabase": false,
     "canBackup": false,
-    "editConfigAIUI": false
+    "editConfigAIUI": false,
+    "editConfigFullAIUI": false
   },
   "operator": {
     "editConfig": false,
@@ -46,6 +47,7 @@
     "editConfigAI": false,
     "ConvertToDatabase": false,
     "canBackup": false,
-    "editConfigAIUI": false
+    "editConfigAIUI": false,
+    "editConfigFullAIUI": false
   }
 }

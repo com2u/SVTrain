@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h2>Login to SVTrain</h2>
+    <h2>Login to SVTrain 1.4.1</h2>
     <div class="login-form">
       <ul>
         <li>
@@ -71,8 +71,8 @@ export default {
         localStorage.setItem('sessionToken', data.sessionToken)
         localStorage.setItem('sessionUser', data.login)
         // this.$store.dispatch('app/setUser', data.login);
-        api.setSessionToken(data.sessionToken)
-        this.$router.push({ name: 'WorkSpacePage' })
+        await api.setSessionToken(data.sessionToken)
+        await this.$router.push({ name: 'WorkSpacePage' })
         // window.location.reload()
         this.loading = false
       } catch (e) {

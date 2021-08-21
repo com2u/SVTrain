@@ -1,9 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="title-container">
-      <div>
-        <h2>SVTrain v0.11</h2>
-      </div>
+      <div></div>
       <div>
         <b-button variant="dark" @click="gotoWorkspace">Workspace List</b-button>
       </div>

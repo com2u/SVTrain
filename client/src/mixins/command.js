@@ -1,4 +1,6 @@
 import { mapGetters } from 'vuex'
+import axios from 'axios'
+import { getFileServerPath } from '@/utils'
 import api from '../utils/api'
 import socket from '../utils/socket.js'
 
@@ -28,6 +30,7 @@ export default {
       commands: [],
       twoLogLines: null,
       status: null,
+      aiOptions: {},
     }
   },
   computed: {
@@ -56,6 +59,10 @@ export default {
     },
   },
   async created() {
+    const ws = this.currentWs.split('/').pop()
+    await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
+      this.aiOptions = data
+    })
     this.sessionUser = localStorage.getItem('sessionUser')
     await this.checkStatus()
     await this.checkWorkspace()

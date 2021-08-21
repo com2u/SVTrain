@@ -20,10 +20,10 @@ router.beforeEach(async (to, from, next) => {
     } else {
       if (!config.user) {
         try {
-          api.setSessionToken(token)
+          await api.setSessionToken(token)
           config = await api.getConfig()
-          store.dispatch('app/setConfig', config)
-          store.dispatch('app/setUser', config.user)
+          await store.dispatch('app/setConfig', config)
+          await store.dispatch('app/setUser', config.user)
           EventBus.$emit('loaded-config')
         } catch (e) {
           next('/login')
