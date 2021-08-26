@@ -5,24 +5,40 @@ export default {
   data: () => ({
     message: 'important message',
   }),
-  async beforeCreate() {
-    const waitConnection = () => new Promise((resolve, reject) => {
-      let time = 0
-      const interval = setInterval(() => {
-        if (socket.isConnected()) {
-          clearInterval(interval)
-          resolve(true)
-        } else {
-          time += 100
-          if (time >= 10000) {
+  methods: {
+    async initSocket() {
+      const waitConnection = () => new Promise((resolve, reject) => {
+        let time = 0
+        const interval = setInterval(() => {
+          if (socket.isConnected()) {
             clearInterval(interval)
-            reject(Error('Timeout error with connecting to the server socker'))
+            resolve(true)
+          } else {
+            time += 100
+            if (time >= 10000) {
+              clearInterval(interval)
+              reject(Error('Timeout error with connecting to the server socker'))
+            }
           }
-        }
-      }, 100)
-    })
-    socket.init()
-    await waitConnection()
+        }, 100)
+      })
+      await socket.init()
+      await waitConnection()
+    },
+  },
+  async mounted() {
+    if (this.$store.state.app.user.username) {
+      await this.initSocket()
+    }
+  },
+  watch: {
+    // eslint-disable-next-line func-names
+    '$store.state.app.user': async function () {
+      if (this.$store.state.app.user.username) {
+        console.log('a')
+        await this.initSocket()
+      }
+    },
   },
 }
 </script>

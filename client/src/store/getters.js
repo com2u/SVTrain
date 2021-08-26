@@ -29,5 +29,6 @@ const getters = {
   imageViewer: (state) => state.app.explorerConfig.imageViewer,
   showHeader: (state) => state.app.showHeader,
   canEditConfigAIUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigAIUI,
+  canEditConfigFullAIUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigFullAIUI,
 }
 export default getters

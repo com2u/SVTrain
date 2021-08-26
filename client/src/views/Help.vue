@@ -1,4 +1,4 @@
-<template>
+<div>
   <div>
     <div>
       <div>
@@ -6,8 +6,6 @@
         <p class="Zwischenüberschrift" style="text-align: center;">
           <img class="img-title" src="../assets/logo-ejectx_338x141.png" style="width: 338px;height: 141px;"/>
         </p>
-        <p class="title" style="text-align: center;font-size: 18pt;">Version <span
-          class="GeneralSVO version">{{ version }}</span></p>
         <h1>Table of Contents</h1>
         <p><a href="#Getting-started">Getting started</a></p>
         <p><a href="#Work_Spaces">Work Spaces</a></p>
@@ -258,7 +256,6 @@
         <p>→ Click on the corresponding class.</p>
         <p>→ The selected image(s) are moved to the corresponding folder.</p>
         <p>→ The page refreshes automatically so that it displays only the unclassified images.</p>
-
         <p><a name="Confirm_Method"></a><b>Classification by confirming defects on images - "Confirm Metod"</b></p>
         <p>This method is used when the input images are structured and have been preselected according to defect
           classes.
@@ -428,6 +425,7 @@
   </div>
   </div>
 </template>
+
 <script>
 export default {
   name: 'Help',

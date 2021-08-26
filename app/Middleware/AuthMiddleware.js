@@ -1,10 +1,13 @@
 const fs = require('fs')
 const { promisify } = require("util")
+const axios = require("axios")
 const readFile = promisify(fs.readFile)
 const exists = promisify(fs.exists)
 const path = require('path')
 const sessionsFilePath = path.join(__dirname, '../../sessions.json')
-const {getUsers, getRoles} = require('../utils')
+const {getRoles} = require('../utils')
+
+const KEYCLOAK_URI = process.env.KEYCLOAK_URI
 
 class AuthMiddleware {
   async handle({request, response}, next, properties) {
@@ -13,77 +16,61 @@ class AuthMiddleware {
       let {token} = request.get()
       sessionToken = token;
     }
-    if (!sessionToken) {
-      console.log("where is sessionToken")
-      response.unauthorized('LoginFirst')
-      return
-    }
-    if (!await exists(sessionsFilePath)) {
-      console.log('sessions file is empty')
-      response.unauthorized('InvalidToken')
-      return
-    }
-    let sessions = JSON.parse(await readFile(sessionsFilePath))
-    if (!sessions[sessionToken]) {
-      console.log('token doesn exist')
-      response.unauthorized('InvalidToken')
-      return
-    }
-    if (Date.now() > sessions[sessionToken].expiredTime) {
-      console.log('expired')
-      response.unauthorized('InvalidToken')
-      return
-    }
-    const username = sessions[sessionToken].login
-    let user = getUsers()
-    if (!user[username]) {
-      response.unauthorized('UserNotExist')
-      return
-    }
-    const role = user[username].role
-    const permissions = getRoles()[role]
-    if (properties.length) {
-      for (const permission of properties) {
-        response.unauthorized('PermissionDenied')
-        return
+    if (sessionToken) {
+      let user = await axios.get(
+        `${KEYCLOAK_URI}/userinfo`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        }
+      ).then(res => res.data).catch(() => {
+        return null
+      })
+      if (user) {
+        const role = user["roles"].length ? user["roles"][0] : null
+        if (role) {
+          const permissions = getRoles()[role]
+          if (properties.length) {
+            for (const permission of properties) {
+              response.unauthorized('PermissionDenied')
+              return
+            }
+          }
+          request.currentUser = {
+            username: user["preferred_username"],
+            role,
+            permissions
+          }
+          await next()
+          return
+        }
       }
     }
-    request.currentUser = {
-      username,
-      role,
-      permissions
-    }
-    await next()
+    response.unauthorized('LoginFirst')
   }
 
   async wsHandle({request, response}, next) {
     let {sessionToken} = request.get()
     if (!sessionToken) {
-      console.log("ws where is sessionToken")
       throw new Error('LoginFirst')
-      next(new Error('LoginFirst'))
-      return
+    } else {
+      let user = await axios.get(
+        `${KEYCLOAK_URI}/userinfo`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        }
+      ).then(res => res.data).catch(() => {
+        return null
+      })
+      if (!user) {
+        throw new Error('LoginFirst')
+      }
     }
-    if (!await exists(sessionsFilePath)) {
-      console.log('ws sessions file is empty')
-      throw new Error('LoginFirst')
-      next(new Error('InvalidToken'))
-      return
-    }
-    let sessions = JSON.parse(await readFile(sessionsFilePath))
-    if (!sessions[sessionToken]) {
-      console.log('ws token doesn exist')
-      throw new Error('LoginFirst')
-      next(new Error('InvalidToken'))
-      return
-    }
-    if (Date.now() > sessions[sessionToken].expiredTime) {
-      console.log('ws expired')
-      throw new Error('LoginFirst')
-      next(new Error('InvalidToken'))
-      return
-    }
-    await next()
   }
 }
 

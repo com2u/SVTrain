@@ -15,8 +15,9 @@ const writeFile = promisify(fs.writeFile);
 const rename = promisify(fs.rename);
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
-const readFile = promisify(fs.readFile)
-const copyFile = promisify(fs.copyFile)
+const readFile = promisify(fs.readFile);
+const copyFile = promisify(fs.copyFile);
+const unlinkSync = promisify(fs.unlinkSync)
 const readLastLines = require('read-last-lines');
 const config = require('../../../config/ui');
 const logger = require('../../../logger');
@@ -133,6 +134,11 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
 
 const calculate = async (job, done) => {
   try {
+    let data = {}
+    const usersFilePath = path.join(__dirname, '../../../statistic.data')
+    if (await exists(usersFilePath)) {
+      data = JSON.parse(await readFile(usersFilePath))
+    }
     const missedFiles = [];
     const allFiles = [];
     const dirsObject = {};
@@ -140,45 +146,50 @@ const calculate = async (job, done) => {
     const dirs = await recursive(CONST_PATHS.root);
     await Promise.all(
       dirs.map(async dir => {
-        let dirname = path.basename(dir);
-        let files = await readdir(dir);
-        const subfolders = [];
-        dirsObject[dir] = {
-          missed: 0,
-          matched: 0,
-          missmatched: 0,
-          classified: 0,
-          unclassified: 0
-        };
-        // count matches | missmatches
-        await Promise.all(
-          files.map(async f => {
-            let filepath = path.join(dir, f);
-            const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
-            const stats = await lstat(filepath);
-            if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
-              if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
-                dirsObject[dir].matched++;
-              } else {
-                dirsObject[dir].missmatched++;
-                missedFiles.push(filepath);
+        if (await exists(path.join(dir, '.statistics')) && data && data[dir]) {
+          dirsObject[dir] = data[dir];
+        } else {
+          let dirname = path.basename(dir);
+          let files = await readdir(dir);
+          const subfolders = [];
+          dirsObject[dir] = {
+            missed: 0,
+            matched: 0,
+            missmatched: 0,
+            classified: 0,
+            unclassified: 0
+          };
+          // count matches | missmatches
+          await Promise.all(
+            files.map(async f => {
+              let filepath = path.join(dir, f);
+              const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
+              const stats = await lstat(filepath);
+              if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
+                if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
+                  dirsObject[dir].matched++;
+                } else {
+                  dirsObject[dir].missmatched++;
+                  missedFiles.push(filepath);
+                }
+                if (regexpForImages.test(f)) {
+                  allFiles.push({
+                    filepath,
+                    isUnclassified
+                  });
+                }
               }
-              if (regexpForImages.test(f)) {
-                allFiles.push({
-                  filepath,
-                  isUnclassified
-                });
+              if (stats.isDirectory()) {
+                subfolders.push(f);
               }
-            }
-            if (stats.isDirectory()) {
-              subfolders.push(f);
-            }
-          }) // end of map function for all files
-        ); // end of promise for all files
-        try {
-          dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
-        } catch (e) {
-          console.log(e);
+            }) // end of map function for all files
+          ); // end of promise for all files
+          try {
+            dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
+          } catch (e) {
+            console.log(e);
+          }
+          await writeFile(path.join(dir, '.statistics'), '', {encoding: 'utf8', flag: 'w'});
         }
       })
     );
@@ -605,18 +616,22 @@ class ExplorerController {
       throw new Error(`Access denied`);
     }
     // skip files with no access
-    files = files
-      .filter(
-        f => accessToFile(CONST_PATHS.root, f)
-      );
+    files = files.filter(f => accessToFile(CONST_PATHS.root, f));
     await Promise.all(
       files.map(
-        async f => await rename(
-          f,
-          path.join(absDestination, path.basename(f))
-        )
+        async f => {
+          const fileF = f.split("/");
+          fileF.pop()
+          if (await exists(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"))) {
+            await unlinkSync(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"))
+          }
+          await rename(f, path.join(absDestination, path.basename(f)))
+        }
       )
     );
+    if (await exists(path.join(destination, ".statistics"))) {
+      await unlinkSync(path.join(destination, ".statistics"))
+    }
     if (isDelete) {
       for (const file of files) {
         logger.info(`User ${user} has deleted file: "${file}"`);
@@ -1190,6 +1205,8 @@ class ExplorerController {
     let {dir, type, ws} = request.get()
     if (!dir) {
       dir = CONST_PATHS.root
+    } else {
+      dir = path.join(CONST_PATHS.root, dir)
     }
     let wsDB
     if (type === 'ws') {
@@ -1344,8 +1361,8 @@ class ExplorerController {
     const {left, right} = request.post();
     logger.info(`User ${request.currentUser.username} has compared workspace between ${left} and ${right}`);
     const cog = await this.getJsonConfig(path.join(right, '.cfg'));
-    const compare_folders = (await folderTravel(left, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-    const active_folders = (await folderTravel(right, true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
+    const compare_folders = (await folderTravel(path.join(CONST_PATHS.root, left), true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+    const active_folders = (await folderTravel(path.join(CONST_PATHS.root, right), true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
     const compare_names = compare_folders.map(x => x.name);
     const active_names = active_folders.map(x => x.name);
     let new_active_folders = []

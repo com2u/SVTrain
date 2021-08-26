@@ -28,14 +28,14 @@ const urls = {
   logout: `${baseurl}logout`,
   getConfig: `${baseurl}config`,
   getExplorerConfig: `${baseurl}explorerConfig`,
-  forwardOnly: `${baseurl}forward-only`,
+  forwardOnly: `${baseurl}forwardOnly`,
   saveNotes: `${baseurl}notes`,
-  saveConfig: `${baseurl}save-config`,
-  listStatistics: `${baseurl}list-statistics`,
-  confusionMatrix: `${baseurl}fetch-confusion-matrix`,
-  syncDB: `${baseurl}convert-to-database`,
+  saveConfig: `${baseurl}saveConfig`,
+  listStatistics: `${baseurl}listStatistics`,
+  confusionMatrix: `${baseurl}fetchConfusionMatrix`,
+  syncDB: `${baseurl}convertToDatabase`,
   backup: `${baseurl}backup`,
-  getFoldersByPath: `${baseurl}get-folders`,
+  getFoldersByPath: `${baseurl}getFolders`,
 }
 
 export default {

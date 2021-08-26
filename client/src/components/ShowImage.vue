@@ -123,7 +123,7 @@ export default {
         this.srcIMG = this.file.serverPath.replaceAll('#', '{hash_tag}')
       } else {
         const path = this.file.relativePath.replaceAll('#', '{hash_tag}')
-        const uri = `${getFileServerPath().replace('data', 'api')}visualize-heatmap?image=${path}`
+        const uri = `${getFileServerPath().replace('data', 'api')}visualizeHeatmap?image=${path}`
         this.srcIMG = await axios.get(uri).then(() => uri).catch(() => this.file.serverPath.replaceAll('#', '{hash_tag}'))
       }
     },
