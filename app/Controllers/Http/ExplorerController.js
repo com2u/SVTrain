@@ -34,7 +34,12 @@ const DefectClass = use('App/Models/DefectClass');
 const ImageDefectClass = use('App/Models/ImageDefectClass');
 const Batch = use('App/Models/Batch');
 
-const queue = kue.createQueue();
+const queue = kue.createQueue({
+  redis: {
+    port: process.env.REDIS_PORT || 6379,
+    host: process.env.REDIS_HOSTNAME || "localhost",
+  }
+});
 // if file is landing under root directory
 // prevent access to that file
 const accessToFile = (root, file) => {
