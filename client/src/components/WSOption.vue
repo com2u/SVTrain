@@ -295,6 +295,14 @@ export default {
             help: 'Path to define the backup location',
           },
         },
+        {
+          label: 'Invert Image',
+          field: 'imageInvert',
+          type: types.BOOLEAN,
+          options: {
+            help: 'This switch will invert the displayed image colors',
+          },
+        },
       ],
       data: {
         ...cloneDeep(this.value),
