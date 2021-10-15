@@ -47,6 +47,12 @@ Route.group(() => {
   Route.post('/convertToDatabase', 'ExplorerController.convert2DB').middleware('auth')
   Route.post('/backup', 'ExplorerController.backup').middleware('auth')
   Route.get('/visualizeHeatmap', 'ExplorerController.visualizeHeatmap').middleware('auth')
+  // NEW
+  Route.get('/sample-config', 'ExplorerController.sampleConfig').middleware('auth')
+  Route.post('/sample-config', 'ExplorerController.sampleConfig').middleware('auth')
+  Route.get('/system-log', 'ExplorerController.systemLog').middleware('auth')
+  Route.get('/backup-list', 'ExplorerController.backupList').middleware('auth')
+  Route.post('/restore-backup', 'ExplorerController.restoreBackup').middleware('auth')
 }).prefix('api')
 Route.group(() => {
   Route.get('/:filePath*', 'FileController.download').middleware('auth')

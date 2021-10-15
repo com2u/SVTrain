@@ -35,6 +35,16 @@ const routes = [
         component: () => import('../views/Help'),
       },
       {
+        name: 'AdminPage',
+        path: '/admin',
+        component: () => import('../views/Admin'),
+      },
+      {
+        name: 'BackupPage',
+        path: '/backup',
+        component: () => import('../views/Backup'),
+      },
+      {
         name: 'WorkSpacePage',
         path: '/',
         component: () => import('../views/WorkSpace'),

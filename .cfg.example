@@ -5,23 +5,38 @@
     "margin": 5,
     "fontSize": "1rem"
   },
-  "filePerPage": 3,
+  "filePerPage": 25,
   "showFileName": true,
   "useShortcuts": true,
   "requestBeforeDelete": true,
-  "defaultPictureSize": 200,
+  "defaultPictureSize": {
+    "width": 200,
+    "height": 200
+  },
   "deleteDefaultFolder": "Deleted_files",
   "selectedPath": "Selected_new",
   "notSelectedPath": "Not_Selected",
   "forwardOnly": true,
   "buttonFontSize": "1rem",
   "titleFontSize": "1rem",
+  "defaultEpoch": 1,
+  "defaultLearningRate": 1,
   "forwardLocaltion": "right",
-  "moveMenu": false,
+  "moveMenu": true,
   "newFolder": true,
   "newWorkspace": true,
   "showNavigationIcon": true,
-  "imageFit": "fit",
+  "imageFit": "fill",
   "imageViewer": true,
-  "imageStorage: "ws"
+  "CMExtensions": [
+    "jpg",
+    "png",
+    "bmp"
+  ],
+  "showSubFolderProgress": true,
+  "forwardLocation": "top",
+  "editExplorerNotes": false,
+  "imgContrast": "150",
+  "imgBrightness": "75",
+  "imageInvert": false
 }

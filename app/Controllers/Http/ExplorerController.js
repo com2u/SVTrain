@@ -23,7 +23,8 @@ const config = require('../../../config/ui');
 const logger = require('../../../logger');
 const pathSep = path.sep;
 const Database = use('Database')
-const defaultCfgPath = path.join(__dirname, '../../../default.cfg');
+const defaultCfgPath = path.join(__dirname, '../../../.cfg.example');
+const defaultTFSPath = path.join(__dirname, '../../../TFSettings.json.example');
 const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
 const {hasPermissionWorkspaces} = require('../../utils/index');
@@ -33,6 +34,7 @@ const Workspace = use('App/Models/Workspace');
 const DefectClass = use('App/Models/DefectClass');
 const ImageDefectClass = use('App/Models/ImageDefectClass');
 const Batch = use('App/Models/Batch');
+const extract = require('extract-zip');
 
 const queue = kue.createQueue({
   redis: {
@@ -864,6 +866,7 @@ class ExplorerController {
   */
   async createFolder({request}) {
     let {name, folder} = request.post();
+    console.log(folder);
     if (folder === 'root') {
       folder = CONST_PATHS.root;
     }
@@ -878,6 +881,13 @@ class ExplorerController {
     }
     const newFolderPath = path.join(folder, name);
     await mkdir(newFolderPath);
+    if (folder === CONST_PATHS.root) {
+      await mkdir(path.join(newFolderPath, 'train'));
+      await mkdir(path.join(newFolderPath, 'test'));
+      await mkdir(path.join(newFolderPath, 'validate'));
+      await mkdir(path.join(newFolderPath, 'model'));
+      await copyFile(defaultTFSPath, path.join(newFolderPath, 'TFSettings.json'));
+    }
     await copyFile(defaultCfgPath, path.join(newFolderPath, '.cfg'));
     logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
     return true;
@@ -1492,12 +1502,13 @@ class ExplorerController {
     const ws = path.join(Env.get("ROOT_PATH"), wsName)
     const pathConfig = path.join(ws, '.cfg');
     const config = await this.getJsonConfig(pathConfig)
-    const backupPath = path.join(Env.get("STORAGE_PATH"), config['backupPath'] ? config['backupPath'] : wsName);
+    const backupPath = path.join(Env.get("STORAGE_PATH"), "backups");
     if (!fs.existsSync(backupPath)) {
       await fs.mkdirSync(backupPath);
     }
+    const newBackup = `${config['backupPath'] ? config['backupPath'] : wsName}__${(new Date()).getTime()}.zip`
     logger.info(`User ${request.currentUser.username} has backup workspace: "${wsName}"`);
-    child_process.execSync(`zip -r ${backupPath}/${(new Date()).getTime()}.zip *`, {
+    child_process.execSync(`zip -r ${backupPath}/${newBackup} *`, {
       cwd: ws
     });
     return {
@@ -1534,6 +1545,68 @@ class ExplorerController {
       }
     }
     return response.status(400)
+  }
+
+  async sampleConfig({request, response}) {
+    const {type} = request.get()
+    const p = path.join(process.cwd(), type === "cfg" ? '.cfg.example': 'TFSettings.json.example')
+    if (request.method() === "GET") {
+      return JSON.parse(await readFile(p, 'utf-8'))
+    } else {
+      const data = request.post();
+      const configStr = JSON.stringify(data);
+      await writeFile(p, configStr, {encoding: 'utf8'});
+      return true;
+    }
+  }
+
+  async systemLog({request, response}) {
+    const {download} = request.get()
+    if (download) {
+      return response.download(path.join(process.cwd(), 'SVTrain.log'));
+    } else {
+      return await readFile(path.join(process.cwd(), 'SVTrain.log'), 'utf-8');
+    }
+  }
+
+  async backupList({request, response}) {
+    const backupPath = path.join(Env.get("STORAGE_PATH"), "backups");
+    if (!fs.existsSync(backupPath)) {
+      await fs.mkdirSync(backupPath);
+    }
+    const files = await readdir(backupPath);
+    const out = [];
+    for (let i = 0; i < files.length; ++i) {
+      const f = files[i];
+      const flStat = await lstat(path.join(backupPath, f));
+      const arr = f.split("__")
+      if (arr.length === 2) {
+        out.push({
+          ws: arr[0],
+          created: arr[1].replace(".zip", ""),
+          sz: flStat.size
+        })
+      }
+    }
+    return out
+  }
+
+  async restoreBackup({request, response}) {
+    const item = request.post()
+    const backupPath = path.join(Env.get("STORAGE_PATH"), "backups");
+    if (!fs.existsSync(backupPath)) {
+      await fs.mkdirSync(backupPath);
+    }
+    const p = path.join(backupPath, `${item.ws}__${item.created}.zip`);
+    if (fs.existsSync(p)) {
+      const ws = path.join(Env.get("ROOT_PATH"), item.ws);
+      if (fs.existsSync(ws)) {
+        fs.rmdirSync(ws, { recursive: true });
+      }
+      await extract(p, { dir: path.join(Env.get("ROOT_PATH"), item.ws) })
+      return true
+    }
+    response.status(400)
   }
 }
 

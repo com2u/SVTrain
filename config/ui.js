@@ -29,5 +29,7 @@ module.exports = {
   workspaceFontSize: '25px',
   subFolderFontSize: '16px',
 
-  showNavigationIcon: false
+  showNavigationIcon: false,
+  changePWDUri: process.env.KEYCLOAK_URI_ACCOUNT,
+  KCManagementUri: process.env.KEYCLOAK_URI_MANAGEMENT
 }

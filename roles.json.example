@@ -48,6 +48,7 @@
     "ConvertToDatabase": false,
     "canBackup": false,
     "editConfigAIUI": false,
-    "editConfigFullAIUI": false
+    "editConfigFullAIUI": false,
+    "admin_page": true
   }
 }

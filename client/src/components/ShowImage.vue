@@ -13,8 +13,8 @@
       :base-images="images"
       :base-zoomer-options="options"
     />
-    <div v-else class="mb-4 inline-round-zoomer-base-container">
-      <img v-auth-image="srcIMG" class="responsive-image" alt="">
+    <div v-else class="mb-4 inline-round-zoomer-base-container" ref="imgPreview">
+      <img v-auth-image="srcIMG" class="responsive-image" :class="{'invert': imageInvert}" alt="">
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
@@ -24,6 +24,7 @@
 <script>
 import { getFileServerPath } from '@/utils'
 import axios from 'axios'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'ShowImage',
@@ -99,6 +100,9 @@ export default {
         ],
       }
     },
+    ...mapGetters([
+      'imageInvert',
+    ]),
   },
   mounted() {
     this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.imageWidth}%`)
@@ -137,5 +141,10 @@ export default {
   image {
     object-fit: cover;
   }
+}
+
+.responsive-image.invert {
+  -webkit-filter: invert(1);
+  filter: invert(1);
 }
 </style>

@@ -22,13 +22,17 @@ const getters = {
     return wsPath ? wsPath.substring(root.length) : 'Root'
   },
   imageSpacing: (state) => state.app.explorerConfig.imageSpacing || 10,
+  imageInvert: (state) => state.app.explorerConfig.imageInvert,
   workspaceFontSize: (state) => state.app.config.workspaceFontSize,
   subFolderFontSize: (state) => state.app.config.subFolderFontSize,
+  changePWDUri: (state) => state.app.config.changePWDUri,
+  KCManagementUri: (state) => state.app.config.KCManagementUri,
   showNavigationIcon: (state) => state.app.explorerConfig.showNavigationIcon,
   imageFit: (state) => (state.app.explorerConfig.imageFit || 'fill').toLowerCase(),
   imageViewer: (state) => state.app.explorerConfig.imageViewer,
   showHeader: (state) => state.app.showHeader,
   canEditConfigAIUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigAIUI,
   canEditConfigFullAIUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigFullAIUI,
+  adminPage: (state) => getPermissions(state) && state.app.user.permissions.admin_page,
 }
 export default getters
