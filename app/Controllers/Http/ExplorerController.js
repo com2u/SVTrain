@@ -1399,7 +1399,7 @@ class ExplorerController {
         const colFiles = compare_folders[i].files
         const rowFiles = new_active_folders[j].files
         colFiles.forEach((f1) => {
-          if (rowFiles.includes(f1)) {
+          if (rowFiles.includes(f1) && f1 !== ".statistics") {
             count += 1
           }
         })
