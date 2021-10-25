@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h2>Login to SVTrain 1.4.1</h2>
+    <h2>Login to SVTrain 1.4.2</h2>
     <div class="login-form">
       <ul>
         <li>
