@@ -403,8 +403,7 @@ export default {
       }
     },
     relativeDir() {
-      const { root } = this.systemConfig
-      return this.dir && root ? this.dir.substring(root.length) : this.dir
+      return this.dir
     },
     ...mapGetters([
       'newFolder',
