@@ -702,7 +702,10 @@ class ExplorerController {
         logger.error(`ExplorerController.next: The "path" parameter is needed`);
         throw new Error('The "path" parameter is needed');
       }
-      const parentDirectory = path.join(dir, '../');
+      let parentDirectory = path.join(dir, '../');
+      if (dir !== CONST_PATHS.root) {
+        parentDirectory = path.join(CONST_PATHS.root, parentDirectory)
+      }
       if (!accessToFile(CONST_PATHS.root, parentDirectory)) {
         logger.error(`ExplorerController.next: Access denied for read next directory for folder ${dir}`);
         return [];
