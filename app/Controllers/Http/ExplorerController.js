@@ -76,6 +76,8 @@ const CONST_PATHS = {
   ignoreFiles: ['.DS_Store']
 };
 
+const EXCLUDE_FILES = [".statistics"];
+
 /**
  * Build statistic table for subfolders from directory
  * @param {String} dir Path to directory where subfolders are placed
@@ -355,7 +357,7 @@ class ExplorerController {
         && request.currentUser.permissions
         && request.currentUser.permissions.workspaces;
       for (let i = 0; i < files.length; ++i) {
-        if (to && !isStatistic && !compareFiles.includes(files[i])) {
+        if ((to && !isStatistic && !compareFiles.includes(files[i])) || EXCLUDE_FILES.includes(files[i])) {
           continue
         }
         if (to && isStatistic && !files[i].includes(to)) {
