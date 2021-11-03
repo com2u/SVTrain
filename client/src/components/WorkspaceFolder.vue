@@ -1,6 +1,6 @@
 <template>
   <div class="ws-container">
-    <div class="folder-label" :style="indent" :class="wsPath === info.path ? 'selected': ''">
+    <div class="folder-label" :style="indent" :class="wsPath === systemConfig.root + info.path ? 'selected': ''">
       <div class="folder-label-name" :class="!depth? 'root-item': ''">
         <span class="icon-wrapper expand-icon">
             <b-spinner v-if="loadingChildren" small label="Small Spinner" class="clickable-icon"></b-spinner>
