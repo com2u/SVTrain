@@ -935,7 +935,7 @@ class ExplorerController {
   async statistic({request}) {
     const {dir} = request.get();
     logger.info(`User ${request.currentUser.username} has shown statistic of "${dir}"`);
-    return Statistic.get(dir);
+    return Statistic.get(path.join(CONST_PATHS.root, dir));
   }
 
   /*
