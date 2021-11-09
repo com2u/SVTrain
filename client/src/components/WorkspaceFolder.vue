@@ -245,6 +245,10 @@ export default {
             dir: this.info.path, type: this.info.type, batch: this.info.batch, ws: this.info.ws,
           },
         })
+        api.getConfig(this.info.isDB)
+          .then((data) => {
+            this.$store.dispatch('app/setConfig', data)
+          })
       }
     },
     showStatistic() {
