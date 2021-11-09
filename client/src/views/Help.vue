@@ -1,4 +1,4 @@
-<div>
+<template>
   <div>
     <div>
       <div>
@@ -422,7 +422,7 @@
       <p>You can export the images used for the validation to a default folder.</p>
       <p>&#160;</p>
     </div>
-  </div>
+    </div>
   </div>
 </template>
 

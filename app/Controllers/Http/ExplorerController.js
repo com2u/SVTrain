@@ -625,6 +625,7 @@ class ExplorerController {
       throw new Error(`Access denied`);
     }
     // skip files with no access
+    files = files.map(f => path.join(CONST_PATHS.root, f));
     files = files.filter(f => accessToFile(CONST_PATHS.root, f));
     await Promise.all(
       files.map(
@@ -632,9 +633,9 @@ class ExplorerController {
           const fileF = f.split("/");
           fileF.pop()
           if (await exists(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"))) {
-            await unlinkSync(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"))
+            await unlinkSync(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"));
           }
-          await rename(f, path.join(absDestination, path.basename(f)))
+          await rename(f, path.join(absDestination, path.basename(f)));
         }
       )
     );
@@ -1065,6 +1066,13 @@ class ExplorerController {
 
   async getExplorerConfig({request, response}) {
     let {dir, type} = request.get();
+    if (dir) {
+      const ws = dir.split("/").length > 1 ? dir.split("/")[1] : null;
+      if (ws) {
+        let workspaceFile = path.join(Env.get('COMMAND_FILES_PATH'), CONST_PATHS.workspace);
+        await writeFile(workspaceFile, path.join(CONST_PATHS.root, ws));
+      }
+    }
     let noteData, isHighlight, resConfig = config, isDB
     if (['ws', 'batch', 'defectclass'].includes(type)) {
       const ws = await this.getWorkspace();
