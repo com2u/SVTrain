@@ -1,10 +1,10 @@
-FROM node:12-alpine AS frontend-build
+FROM node:14-alpine AS frontend-build
 
 WORKDIR /build
 COPY ./client/package.json /build/
 COPY ./client/yarn.lock /build/
 RUN apk --no-cache add --virtual native-deps \
-  g++ gcc libgcc libstdc++ linux-headers make python && \
+  g++ gcc libgcc libstdc++ linux-headers make python2 && \
   yarn install --frozen-lockfile && \
   apk del native-deps
 
@@ -20,11 +20,6 @@ COPY yarn.lock .
 
 RUN apt update
 RUN apt install -y python3 python3-pip bash curl
-
-# RUN apk --no-cache add --virtual native-deps \
-#   g++ gcc libgcc libstdc++ linux-headers make && \
-#   yarn install --production && \
-#   apk del native-deps
 
 RUN apt install -y g++ && yarn install --production
 
