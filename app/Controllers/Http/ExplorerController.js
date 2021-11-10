@@ -627,20 +627,20 @@ class ExplorerController {
     // skip files with no access
     files = files.map(f => path.join(CONST_PATHS.root, f));
     files = files.filter(f => accessToFile(CONST_PATHS.root, f));
-    await Promise.all(
-      files.map(
-        async f => {
-          const fileF = f.split("/");
-          fileF.pop()
-          if (await exists(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"))) {
-            await unlinkSync(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"));
-          }
-          await rename(f, path.join(absDestination, path.basename(f)));
+    files.map(
+      async f => {
+        const fileF = f.split("/");
+        fileF.pop();
+        if (await exists(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"))) {
+          await unlinkSync(path.join(CONST_PATHS.root, fileF.join(path.sep), ".statistics"));
         }
-      )
+        await rename(f, path.join(absDestination, path.basename(f)));
+      }
     );
     if (await exists(path.join(destination, ".statistics"))) {
-      await unlinkSync(path.join(destination, ".statistics"))
+      unlinkSync(path.join(destination, ".statistics")).catch(e => {
+        console.log(e);
+      })
     }
     if (isDelete) {
       for (const file of files) {
