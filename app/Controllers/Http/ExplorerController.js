@@ -1517,7 +1517,7 @@ class ExplorerController {
     const config = await this.getJsonConfig(pathConfig)
     const backupPath = path.join(Env.get("STORAGE_PATH"), "backups");
     if (!fs.existsSync(backupPath)) {
-      await fs.mkdirSync(backupPath);
+      await fs.mkdirSync(backupPath, { recursive: true });
     }
     const newBackup = `${config['backupPath'] ? config['backupPath'] : wsName}__${(new Date()).getTime()}.zip`
     logger.info(`User ${request.currentUser.username} has backup workspace: "${wsName}"`);
