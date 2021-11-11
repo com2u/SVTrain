@@ -35,7 +35,6 @@ export default {
     // eslint-disable-next-line func-names
     '$store.state.app.user': async function () {
       if (this.$store.state.app.user.username) {
-        console.log('a')
         await this.initSocket()
       }
     },

@@ -14,7 +14,7 @@
       :base-zoomer-options="options"
     />
     <div v-else class="mb-4 inline-round-zoomer-base-container" ref="imgPreview">
-      <img v-auth-image="srcIMG" class="responsive-image" :class="{'invert': imageInvert}" alt="">
+      <img ref="img" v-auth-image="srcIMG" class="responsive-image" alt="">
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
@@ -25,6 +25,8 @@
 import { getFileServerPath } from '@/utils'
 import axios from 'axios'
 import { mapGetters } from 'vuex'
+
+const colormap = require('colormap')
 
 export default {
   name: 'ShowImage',
@@ -75,6 +77,30 @@ export default {
         this.zoomKey += 1
         this.$emit('zoom-change', this.options.zoomFactor)
       }
+    },
+    invertIMG() {
+      if (!this.imageInvert) return
+      const canvas = this.$refs.img.parentElement.appendChild(document.createElement('canvas'))
+      const c = canvas.getContext('2d')
+      const height = this.$refs.img.clientHeight
+      const width = this.$refs.img.clientWidth
+      c.canvas.height = height
+      c.canvas.width = width
+      const shades = (width / 10)
+      const COLORS = colormap({
+        colormap: 'jet',
+        nshades: shades,
+        format: 'rgbaString',
+        alpha: [0, 0.5],
+      })
+      // eslint-disable-next-line no-plusplus
+      c.drawImage(this.$refs.img, 0, 0, this.$refs.img.clientWidth, this.$refs.img.clientHeight)
+      // eslint-disable-next-line no-plusplus
+      for (let j = 0; j < (width / 10); j++) {
+        c.fillStyle = COLORS[j]
+        c.fillRect(j * 10, 0, 10, height)
+      }
+      this.$refs.img.classList.add('hidden')
     },
   },
   computed: {
@@ -141,10 +167,5 @@ export default {
   image {
     object-fit: cover;
   }
-}
-
-.responsive-image.invert {
-  -webkit-filter: invert(1);
-  filter: invert(1);
 }
 </style>

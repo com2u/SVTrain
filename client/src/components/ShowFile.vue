@@ -78,11 +78,10 @@ export default {
       this.$refs.modal.show()
     },
     onShown(e) {
-      console.log('show file shown')
+      this.$refs.show_image.invertIMG()
       this.$emit('shown', e)
     },
     onHidden(e) {
-      console.log('show file hidden')
       this.$emit('hidden', e)
     },
     closeModal() {
@@ -118,7 +117,6 @@ export default {
     axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
       if (data) {
         const resModes = (data.classes || []).map((x) => ({ text: x, value: x }))
-        console.log(resModes)
         this.showModes = this.showModes.concat(resModes)
       }
     })

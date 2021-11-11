@@ -244,6 +244,10 @@ export default {
   img.responsive-image {
     width: var(--img--zoom);
   }
+
+  .responsive-image.hidden {
+    display: none;
+  }
 }
 
 .scroller-at-bottom img {
@@ -259,6 +263,8 @@ export default {
   filter: var(--image--filter);
 }
 
+.inline-round-zoomer-base-container canvas,
+.file-explorer-item canvas,
 img.responsive-image,
 img.file-explorer-preview {
   filter: var(--image--filter);

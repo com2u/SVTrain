@@ -17,6 +17,7 @@
     "bcrypt": "^5.0.1",
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.9.0",
+    "colormap": "^2.3.2",
     "core-js": "^3.6.4",
     "fs-extra": "^9.0.0",
     "jsoneditor": "^8.6.4",

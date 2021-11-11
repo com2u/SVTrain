@@ -11,8 +11,8 @@
       <template v-else>
         <template v-if="file.type === 'file'">
           <template v-if="file.image">
-            <div>
-              <img :src="convertURIPath(file.serverPath)" class="file-explorer-preview" alt=""
+            <div class="overflow-hidden">
+              <img ref="img" :src="convertURIPath(file.serverPath)" class="file-explorer-preview" alt=""
                 :class="imageFit === 'fit' ? 'image-fit' : 'image-fill'"
                 v-bind:style="{width: size.width - 15 + 'px', height: size.height - 15 + 'px' }">
             </div>
@@ -48,6 +48,9 @@
 <script>
 import { mapGetters } from 'vuex'
 
+
+const colormap = require('colormap')
+
 export default {
   props: {
     file: Object,
@@ -72,7 +75,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['imageSpacing', 'imageFit']),
+    ...mapGetters(['imageSpacing', 'imageFit', 'imageInvert']),
     imageStyles() {
       return {
         width: `${this.size.width}px`,
@@ -86,6 +89,33 @@ export default {
     convertURIPath(p) {
       return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem('sessionToken', null)}`
     },
+    invertIMG() {
+      if (!this.imageInvert) return
+      const canvas = this.$refs.img.parentElement.appendChild(document.createElement('canvas'))
+      const c = canvas.getContext('2d')
+      const height = this.$refs.img.clientHeight
+      const width = this.$refs.img.parentElement.clientWidth
+      c.canvas.height = height
+      c.canvas.width = width
+      const shades = (width / 10)
+      const COLORS = colormap({
+        colormap: 'jet',
+        nshades: shades,
+        format: 'rgbaString',
+        alpha: [0, 0.5],
+      })
+      // eslint-disable-next-line no-plusplus
+      c.drawImage(this.$refs.img, 0, 0, this.$refs.img.clientWidth, this.$refs.img.clientHeight)
+      // eslint-disable-next-line no-plusplus
+      for (let j = 0; j < (width / 10); j++) {
+        c.fillStyle = COLORS[j]
+        c.fillRect(j * 10, 0, 10, height)
+      }
+      this.$refs.img.classList.add('hidden')
+    },
+  },
+  mounted() {
+    this.invertIMG()
   },
 }
 </script>
