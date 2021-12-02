@@ -28,7 +28,8 @@ RUN pip3 install \
   scikit-build \
   scikit-learn \
   scikit-image \
-  opencv-python==4.2.0.34
+  opencv-python==4.2.0.34 \
+  imageio==2.0.1
 
 COPY . .
 
