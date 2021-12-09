@@ -19,7 +19,7 @@ COPY package.json .
 COPY yarn.lock .
 
 RUN apt update
-RUN apt install -y python3 python3-pip bash curl
+RUN apt install -y python3 python3-pip bash curl zip
 
 RUN apt install -y g++ && yarn install --production
 
