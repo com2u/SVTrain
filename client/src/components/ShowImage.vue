@@ -50,12 +50,12 @@ export default {
         scroller_position: 'bottom',
       },
       zoomKey: 1,
-      srcIMG: this.file.serverPath.replaceAll('#', '{hash_tag}'),
+      srcIMG: encodeURIComponent(this.file.serverPath),
     }
   },
   methods: {
     convertURIPath(p) {
-      return p.replaceAll('#', '{hash_tag}')
+      return encodeURIComponent(p)
     },
     onKeyUp(key) {
       let flag = false
@@ -150,11 +150,11 @@ export default {
     },
     async showMode() {
       if (this.showMode === 'Original') {
-        this.srcIMG = this.file.serverPath.replaceAll('#', '{hash_tag}')
+        this.srcIMG = encodeURIComponent(this.file.serverPath)
       } else {
-        const path = this.file.relativePath.replaceAll('#', '{hash_tag}')
-        const uri = `${getFileServerPath().replace('data', 'api')}visualizeHeatmap?image=${path}`
-        this.srcIMG = await axios.get(uri).then(() => uri).catch(() => this.file.serverPath.replaceAll('#', '{hash_tag}'))
+        const path = encodeURIComponent(this.file.relativePath)
+        const uri = `${getFileServerPath().replace('data', 'api')}visualizeHeatmap?mode=${encodeURIComponent(this.showMode)}&image=${path}`
+        this.srcIMG = await axios.get(uri).then(() => uri).catch(() => encodeURIComponent(this.file.serverPath))
       }
     },
   },
