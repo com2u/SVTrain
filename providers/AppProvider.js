@@ -24,7 +24,6 @@ class AppProvider extends ServiceProvider {
   }
 
   async boot () {
-    await use('Statistic').init()
     await use('Watcher').init()
   }
 }

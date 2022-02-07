@@ -11,7 +11,7 @@
       </div>
       <workspace-folder
         v-for="(folder, index) in folders"
-        :info="folder"
+        :rawInfo="folder"
         :key-path="`[${index}]`"
         :key="folder.path"
         :show-sub-folder-progress="folder.config && folder.config.showSubFolderProgress"
@@ -286,7 +286,6 @@ export default {
       justify-content: space-between;
       padding-left: 10px;
       border-radius: 8px;
-
 
       .margin-keeper {
         margin-left: 18px;

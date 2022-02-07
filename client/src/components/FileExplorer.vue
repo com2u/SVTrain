@@ -364,9 +364,6 @@ export default {
     viewerImages() {
       return this.selectedFiles.map((file) => file.serverPath)
     },
-    backgroundCalculating() {
-      return this.$store.state.app.calculating
-    },
     fontSize() {
       const config = this.systemConfig
       if (config.rightMenu && config.rightMenu.fontSize) {

@@ -142,92 +142,84 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
 }
 
 const calculate = async (job, done) => {
+  const folderToRecalculate = job.data.dir || CONST_PATHS.root;
   try {
-    let data = {}
-    const usersFilePath = path.join(__dirname, '../../../statistic.data')
-    if (await exists(usersFilePath)) {
-      data = JSON.parse(await readFile(usersFilePath))
-    }
-    const missedFiles = [];
-    const allFiles = [];
-    const dirsObject = {};
-    const ignoreFunc = (_, lstat) => !lstat.isDirectory();
-    const dirs = await recursive(CONST_PATHS.root);
+    const dirs = await recursive(folderToRecalculate);
     await Promise.all(
-      dirs.map(async dir => {
-        if (await exists(path.join(dir, '.statistics')) && data && data[dir]) {
-          dirsObject[dir] = data[dir];
-        } else {
-          let dirname = path.basename(dir);
-          let files = await readdir(dir);
-          const subfolders = [];
-          dirsObject[dir] = {
-            missed: 0,
-            matched: 0,
-            missmatched: 0,
-            classified: 0,
-            unclassified: 0
-          };
-          // count matches | missmatches
-          await Promise.all(
-            files.map(async f => {
-              let filepath = path.join(dir, f);
-              const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
-              const stats = await lstat(filepath);
-              if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
-                if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
-                  dirsObject[dir].matched++;
-                } else {
-                  dirsObject[dir].missmatched++;
-                  missedFiles.push(filepath);
-                }
-                if (regexpForImages.test(f)) {
-                  allFiles.push({
-                    filepath,
-                    isUnclassified
-                  });
-                }
-              }
-              if (stats.isDirectory()) {
-                subfolders.push(f);
-              }
-            }) // end of map function for all files
-          ); // end of promise for all files
-          try {
-            dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
-          } catch (e) {
-            console.log(e);
-          }
-          await writeFile(path.join(dir, '.statistics'), '', {encoding: 'utf8', flag: 'w'});
+      dirs.map(async (dir) => {
+        if (job.data.safe) {
+          const alreadyCalculated = await Statistic.get(dir)
+          if (alreadyCalculated.calculated !== false) return;
         }
+        let localStateData = {
+          missed: 0,
+          matched: 0,
+          missmatched: 0,
+          classified: 0,
+          unclassified: 0,
+        };
+        let dirname = path.basename(dir);
+        let files = await readdir(dir);
+        const subfolders = [];
+        const isUnclassified = dir
+          .toString()
+          .toLowerCase()
+          .includes("unclassified");
+        await Promise.all(
+          files.map(async (f) => {
+            let filepath = path.join(dir, f);
+            const stats = await lstat(filepath);
+            if (
+              stats.isFile() &&
+              !CONST_PATHS.ignoreFiles.includes(f) &&
+              regexpForImages.test(f)
+            ) {
+              if (isUnclassified) localStateData.unclassified++;
+              else localStateData.classified++;
+              if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
+                localStateData.matched++;
+              } else {
+                localStateData.missmatched++;
+                if (
+                  path
+                    .basename(f)
+                    .toLowerCase()
+                    .indexOf(path.basename(dir).toLowerCase()) > -1
+                )
+                  localStateData.missed++;
+              }
+            } else if (stats.isDirectory()) {
+              subfolders.push(f);
+            }
+          })
+        );
+        try {
+          localStateData.table = await buildSubfolderTable(dir, subfolders);
+        } catch (e) {
+          console.log(e);
+        }
+        await writeFile(
+          path.join(dir, ".statistics"),
+          JSON.stringify(localStateData),
+          { encoding: "utf8", flag: "w" }
+        );
       })
     );
-    Object.keys(dirsObject).forEach(dir => {
-      dirsObject[dir].missed = missedFiles.filter(
-        f => path.basename(f).toLowerCase().indexOf(path.basename(dir).toLowerCase()) > -1
-      ).length;
-      for (let file of allFiles) {
-        const dirLength = dir.length;
-        if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
-          if (file.isUnclassified) {
-            dirsObject[dir].unclassified += 1;
-          } else {
-            dirsObject[dir].classified += 1;
-          }
-        }
-      }
-      Statistic.write(dir, dirsObject[dir]);
-    });
-    await Statistic.save();
-    done()
+    done();
     return true;
   } catch (e) {
     logger.error(`ExplorerController.calculate: ${e.message}`);
     throw e;
   }
-}
+};
 
 queue.process('asyncCalculate', 1, calculate)
+
+const recalculateDir = (dir) => {
+  queue.create("asyncCalculate", { dir }).save(function (error) {
+    if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
+  });
+};
 
 class ExplorerController {
   /*
@@ -587,7 +579,11 @@ class ExplorerController {
         await mkdir(absDestination);
       }
       const user = request.currentUser.username;
-      return await this.moveFiles(files, absDestination, user, true);
+      const results = await this.moveFiles(files, absDestination, user, true);
+      recalculateDir(
+        path.join(workingRoot, dir.substring(0, dir.lastIndexOf("/") + 1))
+      );
+      return results;
     }
   }
 
@@ -614,7 +610,12 @@ class ExplorerController {
       }
       return true
     } else {
-      return await this.moveFiles(files, destination, user);
+      const results = await this.moveFiles(files, destination, user);
+      recalculateDir(path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination));
+      recalculateDir(
+        path.join(CONST_PATHS.root, files[0].substring(0, files[0].lastIndexOf("/") + 1))
+      );
+      return results;
     }
   }
 
@@ -936,7 +937,7 @@ class ExplorerController {
   async statistic({request}) {
     const {dir} = request.get();
     logger.info(`User ${request.currentUser.username} has shown statistic of "${dir}"`);
-    return Statistic.get(path.join(CONST_PATHS.root, dir));
+    return await Statistic.get(path.join(CONST_PATHS.root, dir));
   }
 
   /*
@@ -944,7 +945,11 @@ class ExplorerController {
     Run process for calculate statistic for each folder
   */
   async calculate({request, response}) {
-    queue.create('asyncCalculate', {}).save(function(error) {
+    const { dir, safe } = request.get();
+    queue.create('asyncCalculate', {
+      dir: dir ? path.join(CONST_PATHS.root, dir) : null,
+      safe,
+    }).save(function(error) {
       if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
     });
     return true
@@ -1323,23 +1328,18 @@ class ExplorerController {
         }
         const subDir = path.join(dir, name);
         if ((await lstat(subDir)).isDirectory()) {
+          const statistic = await Statistic.get(subDir);
           const file = {
+            classified: 0,
+            unclassified: 0,
+            ...statistic,
             name,
             path: subDir.replace(CONST_PATHS.root, ""),
             hasSubFolders: await this.hasSubFolders(subDir),
             notes: '',
             notesPath: null,
             highlight: false,
-            classified: 0,
-            unclassified: 0
           };
-          const statistic = Statistic.get(subDir);
-          if (Number.isInteger(statistic.classified)) {
-            file.classified = statistic.classified;
-          }
-          if (Number.isInteger(statistic.unclassified)) {
-            file.unclassified = statistic.unclassified;
-          }
           const notesPath = path.join(subDir, 'notes.txt');
           file.notes = '';
           file.notesPath = notesPath.replace(CONST_PATHS.root, "");
@@ -1377,7 +1377,7 @@ class ExplorerController {
 
   async listStatistic({request}) {
     const {dirs} = request.post();
-    return Statistic.getList(dirs);
+    return await Statistic.getList(dirs);
   }
 
   async hasSubFolders(dir) {

@@ -111,7 +111,7 @@
     <div v-if="hasChildren && showChildren">
       <workspace-folder
         v-for="(folder, index) in info.subFolders"
-        :info="folder"
+        :rawInfo="folder"
         :depth="depth + 1"
         :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
@@ -140,7 +140,7 @@ import EventBus from '../utils/eventbus'
 export default {
   name: 'WorkspaceFolder',
   props: {
-    info: {
+    rawInfo: {
       type: Object,
       default: () => ({}),
     },
@@ -190,6 +190,15 @@ export default {
     },
     wsPath() {
       return this.$store.state.app.config.wsPath
+    },
+    info() {
+      if (this.rawInfo.hasSubFolders && this.rawInfo.subFolders) {
+        return {
+          ...this.rawInfo,
+          ...this.sumObjectsByKey(...this.rawInfo.subFolders),
+        }
+      }
+      return this.rawInfo
     },
     ...mapGetters([
       'canEditNote',
@@ -253,7 +262,7 @@ export default {
     },
     showStatistic() {
       if (this.canViewStatistics) {
-        EventBus.$emit('show-statistic', this.info.path)
+        EventBus.$emit('show-statistic', this.info)
       }
     },
     createNewFolder() {
@@ -279,6 +288,15 @@ export default {
         this.$emit('backup-done')
       }
       this.backuping = false
+    },
+    sumObjectsByKey(...objs) {
+      return objs.reduce((acc, next) => {
+        Object.entries(next).forEach(([k, v]) => {
+          if (!Number.isInteger(v)) return
+          acc[k] = (acc[k] || 0) + v
+        })
+        return acc
+      }, {})
     },
   },
   mounted() {

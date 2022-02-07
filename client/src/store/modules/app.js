@@ -80,7 +80,7 @@ export default {
     calculateStatistic({ commit }) {
       commit('SET_CALCULATING', true)
       return new Promise((resolve, reject) => {
-        api.calculateStatistic()
+        api.calculateStatistic(null, true)
           .then(() => {
             commit('SET_CALCULATING', false)
             resolve(true)

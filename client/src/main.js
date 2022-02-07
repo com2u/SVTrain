@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { BootstrapVueIcons, BootstrapVue } from 'bootstrap-vue'
 import 'vue-awesome/icons'
-import Icon from 'vue-awesome/components/Icon.vue'
+import Icon from 'vue-awesome/components/Icon'
 // eslint-disable-next-line import/no-unresolved
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
