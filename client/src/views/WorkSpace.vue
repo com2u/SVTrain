@@ -215,8 +215,14 @@ export default {
     },
     async loadSubfolder(item) {
       const subFolders = await api.getFoldersByPath(item.info.path, item.info.type, item.info.ws)
-      subFolders.forEach((f) => {
+      subFolders.forEach((f, index) => {
         this.populatedFolders.push(f.path)
+        if (f.hasSubFolders) {
+          this.loadSubfolder({
+            info: f,
+            keyPath: `${item.keyPath}.subFolders.[${index}]`,
+          })
+        }
       })
       const subFoldersPath = `${item.keyPath}.subFolders`
       const updatedFolders = _set(this.folders, subFoldersPath, subFolders)

@@ -219,16 +219,19 @@ export default {
         flag: this.showChildren,
       })
       if (!this.info.subFolders) {
-        this.loadingChildren = true
-        EventBus
-          .$emit('load-sub-folders', {
-            info: this.info,
-            keyPath: this.keyPath,
-            done: () => {
-              this.loadingChildren = false
-            },
-          })
+        this.loadSubFolders()
       }
+    },
+    loadSubFolders() {
+      this.loadingChildren = true
+      EventBus
+        .$emit('load-sub-folders', {
+          info: this.info,
+          keyPath: this.keyPath,
+          done: () => {
+            this.loadingChildren = false
+          },
+        })
     },
     showNotes() {
       this.$store.dispatch('notes/showFolder', this.info)
@@ -291,7 +294,14 @@ export default {
     },
     sumObjectsByKey(...objs) {
       return objs.reduce((acc, next) => {
-        Object.entries(next).forEach(([k, v]) => {
+        let nextObj = next
+        if (next.hasSubFolders && next.subFolders) {
+          nextObj = {
+            ...next,
+            ...this.sumObjectsByKey(...next.subFolders),
+          }
+        }
+        Object.entries(nextObj).forEach(([k, v]) => {
           if (!Number.isInteger(v)) return
           acc[k] = (acc[k] || 0) + v
         })
@@ -300,6 +310,7 @@ export default {
     },
   },
   mounted() {
+    this.loadSubFolders()
     if (this.$store.state.app.expanded.includes(this.info.path)) {
       this.toggleShowChildren()
     }
