@@ -141,63 +141,83 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
   return out
 }
 
+
+// calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
+// return an object with the calculated values, and the list of subfolders found.
+const classifyFilesOfDir = async (dir) => {
+  let localStateData = {
+    missed: 0,
+    matched: 0,
+    missmatched: 0,
+    classified: 0,
+    unclassified: 0,
+  };
+  let dirname = path.basename(dir);
+  let files = await readdir(dir);
+  const subfolders = [];
+  const isUnclassified = dir
+    .toString()
+    .toLowerCase()
+    .includes("unclassified");
+  await Promise.all(
+    files.map(async (f) => {
+      let filepath = path.join(dir, f);
+      const stats = await lstat(filepath);
+      if (
+        stats.isFile() &&
+        !CONST_PATHS.ignoreFiles.includes(f) &&
+        regexpForImages.test(f)
+      ) {
+        if (isUnclassified) localStateData.unclassified++;
+        else localStateData.classified++;
+        if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
+          localStateData.matched++;
+        } else {
+          localStateData.missmatched++;
+          if (
+            path
+              .basename(f)
+              .toLowerCase()
+              .indexOf(path.basename(dir).toLowerCase()) > -1
+          )
+            localStateData.missed++;
+        }
+      } else if (stats.isDirectory()) {
+        subfolders.push(f);
+      }
+    })
+  );
+  return {
+    localStateData,
+    subfolders
+  }
+}
+
 const calculate = async (job, done) => {
+  // job.data has the following structure:
+  // {
+  //   dir: 'path/to/dir', // falls back to root if not set
+  //   safe: boolean,      // if true, only recalculate folders that haven't been calculated yet
+  //                       // for performance reasons
+  // }
   const folderToRecalculate = job.data.dir || CONST_PATHS.root;
   try {
     const dirs = await recursive(folderToRecalculate);
     await Promise.all(
       dirs.map(async (dir) => {
         if (job.data.safe) {
+          // if safe, only recalculate folders that haven't been calculated yet
           const alreadyCalculated = await Statistic.get(dir)
           if (alreadyCalculated.calculated !== false) return;
         }
-        let localStateData = {
-          missed: 0,
-          matched: 0,
-          missmatched: 0,
-          classified: 0,
-          unclassified: 0,
-        };
-        let dirname = path.basename(dir);
-        let files = await readdir(dir);
-        const subfolders = [];
-        const isUnclassified = dir
-          .toString()
-          .toLowerCase()
-          .includes("unclassified");
-        await Promise.all(
-          files.map(async (f) => {
-            let filepath = path.join(dir, f);
-            const stats = await lstat(filepath);
-            if (
-              stats.isFile() &&
-              !CONST_PATHS.ignoreFiles.includes(f) &&
-              regexpForImages.test(f)
-            ) {
-              if (isUnclassified) localStateData.unclassified++;
-              else localStateData.classified++;
-              if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
-                localStateData.matched++;
-              } else {
-                localStateData.missmatched++;
-                if (
-                  path
-                    .basename(f)
-                    .toLowerCase()
-                    .indexOf(path.basename(dir).toLowerCase()) > -1
-                )
-                  localStateData.missed++;
-              }
-            } else if (stats.isDirectory()) {
-              subfolders.push(f);
-            }
-          })
-        );
+        // calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
+        const { localStateData, subfolders } = await classifyFilesOfDir(dir);
         try {
           localStateData.table = await buildSubfolderTable(dir, subfolders);
         } catch (e) {
           console.log(e);
         }
+        // statistics are saved in .statistics file inside the folder, for each folder.
         await writeFile(
           path.join(dir, ".statistics"),
           JSON.stringify(localStateData),
@@ -215,6 +235,7 @@ const calculate = async (job, done) => {
 
 queue.process('asyncCalculate', 1, calculate)
 
+// create a calculation job for a folder
 const recalculateDir = (dir) => {
   queue.create("asyncCalculate", { dir }).save(function (error) {
     if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
@@ -580,6 +601,7 @@ class ExplorerController {
       }
       const user = request.currentUser.username;
       const results = await this.moveFiles(files, absDestination, user, true);
+      // should recalculate the statistics for the folder since the files have been deleted.
       recalculateDir(
         path.join(workingRoot, dir.substring(0, dir.lastIndexOf("/") + 1))
       );
@@ -611,6 +633,8 @@ class ExplorerController {
       return true
     } else {
       const results = await this.moveFiles(files, destination, user);
+      // should recalculate the statistics for the folder since the files have been deleted.
+      // for both source and destination folders.
       recalculateDir(path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination));
       recalculateDir(
         path.join(CONST_PATHS.root, files[0].substring(0, files[0].lastIndexOf("/") + 1))
@@ -946,6 +970,8 @@ class ExplorerController {
   */
   async calculate({request, response}) {
     const { dir, safe } = request.get();
+    // safe: boolean // if true and !dir then calculate statistic for all folders that have no .statistic file
+    // if dir exists, safe is ignored, used to recalculate statistic for a specific folder
     queue.create('asyncCalculate', {
       dir: dir ? path.join(CONST_PATHS.root, dir) : null,
       safe,
@@ -1184,6 +1210,10 @@ class ExplorerController {
       }
       const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
       const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
+      // recalculate statistics for parent dir, and all selected/notSelected folders
+      recalculateDir(absSelectedPath);
+      recalculateDir(absNotSelectedPath);
+      recalculateDir(workingRoot);
       response.json({
         selected,
         notSelected
