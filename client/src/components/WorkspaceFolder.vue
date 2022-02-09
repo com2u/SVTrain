@@ -233,6 +233,12 @@ export default {
           },
         })
     },
+    getSubFolderStatistics(folderInfo) {
+      if (folderInfo.hasSubFolders && folderInfo.subFolders) {
+        return this.sumObjectsByKey(...folderInfo.subFolders)
+      }
+      return folderInfo
+    },
     showNotes() {
       this.$store.dispatch('notes/showFolder', this.info)
     },
@@ -293,19 +299,16 @@ export default {
       this.backuping = false
     },
     sumObjectsByKey(...objs) {
-      return objs.reduce((acc, next) => {
-        let nextObj = next
-        if (next.hasSubFolders && next.subFolders) {
-          nextObj = {
-            ...next,
-            ...this.sumObjectsByKey(...next.subFolders),
-          }
+      return objs.reduce((totalStats, currentSubFolder) => {
+        const subFolderStats = {
+          ...currentSubFolder,
+          ...this.getSubFolderStatistics(currentSubFolder),
         }
-        Object.entries(nextObj).forEach(([k, v]) => {
-          if (!Number.isInteger(v)) return
-          acc[k] = (acc[k] || 0) + v
+        Object.entries(subFolderStats).forEach(([key, value]) => {
+          if (!Number.isInteger(value)) return
+          totalStats[key] = (totalStats[key] || 0) + value // eslint-disable-line no-param-reassign
         })
-        return acc
+        return totalStats
       }, {})
     },
   },
