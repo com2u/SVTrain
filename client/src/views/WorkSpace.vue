@@ -90,7 +90,6 @@ import api from '../utils/api'
 import WorkspaceFolder from '../components/WorkspaceFolder.vue'
 import CreatingFolder from '../components/CreatingFolder.vue'
 import EventBus from '../utils/eventbus'
-import { updateCounting } from '../utils'
 
 export default {
   name: 'WorkSpace',
@@ -215,14 +214,8 @@ export default {
     },
     async loadSubfolder(item) {
       const subFolders = await api.getFoldersByPath(item.info.path, item.info.type, item.info.ws)
-      subFolders.forEach((f, index) => {
+      subFolders.forEach((f) => {
         this.populatedFolders.push(f.path)
-        if (f.hasSubFolders) {
-          this.loadSubfolder({
-            info: f,
-            keyPath: `${item.keyPath}.subFolders.[${index}]`,
-          })
-        }
       })
       const subFoldersPath = `${item.keyPath}.subFolders`
       const updatedFolders = _set(this.folders, subFoldersPath, subFolders)
@@ -237,15 +230,10 @@ export default {
       EventBus.$emit('create-new-folder', 'root')
     },
   },
-  mounted() {
+  async mounted() {
     // this.loadFolders()
+    await api.calculateStatistic(null, true)
     this.loadFoldersByPath()
-    this.$store.dispatch('app/calculateStatistic')
-      .then(async () => {
-        const updatedStatistic = await api.listStatistics(this.populatedFolders)
-        const folders = updateCounting(this.folders, updatedStatistic)
-        this.folders = folders
-      })
     EventBus.$on('load-sub-folders', this.loadSubfolder)
   },
   destroyed() {

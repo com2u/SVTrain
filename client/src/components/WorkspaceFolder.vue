@@ -313,7 +313,6 @@ export default {
     },
   },
   mounted() {
-    this.loadSubFolders()
     if (this.$store.state.app.expanded.includes(this.info.path)) {
       this.toggleShowChildren()
     }
