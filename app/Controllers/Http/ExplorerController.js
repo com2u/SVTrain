@@ -141,6 +141,38 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
   return out
 }
 
+const getCfg = async (dir) => {
+  const results = {}
+  const cfgPath = path.join(dir, '.cfg');
+  if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
+    try {
+      let cfg = await readFile(cfgPath, 'utf-8');
+      result.config = JSON.parse(cfg);
+      result.cfgPath = cfgPath;
+    } catch (e) {
+      logger.error(`ExplorerController.getCfg: ${e.message}`);
+    }
+  }
+  return results;
+}
+
+const getNotes = async (dir) => {
+  const results = {}
+  const notesPath = path.join(dir, 'notes.txt');
+  if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
+    try {
+      let notes = await readFile(notesPath, 'utf-8');
+      if (notes.startsWith(highlightPrefix)) {
+        results.highlight = true;
+      }
+      results.notes = notes;
+      results.notesPath = notesPath;
+    } catch (e) {
+      console.log(`can not read ${notesPath}`);
+    }
+  }
+  return results;
+}
 
 // calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
 // return an object with the calculated values, and the list of subfolders found.
@@ -784,36 +816,25 @@ class ExplorerController {
   }
 
   async countSync(dir, name, unclassified = false) {
-    const result = {
+    let result = {
+      ...(await Statistic.get(dir)),
       subFolders: [],
-      unclassified: 0,
-      classified: 0,
+      hasSubFolders: await this.hasSubFolders(dir),
       name: name,
-      path: dir
-    };
-
-    // Read notes
-    const notesPath = path.join(dir, 'notes.txt');
-    if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
-      try {
-        let notes = await readFile(notesPath, 'utf-8');
-        result.notes = notes;
-        result.notesPath = notesPath;
-      } catch (e) {
-        console.log(`can not read ${notesPath}`);
-      }
+      path: dir,
     }
-
+    // Read notes
+    const { notes, notesPath, highlight } = await getNotes(dir);
     //Read Cfg
-    const cfgPath = path.join(dir, '.cfg');
-    if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
-      try {
-        let cfg = await readFile(cfgPath, 'utf-8');
-        result.config = JSON.parse(cfg);
-        result.cfgPath = cfgPath;
-      } catch (e) {
-        logger.error(`ExplorerController.countSync: ${e.message}`);
-      }
+    const { cfg, cfgPath } = await getCfg(dir)
+
+    result = {
+      ...result,
+      notes,
+      notesPath,
+      highlight,
+      cfg,
+      cfgPath
     }
 
     const files = await readdir(dir);
@@ -827,17 +848,11 @@ class ExplorerController {
         } else {
           subResult = await this.countSync(nextDir, file, false);
         }
-        result.classified += subResult.classified;
-        result.unclassified += subResult.unclassified;
         result.subFolders.push(subResult);
-      } else if (this.isValidFile(file)) {
-        if (unclassified) {
-          result.unclassified += 1;
-        } else {
-          result.classified += 1;
-        }
       }
     }
+    result.path = dir.replace(CONST_PATHS.root, '');
+
     return result;
   }
 
@@ -1358,45 +1373,21 @@ class ExplorerController {
         }
         const subDir = path.join(dir, name);
         if ((await lstat(subDir)).isDirectory()) {
-          const statistic = await Statistic.get(subDir);
-          const file = {
-            classified: 0,
-            unclassified: 0,
-            ...statistic,
-            name,
-            path: subDir.replace(CONST_PATHS.root, ""),
-            hasSubFolders: await this.hasSubFolders(subDir),
-            notes: '',
-            notesPath: null,
-            highlight: false,
-          };
-          const notesPath = path.join(subDir, 'notes.txt');
-          file.notes = '';
-          file.notesPath = notesPath.replace(CONST_PATHS.root, "");
-          file.highlight = false;
-          if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
-            try {
-              let notes = await readFile(notesPath, 'utf-8');
-              if (notes.startsWith(highlightPrefix)) {
-                file.notes = notes.substring(highlightPrefix.length);
-                file.highlight = true;
-              } else {
-                file.notes = notes;
-              }
-            } catch (e) {
-              console.log(`can not read ${notesPath}`);
-            }
-          }
+          let file = await this.countSync(subDir,name)
+          // Read notes
+          const { notes, notesPath, highlight } = await getNotes(subDir);
+
           //Read Cfg
-          const cfgPath = path.join(subDir, '.cfg');
-          if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
-            try {
-              let cfg = await readFile(cfgPath, 'utf-8');
-              file.config = JSON.parse(cfg);
-              file.cfgPath = cfgPath.replace(CONST_PATHS.root, "");
-            } catch (e) {
-              logger.error(`ExplorerController.getSubFolderByPath: Can not read ${cfgPath}`);
-            }
+          const { cfg, cfgPath } = await getCfg(subDir.replace(CONST_PATHS.root, ""));
+
+          file = {
+            ...file,
+            path: subDir.replace(CONST_PATHS.root, ""),
+            notes,
+            notesPath: notesPath ? notesPath.replace(CONST_PATHS.root, "") : null,
+            highlight,
+            cfg,
+            cfgPath: cfgPath ? cfgPath.replace(CONST_PATHS.root, "") : null,
           }
           folders.push(file);
         }
