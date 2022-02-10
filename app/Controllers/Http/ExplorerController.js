@@ -1209,10 +1209,11 @@ class ExplorerController {
       if (currentCfg.parentFolderPath) {
         workingRoot = currentCfg.parentFolderPath
       }
+      const parentDir = dir.split(path.sep).slice(2, -1).join(path.sep);
       const selectedPath = currentCfg.selectedPath || 'Selected';
-      const absSelectedPath = path.join(workingRoot, selectedPath);
+      const absSelectedPath = path.join(workingRoot, parentDir, selectedPath);
       const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected';
-      const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
+      const absNotSelectedPath = path.join(workingRoot, parentDir, notSelectedPath);
       const user = request.currentUser.username;
       // Create delete directory if not exist
       if (!await exists(absSelectedPath)) {
