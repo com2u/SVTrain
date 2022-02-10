@@ -29,6 +29,8 @@ RUN pip3 install \
   imagesize
 
 RUN pip3 install numpy==1.22.2
+# tensorflow comes with this dependency but then conflicts with it since there are two keras: keras and tf.keras
+RUN pip3 uninstall keras
 
 COPY . .
 
