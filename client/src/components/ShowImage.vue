@@ -50,12 +50,12 @@ export default {
         scroller_position: 'bottom',
       },
       zoomKey: 1,
-      srcIMG: encodeURIComponent(this.file.serverPath),
+      srcIMG: encodeURI(this.file.serverPath),
     }
   },
   methods: {
     convertURIPath(p) {
-      return encodeURIComponent(p)
+      return encodeURI(p)
     },
     onKeyUp(key) {
       let flag = false
