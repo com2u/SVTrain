@@ -24,8 +24,9 @@ RUN apt install -y python3 python3-pip bash curl zip
 RUN apt install -y g++ && yarn install --production
 
 RUN pip3 install \
-  tensorflow==2.6.0 \
+  tensorflow==2.6.1 \
   matplotlib==3.4.3 \
+  numpy==1.22.2 \
   imagesize
 
 COPY . .
