@@ -1,4 +1,4 @@
-FROM node:14-alpine AS frontend-build
+FROM node:14-alpine3.15 AS frontend-build
 
 WORKDIR /build
 COPY ./client/package.json /build/
@@ -11,7 +11,7 @@ RUN apk --no-cache add --virtual native-deps \
 COPY ./client /build/
 RUN yarn build
 
-FROM node:14
+FROM node:14-bullseye
 
 WORKDIR /app
 
