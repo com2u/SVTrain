@@ -26,8 +26,9 @@ RUN apt install -y g++ && yarn install --production
 RUN pip3 install \
   tensorflow==2.6.1 \
   matplotlib==3.4.3 \
-  numpy==1.22.2 \
   imagesize
+
+RUN pip3 install numpy==1.22.2
 
 COPY . .
 
