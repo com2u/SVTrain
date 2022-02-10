@@ -1644,6 +1644,11 @@ class ExplorerController {
     }
     response.status(400)
   }
+
+  async init () {
+    // calculate statistics on server boot
+    recalculateDir()
+  }
 }
 
 module.exports = ExplorerController;
