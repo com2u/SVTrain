@@ -141,93 +141,138 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
   return out
 }
 
-const calculate = async (job, done) => {
-  try {
-    let data = {}
-    const usersFilePath = path.join(__dirname, '../../../statistic.data')
-    if (await exists(usersFilePath)) {
-      data = JSON.parse(await readFile(usersFilePath))
+const getCfg = async (dir) => {
+  const results = {}
+  const cfgPath = path.join(dir, '.cfg');
+  if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
+    try {
+      let cfg = await readFile(cfgPath, 'utf-8');
+      result.config = JSON.parse(cfg);
+      result.cfgPath = cfgPath;
+    } catch (e) {
+      logger.error(`ExplorerController.getCfg: ${e.message}`);
     }
-    const missedFiles = [];
-    const allFiles = [];
-    const dirsObject = {};
-    const ignoreFunc = (_, lstat) => !lstat.isDirectory();
-    const dirs = await recursive(CONST_PATHS.root);
-    await Promise.all(
-      dirs.map(async dir => {
-        if (await exists(path.join(dir, '.statistics')) && data && data[dir]) {
-          dirsObject[dir] = data[dir];
+  }
+  return results;
+}
+
+const getNotes = async (dir) => {
+  const results = {}
+  const notesPath = path.join(dir, 'notes.txt');
+  if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
+    try {
+      let notes = await readFile(notesPath, 'utf-8');
+      if (notes.startsWith(highlightPrefix)) {
+        results.highlight = true;
+      }
+      results.notes = notes;
+      results.notesPath = notesPath;
+    } catch (e) {
+      console.log(`can not read ${notesPath}`);
+    }
+  }
+  return results;
+}
+
+// calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
+// return an object with the calculated values, and the list of subfolders found.
+const classifyFilesOfDir = async (dir) => {
+  let localStateData = {
+    missed: 0,
+    matched: 0,
+    missmatched: 0,
+    classified: 0,
+    unclassified: 0,
+  };
+  let dirname = path.basename(dir);
+  let files = await readdir(dir);
+  const subfolders = [];
+  const isUnclassified = dir
+    .toString()
+    .toLowerCase()
+    .includes("unclassified");
+  await Promise.all(
+    files.map(async (f) => {
+      let filepath = path.join(dir, f);
+      const stats = await lstat(filepath);
+      if (
+        stats.isFile() &&
+        !CONST_PATHS.ignoreFiles.includes(f) &&
+        regexpForImages.test(f)
+      ) {
+        if (isUnclassified) localStateData.unclassified++;
+        else localStateData.classified++;
+        if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
+          localStateData.matched++;
         } else {
-          let dirname = path.basename(dir);
-          let files = await readdir(dir);
-          const subfolders = [];
-          dirsObject[dir] = {
-            missed: 0,
-            matched: 0,
-            missmatched: 0,
-            classified: 0,
-            unclassified: 0
-          };
-          // count matches | missmatches
-          await Promise.all(
-            files.map(async f => {
-              let filepath = path.join(dir, f);
-              const isUnclassified = dir.toString().toLowerCase().includes('unclassified');
-              const stats = await lstat(filepath);
-              if (stats.isFile() && !CONST_PATHS.ignoreFiles.includes(f)) {
-                if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
-                  dirsObject[dir].matched++;
-                } else {
-                  dirsObject[dir].missmatched++;
-                  missedFiles.push(filepath);
-                }
-                if (regexpForImages.test(f)) {
-                  allFiles.push({
-                    filepath,
-                    isUnclassified
-                  });
-                }
-              }
-              if (stats.isDirectory()) {
-                subfolders.push(f);
-              }
-            }) // end of map function for all files
-          ); // end of promise for all files
-          try {
-            dirsObject[dir].table = await buildSubfolderTable(dir, subfolders);
-          } catch (e) {
-            console.log(e);
-          }
-          await writeFile(path.join(dir, '.statistics'), '', {encoding: 'utf8', flag: 'w'});
+          localStateData.missmatched++;
+          if (
+            path
+              .basename(f)
+              .toLowerCase()
+              .indexOf(path.basename(dir).toLowerCase()) > -1
+          )
+            localStateData.missed++;
         }
+      } else if (stats.isDirectory()) {
+        subfolders.push(f);
+      }
+    })
+  );
+  return {
+    localStateData,
+    subfolders
+  }
+}
+
+const calculate = async (job, done) => {
+  // job.data has the following structure:
+  // {
+  //   dir: 'path/to/dir', // falls back to root if not set
+  //   safe: boolean,      // if true, only recalculate folders that haven't been calculated yet
+  //                       // for performance reasons
+  // }
+  const folderToRecalculate = job.data.dir || CONST_PATHS.root;
+  try {
+    const dirs = await recursive(folderToRecalculate);
+    await Promise.all(
+      dirs.map(async (dir) => {
+        if (job.data.safe) {
+          // if safe, only recalculate folders that haven't been calculated yet
+          const alreadyCalculated = await Statistic.get(dir)
+          if (alreadyCalculated.calculated !== false) return;
+        }
+        // calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
+        const { localStateData, subfolders } = await classifyFilesOfDir(dir);
+        try {
+          localStateData.table = await buildSubfolderTable(dir, subfolders);
+        } catch (e) {
+          console.log(e);
+        }
+        // statistics are saved in .statistics file inside the folder, for each folder.
+        await writeFile(
+          path.join(dir, ".statistics"),
+          JSON.stringify(localStateData),
+          { encoding: "utf8", flag: "w" }
+        );
       })
     );
-    Object.keys(dirsObject).forEach(dir => {
-      dirsObject[dir].missed = missedFiles.filter(
-        f => path.basename(f).toLowerCase().indexOf(path.basename(dir).toLowerCase()) > -1
-      ).length;
-      for (let file of allFiles) {
-        const dirLength = dir.length;
-        if (file.filepath.startsWith(dir) && file.filepath.length > dirLength && file.filepath[dirLength] === pathSep) {
-          if (file.isUnclassified) {
-            dirsObject[dir].unclassified += 1;
-          } else {
-            dirsObject[dir].classified += 1;
-          }
-        }
-      }
-      Statistic.write(dir, dirsObject[dir]);
-    });
-    await Statistic.save();
-    done()
+    done();
     return true;
   } catch (e) {
     logger.error(`ExplorerController.calculate: ${e.message}`);
     throw e;
   }
-}
+};
 
 queue.process('asyncCalculate', 1, calculate)
+
+// create a calculation job for a folder
+const recalculateDir = (dir) => {
+  queue.create("asyncCalculate", { dir }).save(function (error) {
+    if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
+  });
+};
 
 class ExplorerController {
   /*
@@ -587,7 +632,12 @@ class ExplorerController {
         await mkdir(absDestination);
       }
       const user = request.currentUser.username;
-      return await this.moveFiles(files, absDestination, user, true);
+      const results = await this.moveFiles(files, absDestination, user, true);
+      // should recalculate the statistics for the folder since the files have been deleted.
+      recalculateDir(
+        path.join(workingRoot, dir.substring(0, dir.lastIndexOf("/") + 1))
+      );
+      return results;
     }
   }
 
@@ -614,7 +664,14 @@ class ExplorerController {
       }
       return true
     } else {
-      return await this.moveFiles(files, destination, user);
+      const results = await this.moveFiles(files, destination, user);
+      // should recalculate the statistics for the folder since the files have been deleted.
+      // for both source and destination folders.
+      recalculateDir(path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination));
+      recalculateDir(
+        path.join(CONST_PATHS.root, files[0].substring(0, files[0].lastIndexOf("/") + 1))
+      );
+      return results;
     }
   }
 
@@ -759,36 +816,25 @@ class ExplorerController {
   }
 
   async countSync(dir, name, unclassified = false) {
-    const result = {
+    let result = {
+      ...(await Statistic.get(dir)),
       subFolders: [],
-      unclassified: 0,
-      classified: 0,
+      hasSubFolders: await this.hasSubFolders(dir),
       name: name,
-      path: dir
-    };
-
-    // Read notes
-    const notesPath = path.join(dir, 'notes.txt');
-    if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
-      try {
-        let notes = await readFile(notesPath, 'utf-8');
-        result.notes = notes;
-        result.notesPath = notesPath;
-      } catch (e) {
-        console.log(`can not read ${notesPath}`);
-      }
+      path: dir,
     }
-
+    // Read notes
+    const { notes, notesPath, highlight } = await getNotes(dir);
     //Read Cfg
-    const cfgPath = path.join(dir, '.cfg');
-    if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
-      try {
-        let cfg = await readFile(cfgPath, 'utf-8');
-        result.config = JSON.parse(cfg);
-        result.cfgPath = cfgPath;
-      } catch (e) {
-        logger.error(`ExplorerController.countSync: ${e.message}`);
-      }
+    const { cfg, cfgPath } = await getCfg(dir)
+
+    result = {
+      ...result,
+      notes,
+      notesPath,
+      highlight,
+      cfg,
+      cfgPath
     }
 
     const files = await readdir(dir);
@@ -802,17 +848,11 @@ class ExplorerController {
         } else {
           subResult = await this.countSync(nextDir, file, false);
         }
-        result.classified += subResult.classified;
-        result.unclassified += subResult.unclassified;
         result.subFolders.push(subResult);
-      } else if (this.isValidFile(file)) {
-        if (unclassified) {
-          result.unclassified += 1;
-        } else {
-          result.classified += 1;
-        }
       }
     }
+    result.path = dir.replace(CONST_PATHS.root, '');
+
     return result;
   }
 
@@ -936,7 +976,7 @@ class ExplorerController {
   async statistic({request}) {
     const {dir} = request.get();
     logger.info(`User ${request.currentUser.username} has shown statistic of "${dir}"`);
-    return Statistic.get(path.join(CONST_PATHS.root, dir));
+    return await Statistic.get(path.join(CONST_PATHS.root, dir));
   }
 
   /*
@@ -944,7 +984,13 @@ class ExplorerController {
     Run process for calculate statistic for each folder
   */
   async calculate({request, response}) {
-    queue.create('asyncCalculate', {}).save(function(error) {
+    const { dir, safe } = request.get();
+    // safe: boolean // if true and !dir then calculate statistic for all folders that have no .statistic file
+    // if dir exists, safe is ignored, used to recalculate statistic for a specific folder
+    queue.create('asyncCalculate', {
+      dir: dir ? path.join(CONST_PATHS.root, dir) : null,
+      safe,
+    }).save(function(error) {
       if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
     });
     return true
@@ -1163,10 +1209,11 @@ class ExplorerController {
       if (currentCfg.parentFolderPath) {
         workingRoot = currentCfg.parentFolderPath
       }
+      const parentDir = dir.split(path.sep).slice(2, -1).join(path.sep);
       const selectedPath = currentCfg.selectedPath || 'Selected';
-      const absSelectedPath = path.join(workingRoot, selectedPath);
+      const absSelectedPath = path.join(workingRoot, parentDir, selectedPath);
       const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected';
-      const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
+      const absNotSelectedPath = path.join(workingRoot, parentDir, notSelectedPath);
       const user = request.currentUser.username;
       // Create delete directory if not exist
       if (!await exists(absSelectedPath)) {
@@ -1179,6 +1226,10 @@ class ExplorerController {
       }
       const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
       const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
+      // recalculate statistics for parent dir, and all selected/notSelected folders
+      recalculateDir(absSelectedPath);
+      recalculateDir(absNotSelectedPath);
+      recalculateDir(workingRoot);
       response.json({
         selected,
         notSelected
@@ -1323,50 +1374,21 @@ class ExplorerController {
         }
         const subDir = path.join(dir, name);
         if ((await lstat(subDir)).isDirectory()) {
-          const file = {
-            name,
-            path: subDir.replace(CONST_PATHS.root, ""),
-            hasSubFolders: await this.hasSubFolders(subDir),
-            notes: '',
-            notesPath: null,
-            highlight: false,
-            classified: 0,
-            unclassified: 0
-          };
-          const statistic = Statistic.get(subDir);
-          if (Number.isInteger(statistic.classified)) {
-            file.classified = statistic.classified;
-          }
-          if (Number.isInteger(statistic.unclassified)) {
-            file.unclassified = statistic.unclassified;
-          }
-          const notesPath = path.join(subDir, 'notes.txt');
-          file.notes = '';
-          file.notesPath = notesPath.replace(CONST_PATHS.root, "");
-          file.highlight = false;
-          if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
-            try {
-              let notes = await readFile(notesPath, 'utf-8');
-              if (notes.startsWith(highlightPrefix)) {
-                file.notes = notes.substring(highlightPrefix.length);
-                file.highlight = true;
-              } else {
-                file.notes = notes;
-              }
-            } catch (e) {
-              console.log(`can not read ${notesPath}`);
-            }
-          }
+          let file = await this.countSync(subDir,name)
+          // Read notes
+          const { notes, notesPath, highlight } = await getNotes(subDir);
+
           //Read Cfg
-          const cfgPath = path.join(subDir, '.cfg');
-          if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
-            try {
-              let cfg = await readFile(cfgPath, 'utf-8');
-              file.config = JSON.parse(cfg);
-              file.cfgPath = cfgPath.replace(CONST_PATHS.root, "");
-            } catch (e) {
-              logger.error(`ExplorerController.getSubFolderByPath: Can not read ${cfgPath}`);
-            }
+          const { cfg, cfgPath } = await getCfg(subDir.replace(CONST_PATHS.root, ""));
+
+          file = {
+            ...file,
+            path: subDir.replace(CONST_PATHS.root, ""),
+            notes,
+            notesPath: notesPath ? notesPath.replace(CONST_PATHS.root, "") : null,
+            highlight,
+            cfg,
+            cfgPath: cfgPath ? cfgPath.replace(CONST_PATHS.root, "") : null,
           }
           folders.push(file);
         }
@@ -1377,7 +1399,7 @@ class ExplorerController {
 
   async listStatistic({request}) {
     const {dirs} = request.post();
-    return Statistic.getList(dirs);
+    return await Statistic.getList(dirs);
   }
 
   async hasSubFolders(dir) {

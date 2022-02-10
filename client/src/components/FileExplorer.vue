@@ -145,7 +145,6 @@
           <div class="pagination-group">
             <b-button
               class="mr-2"
-              v-if="!forwardOnly"
               variant="primary"
               size="sm"
               @click="backward()">
@@ -232,7 +231,7 @@ import WindowSplitting from './WindowSplitting.vue'
 
 function preventDefaultScrolling(e) {
   // space and arrow keys
-  if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+  if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1 && document.activeElement.tagName !== 'TEXTAREA') {
     e.preventDefault()
   }
 }
@@ -363,9 +362,6 @@ export default {
     },
     viewerImages() {
       return this.selectedFiles.map((file) => file.serverPath)
-    },
-    backgroundCalculating() {
-      return this.$store.state.app.calculating
     },
     fontSize() {
       const config = this.systemConfig
@@ -523,7 +519,7 @@ export default {
       if (folder) this.goToTheFolder(folder)
     },
     selectFileByIndex(number) {
-      const index = (number + 10) % 11
+      const index = (number + 9) % 10
       if (this.screenFiles.length > index) {
         this.toggleSelect(this.screenFiles[index])
       }
@@ -823,7 +819,7 @@ export default {
       }
     },
     forward() {
-      if (!this.forwardOnly) {
+      if (!this.forwardOnly || this.selectedFiles.length === 0) {
         if (this.page < this.page_count) {
           this.page += 1
           this.calculatePage(this.page)

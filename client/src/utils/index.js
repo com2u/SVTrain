@@ -7,20 +7,6 @@ export const get = (obj, path, defaultValue) => {
   return result === undefined || result === obj ? defaultValue : result
 }
 
-export const updateCounting = (folders, statistics) => {
-  const res = folders.slice()
-  res.forEach((file, i) => {
-    if (Object.keys(statistics).includes(file.path)) {
-      res[i].classified = statistics[file.path].classified
-      res[i].unclassified = statistics[file.path].unclassified
-      if (file.subFolders && file.subFolders.length) {
-        res[i].subFolders = updateCounting(file.subFolders, statistics)
-      }
-    }
-  })
-  return res
-}
-
 export const getToken = () => localStorage.getItem('sessionToken', null)
 
 export const isProduction = () => (process.env.NODE_ENV || 'production') === 'production'

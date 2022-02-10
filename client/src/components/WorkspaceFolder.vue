@@ -111,7 +111,7 @@
     <div v-if="hasChildren && showChildren">
       <workspace-folder
         v-for="(folder, index) in info.subFolders"
-        :info="folder"
+        :rawInfo="folder"
         :depth="depth + 1"
         :key-path="`${keyPath}.subFolders.[${index}]`"
         :key="folder.path"
@@ -140,7 +140,7 @@ import EventBus from '../utils/eventbus'
 export default {
   name: 'WorkspaceFolder',
   props: {
-    info: {
+    rawInfo: {
       type: Object,
       default: () => ({}),
     },
@@ -191,6 +191,15 @@ export default {
     wsPath() {
       return this.$store.state.app.config.wsPath
     },
+    info() {
+      if (this.rawInfo.hasSubFolders && this.rawInfo.subFolders) {
+        return {
+          ...this.rawInfo,
+          ...this.sumObjectsByKey(...this.rawInfo.subFolders),
+        }
+      }
+      return this.rawInfo
+    },
     ...mapGetters([
       'canEditNote',
       'canEditConfig',
@@ -210,16 +219,25 @@ export default {
         flag: this.showChildren,
       })
       if (!this.info.subFolders) {
-        this.loadingChildren = true
-        EventBus
-          .$emit('load-sub-folders', {
-            info: this.info,
-            keyPath: this.keyPath,
-            done: () => {
-              this.loadingChildren = false
-            },
-          })
+        this.loadSubFolders()
       }
+    },
+    loadSubFolders() {
+      this.loadingChildren = true
+      EventBus
+        .$emit('load-sub-folders', {
+          info: this.info,
+          keyPath: this.keyPath,
+          done: () => {
+            this.loadingChildren = false
+          },
+        })
+    },
+    getSubFolderStatistics(folderInfo) {
+      if (folderInfo.hasSubFolders && folderInfo.subFolders) {
+        return this.sumObjectsByKey(...folderInfo.subFolders)
+      }
+      return folderInfo
     },
     showNotes() {
       this.$store.dispatch('notes/showFolder', this.info)
@@ -253,7 +271,7 @@ export default {
     },
     showStatistic() {
       if (this.canViewStatistics) {
-        EventBus.$emit('show-statistic', this.info.path)
+        EventBus.$emit('show-statistic', this.info)
       }
     },
     createNewFolder() {
@@ -279,6 +297,19 @@ export default {
         this.$emit('backup-done')
       }
       this.backuping = false
+    },
+    sumObjectsByKey(...objs) {
+      return objs.reduce((totalStats, currentSubFolder) => {
+        const subFolderStats = {
+          ...currentSubFolder,
+          ...this.getSubFolderStatistics(currentSubFolder),
+        }
+        Object.entries(subFolderStats).forEach(([key, value]) => {
+          if (!Number.isInteger(value)) return
+          totalStats[key] = (totalStats[key] || 0) + value // eslint-disable-line no-param-reassign
+        })
+        return totalStats
+      }, {})
     },
   },
   mounted() {

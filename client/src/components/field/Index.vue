@@ -103,7 +103,7 @@ export default {
     handleInput(value) {
       if (this.schema.type === types.NUMBER) {
         // eslint-disable-next-line radix
-        this.temp = Number.parseInt(value)
+        this.temp = Number.parseFloat(value)
       } else {
         this.temp = value
       }
