@@ -71,25 +71,10 @@ export default {
     setUser: ({ commit }, user) => {
       commit('SET_USER', user)
     },
-
     logout({ commit }) {
       commit('SET_CONFIG', {})
       localStorage.removeItem('sessionToken')
       api.setSessionToken('')
-    },
-    calculateStatistic({ commit }) {
-      commit('SET_CALCULATING', true)
-      return new Promise((resolve, reject) => {
-        api.calculateStatistic()
-          .then(() => {
-            commit('SET_CALCULATING', false)
-            resolve(true)
-          })
-          .catch((err) => {
-            commit('SET_CALCULATING', false)
-            reject(err)
-          })
-      })
     },
   },
   getters: {

@@ -1,12 +1,12 @@
 <template>
   <div>
-<!--    <b-button-->
-<!--      :disabled="isLoading || backgroundCalculating"-->
-<!--      @click="calculate()">-->
-<!--      Calculate statistic{{ isLoading || backgroundCalculating ? ' (loading...)' : ''}}-->
-<!--    </b-button>-->
+    <b-button
+      :disabled="isLoading || backgroundCalculating"
+      @click="calculate(dir)">
+        Calculate statistic{{ isLoading || backgroundCalculating ? ' (loading...)' : ''}}
+      </b-button>
     <div v-if="statistic">
-      <div class="right-side-section" v-if="statistic.calculated">
+      <div class="right-side-section" v-if="statistic.calculated !== false">
         <div class="caption">
           <div>{{currentFolder}}</div>
           <div>
@@ -56,6 +56,12 @@ export default {
   },
   methods: {
     open(dir) {
+      if (typeof dir === 'object') {
+        this.statistic = dir
+        this.dir = dir.path
+        this.isLoading = false
+        return
+      }
       this.dir = dir
       this.load(dir)
     },
@@ -65,12 +71,11 @@ export default {
         dir = this.dir
       }
       const response = await api.getStatistic(dir)
-      console.log(response)
       this.statistic = response
     },
-    async calculate() {
+    async calculate(dir) {
       this.isLoading = true
-      await api.calculateStatistic()
+      await api.calculateStatistic(dir)
       await this.load()
       this.isLoading = false
     },

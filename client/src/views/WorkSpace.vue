@@ -11,7 +11,7 @@
       </div>
       <workspace-folder
         v-for="(folder, index) in folders"
-        :info="folder"
+        :rawInfo="folder"
         :key-path="`[${index}]`"
         :key="folder.path"
         :show-sub-folder-progress="folder.config && folder.config.showSubFolderProgress"
@@ -90,7 +90,6 @@ import api from '../utils/api'
 import WorkspaceFolder from '../components/WorkspaceFolder.vue'
 import CreatingFolder from '../components/CreatingFolder.vue'
 import EventBus from '../utils/eventbus'
-import { updateCounting } from '../utils'
 
 export default {
   name: 'WorkSpace',
@@ -231,15 +230,10 @@ export default {
       EventBus.$emit('create-new-folder', 'root')
     },
   },
-  mounted() {
+  async mounted() {
     // this.loadFolders()
+    await api.calculateStatistic(null, true)
     this.loadFoldersByPath()
-    this.$store.dispatch('app/calculateStatistic')
-      .then(async () => {
-        const updatedStatistic = await api.listStatistics(this.populatedFolders)
-        const folders = updateCounting(this.folders, updatedStatistic)
-        this.folders = folders
-      })
     EventBus.$on('load-sub-folders', this.loadSubfolder)
   },
   destroyed() {

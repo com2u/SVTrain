@@ -1,4 +1,5 @@
 var fs = require("fs");
+const Env = use('Env');
 var p = require("path");
 const {promisify} = require('util')
 const readdir = promisify(fs.readdir)
@@ -22,7 +23,7 @@ const lstat = promisify(fs.lstat)
 
 
 const readDirRecursiveSync = async function (dir) {
-  let result = [dir]
+  let result = Env.get('ROOT_PATH') === dir ? [] : [dir]
   const files = await readdir(dir)
   for (const file of files) {
     const nextPath = p.join(dir, file)
