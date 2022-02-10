@@ -1,68 +1,45 @@
-const {promisify} = use('Helpers')
-const fs = require('fs')
-const path = require('path')
-const { promisify : promisifyUtil } = require("util")
-const exists = promisifyUtil(fs.exists)
-const readFile = promisifyUtil(fs.readFile)
-const writeFile = promisifyUtil(fs.writeFile)
+const { promisify } = use("Helpers");
+const fs = require("fs");
+const path = require("path");
+const { promisify: promisifyUtil } = require("util");
+const exists = promisifyUtil(fs.exists);
+const readFile = promisifyUtil(fs.readFile);
+const writeFile = promisifyUtil(fs.writeFile);
+const Env = use("Env");
 
+const ROOT_PATH = Env.get("ROOT_PATH");
 module.exports = class Statistic {
   constructor() {
-    this._path = path.join(__dirname, '../../', 'statistic.data')
-    this._data = {}
+    this.filename = ".statistics";
   }
 
-  async init() {
-    if (!exists(this._path)) {
-      console.log(this._path)
-      console.log('Statistic file doesn\'t exist')
-      return
-    }
-
-    let data = await readFile(this._path, 'utf8')
+  async get(_path) {
     try {
-      data = JSON.parse(data)
-    } catch (e) {
-      console.log('Error occured when parse statistic data')
-      console.log(e)
-      return
+      return (await exists(
+        path.isAbsolute(_path)
+          ? path.join(_path, this.filename)
+          : path.join(ROOT_PATH, _path, this.filename)
+      ))
+        ? JSON.parse(
+            await readFile(
+              path.isAbsolute(_path)
+                ? path.join(_path, this.filename)
+                : path.join(ROOT_PATH, _path, this.filename)
+            )
+          )
+        : { calculated: false };
+    } catch {
+      return { calculated: false };
     }
-
-    this._data = data
   }
 
-  get(path) {
-    return this._data[path]
-      ? this._data[path]
-      : {
-        calculated: false
-      }
-  }
-
-  getList(dirs) {
-    const res = {}
+  async getList(dirs) {
+    const res = {};
     for (const dir of dirs) {
-      if (this._data[dir]) {
-        res[dir] = this._data[dir]
-      }
+      res[dir] = (await exists(path.join(ROOT_PATH, dir, this.filename)))
+        ? JSON.parse(await readFile(path.join(ROOT_PATH, dir, this.filename)))
+        : { calculated: false };
     }
-    return res
+    return res;
   }
-
-  async save() {
-    const data = JSON.stringify(this._data, null, 2)
-    return await writeFile(this._path, data, 'utf8')
-  }
-
-  write(path, {missed, matched, missmatched, table, unclassified, classified}) {
-    this._data[path] = {
-      calculated: true,
-      missed,
-      matched,
-      missmatched,
-      table,
-      classified,
-      unclassified
-    }
-  }
-}
+};

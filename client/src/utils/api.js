@@ -78,7 +78,12 @@ export default {
       type,
     },
   })).data,
-  calculateStatistic: async () => (await axios.get(urls.calculateStatistic)).data,
+  calculateStatistic: async (dir, safe) => (await axios.get(urls.calculateStatistic, {
+    params: {
+      safe,
+      ...(dir ? { dir } : {}),
+    },
+  })).data,
   saveFile: async (path, data) => (await axios.post(urls.saveFile, {
     path,
     data,
