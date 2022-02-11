@@ -143,12 +143,12 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
 
 const getCfg = async (dir) => {
   const results = {}
-  const cfgPath = path.join(dir, '.cfg');
+  const cfgPath = path.join(CONST_PATHS.root, dir, '.cfg');
+  results.cfgPath = path.join(dir, '.cfg');;
   if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
     try {
       let cfg = await readFile(cfgPath, 'utf-8');
-      result.config = JSON.parse(cfg);
-      result.cfgPath = cfgPath;
+      results.config = JSON.parse(cfg);
     } catch (e) {
       logger.error(`ExplorerController.getCfg: ${e.message}`);
     }
@@ -158,7 +158,8 @@ const getCfg = async (dir) => {
 
 const getNotes = async (dir) => {
   const results = {}
-  const notesPath = path.join(dir, 'notes.txt');
+  const notesPath = path.join(CONST_PATHS.root, dir, 'notes.txt');
+  results.notesPath = path.join(dir, 'notes.txt');;
   if (await exists(notesPath) && (await lstat(notesPath)).isFile()) {
     try {
       let notes = await readFile(notesPath, 'utf-8');
@@ -166,7 +167,6 @@ const getNotes = async (dir) => {
         results.highlight = true;
       }
       results.notes = notes;
-      results.notesPath = notesPath;
     } catch (e) {
       console.log(`can not read ${notesPath}`);
     }
@@ -824,17 +824,17 @@ class ExplorerController {
       path: dir,
     }
     // Read notes
-    const { notes, notesPath, highlight } = await getNotes(dir);
+    const { notes, notesPath, highlight } = await getNotes(dir.replace(CONST_PATHS.root, ""));
     //Read Cfg
-    const { cfg, cfgPath } = await getCfg(dir)
+    const { config, cfgPath } = await getCfg(dir.replace(CONST_PATHS.root, ""))
 
     result = {
       ...result,
       notes,
-      notesPath,
+      notesPath: notesPath.replace(CONST_PATHS.root, ""),
       highlight,
-      cfg,
-      cfgPath
+      config,
+      cfgPath: cfgPath.replace(CONST_PATHS.root, ""),
     }
 
     const files = await readdir(dir);
@@ -851,6 +851,7 @@ class ExplorerController {
         result.subFolders.push(subResult);
       }
     }
+
     result.path = dir.replace(CONST_PATHS.root, '');
 
     return result;
@@ -1376,10 +1377,10 @@ class ExplorerController {
         if ((await lstat(subDir)).isDirectory()) {
           let file = await this.countSync(subDir,name)
           // Read notes
-          const { notes, notesPath, highlight } = await getNotes(subDir);
+          const { notes, notesPath, highlight } = await getNotes(subDir.replace(CONST_PATHS.root, ""));
 
           //Read Cfg
-          const { cfg, cfgPath } = await getCfg(subDir.replace(CONST_PATHS.root, ""));
+          const { config, cfgPath } = await getCfg(subDir.replace(CONST_PATHS.root, ""));
 
           file = {
             ...file,
@@ -1387,7 +1388,7 @@ class ExplorerController {
             notes,
             notesPath: notesPath ? notesPath.replace(CONST_PATHS.root, "") : null,
             highlight,
-            cfg,
+            config,
             cfgPath: cfgPath ? cfgPath.replace(CONST_PATHS.root, "") : null,
           }
           folders.push(file);
@@ -1642,6 +1643,11 @@ class ExplorerController {
       return true
     }
     response.status(400)
+  }
+
+  async init () {
+    // calculate statistics on server boot
+    recalculateDir()
   }
 }
 
