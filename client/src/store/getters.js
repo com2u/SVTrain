@@ -17,6 +17,7 @@ const getters = {
   canBackup: (state) => getPermissions(state) && state.app.user.permissions.canBackup,
   editConfigUI: (state) => getPermissions(state) && state.app.user.permissions.editConfigUI,
   editConfigAI: (state) => getPermissions(state) && state.app.user.permissions.editConfigAI,
+  importFiles: (state) => getPermissions(state) && state.app.user.permissions.importFiles,
   currentWs: (state) => {
     const { wsPath, root } = state.app.config
     return wsPath ? wsPath.substring(root.length) : 'Root'

@@ -675,6 +675,39 @@ class ExplorerController {
     }
   }
 
+  /*
+   POST /uploadFiles
+    Except a formData with two properties: "files" and "path"
+    Upload files from array "files" to the derictory "destination"
+    { files: [...], destination: "path/to/move" }
+
+    returns true if success, or throws an error if failed
+  */
+  async uploadFiles({request}) {
+    const { path: fPath } = request.post();
+    const  { files }  = request.files();
+    const user = request.currentUser.username;
+  
+    for (let file of files) {
+      const fileName = file.clientName;
+      const filePath = path.join(CONST_PATHS.root, fPath, fileName);
+      try {
+        fs.copyFileSync(file.tmpPath, filePath);
+      } catch (err) {
+        logger.error(
+          `Failed uploading file: "${fileName}" to "${filePath}" by "${user}"`
+        );
+        throw err;
+      }
+      logger.info(
+        `User ${user} has uploaded file: "${fileName}" to "${fPath}"`
+      );
+    }
+    // recalculate the statistics for the folder since new files have been uploaded.
+    recalculateDir(path.join(CONST_PATHS.root, fPath));
+    return true;
+  }
+
   async moveFiles(files, destination, user, isDelete = false) {
     const absDestination = path.isAbsolute(destination) ? destination : path.join(CONST_PATHS.root, destination);
     if (!accessToFile(CONST_PATHS.root, destination)) {

@@ -87,6 +87,11 @@
                 advantage is that you see all images of one specifc object at one screen.</p></td>
             </tr>
             <tr>
+              <td>importFiles</td>
+              <td><p>Set the value to true if you want to import images from your local computer to the workspace.
+                  The images are imported in the active directory of the workspace.</p></td>
+            </tr>
+            <tr>
               <td>showFileName</td>
               <td><p>Set the value to true if you want to display the file name below the image. The file name will be
                 highlighted in red when the image was not identified by the AI model. The file name will be highlighted
