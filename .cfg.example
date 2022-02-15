@@ -38,5 +38,7 @@
   "editExplorerNotes": false,
   "imgContrast": "150",
   "imgBrightness": "75",
-  "imageInvert": false
+  "imageInvert": false,
+  "importFiles": true,
+  "maxFileSize": 10
 }

@@ -139,6 +139,14 @@
             <div class="list-folder-item" v-if="systemConfig.newFolder && newFolder">
               <new-folder-button @click.native="createNewFolder"/>
             </div>
+            <div class="list-folder-item" v-if="systemConfig.importFiles && importFiles">
+              <label for="import-files">
+                <import-files-button/>
+                <span v-if="isLoading.uploading"><v-icon
+                name="spinner"></v-icon> (Uploading...)</span>
+                <input id="import-files" type="file" @change="onFilesSelected()" ref="filesInput" multiple="multiple" style="display:none">
+              </label>
+            </div>
           </div>
         </div>
         <div class="mb-2 mt-2" v-if="systemConfig.forwardLocation === 'top'">
@@ -227,6 +235,7 @@ import File from './File.vue'
 import ShowFile from './ShowFile.vue'
 import CreatingFolder from './CreatingFolder.vue'
 import NewFolderButton from './NewFolderButton.vue'
+import ImportFilesButton from './ImportFilesButton.vue'
 import WindowSplitting from './WindowSplitting.vue'
 
 function preventDefaultScrolling(e) {
@@ -246,6 +255,7 @@ export default {
     ShowFile,
     CreatingFolder,
     NewFolderButton,
+    ImportFilesButton,
     WindowSplitting,
   },
   data: () => ({
@@ -254,6 +264,7 @@ export default {
       deleting: false,
       moving: false,
       statistic: false,
+      uploading: false,
     },
     showShortcuts: false,
     status: null,
@@ -408,6 +419,7 @@ export default {
       'imageViewer',
       'showNavigationIcon',
       'showExplorerNotes',
+      'importFiles',
     ]),
   },
   watch: {
@@ -960,6 +972,26 @@ export default {
         this.cursor(flag, true)
       }
     },
+    async onFilesSelected() {
+      if (!this.$refs.filesInput.files.length) return
+      const formData = new FormData()
+      for (let index = 0; index < this.$refs.filesInput.files.length; index++) {
+        if (this.$refs.filesInput.files[index].size > 1024 * 1024 * this.systemConfig.maxFileSize) {
+          this.$notify({
+            type: 'error',
+            title: 'Error',
+            text: `File size is too big. Max size is ${this.systemConfig.maxFileSize}MB.`,
+          })
+          return
+        }
+        formData.append(`files[${index}]`, this.$refs.filesInput.files[index])
+      }
+      formData.append('path', this.path)
+      this.isLoading.uploading = true
+      await api.uploadFiles(formData)
+      this.isLoading.uploading = false
+      await this.loadFiles(this.path)
+    },
   },
   async created() {
     this.perPage = this.configFilePerPage
@@ -1171,7 +1203,7 @@ export default {
       .file-explorer-file-name {
         margin-left: .125rem;
       }
-      .new-folder-button {
+      .new-folder-button, .import-files-button {
         padding: unset;
       }
     }

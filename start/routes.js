@@ -26,6 +26,7 @@ Route.group(() => {
   Route.get('/calculateStatistic', 'ExplorerController.calculate').middleware('auth')
   Route.post('/deleteFiles', 'ExplorerController.delete').middleware('auth')
   Route.post('/moveFiles', 'ExplorerController.move').middleware('auth')
+  Route.post('uploadFiles', 'ExplorerController.uploadFiles').middleware('auth')
   Route.post('/saveFile', 'ExplorerController.saveFile').middleware('auth')
   Route.get('/getSubfolders', 'ExplorerController.getSubfolders').middleware('auth')
   Route.get('/checkFolder', 'ExplorerController.checkFolder').middleware('auth')
