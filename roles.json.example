@@ -25,7 +25,8 @@
     "ConvertToDatabase": false,
     "canBackup": false,
     "editConfigAIUI": false,
-    "editConfigFullAIUI": false
+    "editConfigFullAIUI": false,
+    "importFiles": true
   },
   "operator": {
     "editConfig": false,

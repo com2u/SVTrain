@@ -15,6 +15,7 @@ const urls = {
   calculateStatistic: `${baseurl}calculateStatistic`,
   moveFiles: `${baseurl}moveFiles`,
   deleteFiles: `${baseurl}deleteFiles`,
+  uploadFiles: `${baseurl}uploadFiles`,
   getParentDirectory: `${baseurl}getParent`,
   saveFile: `${baseurl}saveFile`,
   checkFolder: (folder) => `${baseurl}checkFolder?folder=${folder}`,
@@ -78,6 +79,12 @@ export default {
       type,
     },
   })).data,
+  uploadFiles: async (formData) => (await axios.post(urls.uploadFiles,
+    formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })).data,
   calculateStatistic: async (dir, safe) => (await axios.get(urls.calculateStatistic, {
     params: {
       safe,

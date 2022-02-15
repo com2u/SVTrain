@@ -6,6 +6,8 @@ module.exports = {
   },
   filePerPage: 15,
   showFileName: false,
+  importFiles: false,
+  maxFileSize: 10,
   useShortcuts: true,
   requestBeforeDelete: true,
   defaultPictureSize: 200,

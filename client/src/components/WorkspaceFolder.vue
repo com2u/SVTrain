@@ -195,7 +195,13 @@ export default {
       if (this.rawInfo.hasSubFolders && this.rawInfo.subFolders) {
         return {
           ...this.rawInfo,
-          ...this.sumObjectsByKey(...this.rawInfo.subFolders),
+          ...this.sumObjectsByKey({
+            classified: this.rawInfo.classified,
+            unclassified: this.rawInfo.unclassified,
+            missed: this.rawInfo.missed,
+            matched: this.rawInfo.matched,
+            mismatched: this.rawInfo.mismatched,
+          }, ...this.rawInfo.subFolders),
         }
       }
       return this.rawInfo

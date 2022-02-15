@@ -18,12 +18,21 @@ class AppProvider extends ServiceProvider {
     })
   }
 
+  _registerExplorerController() {
+    this.app.singleton('ExplorerController', () => {
+      const ExplorerController = require('../app/Controllers/Http/ExplorerController')
+      return new ExplorerController()
+    })
+  }
+
   register () {
     this._registerStatistic()
     this._registerWatcher()
+    this._registerExplorerController()
   }
 
   async boot () {
+    await use('ExplorerController').init()
     await use('Watcher').init()
   }
 }

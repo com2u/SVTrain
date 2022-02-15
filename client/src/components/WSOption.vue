@@ -82,6 +82,22 @@ export default {
           },
         },
         {
+          label: 'Import files',
+          field: 'importFiles',
+          type: types.BOOLEAN,
+          options: {
+            help: 'Set the value to true if you want to import images from your local computer to the workspace.',
+          },
+        },
+        {
+          label: 'Max file size',
+          field: 'maxFileSize',
+          type: types.NUMBER,
+          options: {
+            help: 'Set the maximum file size in MB.',
+          },
+        },
+        {
           label: 'Use shortcuts',
           field: 'useShortcuts',
           type: types.BOOLEAN,
