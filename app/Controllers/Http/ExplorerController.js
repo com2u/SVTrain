@@ -1273,7 +1273,7 @@ class ExplorerController {
 
   async saveNotes({request, response}) {
     const data = request.post();
-    let notes = data.notes;
+    let notes = data.notes || "";
     let highlight = data.highlight;
     let xpath = data.path;
     xpath = path.join(CONST_PATHS.root, xpath)
