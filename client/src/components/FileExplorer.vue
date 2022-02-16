@@ -11,7 +11,6 @@
     @keyup.self.exact.187="zoomIn(true)"
     @keyup.self.exact.109="zoomOut(true)"
     @keyup.self.exact.189="zoomOut(true)"
-    @keyup.self.exact.stop.prevent="onKeyUp"
   >
     <div tabindex="0"></div>
     <window-splitting ref="WindowSplitting">
@@ -1005,6 +1004,7 @@ export default {
     socket.subscibeForFolder(this.path, this.fileChanged())
     // set focus on keyupevents
     this.setFocusOnFiles()
+    document.addEventListener('keyup', this.onKeyUp)
     // get status
     this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
