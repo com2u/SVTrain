@@ -987,9 +987,12 @@ export default {
       }
       formData.append('path', this.path)
       this.isLoading.uploading = true
-      await api.uploadFiles(formData)
-      this.isLoading.uploading = false
-      await this.loadFiles(this.path)
+      try {
+        await api.uploadFiles(formData)
+        await this.loadFiles(this.path)
+      } finally {
+        this.isLoading.uploading = false
+      }
     },
   },
   async created() {

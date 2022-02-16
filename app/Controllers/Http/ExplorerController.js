@@ -687,24 +687,36 @@ class ExplorerController {
     const { path: fPath } = request.post();
     const  { files }  = request.files();
     const user = request.currentUser.username;
-  
+
+    let errorMessage = null
     for (let file of files) {
       const fileName = file.clientName;
       const filePath = path.join(CONST_PATHS.root, fPath, fileName);
-      try {
-        fs.copyFileSync(file.tmpPath, filePath);
-      } catch (err) {
-        logger.error(
-          `Failed uploading file: "${fileName}" to "${filePath}" by "${user}"`
+      const fileExists = exists(filePath);
+      if (fileExists) {
+        logger.error(`Failed uploading file (file already exists): "${fileName}" to "${filePath}" by "${user}"`)
+        if (!errorMessage) {
+          errorMessage = `File ${fileName} wasn't uploaded, because it already exists.`
+        } else {
+          errorMessage = 'Some files weren\'t uploaded because they already exist on the disk.'
+        }
+      } else {
+        try {
+          fs.copyFileSync(file.tmpPath, filePath);
+        } catch (err) {
+          logger.error(
+            `Failed uploading file: "${fileName}" to "${filePath}" by "${user}"`
+          );
+          throw err;
+        }
+        logger.info(
+          `User ${user} has uploaded file: "${fileName}" to "${fPath}"`
         );
-        throw err;
       }
-      logger.info(
-        `User ${user} has uploaded file: "${fileName}" to "${fPath}"`
-      );
     }
     // recalculate the statistics for the folder since new files have been uploaded.
     recalculateDir(path.join(CONST_PATHS.root, fPath));
+    if (errorMessage) throw Error(errorMessage)
     return true;
   }
 
