@@ -11,7 +11,6 @@
     @keyup.self.exact.187="zoomIn(true)"
     @keyup.self.exact.109="zoomOut(true)"
     @keyup.self.exact.189="zoomOut(true)"
-    @keyup.self.exact.stop.prevent="onKeyUp"
   >
     <div tabindex="0"></div>
     <window-splitting ref="WindowSplitting">
@@ -988,9 +987,12 @@ export default {
       }
       formData.append('path', this.path)
       this.isLoading.uploading = true
-      await api.uploadFiles(formData)
-      this.isLoading.uploading = false
-      await this.loadFiles(this.path)
+      try {
+        await api.uploadFiles(formData)
+        await this.loadFiles(this.path)
+      } finally {
+        this.isLoading.uploading = false
+      }
     },
   },
   async created() {
@@ -1005,6 +1007,7 @@ export default {
     socket.subscibeForFolder(this.path, this.fileChanged())
     // set focus on keyupevents
     this.setFocusOnFiles()
+    document.addEventListener('keyup', this.onKeyUp)
     // get status
     this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
