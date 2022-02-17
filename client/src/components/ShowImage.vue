@@ -150,7 +150,7 @@ export default {
     },
     async showMode() {
       if (this.showMode === 'Original') {
-        this.srcIMG = encodeURIComponent(this.file.serverPath)
+        this.srcIMG = encodeURI(this.file.serverPath)
       } else {
         const path = encodeURIComponent(this.file.relativePath)
         const uri = `${getFileServerPath().replace('data', 'api')}visualizeHeatmap?mode=${encodeURIComponent(this.showMode)}&image=${path}`
