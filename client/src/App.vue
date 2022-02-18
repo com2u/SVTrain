@@ -42,9 +42,8 @@ export default {
 }
 </script>
 
-
 <template>
-  <div class="maxheight">
+  <div class="maxheight" id="app-content" tabindex="-1">
     <router-view>
     </router-view>
   </div>

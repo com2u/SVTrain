@@ -1,7 +1,6 @@
 <template>
   <div
-    id="keyupevents"
-    tabindex="0"
+    class="file-explorer-container"
     @keyup.self.exact.shift.space="selectCurrent(true)"
     @keyup.left="shiftingMove($event, 'left')"
     @keyup.up="shiftingMove($event, 'up')"
@@ -12,7 +11,6 @@
     @keyup.self.exact.109="zoomOut(true)"
     @keyup.self.exact.189="zoomOut(true)"
   >
-    <div tabindex="0"></div>
     <window-splitting ref="WindowSplitting">
       <template v-slot:side>
         <div class="right-side-section">
@@ -942,10 +940,6 @@ export default {
         }
       }
     },
-    setFocusOnFiles() {
-      window.document.getElementById('keyupevents')
-        .focus()
-    },
     enablePreventingScrolling() {
       window.addEventListener('keydown', preventDefaultScrolling, false)
     },
@@ -956,7 +950,6 @@ export default {
       this.disablePreventingScrolling()
     },
     onCloseModal() {
-      this.setFocusOnFiles()
       this.enablePreventingScrolling()
     },
     showStatistic() {
@@ -1005,9 +998,8 @@ export default {
     this.openedPath = currentPath
     // subscribe for that folder
     socket.subscibeForFolder(this.path, this.fileChanged())
-    // set focus on keyupevents
-    this.setFocusOnFiles()
-    document.addEventListener('keyup', this.onKeyUp)
+    // add keyup event listener
+    window.addEventListener('keyup', this.onKeyUp)
     // get status
     this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
@@ -1022,6 +1014,7 @@ export default {
     })
   },
   beforeDestroy() {
+    window.removeEventListener('keyup', this.onKeyUp)
     socket.unsubscribeForFolder(this.path)
     socket.unsubscribeForFolder('running.lock')
   },
@@ -1029,7 +1022,7 @@ export default {
 </script>
 
 <style lang="scss">
-  #keyupevents {
+  .file-explorer-container {
     outline: none;
     min-height: 100%;
     display: flex;

@@ -32,6 +32,10 @@ Vue.component('v-icon', Icon)
 Vue.component('tags-input', VoerroTagsInput)
 Vue.config.productionTip = false
 
+router.afterEach(() => {
+  document.getElementById('app-content').focus()
+})
+
 new Vue({
   router,
   store,
