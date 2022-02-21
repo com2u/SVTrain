@@ -186,7 +186,6 @@ export default {
     }
   }
 
-
   .value-type-input {
     text-align: right;
   }

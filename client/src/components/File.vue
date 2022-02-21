@@ -48,8 +48,7 @@
 <script>
 import { mapGetters } from 'vuex'
 
-
-const colormap = require('colormap')
+const sequencer = window.ImageSequencer()
 
 export default {
   props: {
@@ -75,7 +74,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['imageSpacing', 'imageFit', 'imageInvert']),
+    ...mapGetters(['imageSpacing', 'imageFit', 'imageInvert', 'imageColorMap']),
     imageStyles() {
       return {
         width: `${this.size.width}px`,
@@ -89,37 +88,20 @@ export default {
     convertURIPath(p) {
       return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem('sessionToken', null)}`
     },
-    invertIMG() {
-      if (!this.imageInvert) return
-      const canvas = this.$refs.img.parentElement.appendChild(document.createElement('canvas'))
-      const c = canvas.getContext('2d')
-      const height = this.$refs.img.clientHeight
-      const width = this.$refs.img.parentElement.clientWidth
-      c.canvas.height = height
-      c.canvas.width = width
-      const shades = (width / 10)
-      const COLORS = colormap({
-        colormap: 'jet',
-        nshades: shades,
-        format: 'rgbaString',
-        alpha: [0, 0.5],
-      })
-      // eslint-disable-next-line no-plusplus
-      c.drawImage(this.$refs.img, 0, 0, this.$refs.img.clientWidth, this.$refs.img.clientHeight)
-      // eslint-disable-next-line no-plusplus
-      for (let j = 0; j < (width / 10); j++) {
-        c.fillStyle = COLORS[j]
-        c.fillRect(j * 10, 0, 10, height)
-      }
-      this.$refs.img.classList.add('hidden')
+    applyImagesFilters() {
+      if (!this.imageInvert && !this.imageColorMap) return
+      if (!this.$refs.img) return
+      const filters = []
+      if (this.imageInvert) filters.push('invert')
+      if (this.imageColorMap) filters.push('colormap')
+      sequencer.replaceImage(`[src="${this.$refs.img.src}"]`, filters)
     },
   },
   mounted() {
-    this.invertIMG()
+    this.applyImagesFilters()
   },
 }
 </script>
-
 
 <style lang="scss">
 </style>
