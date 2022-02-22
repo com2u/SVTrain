@@ -235,8 +235,6 @@ import NewFolderButton from './NewFolderButton.vue'
 import ImportFilesButton from './ImportFilesButton.vue'
 import WindowSplitting from './WindowSplitting.vue'
 
-const sequencer = window.ImageSequencer()
-
 function preventDefaultScrolling(e) {
   // space and arrow keys
   if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1 && document.activeElement.tagName !== 'TEXTAREA') {
@@ -434,26 +432,24 @@ export default {
     },
     viewerIndex() {
       if (this.viewerIndex !== null) {
-        // if no filters are enabled, return;
-        if (!this.imageInvert && !this.imageColorMap) return
-        const filters = []
-        if (this.imageInvert) filters.push('invert')
-        if (this.imageColorMap) filters.push('colormap')
         // setting a timeout to wait for the gallery to be mounted
         setTimeout(() => {
-          document.querySelectorAll('.slide-content').forEach((el) => {
-            // if image is loaded, apply filters
-            if (el.complete && el.naturalWidth) {
-              sequencer.replaceImage(`.slide-content[src="${el.src}"]`, filters)
-            }
-            // if image not loaded, apply filters when it loads
-            el.onload = () => {
-              // remove onload listener to avoid loop after applying filters
-              el.onload = null
-              sequencer.replaceImage(`.slide-content[src="${el.src}"]`, filters)
+          document.querySelectorAll('img.slide-content').forEach((el) => {
+            // add this attribute to allow canvas.toDataURL() to work
+            el.setAttribute('crossorigin', 'anonymous')
+            // if some filters are enabled, we need to load the image first
+            // then apply the filters
+            if (this.imageInvert || this.imageColorMap) {
+              // if image not loaded, apply filters when it loads
+              el.onload = () => this.applyFiltersToImgElement(el)
+              // if image is loaded, apply filters now
+              if (el.complete && el.naturalWidth !== 0) this.applyFiltersToImgElement(el)
+            } else {
+              // if no filters are enabled, just display the image as it is
+              el.classList.add('loaded')
             }
           })
-        }, 100)
+        }, 500)
       }
     },
   },
@@ -1018,6 +1014,27 @@ export default {
         this.isLoading.uploading = false
       }
     },
+    applyFiltersToImgElement(imgEl) {
+      const filters = []
+      if (this.imageInvert) filters.push('invert')
+      if (this.imageColorMap) filters.push('colormap')
+      if (!imgEl || imgEl.classList.contains('loaded') || !imgEl.complete || imgEl.naturalHeight === 0) return
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      canvas.width = imgEl.width
+      canvas.height = imgEl.height
+      console.log(imgEl.src, imgEl.naturalWidth, imgEl.naturalHeight, imgEl.complete)
+      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height)
+      const sequencer = window.ImageSequencer()
+      console.log(canvas.toDataURL('image/png'), canvas.width, canvas.height)
+      sequencer.loadImage(canvas.toDataURL('image/png'), function callback() {
+        this.addSteps(filters)
+        this.run((out) => {
+          imgEl.src = out
+          imgEl.classList.add('loaded')
+        })
+      })
+    },
   },
   async created() {
     this.perPage = this.configFilePerPage
@@ -1255,4 +1272,10 @@ export default {
       width: 100%;
     }
   }
+.slide-content {
+  visibility: hidden;
+  &.loaded {
+    visibility: visible;
+  }
+}
 </style>
