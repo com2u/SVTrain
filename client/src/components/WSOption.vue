@@ -319,6 +319,14 @@ export default {
             help: 'This switch will invert the displayed image colors',
           },
         },
+        {
+          label: 'Color Map',
+          field: 'imageColorMap',
+          type: types.BOOLEAN,
+          options: {
+            help: 'Dark areas should become blue and light areas should become red',
+          },
+        },
       ],
       data: {
         ...cloneDeep(this.value),

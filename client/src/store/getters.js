@@ -24,6 +24,7 @@ const getters = {
   },
   imageSpacing: (state) => state.app.explorerConfig.imageSpacing || 10,
   imageInvert: (state) => state.app.explorerConfig.imageInvert,
+  imageColorMap: (state) => state.app.explorerConfig.imageColorMap,
   workspaceFontSize: (state) => state.app.config.workspaceFontSize,
   subFolderFontSize: (state) => state.app.config.subFolderFontSize,
   changePWDUri: (state) => state.app.config.changePWDUri,

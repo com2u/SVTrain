@@ -7,7 +7,6 @@ import getters from './getters.js'
 
 Vue.use(Vuex)
 
-
 export default new Vuex.Store({
   modules: { app, notes, wsconfig },
   getters,

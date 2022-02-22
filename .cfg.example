@@ -39,6 +39,7 @@
   "imgContrast": "150",
   "imgBrightness": "75",
   "imageInvert": false,
+  "imageColorMap": false,
   "importFiles": true,
   "maxFileSize": 10
 }

@@ -235,6 +235,8 @@ import NewFolderButton from './NewFolderButton.vue'
 import ImportFilesButton from './ImportFilesButton.vue'
 import WindowSplitting from './WindowSplitting.vue'
 
+const sequencer = window.ImageSequencer()
+
 function preventDefaultScrolling(e) {
   // space and arrow keys
   if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1 && document.activeElement.tagName !== 'TEXTAREA') {
@@ -369,7 +371,7 @@ export default {
       },
     },
     viewerImages() {
-      return this.selectedFiles.map((file) => file.serverPath)
+      return this.selectedFiles.map((file) => this.convertURIPath(file.serverPath))
     },
     fontSize() {
       const config = this.systemConfig
@@ -417,6 +419,8 @@ export default {
       'showNavigationIcon',
       'showExplorerNotes',
       'importFiles',
+      'imageInvert',
+      'imageColorMap',
     ]),
   },
   watch: {
@@ -428,6 +432,30 @@ export default {
       }
       this.calculatePage(this.page)
     },
+    viewerIndex() {
+      if (this.viewerIndex !== null) {
+        // if no filters are enabled, return;
+        if (!this.imageInvert && !this.imageColorMap) return
+        const filters = []
+        if (this.imageInvert) filters.push('invert')
+        if (this.imageColorMap) filters.push('colormap')
+        // setting a timeout to wait for the gallery to be mounted
+        setTimeout(() => {
+          document.querySelectorAll('.slide-content').forEach((el) => {
+            // if image is loaded, apply filters
+            if (el.complete && el.naturalWidth) {
+              sequencer.replaceImage(`.slide-content[src="${el.src}"]`, filters)
+            }
+            // if image not loaded, apply filters when it loads
+            el.onload = () => {
+              // remove onload listener to avoid loop after applying filters
+              el.onload = null
+              sequencer.replaceImage(`.slide-content[src="${el.src}"]`, filters)
+            }
+          })
+        }, 100)
+      }
+    },
   },
   mounted() {
     const c = this.systemConfig && this.systemConfig.imgContrast ? this.systemConfig.imgContrast : 100
@@ -435,6 +463,9 @@ export default {
     document.getElementsByTagName('body')[0].style.setProperty('--image--filter', `contrast(${c}%) brightness(${b}%)`)
   },
   methods: {
+    convertURIPath(p) {
+      return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem('sessionToken', null)}`
+    },
     imageShowNavigate(flag) {
       const files = this.screenFiles.filter((x) => !x.selected || x.path === this.viewingFile.path)
       const index = files.map((x) => x.path).indexOf(this.viewingFile.path)
