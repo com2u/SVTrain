@@ -1,8 +1,13 @@
 const path = require('path')
+const { gitDescribeSync } = require('git-describe')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
+
+process.env.VUE_APP_VERSION = require('./package.json').version
+process.env.VUE_APP_GIT_HASH = gitDescribeSync().hash
+process.env.VUE_APP_GIT_REMOTE = 'https://github.com/com2u/SVTrain'
 
 const name = 'SVTrain'
 module.exports = {
