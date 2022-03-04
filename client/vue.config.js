@@ -4,6 +4,10 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
+process.env.VUE_APP_VERSION = require('./package.json').version
+process.env.VUE_APP_GIT_HASH = process.env.GITHUB_SHA
+process.env.VUE_APP_GIT_REMOTE = `https://github.com/${process.env.GITHUB_REPOSITORY}`
+
 const name = 'SVTrain'
 module.exports = {
 
