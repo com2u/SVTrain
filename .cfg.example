@@ -38,6 +38,7 @@
   "editExplorerNotes": false,
   "imgContrast": "150",
   "imgBrightness": "75",
+  "defaultZoom": "70",
   "imageInvert": false,
   "imageColorMap": false,
   "importFiles": true,

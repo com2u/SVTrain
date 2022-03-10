@@ -34,7 +34,6 @@ export default {
   },
   data() {
     return {
-      imageWidth: 70,
       contrast: 100,
       brightness: 100,
       options: {
@@ -125,9 +124,13 @@ export default {
         ],
       }
     },
+    imageWidth() {
+      return this.defaultZoom || 70
+    },
     ...mapGetters([
       'imageInvert',
       'imageColorMap',
+      'defaultZoom',
     ]),
   },
   mounted() {

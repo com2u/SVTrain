@@ -304,6 +304,15 @@ export default {
           },
         },
         {
+          label: 'Zoom',
+          field: 'defaultZoom',
+          type: types.SLIDER,
+          options: {
+            max: 100,
+            min: 0,
+          },
+        },
+        {
           label: 'Backup path',
           field: 'backupPath',
           type: types.TEXT,
