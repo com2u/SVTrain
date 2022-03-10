@@ -912,11 +912,6 @@ class ExplorerController {
 
     if (!folder) throw new Error('The "folder" parameter is needed');
 
-    if (!accessToFile(CONST_PATHS.root, folder)) {
-      logger.error(`ExplorerController.getSubfolders: Access denied for gettings subfolders for folder ${folder}`);
-      throw new Error(`Access denied`);
-    }
-
     // const files = await readdir(folder)
     //
     // for (let i = 0; i < files.length; ++i) {
@@ -927,7 +922,7 @@ class ExplorerController {
     //   }
     // }
 
-    return this.countSync(folder, 'root');
+    return this.countSync(path.join(CONST_PATHS.root, folder), folder);
   }
 
   /*
