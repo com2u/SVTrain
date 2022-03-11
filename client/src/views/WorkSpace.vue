@@ -57,7 +57,7 @@
       </template>
     </b-modal>
     <b-modal v-model="cfgVisible" ok-title="Save" cancel-title="Back" @shown="onModalShow">
-      <template v-slot:modal-title>Config folder {{ $store.state.notes.folder.name }}</template>
+      <template v-slot:modal-title>Workspace Settings {{ $store.state.notes.folder.name }}</template>
       <div v-if="editConfigUI">
         <w-s-option ref="ws-option" :value="$store.state.wsconfig.folder.config"></w-s-option>
       </div>

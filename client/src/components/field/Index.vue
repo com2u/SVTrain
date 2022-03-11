@@ -13,7 +13,7 @@
       <!--        Json         -->
       <field-json v-else-if="schema.type === types.JSON" v-model="temp" :schema="schema"/>
       <!--        Select       -->
-      <b-form-select expanded v-else-if="schema.type === types.SELECT" v-model="temp">
+      <b-form-select expanded :id="schema.field" v-else-if="schema.type === types.SELECT" v-model="temp" @change="handleInput">
         <option
           v-for="option in schema.options.dataset"
           :value="option.value"
@@ -23,7 +23,7 @@
         <option :value="null">________</option>
       </b-form-select>
       <!--        Boolean      -->
-      <b-form-checkbox v-else-if="schema.type === types.BOOLEAN" v-model="temp"/>
+      <b-form-checkbox v-else-if="schema.type === types.BOOLEAN" @change="handleInput" v-model="temp" :id="schema.field"/>
       <b-form-tags v-else-if="schema.type === types.T_ARRAY" v-model="temp" :placeholder="schema.options.placeholder"/>
       <b-row v-else-if="schema.type === types.SLIDER">
         <b-col sm="8"><b-form-input type="range" v-model="temp" :min="schema.options.min || 0" :max="schema.options.max || 200"/></b-col>
@@ -89,6 +89,9 @@ export default {
       // eslint-disable-next-line no-unused-vars
       handler(after, before) {
         this.$emit('input', after)
+        if (this.schema.options.onChange) {
+          this.schema.options.onChange(after)
+        }
       },
       deep: true,
     },
@@ -111,3 +114,12 @@ export default {
   },
 }
 </script>
+
+<style>
+code {
+  color: blue;
+}
+.b-form-tag {
+  margin: 0.1rem 0.3rem!important;
+}
+</style>
