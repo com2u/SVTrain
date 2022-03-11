@@ -71,7 +71,23 @@ export default {
         dir = this.dir
       }
       const response = await api.getStatistic(dir)
-      this.statistic = response
+      const folderInfo = await api.getSubfolders(dir)
+      if (folderInfo.hasSubFolders && folderInfo.subFolders) {
+        this.statistic = {
+          ...folderInfo,
+          ...this.sumObjectsByKey({
+            classified: folderInfo.classified,
+            unclassified: folderInfo.unclassified,
+            missed: folderInfo.missed,
+            matched: folderInfo.matched,
+            mismatched: folderInfo.mismatched,
+          }, ...folderInfo.subFolders),
+        }
+      } else {
+        this.statistic = folderInfo
+      }
+      console.log(folderInfo)
+      this.statistic.table = response.table
     },
     async calculate(dir) {
       this.isLoading = true
@@ -85,6 +101,25 @@ export default {
     selectFolder(item) {
       const gotoDir = `${this.dir}\\${item.folder}`
       this.$router.push({ name: 'explorer', query: { dir: gotoDir } })
+    },
+    getSubFolderStatistics(folderInfo) {
+      if (folderInfo.hasSubFolders && folderInfo.subFolders) {
+        return this.sumObjectsByKey(...folderInfo.subFolders)
+      }
+      return folderInfo
+    },
+    sumObjectsByKey(...objs) {
+      return objs.reduce((totalStats, currentSubFolder) => {
+        const subFolderStats = {
+          ...currentSubFolder,
+          ...this.getSubFolderStatistics(currentSubFolder),
+        }
+        Object.entries(subFolderStats).forEach(([key, value]) => {
+          if (!Number.isInteger(value)) return
+          totalStats[key] = (totalStats[key] || 0) + value // eslint-disable-line no-param-reassign
+        })
+        return totalStats
+      }, {})
     },
   },
 }
