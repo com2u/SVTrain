@@ -26,7 +26,7 @@
       <b-form-checkbox v-else-if="schema.type === types.BOOLEAN" v-model="temp"/>
       <b-form-tags v-else-if="schema.type === types.T_ARRAY" v-model="temp" :placeholder="schema.options.placeholder"/>
       <b-row v-else-if="schema.type === types.SLIDER">
-        <b-col sm="8"><b-form-input type="range" v-model="temp" min="0" max="200"/></b-col>
+        <b-col sm="8"><b-form-input type="range" v-model="temp" :min="schema.options.min || 0" :max="schema.options.max || 200"/></b-col>
         <b-col><code>{{temp}}%</code></b-col>
       </b-row>
     </b-col>
