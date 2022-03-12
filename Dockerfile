@@ -10,12 +10,13 @@ RUN apk --no-cache add --virtual native-deps \
 
 COPY .git/ /build/.git/
 RUN apk --no-cache add git
-RUN GITHUB_SHA==$(git rev-parse --short HEAD) \
-  GITHUB_REPOSITORY=$(git config --get remote.origin.url | sed -e 's/^git@.*:\([[:graph:]]*\).git/\1/')
-RUN rm -rf /build/.git
 
 COPY ./client /build/
-RUN yarn build
+RUN ./node_modules/.bin/cross-env GITHUB_SHA=$(git rev-parse --short HEAD) \
+  GITHUB_REPOSITORY=$(git config --get remote.origin.url | sed -e 's/^git@.*:\([[:graph:]]*\).git/\1/') \
+  yarn build
+
+RUN rm -rf /build/.git
 
 FROM node:14-bullseye
 
