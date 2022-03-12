@@ -184,6 +184,22 @@ export default {
             },
           },
           {
+            label: 'Button font size',
+            field: 'buttonFontSize',
+            type: types.TEXT,
+            options: {
+              help: 'Set a value for the font size applied to the button.',
+            },
+          },
+          {
+            label: 'Title font size',
+            field: 'titleFontSize',
+            type: types.TEXT,
+            options: {
+              help: 'Set a value for the font size applied to the title.',
+            },
+          },
+          {
             label: 'Show file name',
             field: 'showFileName',
             type: types.BOOLEAN,
@@ -298,6 +314,14 @@ export default {
             },
           },
           {
+            label: 'Backup path',
+            field: 'backupPath',
+            type: types.TEXT,
+            options: {
+              help: 'Path to define the backup location',
+            },
+          },
+          {
             label: 'Import files',
             field: 'importFiles',
             type: types.BOOLEAN,
@@ -333,32 +357,6 @@ export default {
             field: 'editExplorerNotes',
             type: types.BOOLEAN,
             options: {},
-          },
-        ],
-        Others: [
-          {
-            label: 'Button font size',
-            field: 'buttonFontSize',
-            type: types.TEXT,
-            options: {
-              help: 'Set a value for the font size applied to the button.',
-            },
-          },
-          {
-            label: 'Title font size',
-            field: 'titleFontSize',
-            type: types.TEXT,
-            options: {
-              help: 'Set a value for the font size applied to the title.',
-            },
-          },
-          {
-            label: 'Backup path',
-            field: 'backupPath',
-            type: types.TEXT,
-            options: {
-              help: 'Path to define the backup location',
-            },
           },
         ],
       },
