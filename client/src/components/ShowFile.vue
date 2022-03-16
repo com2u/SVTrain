@@ -78,7 +78,6 @@ export default {
       this.$refs.modal.show()
     },
     onShown(e) {
-      this.$refs.show_image.invertIMG()
       this.$emit('shown', e)
     },
     onHidden(e) {

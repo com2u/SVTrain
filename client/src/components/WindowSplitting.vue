@@ -76,7 +76,6 @@ export default {
 }
 </script>
 
-
 <style lang="scss" scoped>
 .main-wrapper {
   position: relative;

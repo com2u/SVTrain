@@ -1,6 +1,7 @@
 <template>
   <div class="container">
-    <h2>Login to SVTrain 1.4.10</h2>
+    <h2>Login to SVTrain</h2>
+    <h5>release: <a :href="commitPath" target="_blank">{{version}}-{{commitHash}}</a></h5>
     <div class="login-form">
       <ul>
         <li>
@@ -48,7 +49,15 @@ export default {
       userPassword: '',
       errorMessage: '',
       loading: false,
+      version: process.env.VUE_APP_VERSION,
+      commitHash: process.env.VUE_APP_GIT_HASH,
+      gitRemote: process.env.VUE_APP_GIT_REMOTE,
     }
+  },
+  computed: {
+    commitPath() {
+      return `${this.gitRemote}/commit/${this.commitHash}`
+    },
   },
   methods: {
     async login() {

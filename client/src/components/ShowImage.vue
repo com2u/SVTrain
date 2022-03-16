@@ -14,7 +14,7 @@
       :base-zoomer-options="options"
     />
     <div v-else class="mb-4 inline-round-zoomer-base-container" ref="imgPreview">
-      <img ref="img" v-auth-image="srcIMG" class="responsive-image" alt="">
+      <img @load="applyImagesFilters" ref="img" v-auth-image="srcIMG" class="responsive-image unloaded" alt="">
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
@@ -26,8 +26,6 @@ import { getFileServerPath } from '@/utils'
 import axios from 'axios'
 import { mapGetters } from 'vuex'
 
-const colormap = require('colormap')
-
 export default {
   name: 'ShowImage',
   props: {
@@ -36,7 +34,6 @@ export default {
   },
   data() {
     return {
-      imageWidth: 70,
       contrast: 100,
       brightness: 100,
       options: {
@@ -78,29 +75,30 @@ export default {
         this.$emit('zoom-change', this.options.zoomFactor)
       }
     },
-    invertIMG() {
-      if (!this.imageInvert) return
-      const canvas = this.$refs.img.parentElement.appendChild(document.createElement('canvas'))
-      const c = canvas.getContext('2d')
-      const height = this.$refs.img.clientHeight
-      const width = this.$refs.img.clientWidth
-      c.canvas.height = height
-      c.canvas.width = width
-      const shades = (width / 10)
-      const COLORS = colormap({
-        colormap: 'jet',
-        nshades: shades,
-        format: 'rgbaString',
-        alpha: [0, 0.5],
-      })
-      // eslint-disable-next-line no-plusplus
-      c.drawImage(this.$refs.img, 0, 0, this.$refs.img.clientWidth, this.$refs.img.clientHeight)
-      // eslint-disable-next-line no-plusplus
-      for (let j = 0; j < (width / 10); j++) {
-        c.fillStyle = COLORS[j]
-        c.fillRect(j * 10, 0, 10, height)
+    applyImagesFilters() {
+      const imgRef = this.$refs.img
+      if (!imgRef || !imgRef.classList.contains('unloaded')) return
+      if (this.imageInvert || this.imageColorMap) {
+        if (!imgRef.complete || imgRef.naturalHeight === 0) return
+        const filters = []
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        canvas.width = imgRef.width
+        canvas.height = imgRef.height
+        ctx.drawImage(imgRef, 0, 0, canvas.width, canvas.height)
+        if (this.imageInvert) filters.push('invert')
+        if (this.imageColorMap) filters.push('colormap')
+        const sequencer = window.ImageSequencer()
+        sequencer.loadImage(canvas.toDataURL('image/png'), function callback() {
+          this.addSteps(filters)
+          this.run((out) => {
+            imgRef.src = out
+            imgRef.classList.remove('unloaded')
+          })
+        })
+      } else {
+        this.$refs.img.classList.remove('unloaded')
       }
-      this.$refs.img.classList.add('hidden')
     },
   },
   computed: {
@@ -126,8 +124,13 @@ export default {
         ],
       }
     },
+    imageWidth() {
+      return this.defaultZoom || 70
+    },
     ...mapGetters([
       'imageInvert',
+      'imageColorMap',
+      'defaultZoom',
     ]),
   },
   mounted() {
@@ -167,5 +170,8 @@ export default {
   image {
     object-fit: cover;
   }
+}
+.unloaded {
+  visibility: hidden;
 }
 </style>

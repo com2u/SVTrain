@@ -1,7 +1,6 @@
 <template>
   <div
-    id="keyupevents"
-    tabindex="0"
+    class="file-explorer-container"
     @keyup.self.exact.shift.space="selectCurrent(true)"
     @keyup.left="shiftingMove($event, 'left')"
     @keyup.up="shiftingMove($event, 'up')"
@@ -12,7 +11,6 @@
     @keyup.self.exact.109="zoomOut(true)"
     @keyup.self.exact.189="zoomOut(true)"
   >
-    <div tabindex="0"></div>
     <window-splitting ref="WindowSplitting">
       <template v-slot:side>
         <div class="right-side-section">
@@ -371,7 +369,7 @@ export default {
       },
     },
     viewerImages() {
-      return this.selectedFiles.map((file) => file.serverPath)
+      return this.selectedFiles.map((file) => this.convertURIPath(file.serverPath))
     },
     fontSize() {
       const config = this.systemConfig
@@ -419,6 +417,8 @@ export default {
       'showNavigationIcon',
       'showExplorerNotes',
       'importFiles',
+      'imageInvert',
+      'imageColorMap',
     ]),
   },
   watch: {
@@ -430,6 +430,28 @@ export default {
       }
       this.calculatePage(this.page)
     },
+    viewerIndex() {
+      if (this.viewerIndex !== null) {
+        // setting a timeout to wait for the gallery to be mounted
+        setTimeout(() => {
+          document.querySelectorAll('img.slide-content').forEach((el) => {
+            // add this attribute to allow canvas.toDataURL() to work
+            el.setAttribute('crossorigin', 'anonymous')
+            // if some filters are enabled, we need to load the image first
+            // then apply the filters
+            if (this.imageInvert || this.imageColorMap) {
+              // if image not loaded, apply filters when it loads
+              el.onload = () => this.applyFiltersToImgElement(el)
+              // if image is loaded, apply filters now
+              if (el.complete && el.naturalWidth !== 0) this.applyFiltersToImgElement(el)
+            } else {
+              // if no filters are enabled, just display the image as it is
+              el.classList.add('loaded')
+            }
+          })
+        }, 500)
+      }
+    },
   },
   mounted() {
     const c = this.systemConfig && this.systemConfig.imgContrast ? this.systemConfig.imgContrast : 100
@@ -437,6 +459,9 @@ export default {
     document.getElementsByTagName('body')[0].style.setProperty('--image--filter', `contrast(${c}%) brightness(${b}%)`)
   },
   methods: {
+    convertURIPath(p) {
+      return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem('sessionToken', null)}`
+    },
     imageShowNavigate(flag) {
       const files = this.screenFiles.filter((x) => !x.selected || x.path === this.viewingFile.path)
       const index = files.map((x) => x.path).indexOf(this.viewingFile.path)
@@ -942,10 +967,6 @@ export default {
         }
       }
     },
-    setFocusOnFiles() {
-      window.document.getElementById('keyupevents')
-        .focus()
-    },
     enablePreventingScrolling() {
       window.addEventListener('keydown', preventDefaultScrolling, false)
     },
@@ -956,7 +977,6 @@ export default {
       this.disablePreventingScrolling()
     },
     onCloseModal() {
-      this.setFocusOnFiles()
       this.enablePreventingScrolling()
     },
     showStatistic() {
@@ -994,6 +1014,27 @@ export default {
         this.isLoading.uploading = false
       }
     },
+    applyFiltersToImgElement(imgEl) {
+      const filters = []
+      if (this.imageInvert) filters.push('invert')
+      if (this.imageColorMap) filters.push('colormap')
+      if (!imgEl || imgEl.classList.contains('loaded') || !imgEl.complete || imgEl.naturalHeight === 0) return
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      canvas.width = imgEl.width
+      canvas.height = imgEl.height
+      console.log(imgEl.src, imgEl.naturalWidth, imgEl.naturalHeight, imgEl.complete)
+      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height)
+      const sequencer = window.ImageSequencer()
+      console.log(canvas.toDataURL('image/png'), canvas.width, canvas.height)
+      sequencer.loadImage(canvas.toDataURL('image/png'), function callback() {
+        this.addSteps(filters)
+        this.run((out) => {
+          imgEl.src = out
+          imgEl.classList.add('loaded')
+        })
+      })
+    },
   },
   async created() {
     this.perPage = this.configFilePerPage
@@ -1005,9 +1046,8 @@ export default {
     this.openedPath = currentPath
     // subscribe for that folder
     socket.subscibeForFolder(this.path, this.fileChanged())
-    // set focus on keyupevents
-    this.setFocusOnFiles()
-    document.addEventListener('keyup', this.onKeyUp)
+    // add keyup event listener
+    window.addEventListener('keyup', this.onKeyUp)
     // get status
     this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
@@ -1022,6 +1062,7 @@ export default {
     })
   },
   beforeDestroy() {
+    window.removeEventListener('keyup', this.onKeyUp)
     socket.unsubscribeForFolder(this.path)
     socket.unsubscribeForFolder('running.lock')
   },
@@ -1029,7 +1070,7 @@ export default {
 </script>
 
 <style lang="scss">
-  #keyupevents {
+  .file-explorer-container {
     outline: none;
     min-height: 100%;
     display: flex;
@@ -1231,4 +1272,10 @@ export default {
       width: 100%;
     }
   }
+.slide-content {
+  visibility: hidden;
+  &.loaded {
+    visibility: visible;
+  }
+}
 </style>

@@ -37,10 +37,10 @@
               <span v-if="table[name2][name1].all > 0" class="clickable-text">
                 <a href="javascript:;" v-on:click="select(name1, name2)">
                   <span v-if="valuesView === 'absolute'">
-                    {{ exclude ? table[name2][name1].exclude : table[name2][name1].all }}
+                    {{ (table[name2][name1][exclude ? 'exclude' : 'all']).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
                   </span>
                   <span v-if="valuesView === 'percentage'">
-                    {{ Math.round(table[name2][name1][exclude ? 'exclude' : 'all'] / sumFor(name2) * 100) }}%
+                    {{ (table[name2][name1][exclude ? 'exclude' : 'all'] / sumFor(name1) * 100).toFixed(1) }}%
                   </span>
                 </a>
               </span>
@@ -91,15 +91,13 @@ export default {
       })
     },
     sumFor(name) {
-      return Object.keys(this.table[name])
-        .map((n) => (this.exclude ? this.table[name][n].exclude : this.table[name][n].all))
-        .reduce((p, c) => c + p)
+      return Object.values(this.table)
+        .map((row) => row[name][this.exclude ? 'exclude' : 'all'])
+        .reduce((p, c) => c + p, 0)
     },
   },
   computed: {
     names() {
-      console.log(Object.keys(this.table)
-        .map((n) => n))
       return Object.keys(this.table)
         .map((n) => n)
     },
@@ -185,7 +183,6 @@ export default {
       margin-right: 10px;
     }
   }
-
 
   .value-type-input {
     text-align: right;

@@ -1,7 +1,8 @@
 const fs = require('fs')
 const fsExtra = require('fs-extra')
 const path = require('path')
-const { promisify } = require("util")
+const { promisify } = require('util')
+
 const exists = promisify(fs.exists)
 const copy = promisify(fsExtra.copy)
 
@@ -18,9 +19,8 @@ function copyDist() {
   return copy(distDir, publicDir)
 }
 
-
 function buildAndCopy() {
-  emptyPublicDir().then(() =>  copyDist())
+  emptyPublicDir().then(() => copyDist())
 }
 
 buildAndCopy()
