@@ -1,11 +1,30 @@
 <template>
   <div>
-    <section v-for="category in Object.keys(schemas)" :key="category">
-      <h5>{{category}}</h5>
-      <s-field v-for="schema in schemas[category]" :key="schema.field"
-              :schema="schema" :value="data[schema.field]"
-              @input="data[schema.field] = $event"/>
-    </section>
+    <template v-for="category in Object.keys(schemas)">
+      <section
+        :key="category"
+        :class="{ expanded: expandedCategory === category }"
+      >
+        <h5
+          @click="
+            expandedCategory = expandedCategory === category ? null : category
+          "
+        >
+          <v-icon
+            :name="`arrow-${expandedCategory === category ? 'down' : 'up'}`"
+          />{{ category }}
+        </h5>
+        <div>
+          <s-field
+            v-for="schema in schemas[category]"
+            :key="schema.field"
+            :schema="schema"
+            :value="data[schema.field]"
+            @input="data[schema.field] = $event"
+          />
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
@@ -27,6 +46,7 @@ export default {
   },
   data() {
     return {
+      expandedCategory: null,
       schemas: {
         Image: [
           {
@@ -380,11 +400,24 @@ section {
   padding: 1rem;
   position: relative;
 }
+section div {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+section.expanded div {
+  max-height: fit-content;
+  overflow: visible;
+}
 section h5 {
   position: absolute;
   top: 0;
-  padding: 0 2rem 0 0.5rem;
+  padding: 0 1rem 0 0.5rem;
   transform: translateY(-50%);
   background: #fff;
+  cursor: pointer;
+}
+h5 svg {
+  margin-right: 0.5rem;
 }
 </style>
