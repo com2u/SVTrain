@@ -25,6 +25,7 @@ const pathSep = path.sep;
 const Database = use('Database')
 const defaultCfgPath = path.join(__dirname, '../../../.cfg.example');
 const defaultTFSPath = path.join(__dirname, '../../../TFSettings.json.example');
+const defaultExternalPaths = path.join(__dirname, '../../../externalpath.json.example');
 const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
 const {hasPermissionWorkspaces} = require('../../utils/index');
@@ -974,6 +975,7 @@ class ExplorerController {
       await mkdir(path.join(newFolderPath, 'validate'));
       await mkdir(path.join(newFolderPath, 'model'));
       await copyFile(defaultTFSPath, path.join(newFolderPath, 'TFSettings.json'));
+      await copyFile(defaultExternalPaths, path.join(newFolderPath, 'externalpath.json'));
     }
     await copyFile(defaultCfgPath, path.join(newFolderPath, '.cfg'));
     logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
