@@ -1,19 +1,27 @@
 <template>
-  <b-row class="mb-2">
+  <!--    Augmentations    -->
+  <augmentations-input v-if="schema.type === types.AUGMENTATIONS" :augmentations="temp" @input="handleInput" />
+  <b-row v-else class="mb-2">
     <b-col cols="6" class="mr-auto">
       <div>{{schema.label}}</div>
       <small v-if="schema.options.help" class="form-text text-muted">{{schema.options.help}}</small>
+      <small  v-if="schema.options.hasAuto === true">
+        Auto:
+        <b-form-checkbox class="ml-2" style="display:inline;" :checked="temp === 'auto'" @change="toggleAuto" :id="schema.field + 'auto'"/>
+      </small>
     </b-col>
     <b-col cols="6">
+      <code v-if="temp === 'auto'">AUTO</code>
       <!--        Text         -->
       <b-form-input
-        v-if="[types.TEXT, types.NUMBER].includes(schema.type)"
+        v-else-if="[types.TEXT, types.NUMBER].includes(schema.type)"
         :type="schema.type" @input="handleInput"
+        :min="schema.options.min" :max="schema.options.max"
         :value="temp" :placeholder="schema.options.placeholder"/>
       <!--        Json         -->
-      <field-json v-else-if="schema.type === types.JSON" v-model="temp" :schema="schema"/>
+      <field-json v-else-if="schema.type === types.JSON || schema.type === types.J_ARRAY" v-model="temp" :schema="schema"/>
       <!--        Select       -->
-      <b-form-select expanded :id="schema.field" v-else-if="schema.type === types.SELECT" v-model="temp" @change="handleInput">
+      <b-form-select expanded :multiple="schema.options.multiple" :id="schema.field" v-else-if="schema.type === types.SELECT" v-model="temp" @change="handleInput">
         <option
           v-for="option in schema.options.dataset"
           :value="option.value"
@@ -36,11 +44,13 @@
 <script>
 import * as types from './data_types'
 import FieldJson from './Json'
+import AugmentationsInput from './Augmentations'
 
 export default {
   name: 'SField',
   components: {
     'field-json': FieldJson,
+    'augmentations-input': AugmentationsInput,
   },
   props: {
     schema: {
@@ -59,6 +69,7 @@ export default {
             * help: String
             * multiple: Boolean
             * type: String - use for TextField
+            * hasAuto: Boolean - use for data selector
             * */
         },
       }),
@@ -76,6 +87,10 @@ export default {
     if (temp === null) {
       if (this.schema.type === types.JSON) {
         temp = {}
+        this.$emit('input', temp)
+      }
+      if (this.schema.type === types.J_ARRAY) {
+        temp = []
         this.$emit('input', temp)
       }
     }
@@ -110,6 +125,16 @@ export default {
       } else {
         this.temp = value
       }
+    },
+    toggleAuto() {
+      // const fallbackJson = this.schema.type === types.J_ARRAY ? new Array(this.schema.options?.schema?.length || 0).fill(0) : {}
+      const fallbackString = this.value === 'auto' ? this.value.replace('auto', '') : this.value
+      // const fallback = this.value === null && (this.schema.type === types.JSON || this.schema.type === types.J_ARRAY) ? fallbackJson : fallbackString
+      this.temp = this.temp !== 'auto' ? 'auto' : fallbackString
+      if (this.schema.type === types.T_ARRAY && this.temp !== 'auto') this.temp = []
+      if (this.schema.type === types.JSON && this.temp !== 'auto') this.temp = {}
+      if (this.schema.type === types.J_ARRAY && this.temp !== 'auto') this.temp = new Array(this.schema.options?.schema?.length || 0).fill(0)
+      this.$emit('input', this.temp)
     },
   },
 }

@@ -1,15 +1,36 @@
 <template>
   <b-modal v-on:shown="onOpen" size="md" ref="modal" title="AI Settings">
     <template v-if="!canEditConfigAIUI">
-      <div id="wsjsoneditor" style="height: 400px;"/>
+      <div id="wsjsoneditor" style="height: 400px" />
     </template>
     <template v-else>
-      <template v-for="schema in schemas">
-        <s-field
-          v-if="canEditConfigFullAIUI || limitAIUI.includes(schema.field)"
-          :key="`${schema.field}-${fetchCount}`"
-          :schema="schema" :value="data[schema.field]"
-          @input="data[schema.field] = $event"/>
+      <template v-for="category in Object.keys(schemas)">
+        <section
+          :key="category"
+          v-if="canEditConfigFullAIUI || limitAIUI.includes(category)"
+          :class="{ expanded: expandedCategory === category }"
+        >
+          <h5
+            @click="
+              expandedCategory = expandedCategory === category ? null : category
+            "
+          >
+            <v-icon
+              :name="`arrow-${expandedCategory === category ? 'down' : 'up'}`"
+            />
+            {{ category }}
+          </h5>
+          <div>
+            <template v-for="schema in schemas[category]">
+              <s-field
+                :key="`${schema.field}-${fetchCount}`"
+                :schema="schema"
+                :value="data[schema.field]"
+                @input="data[schema.field] = $event"
+              />
+            </template>
+          </div>
+        </section>
       </template>
     </template>
     <template v-slot:modal-footer>
@@ -40,330 +61,712 @@ export default {
   },
   data() {
     return {
-      limitAIUI: [
-        'max_train_steps',
-        'classes',
-        'batch_size',
-        'input_width',
-        'input_height',
-        'input_depth',
-        'ViewLogLines',
-        'heatmap_types',
-      ],
-      schemas: [
-        {
-          label: 'Max Train Steps',
-          field: 'max_train_steps',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Training Classes',
-          field: 'classes',
-          type: types.T_ARRAY,
-          options: {},
-        },
-        {
-          label: 'Model directory',
-          field: 'model_dir',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Batch Size',
-          field: 'batch_size',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Input width',
-          field: 'input_width',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Input height',
-          field: 'input_height',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Input depth',
-          field: 'input_depth',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Heatmap types',
-          field: 'heatmap_types',
-          type: types.SELECT,
-          options: {
-            dataset: [
-              {
-                value: 'overlay',
-                label: 'Overlay',
-              },
-            ],
+      limitAIUI: ['AI Training'],
+      expandedCategory: null,
+      schemas: {
+        'AI Training': [
+          {
+            label: 'Max Train Steps',
+            field: 'epochs',
+            type: types.NUMBER,
+            options: {
+              help: 'How many training iterations will be calculated (epocs)',
+            },
           },
-        },
-        {
-          label: 'Augmentation noise std',
-          field: 'augmentation_noise_std',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Augmentation brightness delta',
-          field: 'augmentation_brightness_delta',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Learning rate',
-          field: 'learning_rate',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Enable linear stretch images',
-          field: 'enable_linear_stretch_images',
-          type: types.BOOLEAN,
-          options: {},
-        },
-        {
-          label: 'Enable augmentation noise',
-          field: 'enable_augmentation_noise',
-          type: types.BOOLEAN,
-          options: {},
-        },
-        {
-          label: 'Enable augmentation mirror',
-          field: 'enable_augmentation_mirror',
-          type: types.BOOLEAN,
-          options: {},
-        },
-        {
-          label: 'Enable augmentation brightness',
-          field: 'enable_augmentation_brightness',
-          type: types.BOOLEAN,
-          options: {},
-        },
-        {
-          label: 'Rename',
-          field: 'rename',
-          type: types.BOOLEAN,
-          options: {},
-        },
-        {
-          label: 'Network architecture',
-          field: 'network_architecture',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Good class',
-          field: 'good_class',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Log every n steps',
-          field: 'log_every_n_steps',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Workspace path',
-          field: 'workspace',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Train script name',
-          field: 'script_training',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Test script name',
-          field: 'script_test',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Validate script name',
-          field: 'script_validate',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Cleanup',
-          field: 'script_training2',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Prepare Data',
-          field: 'script_test2',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Backup',
-          field: 'script_validate2',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Stop train script name',
-          field: 'script_stop_train',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Stop test script name',
-          field: 'script_stop_test',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Stop validate script name',
-          field: 'script_stop_validate',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Export model script name',
-          field: 'script_export_model',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Export result script name',
-          field: 'script_export_result',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Export images script name',
-          field: 'script_export_image',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Create report script name',
-          field: 'script_report',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'split data script name',
-          field: 'script_split_data',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Heatmap generation script',
-          field: 'script_visualize_heatmap',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to log training file',
-          field: 'path_log_training',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to log test file',
-          field: 'path_log_test',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to log validate file',
-          field: 'path_log_validate',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to exported model file',
-          field: 'path_field_export_model',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to exported results file',
-          field: 'path_field_export_results',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to exported images folder',
-          field: 'path_field_export_images',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to train folder',
-          field: 'path_train',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to test folder',
-          field: 'path_test',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'Path to validate folder',
-          field: 'path_validate',
-          type: types.TEXT,
-          options: {},
-        },
-        {
-          label: 'The numbers of lines to be displayed',
-          field: 'ViewLogLines',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Default epoch',
-          field: 'defaultEpoch',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Default learning rate',
-          field: 'defaultLearningRate',
-          type: types.NUMBER,
-          options: {},
-        },
-        {
-          label: 'Tenser Board Url',
-          field: 'LiveViewURL',
-          type: types.TEXT,
-          options: {},
-        },
-      ],
+          {
+            label: 'Image size',
+            field: 'image_shape',
+            type: types.J_ARRAY,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'width',
+                  field: '0',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+                {
+                  label: 'height',
+                  field: '1',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+                {
+                  label: 'depth',
+                  field: '2',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ],
+              help: 'The Image Size and color depth. "Auto" as default',
+            },
+          },
+          {
+            label: 'Training Classes',
+            field: 'classes',
+            type: types.T_ARRAY,
+            options: {
+              hasAuto: true,
+              placeholder: 'Add',
+              help: 'The names for the defect classes',
+            },
+          },
+          {
+            label: 'Begin new model',
+            field: 'overwrite_model',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Overwite an existing model',
+            },
+          },
+          {
+            label: 'Rename images',
+            field: 'rename_after_test',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Add defect class to the image file names',
+            },
+          },
+          {
+            label: 'GPU',
+            field: 'GPU',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Add defect class to the image file names',
+            },
+          },
+          {
+            label: 'Optimizer',
+            field: 'optimizer',
+            type: types.SELECT,
+            options: {
+              dataset: [
+                {
+                  value: 'Adadelta',
+                  label: 'Adadelta',
+                },
+                {
+                  value: 'Adagrad',
+                  label: 'Adagrad',
+                },
+                {
+                  value: 'Adam',
+                  label: 'Adam',
+                },
+                {
+                  value: 'Adamax',
+                  label: 'Adamax',
+                },
+                {
+                  value: 'Ftrl',
+                  label: 'Ftrl',
+                },
+                {
+                  value: 'Nadam',
+                  label: 'Nadam',
+                },
+                {
+                  value: 'Optimizer',
+                  label: 'Optimizer',
+                },
+                {
+                  value: 'RMSprop',
+                  label: 'RMSprop',
+                },
+                {
+                  value: 'SGD',
+                  label: 'SGD',
+                },
+              ],
+            },
+          },
+          {
+            label: 'Learning rate',
+            field: 'learning_rate',
+            type: types.NUMBER,
+            options: {
+              help: 'Hyperparameter to control how much to change the model in response to the estimated error',
+            },
+          },
+          {
+            label: 'Batch Size',
+            field: 'batch_size',
+            type: types.NUMBER,
+            options: {
+              info: 'Amount of images in one training batch',
+            },
+          },
+          {
+            label: 'Shuffle buffer',
+            field: 'shuffle_buffer',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Number of images used to randomly choose batch images',
+            },
+          },
+          {
+            label: 'Save best only',
+            field: 'save_best_only',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Save the model only when it was improved',
+            },
+          },
+          {
+            label: 'Validation frequency',
+            field: 'validation_freq',
+            type: types.NUMBER,
+            options: {
+              info: 'frequency in epochs of validation e.g. if set to 1 the model will be evaluated after each epoch',
+            },
+          },
+          {
+            label: 'Metrics',
+            field: 'metrics',
+            type: types.T_ARRAY,
+            options: {
+              help: 'Metrics to be evaluated and tracked in tensorboard',
+              placeholder: 'Add',
+            },
+          },
+          {
+            label: 'Monitor',
+            field: 'monitor',
+            type: types.SELECT,
+            options: {
+              dataset: [
+                {
+                  value: 'val_categorical_accuracy',
+                  label: 'val_categorical_accuracy',
+                },
+              ],
+              help: 'Which metric to monitor to save best checkpoint',
+            },
+          },
+          {
+            label: 'Monitor mode ',
+            field: 'monitor_mode',
+            type: types.SELECT,
+            options: {
+              dataset: [
+                {
+                  value: 'min',
+                  label: 'min',
+                },
+                {
+                  value: 'max',
+                  label: 'max',
+                },
+              ],
+              help: '"max" / "min" defines what "best" is, e.g. for accuracy it should be "max", for loss function it should be "min"',
+            },
+          },
+        ],
+        'AI Model': [
+          {
+            label: 'Network architecture',
+            field: 'network_architecture',
+            type: types.TEXT,
+            options: {
+              help: "is the network architecture e.g. 'net_CPCPCP' or 'InceptionV3'",
+            },
+          },
+          {
+            label: 'Activation function',
+            field: 'activation_function',
+            type: types.TEXT,
+            options: {
+              help: "used by custom models like net_CPCP... The fastest to train are typically 'relu' and 'leaky_relu'",
+            },
+          },
+          {
+            label: 'Dropout rate',
+            field: 'dropout_rate',
+            type: types.NUMBER,
+            options: {
+              help: 'Defines the dropout layers of the model',
+            },
+          },
+          {
+            label: 'Epsilon',
+            field: 'epsilon',
+            type: types.NUMBER,
+            options: {
+              help: 'Is used only by some specific optimizers',
+            },
+          },
+          {
+            label: 'Kernel initializer',
+            field: 'kernel_initializer',
+            type: types.J_ARRAY,
+            options: {
+              schemas: [
+                {
+                  label: 'value',
+                  field: '0',
+                  type: types.SELECT,
+                  default: null,
+                  options: {
+                    dataset: [
+                      {
+                        value: 'glorot_normal',
+                        label: 'glorot_normal',
+                      },
+                    ],
+                  },
+                },
+                {
+                  label: '',
+                  field: 1,
+                  type: types.JSON,
+                  default: null,
+                  options: {},
+                },
+              ],
+            },
+          },
+          {
+            label: 'Bias initializer',
+            field: 'bias_initializer',
+            type: types.J_ARRAY,
+            options: {
+              schemas: [
+                {
+                  label: 'value',
+                  field: '0',
+                  type: types.SELECT,
+                  default: null,
+                  options: {
+                    dataset: [
+                      {
+                        value: 'glorot_normal',
+                        label: 'glorot_normal',
+                      },
+                    ],
+                  },
+                },
+                {
+                  label: '',
+                  field: 1,
+                  type: types.JSON,
+                  default: null,
+                  options: {},
+                },
+              ],
+            },
+          },
+          {
+            label: 'Kernel regularizer',
+            field: 'kernel_regularizer',
+            type: types.J_ARRAY,
+            options: {
+              schemas: [
+                {
+                  label: 'value',
+                  field: '0',
+                  type: types.TEXT,
+                  default: null,
+                  options: {},
+                },
+                {
+                  label: '',
+                  field: '1',
+                  type: types.JSON,
+                  default: null,
+                  options: {},
+                },
+              ],
+            },
+          },
+          {
+            label: 'Bias regularizer',
+            field: 'bias_regularizer',
+            type: types.J_ARRAY,
+            options: {
+              schemas: [
+                {
+                  label: 'value',
+                  field: '0',
+                  type: types.TEXT,
+                  default: null,
+                  options: {},
+                },
+                {
+                  label: '',
+                  field: '1',
+                  type: types.JSON,
+                  default: null,
+                  options: {},
+                },
+              ],
+            },
+          },
+          {
+            label: 'Activity regularizer',
+            field: 'activity_regularizer',
+            type: types.J_ARRAY,
+            options: {
+              schemas: [
+                {
+                  label: 'value',
+                  field: '0',
+                  type: types.TEXT,
+                  default: null,
+                  options: {},
+                },
+                {
+                  label: '',
+                  field: '1',
+                  type: types.JSON,
+                  default: null,
+                  options: {},
+                },
+              ],
+            },
+          },
+          {
+            label: 'Input correction',
+            field: 'input_correction',
+            type: types.SELECT,
+            options: {
+              dataset: [
+                {
+                  value: 'none',
+                  label: 'none',
+                },
+                {
+                  value: '-1 to 1',
+                  label: '-1 to 1',
+                },
+                {
+                  value: 'min_max',
+                  label: 'min_max',
+                },
+                {
+                  value: 'mean',
+                  label: 'mean',
+                },
+              ],
+            },
+          },
+        ],
+        'Data processing': [
+          {
+            label: 'Augmentation count',
+            field: 'augmentation_samples_number',
+            type: types.NUMBER,
+            options: {},
+          },
+          {
+            label: 'Batch normalization',
+            field: 'batch_normalization',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Balance dataset',
+            field: 'balance_dataset_to_max',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Balance dataset to max',
+            },
+          },
+          {
+            label: 'Heatmap Types',
+            field: 'heatmap_types',
+            type: types.SELECT,
+            options: {
+              multiple: true,
+              dataset: [
+                {
+                  value: 'overlay',
+                  label: 'overlay',
+                },
+                {
+                  value: 'cam',
+                  label: 'cam',
+                },
+              ],
+              help: '(hold CTRL to select multiple options)',
+            },
+          },
+        ],
+        Augmentations: [
+          {
+            label: 'Augmentations',
+            field: 'augmentations',
+            type: types.AUGMENTATIONS,
+            options: {},
+          },
+          {
+            label: 'Augmentation noise std',
+            field: 'augmentation_noise_std',
+            type: types.NUMBER,
+            options: {},
+          },
+          {
+            label: 'Augmentation brightness delta',
+            field: 'augmentation_brightness_delta',
+            type: types.NUMBER,
+            options: {},
+          },
+          {
+            label: 'Enable linear stretch images',
+            field: 'enable_linear_stretch_images',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Enable augmentation noise',
+            field: 'enable_augmentation_noise',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Enable augmentation mirror',
+            field: 'enable_augmentation_mirror',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Enable augmentation brightness',
+            field: 'enable_augmentation_brightness',
+            type: types.BOOLEAN,
+            options: {},
+          },
+        ],
+        'Scrips & Folders': [
+          {
+            label: 'The numbers of lines to be displayed',
+            field: 'ViewLogLines',
+            type: types.NUMBER,
+            options: {},
+          },
+          {
+            label: 'Tenser Board Url',
+            field: 'LiveViewURL',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Training path',
+            field: 'path_to_dataset_training',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Validation path',
+            field: 'path_to_dataset_validation',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Testset path',
+            field: 'path_to_dataset_test',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Model path',
+            field: 'model_dir',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Heatmap path',
+            field: 'heatmap_dir',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Stop file',
+            field: 'stop_file',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Classes to model',
+            field: 'pack_classes_to_model',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Pack classes to model',
+            },
+          },
+          {
+            label: 'Test output path',
+            field: 'test_output_dir',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Augmentation path',
+            field: 'augmented_dir',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Training script ',
+            field: 'script_training',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Test script',
+            field: 'script_test',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Validate script',
+            field: 'script_validate',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Training2 script',
+            field: 'script_training2',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Test2 script',
+            field: 'script_test2',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Validate2 script ',
+            field: 'script_validate2',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Stop train script',
+            field: 'script_stop_training',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Stop test script',
+            field: 'script_stop_test',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Stop validate script',
+            field: 'script_stop_validation',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Export model script',
+            field: 'script_export_model',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Export result script',
+            field: 'script_export_result',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Export images script',
+            field: 'script_export_image',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Report script',
+            field: 'script_report',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'split data script',
+            field: 'script_split_data',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Visualize heatmap script',
+            field: 'script_visualize_heatmap',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Log training path',
+            field: 'path_log_training',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Log test path',
+            field: 'path_log_test',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Log validate path',
+            field: 'path_log_validate',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Field export model path',
+            field: 'path_field_export_model',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Field export result path',
+            field: 'path_field_export_results',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Field export images path',
+            field: 'path_field_export_images',
+            type: types.TEXT,
+            options: {},
+          },
+        ],
+      },
       data: {},
       fields: {
-        max_train_steps: 0,
+        epochs: 0,
+        image_shape: [0, 0, 0],
         classes: [],
-        model_dir: '',
+        overwrite_model: false,
+        rename_after_test: false,
+        GPU: false,
+        optimizer: null,
+        learning_rate: 0.0,
         batch_size: 0,
-        input_width: 0,
-        input_height: 0,
-        input_depth: 0,
+        shuffle_buffer: 0,
+        save_best_only: false,
+        validation_freq: 1,
+        metrics: [],
+        monitor: '',
+        monitor_mode: '',
+        // next
+        model_dir: '',
         augmentation_noise_std: 0.0,
         augmentation_brightness_delta: 0.0,
-        learning_rate: 0.0,
         enable_linear_stretch_images: false,
         enable_augmentation_noise: false,
         enable_augmentation_mirror: false,
         enable_augmentation_brightness: false,
-        rename: false,
         network_architecture: '',
         good_class: '',
         log_every_n_steps: 0,
@@ -395,6 +798,7 @@ export default {
         defaultEpoch: null,
         defaultLearningRate: null,
         LiveViewURL: null,
+        heatmap_types: [],
       },
       fetchCount: 1,
       editor: null,
@@ -403,7 +807,9 @@ export default {
   methods: {
     async loadFile() {
       const ws = this.ws.split('/').pop()
-      const { data } = await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`)
+      const { data } = await axios.get(
+        `${getFileServerPath()}${ws}/TFSettings.json`,
+      )
       Object.keys(this.fields).forEach((field) => {
         this.fields[field] = data[field] || this.fields[field]
       })
@@ -428,22 +834,46 @@ export default {
         ...this.data,
       }
       const filePath = `${this.ws}/TFSettings.json`
+      console.log(JSON.stringify(data, null, 2))
       await api.saveFile(filePath, JSON.stringify(data, null, 2))
-      this.$refs.modal.hide()
+      // this.$refs.modal.hide()
     },
     onOpen() {
       this.loadFile()
     },
   },
   computed: {
-    ...mapGetters([
-      'canEditConfigAIUI',
-      'canEditConfigFullAIUI',
-    ]),
+    ...mapGetters(['canEditConfigAIUI', 'canEditConfigFullAIUI']),
   },
 }
 </script>
 
 <style scoped>
-
+section {
+  border: 3px solid darkslategrey;
+  border-radius: 1rem;
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  position: relative;
+}
+section div {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+section.expanded div {
+  max-height: fit-content;
+  overflow: visible;
+}
+section h5 {
+  position: absolute;
+  top: 0;
+  padding: 0 1rem 0 0.5rem;
+  transform: translateY(-50%);
+  background: #fff;
+  cursor: pointer;
+}
+h5 svg {
+  margin-right: 0.5rem;
+}
 </style>
