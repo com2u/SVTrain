@@ -62,8 +62,8 @@ class FileController {
         }
       }
     } else {
-      const filePath = decodeURI(params.filePath.join('/'));
-      const isExist = await Drive.exists(filePath);
+      const filePath = params.filePath.join('/');
+      const isExist = await Drive.exists(decodeURIComponent(filePath));
       const storageImagePath = path.join(storagePath, filePath)
       if (isExist) {
         return response.download(`${rootPath}/${filePath}`);

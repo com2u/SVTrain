@@ -36,6 +36,12 @@ const ImageDefectClass = use('App/Models/ImageDefectClass');
 const Batch = use('App/Models/Batch');
 const extract = require('extract-zip');
 
+const escapeFileName = (str) => {
+  return str.replace(/[#;{}%]/g, (match) => {
+    return `%${match.charCodeAt(0).toString(16)}`
+  })
+}
+
 const queue = kue.createQueue({
   redis: {
     port: process.env.REDIS_PORT || 6379,
@@ -409,7 +415,7 @@ class ExplorerController {
           continue
         }
         const f = files[i];
-        const fPath = path.join(dir, f);
+        const fPath = path.join(dir, escapeFileName(f))
         const flstat = await lstat(path.join(dir, f));
         if (f)
           if (flstat.isDirectory()) {

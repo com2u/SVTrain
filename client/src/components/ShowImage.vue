@@ -2,7 +2,7 @@
   <div class="image-viewing" ref="image_viewing" @keyup="onKeyUp">
     <b-container fluid>
       <b-row class="my-1">
-        <b-col sm="12"><b-form-input type="range" v-model="imageWidth"/></b-col>
+        <b-col sm="12"><b-form-input type="range" v-model="zoom" /></b-col>
       </b-row>
     </b-container>
     <ProductZoomer
@@ -13,8 +13,18 @@
       :base-images="images"
       :base-zoomer-options="options"
     />
-    <div v-else class="mb-4 inline-round-zoomer-base-container" ref="imgPreview">
-      <img @load="applyImagesFilters" ref="img" v-auth-image="srcIMG" class="responsive-image unloaded" alt="">
+    <div
+      v-else
+      class="mb-4 inline-round-zoomer-base-container"
+      ref="imgPreview"
+    >
+      <img
+        @load="applyImagesFilters"
+        ref="img"
+        v-auth-image="srcIMG"
+        class="responsive-image unloaded"
+        alt=""
+      />
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
@@ -47,12 +57,16 @@ export default {
         scroller_position: 'bottom',
       },
       zoomKey: 1,
-      srcIMG: encodeURI(this.file.serverPath),
+      srcIMG: this.file.serverPath,
+      zoom: 70,
     }
   },
   methods: {
     convertURIPath(p) {
-      return encodeURI(p)
+      return `${p}?token=${localStorage.getItem(
+        'sessionToken',
+        null,
+      )}`
     },
     onKeyUp(key) {
       let flag = false
@@ -124,17 +138,11 @@ export default {
         ],
       }
     },
-    imageWidth() {
-      return this.defaultZoom || 70
-    },
-    ...mapGetters([
-      'imageInvert',
-      'imageColorMap',
-      'defaultZoom',
-    ]),
+    ...mapGetters(['imageInvert', 'imageColorMap', 'defaultZoom']),
   },
   mounted() {
-    this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.imageWidth}%`)
+    this.zoom = this.defaultZoom
+    this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.zoom}%`)
     document.addEventListener('keyup', this.onKeyUp)
   },
   beforeDestroy() {
@@ -145,8 +153,11 @@ export default {
     'options.zoomFactor': function () {
       this.zoomKey += 1
     },
-    imageWidth() {
-      this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.imageWidth}%`)
+    zoom() {
+      this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.zoom}%`)
+    },
+    defaultZoom() {
+      this.zoom = this.defaultZoom
     },
     file() {
       this.zoomKey += 1
@@ -156,8 +167,16 @@ export default {
         this.srcIMG = encodeURI(this.file.serverPath)
       } else {
         const path = encodeURIComponent(this.file.relativePath)
-        const uri = `${getFileServerPath().replace('data', 'api')}visualizeHeatmap?mode=${encodeURIComponent(this.showMode)}&image=${path}`
-        this.srcIMG = await axios.get(uri).then(() => uri).catch(() => encodeURIComponent(this.file.serverPath))
+        const uri = `${getFileServerPath().replace(
+          'data',
+          'api',
+        )}visualizeHeatmap?mode=${encodeURIComponent(
+          this.showMode,
+        )}&image=${path}`
+        this.srcIMG = await axios
+          .get(uri)
+          .then(() => uri)
+          .catch(() => encodeURIComponent(this.file.serverPath))
       }
     },
   },
@@ -167,6 +186,7 @@ export default {
 <style lang="scss" scoped>
 .image-viewing {
   text-align: center;
+  margin: 0 3rem;
   image {
     object-fit: cover;
   }
