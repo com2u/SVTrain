@@ -373,8 +373,14 @@ export default {
             options: {},
           },
           {
-            label: 'Allow edit explorer notes',
-            field: 'editExplorerNotes',
+            label: 'Allow filter files',
+            field: 'filterFiles',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Allow sort files',
+            field: 'sortFiles',
             type: types.BOOLEAN,
             options: {},
           },

@@ -5,6 +5,8 @@ module.exports = {
     fontSize: "1rem"
   },
   filePerPage: 15,
+  filterFiles: false,
+  sortFiles: false,
   showFileName: false,
   importFiles: false,
   maxFileSize: 10,
