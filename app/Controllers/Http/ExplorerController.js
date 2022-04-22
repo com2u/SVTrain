@@ -438,7 +438,10 @@ class ExplorerController {
               name: f,
               type: FTYPES.file,
               image: regexpForImages.test(f),
-              match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1
+              match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1,
+              size: flstat.size,
+              date_mod: flstat.mtimeMs,
+              date_create: flstat.birthtimeMs
             });
           } else {
             console.log(`File ${f} in the directory ${dir} nor file neither directory.`);

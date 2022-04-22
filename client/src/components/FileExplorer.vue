@@ -115,6 +115,43 @@
       <template v-slot:main>
         <div class="mb-2 d-flex flex-column">
           <div><strong>{{relativeDir}}</strong></div>
+          <div class="filters">
+            <div class="filter-item">
+              <span class="filter-select"  v-if="showSortBy">
+                Sort By:
+                <select class="filter-select" v-if="showSortBy" v-model="selectedSortBy" @change="sortChanged">
+                  <option value="">Default</option>
+                  <option value="name">Filename</option>
+                  <option value="date-mod">Modified</option>
+                  <option value="date-create">Created</option>
+                  <option value="size">Size</option>
+                </select> <select class="filter-select" v-if="showSortBy" v-model="selectedSortByOrder" @change="sortChanged">
+                  <option value="">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </span>
+              <span class="filter-select"  v-if="showFilters">
+                Show:
+                <select v-model="selectedFilter" @change="filterChanged">
+                  <option value="">All</option>
+                  <option value="matching">Matching</option>
+                  <option value="not-matching">Not matching</option>
+                  <option value="search">Search</option>
+                </select>
+              </span>
+              <input class="filter-search" v-if="showFilters && selectedFilter === 'search'" v-model="searchText" @change="filterChanged" placeholder="Search"/>
+            </div>
+            <div class="filter-item">
+              <v-icon v-if="filterFiles" name="filter"
+                :class="{'active': showFilters, 'filter-icon':true}"
+                @click="showFilters = !showFilters"
+              ></v-icon>
+              <v-icon v-if="sortFiles" name="sort-amount-down"
+                :class="{'active': showSortBy, 'filter-icon':true}"
+                @click="showSortBy = !showSortBy"
+              ></v-icon>
+            </div>
+          </div>
           <div v-if="!['defectclass', 'batch', 'ws'].includes(type)" class="list-folders">
             <div class="list-folder-item" v-for="file in folder.folders" :key="file.path">
               <file
@@ -264,6 +301,14 @@ export default {
       uploading: false,
     },
     showShortcuts: false,
+    showFilters: false,
+    selectedFilter: '',
+    searchText: '',
+    filteredFolderFiles: [],
+    sortedFolderFiles: [],
+    showSortBy: false,
+    selectedSortBy: '',
+    selectedSortByOrder: '',
     status: null,
     viewingFile: null,
     statisticShown: false,
@@ -419,6 +464,8 @@ export default {
       'importFiles',
       'imageInvert',
       'imageColorMap',
+      'filterFiles',
+      'sortFiles',
     ]),
   },
   watch: {
@@ -744,6 +791,7 @@ export default {
     async loadFiles(path) {
       // clear old files
       this.folder.files = []
+      this.filteredFolderFiles = []
       this.folder.folders = []
       this.screenFiles = []
       this.selectedFiles = []
@@ -815,18 +863,56 @@ export default {
       if (this.page > this.page_count) {
         this.page = this.page_count
       }
-
-      this.calculatePage(this.page)
-
+      this.sortChanged()
       return {
         currentPath: content.path,
       }
     },
+    sortChanged() {
+      this.sortedFolderFiles = [...this.folder.files]
+      this.sortedFolderFiles.sort((a, b) => {
+        if (this.selectedSortBy === 'name') {
+          return a.name.localeCompare(b.name)
+        }
+        if (this.selectedSortBy === 'size') {
+          return a.size - b.size
+        }
+        if (this.selectedSortBy === 'date-mod') {
+          return a.date_mod - b.date_mod
+        }
+        if (this.selectedSortBy === 'date-create') {
+          return a.date_create - b.date_create
+        }
+        return 0
+      })
+      if (this.selectedSortByOrder === 'desc') {
+        this.sortedFolderFiles = this.sortedFolderFiles.reverse()
+      }
+      this.filterChanged()
+    },
+    filterChanged() {
+      switch (this.selectedFilter) {
+        case 'matching':
+          this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.match)
+          break
+        case 'not-matching':
+          this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => !f.match)
+          break
+        case 'search':
+          this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.name.toLowerCase()
+            .includes(this.searchText))
+          break
+        default:
+          this.filteredFolderFiles = this.sortedFolderFiles
+          break
+      }
+      this.calculatePage(this.page)
+    },
     calculatePage(page) {
       if (!this.perPage) {
-        this.screenFiles = [...this.folder.files]
+        this.screenFiles = [...this.filteredFolderFiles]
       } else {
-        this.screenFiles = this.folder.files.slice((page - 1) * this.perPage, page * this.perPage)
+        this.screenFiles = this.filteredFolderFiles.slice((page - 1) * this.perPage, page * this.perPage)
       }
       if (this.screenFiles.length) {
         this.screenFiles = this.screenFiles.map((f) => {
@@ -842,7 +928,7 @@ export default {
       }
       const first = this.page * this.perPage - this.perPage
       const last = first + this.screenFiles.length
-      return `${first} - ${last} of ${this.folder.files.length}`
+      return `${first} - ${last} of ${this.filteredFolderFiles.length}`
     },
     onPageChange(page) {
       this.page = page
@@ -1278,4 +1364,35 @@ export default {
     visibility: visible;
   }
 }
+.filters {
+     display: flex;
+     justify-content: end;
+     align-items: center;
+     margin-bottom: 10px;
+     height: 1.8rem;
+     .filter-item {
+         margin-inline: 10px;
+         .filter-icon {
+             cursor: pointer;
+             width: 1.8rem;
+             height: 1.8rem;
+            margin-inline: 1rem;
+             &.active {
+                margin-left: 1rem;
+                 fill: #0f00e4;
+            }
+        }
+         .filter-select, .filter-search {
+            margin-left: 1rem;
+            input, select {
+              background: #fff;
+              border: 1px solid #dedede;
+              border-radius: 4px;
+              padding: 5px;
+              height: 100%;
+            }
+        }
+    }
+}
+
 </style>
