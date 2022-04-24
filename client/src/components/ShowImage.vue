@@ -2,29 +2,35 @@
   <div class="image-viewing" ref="image_viewing" @keyup="onKeyUp">
     <b-container fluid>
       <b-row class="my-1">
-        <b-col sm="12"><b-form-input type="range" v-model="zoom" /></b-col>
+        <b-col sm="12">
+          <b-form-input v-if="defaultZoomApplied" type="range" v-model="zoom" />
+          <b-form-input v-else type="range" disabled="true" v-model="defaultZoom" />
+        </b-col>
       </b-row>
     </b-container>
-    <ProductZoomer
-      v-if="options.zoomFactor > 1"
-      :key="zoomKey"
-      class="mb-4"
-      ref="product_zoomer"
-      :base-images="images"
-      :base-zoomer-options="options"
-    />
+        zoom: {{options.zoomFactor}}
     <div
-      v-else
       class="mb-4 inline-round-zoomer-base-container"
       ref="imgPreview"
     >
-      <img
-        @load="applyImagesFilters"
-        ref="img"
-        v-auth-image="srcIMG"
-        class="responsive-image unloaded"
-        alt=""
-      />
+      <vue-photo-zoom-pro
+        :high-url="imgDataUrl"
+        :loaded="imgDataUrl !== ''"
+        ref="zoomer"
+        :scale="options.zoomFactor"
+        :selector="options.zoomFactor > 1"
+        style="width:100%"
+        width="300"
+        height="180"
+        disable-reactive
+      >
+        <img ref="img"
+          v-auth-image="srcIMG"
+          @load="applyImagesFilters"
+          class="responsive-image unloaded"
+          style="height:auto"
+        />
+      </vue-photo-zoom-pro>
     </div>
     <div>{{ file.path }}</div>
     <div>{{ file.name }}</div>
@@ -35,9 +41,14 @@
 import { getFileServerPath } from '@/utils'
 import axios from 'axios'
 import { mapGetters } from 'vuex'
+import VuePhotoZoomPro from 'vue-photo-zoom-pro'
+import 'vue-photo-zoom-pro/dist/style/vue-photo-zoom-pro.css'
 
 export default {
   name: 'ShowImage',
+  components: {
+    VuePhotoZoomPro,
+  },
   props: {
     file: { type: Object, required: true },
     showMode: { type: String, default: 'Original' },
@@ -58,7 +69,9 @@ export default {
       },
       zoomKey: 1,
       srcIMG: this.file.serverPath,
-      zoom: 70,
+      imgDataUrl: '',
+      zoom: 100,
+      defaultZoomApplied: false,
     }
   },
   methods: {
@@ -90,6 +103,13 @@ export default {
       }
     },
     applyImagesFilters() {
+      const setZoom = () => {
+        this.zoom = this.defaultZoom
+        this.defaultZoomApplied = true
+      }
+      const setDataUrl = (dataUrl) => {
+        this.imgDataUrl = dataUrl
+      }
       const imgRef = this.$refs.img
       if (!imgRef || !imgRef.classList.contains('unloaded')) return
       if (this.imageInvert || this.imageColorMap) {
@@ -107,42 +127,21 @@ export default {
           this.addSteps(filters)
           this.run((out) => {
             imgRef.src = out
+            setDataUrl(out)
             imgRef.classList.remove('unloaded')
+            setZoom()
           })
         })
       } else {
         this.$refs.img.classList.remove('unloaded')
+        setZoom()
       }
     },
   },
   computed: {
-    images() {
-      return {
-        thumbs: [
-          {
-            id: 1,
-            url: this.convertURIPath(this.file.serverPath),
-          },
-        ],
-        normal_size: [
-          {
-            id: 1,
-            url: this.convertURIPath(this.file.serverPath),
-          },
-        ],
-        large_size: [
-          {
-            id: 1,
-            url: this.convertURIPath(this.file.serverPath),
-          },
-        ],
-      }
-    },
     ...mapGetters(['imageInvert', 'imageColorMap', 'defaultZoom']),
   },
   mounted() {
-    this.zoom = this.defaultZoom
-    this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.zoom}%`)
     document.addEventListener('keyup', this.onKeyUp)
   },
   beforeDestroy() {
@@ -155,9 +154,6 @@ export default {
     },
     zoom() {
       this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.zoom}%`)
-    },
-    defaultZoom() {
-      this.zoom = this.defaultZoom
     },
     file() {
       this.zoomKey += 1
