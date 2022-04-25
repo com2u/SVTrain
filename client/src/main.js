@@ -12,7 +12,6 @@ import VueGallery from 'vue-gallery'
 import VueAuthImage from 'vue-auth-image'
 import Notifications from 'vue-notification'
 import './icons' // icon
-import ProductZoomer from 'vue-product-zoomer'
 import store from './store'
 import router from './router'
 import './permissions'
@@ -26,7 +25,6 @@ Vue.use(Notifications)
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 Vue.use(VueAuthImage)
-Vue.use(ProductZoomer)
 
 Vue.component('v-icon', Icon)
 Vue.component('tags-input', VoerroTagsInput)

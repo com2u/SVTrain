@@ -118,6 +118,7 @@ export default {
     },
     onShown(e) {
       this.$emit('shown', e)
+      this.$refs.show_image.options.zoomFactor = this.magnify
     },
     onHidden(e) {
       this.$emit('hidden', e)
