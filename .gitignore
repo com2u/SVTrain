@@ -10,6 +10,7 @@ tmp
 
 # The development sqlite file
 database/development.sqlite
+imageData.sqlite
 
 # VSCode & Webstorm history directories
 .history
@@ -18,6 +19,7 @@ database/development.sqlite
 statistic.data
 users.json
 sessions.json
+tags.json
 ssl/*
 
 npm-debug.log

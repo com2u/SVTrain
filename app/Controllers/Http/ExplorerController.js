@@ -7,6 +7,7 @@ const path = require('path');
 const recursive = require('../../../src/recursive');
 const {promisify} = require('util');
 const fs = require('fs');
+const { Sequelize, DataTypes, Op } = require('sequelize');
 const execFile = promisify(require('child_process').execFile);
 const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i);
 const readdir = promisify(fs.readdir);
@@ -36,6 +37,44 @@ const DefectClass = use('App/Models/DefectClass');
 const ImageDefectClass = use('App/Models/ImageDefectClass');
 const Batch = use('App/Models/Batch');
 const extract = require('extract-zip');
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: 'imageData.sqlite',
+});
+
+const ImageData = sequelize.define('image_data', {
+  fileName: {
+    type: DataTypes.STRING,
+    primaryKey: true
+  },
+  folder: {
+    type: DataTypes.STRING
+  },
+  class: {
+    type: DataTypes.STRING
+  },
+  stars: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  tags: {
+    type: DataTypes.STRING,
+    defaultValue: '[]'
+  },
+  note: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+  user: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+}, {
+  timestamps: true
+});
+
+ImageData.sync();
 
 const escapeFileName = (str) => {
   return str.replace(/[#;{}%]/g, (match) => {
@@ -737,7 +776,7 @@ class ExplorerController {
       throw new Error(`Access denied`);
     }
     // skip files with no access
-    files = files.map(f => path.join(CONST_PATHS.root, f));
+    files = files.map(f => path.join(CONST_PATHS.root, decodeURIComponent(f)));
     files = files.filter(f => accessToFile(CONST_PATHS.root, f));
     files.map(
       async f => {
@@ -762,6 +801,14 @@ class ExplorerController {
       for (const file of files) {
         logger.info(`User ${user} has move file "${file}" to "${path.join(absDestination, path.basename(file))}"`);
       }
+    }
+    for (let fileName of files) {
+      await ImageData.upsert({
+        fileName: path.basename(fileName),
+        folder: destination.replace(CONST_PATHS.root, ""),
+        class: destination.split("/").pop(),
+        user: user
+      });
     }
     return files.map(
       f => path.join(absDestination, path.basename(f))
@@ -1694,6 +1741,36 @@ class ExplorerController {
       return true
     }
     response.status(400)
+  }
+
+  async getImageTags({request, response}) {
+    return await readFile('tags.json', 'utf-8');
+  }
+
+  async setImageData({request, response}) {
+    const { fileNames, folder, className, stars, tags, note } = request.post();
+    for (let fileName of fileNames) {
+      await ImageData.upsert({
+        fileName,
+        folder,
+        class: className,
+        stars,
+        tags: JSON.stringify(tags),
+        note,
+        user: request.currentUser.username
+      });
+    }
+    return response.status(200).send({ status: "OK" });
+  }
+
+  async getImageData({request, response}) {
+    const { fileNames } = request.post();
+    const imagesData = await ImageData.findAll({
+      where: {
+        [Op.or]: fileNames.map(fileName => ({ fileName }))
+      }
+    });
+    return imagesData;
   }
 
   async init () {

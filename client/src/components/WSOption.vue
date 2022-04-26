@@ -287,6 +287,14 @@ export default {
             type: types.BOOLEAN,
             options: {},
           },
+          {
+            label: 'Image Data',
+            field: 'addImageData',
+            type: types.BOOLEAN,
+            options: {
+              help: 'Activates a UI to add data to the images',
+            },
+          },
         ],
         Workspace: [
           {
@@ -383,6 +391,14 @@ export default {
             field: 'sortFiles',
             type: types.BOOLEAN,
             options: {},
+          },
+          {
+            label: 'Old Filename Ignore',
+            field: 'oldFilenameIgnore',
+            type: types.BOOLEAN,
+            options: {
+              help: 'This flag will ignore text before three underscore characters in the filename',
+            },
           },
         ],
       },

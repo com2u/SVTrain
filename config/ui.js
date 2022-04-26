@@ -9,6 +9,8 @@ module.exports = {
   sortFiles: false,
   showFileName: false,
   importFiles: false,
+  addImageData: false,
+  oldFilenameIgnore: false,
   maxFileSize: 10,
   useShortcuts: true,
   requestBeforeDelete: true,

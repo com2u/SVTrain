@@ -38,6 +38,7 @@
     "password-hash": "^1.2.2",
     "read-last-lines": "^1.7.1",
     "recursive-readdir": "^2.2.2",
+    "sequelize": "^6.19.0",
     "sqlite3": "^5.0.2",
     "static-server": "^2.2.1",
     "uuid": "^8.3.2",
