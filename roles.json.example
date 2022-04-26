@@ -26,7 +26,8 @@
     "canBackup": false,
     "editConfigAIUI": false,
     "editConfigFullAIUI": false,
-    "importFiles": true
+    "importFiles": true,
+    "addImageData": true,
   },
   "operator": {
     "editConfig": false,

@@ -1,0 +1,6 @@
+[
+  { "Text": "Critical", "Color": "#FF0000" },
+  { "Text": "Test", "Color": "#FFFF00" },
+  { "Text": "Production", "Color": "#0000FF" },
+  { "Text": "Operator", "Color": "#000000" }
+]

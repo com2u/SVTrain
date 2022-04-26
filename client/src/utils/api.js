@@ -37,6 +37,9 @@ const urls = {
   syncDB: `${baseurl}convertToDatabase`,
   backup: `${baseurl}backup`,
   getFoldersByPath: `${baseurl}getFolders`,
+  getImageData: `${baseurl}getImageData`,
+  setImageData: `${baseurl}setImageData`,
+  getImageTags: `${baseurl}getImageTags`,
 }
 
 export default {
@@ -169,6 +172,25 @@ export default {
   backup: async (wsName) => (await axios.post(urls.backup, {
     wsName,
   })).data,
+  getImageData: async (fileNames) => (await axios.post(urls.getImageData, {
+    fileNames,
+  })).data,
+  setImageData: async ({
+    fileNames,
+    folder,
+    className,
+    stars,
+    tags,
+    note,
+  }) => (await axios.post(urls.setImageData, {
+    fileNames,
+    folder,
+    className,
+    stars,
+    tags,
+    note,
+  })).data,
+  getImageTags: async () => (await axios.get(urls.getImageTags)).data,
 }
 
 axios.interceptors.response.use((response) => response, (error) => {

@@ -102,7 +102,37 @@
             </template>
           </div>
         </div>
+        <div v-if="addImageData && canAddImageData && selectedFiles.length" class="image-data right-side-section">
+          <div class="star-rating">
+            <v-icon name="star" v-for="i in 5" :class="{'active': i <= newImagesData.stars}" :key="i" @click="setNewRating(i)"></v-icon>
+          </div>
+          <div class="tags">
+              <b-badge
+                v-for="(tag, index) in newImagesData.tags"
+                :key="index"
+                pill
+                :style="`background-color: ${imageTags.find(t => t.Text === tag).Color}!important`"
+                >
+                  {{tag}}
+                  <v-icon name="times" class="times" @click="removeTag(index)"></v-icon>
+              </b-badge>
+              <span v-if="newImagesData.dirty && (!newImagesData.tags || !newImagesData.tags.length)">Inconsistent data</span>
+              <b-form-select id="tag_selector" :options="imageTags.filter(t => !(newImagesData.tags||[]).includes(t.Text)).map(tag=> ({
+                  text: tag.Text,
+                  value: tag.Text
+                }))"
+                @change="setNewTag($event)"
+                v-model="newImagesData.newTag"
+                :reset-on-options-change="true"
+              ></b-form-select>
+          </div>
+          <div class="notes">
+            <b-form-textarea id="textarea" v-model="newImagesData.note" rows="3" :placeholder="newImagesData.dirty ? 'Inconsistent Data':'Note'"/>
+          </div>
+          <b-button :disabled="isLoading.updating" variant="primary" @click="updateImageData">Update</b-button>
+        </div>
         <div v-if="showExplorerNotes" class="right-side-section">
+          <h4>Folder</h4>
           <b-form-textarea :disabled="!systemConfig['editExplorerNotes']" id="textarea" v-model="notesContent" rows="3" placeholder="Note"/>
         </div>
         <div class="right-side-section">
@@ -299,6 +329,7 @@ export default {
       moving: false,
       statistic: false,
       uploading: false,
+      updating: false,
     },
     showShortcuts: false,
     showFilters: false,
@@ -339,6 +370,8 @@ export default {
     },
     createdFolders: [],
     selectedFiles: [],
+    newImagesData: {},
+    imageTags: [],
     filter: {},
     shortCuts: {
       left: [
@@ -466,6 +499,9 @@ export default {
       'imageColorMap',
       'filterFiles',
       'sortFiles',
+      'addImageData',
+      'canAddImageData',
+      'oldFilenameIgnore',
     ]),
   },
   watch: {
@@ -497,6 +533,39 @@ export default {
             }
           })
         }, 500)
+      }
+    },
+    async selectedFiles() {
+      if (!this.addImageData || !this.canAddImageData) return
+      this.isLoading.updating = true
+      this.newImagesData = {}
+      const imagesData = await api.getImageData(this.selectedFiles.map((file) => {
+        if (this.oldFilenameIgnore) {
+          return file.name.replace(/^[^___]*___/, '')
+        }
+        return file.name
+      }))
+      // make sure all objects in imagesData have the same keys and values
+      // and mark as dirty if it's not the case
+      let dirty = imagesData.length && imagesData.length !== this.selectedFiles.length && this.selectedFiles.length > 1 && (!this.oldFilenameIgnore || this.selectedFiles.some((file) => file.name.replace(/^[^___]*___/, '') !== this.selectedFiles[0].name.replace(/^[^___]*___/, '')))
+      const relevantKeys = ['note', 'tags', 'stars']
+      relevantKeys.forEach((key) => {
+        if (!imagesData.every((imageData) => imageData[key] === imagesData[0][key])) {
+          console.log(key, !imagesData.every((imageData) => imageData[key] === imagesData[0][key]))
+          dirty = true
+        }
+      })
+      this.isLoading.updating = false
+      if (dirty) {
+        this.newImagesData = {
+          dirty,
+        }
+        return
+      }
+      if (!imagesData.length) return
+      this.newImagesData = {
+        ...imagesData[0],
+        tags: JSON.parse(imagesData[0]?.tags),
       }
     },
   },
@@ -544,6 +613,7 @@ export default {
         event.preventDefault()
       }
       if (!this.systemConfig.useShortcuts) return
+      if (document.activeElement.type === 'textarea') return
       const keys = {
         space: 32,
         pageUp: 33,
@@ -1121,6 +1191,38 @@ export default {
         })
       })
     },
+    setNewRating(newRating) {
+      this.newImagesData = {
+        ...this.newImagesData,
+        stars: newRating,
+      }
+    },
+    setNewTag(value) {
+      if (!this.newImagesData.tags?.includes(value)) {
+        this.newImagesData = {
+          ...this.newImagesData,
+          tags: [...(this.newImagesData.tags || []), value],
+        }
+      }
+    },
+    removeTag(index) {
+      this.newImagesData.tags.splice(index, 1)
+    },
+    async updateImageData() {
+      this.isLoading.updating = true
+      await api.setImageData({
+        fileNames: this.selectedFiles.map((f) => {
+          if (this.oldFilenameIgnore) {
+            return f.name.replace(/^[^___]*___/, '')
+          }
+          return f.name
+        }),
+        folder: this.path,
+        className: this.path.split('/').pop(),
+        ...this.newImagesData,
+      })
+      this.isLoading.updating = false
+    },
   },
   async created() {
     this.perPage = this.configFilePerPage
@@ -1146,6 +1248,7 @@ export default {
       notes: this.systemConfig.notes || null,
       highlight: Boolean(this.systemConfig.highlight),
     })
+    this.imageTags = await api.getImageTags()
   },
   beforeDestroy() {
     window.removeEventListener('keyup', this.onKeyUp)
@@ -1394,5 +1497,52 @@ export default {
         }
     }
 }
-
+.image-data {
+  .star-rating {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    svg {
+      &:hover > svg {
+        fill: gray;
+      }
+      fill: gray;
+      cursor: pointer;
+      height: 2rem;
+      width: 2rem;
+      margin-inline: 5px;
+      &.active {
+        fill: #ffd900;
+      }
+    }
+  }
+  .tags {
+    padding: 0.5rem;
+    margin-top: 1rem;
+    border: 1px solid #dedede;
+    .badge {
+      margin: 0.2rem;
+      white-space: nowrap;
+      .times {
+        cursor: pointer;
+        margin-left: 0.1rem;
+        font-size: 1rem;
+        &:hover {
+          color: red;
+        }
+      }
+    }
+    select {
+      margin-top: 1rem;
+      border: none;
+      border-radius: none;
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+  .notes {
+    margin: 1rem 0;
+  }
+}
 </style>

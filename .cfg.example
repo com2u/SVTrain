@@ -44,5 +44,7 @@
   "imageInvert": false,
   "imageColorMap": false,
   "importFiles": true,
-  "maxFileSize": 10
+  "maxFileSize": 10,
+  "addImageData": true,
+  "oldFilenameIgnore": false
 }
