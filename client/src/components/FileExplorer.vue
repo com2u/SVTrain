@@ -155,6 +155,8 @@
                   <option value="date-mod">Modified</option>
                   <option value="date-create">Created</option>
                   <option value="size">Size</option>
+                  <option value="note">Note</option>
+                  <option value="stars">Stars</option>
                 </select> <select class="filter-select" v-if="showSortBy" v-model="selectedSortByOrder" @change="sortChanged">
                   <option value="">Ascending</option>
                   <option value="desc">Descending</option>
@@ -167,6 +169,10 @@
                   <option value="matching">Matching</option>
                   <option value="not-matching">Not matching</option>
                   <option value="search">Search</option>
+                  <option value="with-note">With Note</option>
+                  <option value="without-note">Without Note</option>
+                  <option :value="`stars-${i}`" v-for="(e, i) in 6" :key="i">{{'☆'.repeat(i)|| 'Unrated'}}</option>
+                  <option :value="`tag-${tag.Text}`" v-bind:key="tag.Text" v-for="tag in imageTags">Tag: {{tag.Text}}</option>
                 </select>
               </span>
               <input class="filter-search" v-if="showFilters && selectedFilter === 'search'" v-model="searchText" @change="filterChanged" placeholder="Search"/>
@@ -867,7 +873,7 @@ export default {
       this.selectedFiles = []
 
       // load data
-      const content = await api.getFiles(path, this.$route.query.to, this.type, this.$route.query.batch, this.$route.query.isStatistic)
+      const content = await api.getFiles(path, this.$route.query.to, this.type, this.$route.query.batch, this.$route.query.isStatistic, this.oldFilenameIgnore)
       // prepare files
       this.folder.files = content.files.map((f) => {
         f.selected = false
@@ -944,8 +950,14 @@ export default {
         if (this.selectedSortBy === 'name') {
           return a.name.localeCompare(b.name)
         }
+        if (this.selectedSortBy === 'note') {
+          return a.note.localeCompare(b.note)
+        }
         if (this.selectedSortBy === 'size') {
           return a.size - b.size
+        }
+        if (this.selectedSortBy === 'stars') {
+          return a.stars - b.stars
         }
         if (this.selectedSortBy === 'date-mod') {
           return a.date_mod - b.date_mod
@@ -972,8 +984,23 @@ export default {
           this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.name.toLowerCase()
             .includes(this.searchText))
           break
+        case 'with-note':
+          this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.note)
+          break
+        case 'without-note':
+          this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => !f.note)
+          break
+        case 'stars-0':
+          this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.stars === 0)
+          break
         default:
           this.filteredFolderFiles = this.sortedFolderFiles
+          if (this.selectedFilter.indexOf('stars-') === 0) {
+            this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.stars === parseInt(this.selectedFilter.substring(6), 10))
+          }
+          if (this.selectedFilter.indexOf('tag-') === 0) {
+            this.filteredFolderFiles = this.sortedFolderFiles.filter((f) => f.tags.includes(this.selectedFilter.substring(4)))
+          }
           break
       }
       this.calculatePage(this.page)
@@ -1222,6 +1249,15 @@ export default {
         ...this.newImagesData,
       })
       this.isLoading.updating = false
+      this.folder.files = this.folder.files.map((f) => {
+        if (this.selectedFiles.find((s) => s.name === f.name)) {
+          f.stars = this.newImagesData.stars
+          f.tags = this.newImagesData.tags
+          f.note = this.newImagesData.note || ''
+        }
+        return f
+      })
+      this.sortChanged()
     },
   },
   async created() {
@@ -1469,7 +1505,7 @@ export default {
 }
 .filters {
      display: flex;
-     justify-content: end;
+     justify-content: flex-end;
      align-items: center;
      margin-bottom: 10px;
      height: 1.8rem;

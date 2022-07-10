@@ -60,7 +60,7 @@ const ImageData = sequelize.define('image_data', {
   },
   tags: {
     type: DataTypes.STRING,
-    defaultValue: '[]'
+    defaultValue: '[]',
   },
   note: {
     type: DataTypes.STRING,
@@ -341,7 +341,8 @@ class ExplorerController {
     }
   */
   async all({request}) {
-    let {dir, type, batch, to, isStatistic} = request.get();
+    let {dir, type, batch, to, isStatistic, oldFilenameIgnore = false } = request.get();
+    const relativeFilesDir = dir;
     if (!dir) {
       dir = CONST_PATHS.root
     } else {
@@ -471,6 +472,19 @@ class ExplorerController {
             };
             result.folders.push(folder);
           } else if (flstat.isFile() && f !== iconName) {
+            const imageData = await ImageData.findOne({
+              where: {
+                fileName: JSON.parse(oldFilenameIgnore)? f.replace(/^[^___]*___/, '') : f,
+                folder: relativeFilesDir
+              },
+              attributes: ['stars', 'note', 'tags'],
+              raw: true,
+            });
+            const parsedImageData = {
+              stars: imageData?.stars || 0,
+              note: imageData?.note || '',
+              tags: JSON.parse(imageData?.tags || '[]')
+            }
             result.files.push({
               path: fPath.replace(CONST_PATHS.root, ""),
               relativePath: path.relative(CONST_PATHS.root, fPath),
@@ -480,7 +494,8 @@ class ExplorerController {
               match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1,
               size: flstat.size,
               date_mod: flstat.mtimeMs,
-              date_create: flstat.birthtimeMs
+              date_create: flstat.birthtimeMs,
+              ...parsedImageData
             });
           } else {
             console.log(`File ${f} in the directory ${dir} nor file neither directory.`);

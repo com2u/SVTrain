@@ -1,6 +1,6 @@
 {
   "name": "svtrain",
-  "version": "1.4.17",
+  "version": "1.4.18",
   "private": true,
   "scripts": {
     "serve": "cross-env NODE_ENV=development vue-cli-service serve",
@@ -14,6 +14,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@voerro/vue-tagsinput": "^2.2.0",
     "axios": "^0.21.1",
+    "babel-polyfill": "^6.26.0",
     "bcrypt": "^5.0.1",
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.9.0",
