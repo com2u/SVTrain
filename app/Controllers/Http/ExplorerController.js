@@ -9,7 +9,7 @@ const {promisify} = require('util');
 const fs = require('fs');
 const { Sequelize, DataTypes, Op } = require('sequelize');
 const execFile = promisify(require('child_process').execFile);
-const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp)$/i);
+const regexpForImages = (/\.(gif|jpg|jpeg|tiff|png|bmp|webp)$/i);
 const readdir = promisify(fs.readdir);
 const lstat = promisify(fs.lstat);
 const writeFile = promisify(fs.writeFile);
@@ -31,6 +31,7 @@ const highlightPrefix = '[HIGHLIGHT]';
 const iconName = 'favicon.ico';
 const {hasPermissionWorkspaces} = require('../../utils/index');
 const {readDirRecursive} = require("../../utils")
+const fastFolderSizeSync = require('fast-folder-size/sync')
 
 const Workspace = use('App/Models/Workspace');
 const DefectClass = use('App/Models/DefectClass');
@@ -270,6 +271,28 @@ const classifyFilesOfDir = async (dir) => {
     subfolders
   }
 }
+
+/**
+ * copyRecursiveSync
+ * @param {string} src  The path to the thing to copy.
+ * @param {string} dest The path to the new copy.
+ * @param {string} suffix The suffix to add to the copied fileNames before the extension.
+ */
+ var copyRecursiveSync = function(src, dest, suffix) {
+  var exists = fs.existsSync(src);
+  var stats = exists && fs.statSync(src);
+  var isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    fs.mkdirSync(dest);
+    fs.readdirSync(src).forEach(function(childItemName) {
+      copyRecursiveSync(path.join(src, childItemName),
+                        path.join(dest, childItemName),
+                        suffix);
+    });
+  } else {
+    fs.copyFileSync(src, dest.replace(/(\.[\w\d_-]+)$/i, `${suffix}$1`));
+  }
+};
 
 const calculate = async (job, done) => {
   // job.data has the following structure:
@@ -1656,10 +1679,10 @@ class ExplorerController {
       await fs.mkdirSync(backupPath, { recursive: true });
     }
     const newBackup = `${config['backupPath'] ? config['backupPath'] : wsName}__${(new Date()).getTime()}.zip`
-    logger.info(`User ${request.currentUser.username} has backup workspace: "${wsName}"`);
     child_process.execSync(`zip -r ${backupPath}/${newBackup} *`, {
       cwd: ws
     });
+    logger.info(`User ${request.currentUser.username} has backup workspace: "${wsName}"`);
     return {
       status: "DONE"
     }
@@ -1753,6 +1776,7 @@ class ExplorerController {
         fs.rmdirSync(ws, { recursive: true });
       }
       await extract(p, { dir: path.join(Env.get("ROOT_PATH"), item.ws) })
+      logger.info(`User ${request.currentUser.username} has restored workspace: "${item.ws}"`);
       return true
     }
     response.status(400)
@@ -1787,6 +1811,234 @@ class ExplorerController {
     });
     return imagesData;
   }
+
+  async getRootFolderContent({request, response}) {
+    const backupPath = path.join(Env.get("STORAGE_PATH"), "backups");
+    if (!fs.existsSync(backupPath)) {
+      await fs.mkdirSync(backupPath);
+    }
+    const folders = []
+    const backupZips = []
+    if (!request.currentUser?.permissions?.manageWorkspaces)
+      return response.status(401).send("You don't have permission to manage workspaces")
+    
+    const rootFolders = await readdir(CONST_PATHS.root);
+
+    for (let i = 0; i < rootFolders.length; ++i) {
+      const f = rootFolders[i];
+      const flStat = await lstat(path.join(CONST_PATHS.root, f));
+      if (flStat.isDirectory()) {
+        folders.push({
+          path:   f,
+          name: f,
+          size: fastFolderSizeSync(path.join(CONST_PATHS.root, f))
+        })
+      }
+    }
+
+    const backupFiles = await readdir(backupPath);
+    for (let i = 0; i < backupFiles.length; ++i) {
+      const f = backupFiles[i];
+      const flStat = await lstat(path.join(backupPath, f));
+      if (flStat.isFile() && f.endsWith(".zip")) {
+        backupZips.push({
+          path:   f,
+          name: f.split("__")[0],
+          date_created: f.split("__")[1].replace(".zip", ""),
+          size: flStat.size
+        })
+      }
+    }
+
+    return {
+      folders,
+      backupZips
+    }
+  }
+
+  async deletePath({request, response}) {
+    const { wsPath, isBackup } = request.post();
+    if (!request.currentUser?.permissions?.manageWorkspaces)
+      return response.status(401).send("You don't have permission to manage workspaces")
+      // remove path either if it is a folder or a file
+
+    const absolutePath = path.join(isBackup ? path.join(Env.get("STORAGE_PATH"), "backups") : CONST_PATHS.root, wsPath);
+    
+    // a failsafe to prevent deleting the root folder
+    if (absolutePath === CONST_PATHS.root || absolutePath === path.join(Env.get("STORAGE_PATH"), "backups")) {
+      return response.status(400).send("You can't delete root folder")
+    }
+
+    if (await exists(absolutePath)) {
+      if ((await lstat(absolutePath)).isDirectory()) {
+        await fs.rmdirSync(absolutePath, { recursive: true });
+        await ImageData.destroy({
+          where: {
+            [Op.or]: [
+              {
+                class: wsPath,
+              },
+              {
+                folder: {
+                  [Op.like]: '/' + wsPath + '/%'
+                }
+              },
+              {
+                folder: `/${wsPath}`
+              },
+            ],
+          },
+        })
+      } else {
+        await fs.unlinkSync(absolutePath);
+      }
+      logger.info(`User ${request.currentUser.username} deleted ${path}`);
+    }
+    return response.status(200).send({ status: "OK" });
+  }
+
+  async downloadBackup({request, response}) {
+    const { backupPath } = request.get();
+    
+    const backupFoldersPath = path.join(Env.get("STORAGE_PATH"), "backups");
+    if (!request.currentUser?.permissions?.manageWorkspaces)
+    return response.status(401).send("You don't have permission to manage workspaces")
+
+    const p = path.join(backupFoldersPath, backupPath);
+    if (fs.existsSync(p)) {
+      logger.info(`User ${request.currentUser.username} downloaded ${backupPath}`);
+      return response.attachment(p);
+    }
+    return response.status(400).send("Backup not found")
+  }
+
+  deleteWorkspaceImages({request, response}) {
+    const { wsPath } = request.post();
+    if (!request.currentUser?.permissions?.manageWorkspaces)
+      return response.status(401).send("You don't have permission to manage workspaces")
+
+    const absoluteWorkspacePath = path.join(CONST_PATHS.root, wsPath);
+    if (fs.existsSync(absoluteWorkspacePath)) {
+      // delete all images recursively
+    const getFilesRecursively = (directory) => {
+      const filesInDirectory = fs.readdirSync(directory);
+      for (const file of filesInDirectory) {
+      const absolute = path.join(directory, file);
+        if (fs.statSync(absolute).isDirectory()) {
+            getFilesRecursively(absolute);
+        } else if (regexpForImages.test(absolute)) {
+            fs.unlinkSync(absolute);
+            ImageData.destroy({
+              where: {
+                fileName: file,
+                folder: directory.replace(CONST_PATHS.root, ""),
+              }
+            })
+          }
+        };
+    }
+    getFilesRecursively(absoluteWorkspacePath);
+    recalculateDir(absoluteWorkspacePath);
+    return true
+    }
+  }
+
+  async renameWorkspace({request, response}) {
+    const { wsPath, newName } = request.post();
+    if (!request.currentUser?.permissions?.manageWorkspaces)
+      return response.status(401).send("You don't have permission to manage workspaces")
+      
+    const absoluteWorkspacePath = path.join(CONST_PATHS.root, wsPath);
+    if (fs.existsSync(absoluteWorkspacePath)) {
+      const newAbsoluteWorkspacePath = path.join(CONST_PATHS.root, newName);
+      // if new name already exists, return error
+      if (fs.existsSync(newAbsoluteWorkspacePath)) {
+        return response.status(400).send("Workspace with this name already exists")
+      }
+      fs.renameSync(absoluteWorkspacePath, newAbsoluteWorkspacePath);
+      // update images in database
+      ImageData.update({
+        folder: `/${newName}`
+      }, {
+        where: {
+          folder: `/${wsPath}`
+        }
+      })
+      ImageData.update({
+        class: newName
+      }, {
+        where: {
+          class: wsPath
+        }
+      })
+      ImageData.update({
+        folder: Sequelize.literal(`REPLACE(folder, '/${wsPath}', '/${newName}')`)
+      }, {
+        where: {
+          [Op.or]: [
+            {
+              folder: {
+                [Op.like]: `/${wsPath}/%`
+              },
+            },
+            { 
+              folder: `/${wsPath}`
+            }
+          ]
+        }
+      })
+      logger.info(`User ${request.currentUser.username} renamed ${wsPath} to ${newName}`);
+      return true
+    }
+  }
+
+  async duplicateWorkspace({request, response}) {
+    const { wsPath, newName } = request.post();
+    if (!request.currentUser?.permissions?.manageWorkspaces)
+      return response.status(401).send("You don't have permission to manage workspaces")
+
+    const absoluteWorkspacePath = path.join(CONST_PATHS.root, wsPath);
+    if (fs.existsSync(absoluteWorkspacePath)) {
+      const newAbsoluteWorkspacePath = path.join(CONST_PATHS.root, newName);
+      // if new name already exists, return error
+      if (fs.existsSync(newAbsoluteWorkspacePath)) {
+        return response.status(400).send("Workspace with this name already exists")
+      }
+      const copySuffix = '_copy';
+      copyRecursiveSync(absoluteWorkspacePath, newAbsoluteWorkspacePath, copySuffix);
+      // update images in database
+      ImageData.findAll({
+        where: {
+          [Op.or]: [
+            {
+              class: wsPath,
+            },
+            {
+              folder: {
+                [Op.like]: '/' + wsPath + '/%'
+              }
+            },
+            {
+              folder: `/${wsPath}`
+            },
+          ],
+        },
+      }).then(async (images) => {
+        for (const image of images) {
+          delete image.dataValues.id;
+          await ImageData.create({
+            ...image.dataValues,
+            folder: image.dataValues.folder.replace(`/${wsPath}`, `/${newName}`),
+            class: image.dataValues.class === wsPath ? newName : image.dataValues.class,
+            fileName: image.dataValues.fileName.replace(/(\.[\w\d_-]+)$/i, `${copySuffix}$1`),
+          });
+        }
+      })
+      logger.info(`User ${request.currentUser.username} duplicated ${wsPath} to ${newName}`);
+      return true
+    }
+  }
+
 
   async init () {
     // calculate statistics on server boot

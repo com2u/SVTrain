@@ -28,6 +28,7 @@
     "editConfigFullAIUI": false,
     "importFiles": true,
     "addImageData": true,
+    "manageWorkspaces": true
   },
   "operator": {
     "editConfig": false,

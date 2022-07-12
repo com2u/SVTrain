@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="notch" @click="toggleHeader()"></div>
-    <div class="header" v-show="showHeader">
-      <div>
+    <div class="header" :class="{'nav-hidden': !showHeader}">
+      <div class="notch" @click="toggleHeader()">
+        <v-icon :name="showHeader? 'chevron-up' : 'chevron-down'"></v-icon>
+      </div>
+      <div class="nav-container">
         <b-navbar toggleable="lg" type="light" variant="faded">
           <b-navbar-nav :to="{name: 'WorkSpacePage'}">
             <b-nav-item class="logo" :to="{name: 'WorkSpacePage'}">
@@ -12,6 +14,19 @@
           <b-navbar-nav class="step-nav-item">
             <div class="step-container">
               <ul class="step-progress">
+                <li data-step="Manage">
+                  <v-icon
+                    name="bars"
+                    class="step-icon"
+                    style="vertical-align: -0.15em"
+                    :class="{
+                      'is-active': $route.name==='manager',
+                      'clickable': canManage,
+                      'is-disabled': !canManage
+                    }"
+                    @click="gotoPage('manager')"
+                  />
+                </li>
                 <li data-step="Classify">
                   <svg-icon
                     icon-class="microscope"
@@ -110,6 +125,7 @@ export default {
       'canTrain',
       'canTest',
       'canValidate',
+      'canManage',
       'showHeader',
       'changePWDUri',
       'adminPage',
@@ -125,6 +141,7 @@ export default {
     },
     gotoPage(page) {
       const permissionMap = {
+        manager: 'canManage',
         explorer: 'canClassify',
         Train: 'canTrain',
         Test: 'canTest',
@@ -155,7 +172,20 @@ export default {
     box-shadow: 0px 2px 6px -7px #222222;
     */
     width: 100%;
+    margin-bottom: 1rem;
+    position: relative;
 
+    .nav-container {
+      transition: max-height 0.3s ease-in-out;
+      max-height: 10rem;
+      overflow: hidden;
+    }
+    &.nav-hidden {
+      border-bottom: 2px solid #808080bd;
+      .nav-container {
+        max-height: 0;
+      }
+    }
     .logo {
       height: 80px;
 
@@ -176,24 +206,30 @@ export default {
 
     .navbar {
       padding: 0 1rem;
+      background: white;
+      z-index: 10;
+      border-bottom: 2px solid #808080bd;
     }
   }
 
   .notch {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    bottom: -1.2rem;
     left: 50%;
-    height: 20px;
-    width: 20px;
-    background: #808080;
+    background: #808080bd;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0%);
+    padding: .2rem .5rem;
+    svg {
+      width: 1rem;
+      height: 1rem;
+      margin-top: 1rem;
+      fill: white;
+    }
 
     &:hover {
       cursor: pointer;
     }
-
-    z-index: 9999999;
   }
 
   .step-nav-item {
@@ -207,7 +243,7 @@ export default {
     .step-progress {
       li {
         list-style-type: none;
-        width: 25%;
+        width: 20%;
         float: left;
         position: relative;
         text-align: center;
