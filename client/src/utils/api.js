@@ -40,6 +40,12 @@ const urls = {
   getImageData: `${baseurl}getImageData`,
   setImageData: `${baseurl}setImageData`,
   getImageTags: `${baseurl}getImageTags`,
+  getRootFolderContent: `${baseurl}getRootFolderContent`,
+  renameWorkspace: `${baseurl}renameWorkspace`,
+  duplicateWorkspace: `${baseurl}duplicateWorkspace`,
+  deletePath: `${baseurl}deletePath`,
+  deleteWorkspaceImages: `${baseurl}deleteWorkspaceImages`,
+  restoreBackup: `${baseurl}restore-backup`,
 }
 
 export default {
@@ -192,6 +198,26 @@ export default {
     note,
   })).data,
   getImageTags: async () => (await axios.get(urls.getImageTags)).data,
+  getRootFolderContent: async () => (await axios.get(urls.getRootFolderContent)).data,
+  renameWorkspace: async (wsPath, newName) => (await axios.post(urls.renameWorkspace, {
+    wsPath,
+    newName,
+  })).data,
+  duplicateWorkspace: async (wsPath, newName) => (await axios.post(urls.duplicateWorkspace, {
+    wsPath,
+    newName,
+  })).data,
+  deletePath: async (wsPath, isBackup) => (await axios.post(urls.deletePath, {
+    wsPath,
+    isBackup,
+  })).data,
+  deleteWorkspaceImages: async (wsPath) => (await axios.post(urls.deleteWorkspaceImages, {
+    wsPath,
+  })).data,
+  restoreBackup: async ({ ws, created }) => (await axios.post(urls.restoreBackup, {
+    ws,
+    created,
+  })).data,
 }
 
 axios.interceptors.response.use((response) => response, (error) => {

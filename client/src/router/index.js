@@ -16,6 +16,14 @@ const routes = [
         component: () => import('../views/Main'),
       },
       {
+        name: 'manager',
+        path: '/manager/',
+        component: () => import('../views/Manager'),
+        meta: {
+          permission: 'manageWorkspaces',
+        },
+      },
+      {
         name: 'explorer',
         path: '/explorer/',
         component: () => import('../views/Explorer'),

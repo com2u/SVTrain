@@ -310,7 +310,7 @@ import WindowSplitting from './WindowSplitting.vue'
 
 function preventDefaultScrolling(e) {
   // space and arrow keys
-  if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1 && document.activeElement.tagName !== 'TEXTAREA') {
+  if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1 && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
     e.preventDefault()
   }
 }
@@ -1154,7 +1154,7 @@ export default {
       window.addEventListener('keydown', preventDefaultScrolling, false)
     },
     disablePreventingScrolling() {
-      window.removeEventListener('keydown', preventDefaultScrolling)
+      window.removeEventListener('keydown', preventDefaultScrolling, false)
     },
     onOpenModal() {
       this.disablePreventingScrolling()
@@ -1290,6 +1290,7 @@ export default {
     window.removeEventListener('keyup', this.onKeyUp)
     socket.unsubscribeForFolder(this.path)
     socket.unsubscribeForFolder('running.lock')
+    this.disablePreventingScrolling()
   },
 }
 </script>

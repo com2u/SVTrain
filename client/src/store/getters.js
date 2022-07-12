@@ -8,6 +8,7 @@ const getters = {
   newWorkspace: (state) => getPermissions(state) && state.app.user.permissions.newWorkspace,
   newFolder: (state) => getPermissions(state) && state.app.user.permissions.newFolder,
   canClassify: (state) => getPermissions(state) && state.app.user.permissions.classify,
+  canManage: (state) => getPermissions(state) && state.app.user.permissions.manageWorkspaces,
   canTrain: (state) => getPermissions(state) && state.app.user.permissions.train,
   canTest: (state) => getPermissions(state) && state.app.user.permissions.test,
   canValidate: (state) => getPermissions(state) && state.app.user.permissions.validate,

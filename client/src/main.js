@@ -8,6 +8,7 @@ import 'bootstrap-vue/dist/bootstrap-vue'
 import 'jsoneditor/dist/jsoneditor.css'
 import VoerroTagsInput from '@voerro/vue-tagsinput'
 import VueGallery from 'vue-gallery'
+import VModal from 'vue-js-modal'
 
 import VueAuthImage from 'vue-auth-image'
 import Notifications from 'vue-notification'
@@ -25,6 +26,7 @@ Vue.use(Notifications)
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 Vue.use(VueAuthImage)
+Vue.use(VModal, { dialog: true })
 
 Vue.component('v-icon', Icon)
 Vue.component('tags-input', VoerroTagsInput)
