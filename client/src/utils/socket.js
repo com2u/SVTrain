@@ -1,4 +1,5 @@
 import { isProduction } from '@/utils/index'
+import 'babel-polyfill'
 import Ws from '@adonisjs/websocket-client'
 
 export default {
