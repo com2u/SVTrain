@@ -534,11 +534,6 @@ $height: 60px;
       line-height: $height;
       font-weight: bold;
       padding-left: 10px;
-      cursor: pointer;
-
-      &.root-item {
-        cursor: pointer;
-      }
     }
 
     .options {
