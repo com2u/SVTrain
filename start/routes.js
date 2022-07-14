@@ -39,6 +39,7 @@ Route.group(() => {
   Route.get('/getLastLogs', 'ExplorerController.getLastLogs').middleware('auth')
   Route.get('/logs/:file', 'ExplorerController.logsFor').middleware('auth')
   Route.post('/login', 'LoginController.login')
+  Route.get('/refreshToken', 'LoginController.refreshToken').middleware('auth')
   Route.post('/logout', 'LoginController.logout')
   Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
   Route.get('/explorerConfig', 'ExplorerController.getExplorerConfig').middleware('auth')
@@ -58,6 +59,7 @@ Route.group(() => {
   Route.post('/convertToDatabase', 'ExplorerController.convert2DB').middleware('auth')
   Route.post('/backup', 'ExplorerController.backup').middleware('auth')
   Route.get('/visualizeHeatmap', 'ExplorerController.visualizeHeatmap').middleware('auth')
+  Route.post('/setDefaultZoomLevel', 'ExplorerController.setDefaultZoomLevel').middleware('auth')
   // NEW
   Route.get('/sample-config', 'ExplorerController.sampleConfig').middleware('auth')
   Route.post('/sample-config', 'ExplorerController.sampleConfig').middleware('auth')

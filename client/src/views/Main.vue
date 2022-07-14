@@ -138,6 +138,7 @@ export default {
     },
     logout() {
       localStorage.removeItem('sessionToken')
+      localStorage.removeItem('refreshToken')
       api.setSessionToken('')
       this.$router.push({ name: 'LoginPage' })
     },

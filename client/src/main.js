@@ -5,6 +5,7 @@ import Icon from 'vue-awesome/components/Icon'
 // eslint-disable-next-line import/no-unresolved
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'jsoneditor/dist/jsoneditor.css'
 import VoerroTagsInput from '@voerro/vue-tagsinput'
 import VueGallery from 'vue-gallery'

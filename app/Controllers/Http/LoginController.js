@@ -39,9 +39,35 @@ class LoginController {
     })
     if (data) {
       logger.info(`User ${login} has logon`);
-      return {login, sessionToken: data.access_token}
+      return {login, sessionToken: data.access_token, refreshToken: data.refresh_token}
     } else {
       response.unauthorized('Invalid password or login')
+    }
+  }
+
+  async refreshToken({request, response}) {
+    const refreshToken = request.header('refreshToken')
+    if (!refreshToken) return response.unauthorized('LoginFirst')
+    const params = new URLSearchParams()
+    params.append('client_id', KEYCLOAK_CLIENT_ID)
+    params.append('grant_type', 'refresh_token')
+    params.append('refresh_token', refreshToken)
+    let data = await axios.post(
+      `${KEYCLOAK_URI}/token`,
+      params,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    ).then(res => res.data).catch(e => {
+      console.log(e.message);
+      return null
+    })
+    if (data) {
+      return { sessionToken: data.access_token, refreshToken: data.refresh_token }
+    } else {
+      response.unauthorized('Invalid refresh token')
     }
   }
 

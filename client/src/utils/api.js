@@ -26,6 +26,7 @@ const urls = {
   getLastLogs: `${baseurl}getLastLogs`,
   getLogFor: `${baseurl}logs`,
   login: `${baseurl}login`,
+  refreshToken: `${baseurl}refreshToken`,
   logout: `${baseurl}logout`,
   getConfig: `${baseurl}config`,
   getExplorerConfig: `${baseurl}explorerConfig`,
@@ -46,6 +47,7 @@ const urls = {
   deletePath: `${baseurl}deletePath`,
   deleteWorkspaceImages: `${baseurl}deleteWorkspaceImages`,
   restoreBackup: `${baseurl}restore-backup`,
+  setDefaultZoomLevel: `${baseurl}setDefaultZoomLevel`,
 }
 
 export default {
@@ -130,6 +132,18 @@ export default {
         throw new Error('Invalid login or password (401)')
       }
       throw e
+    }
+  },
+  refreshToken: async () => {
+    const { data } = await axios.get(urls.refreshToken, {
+      headers: {
+        refreshToken: localStorage.getItem('refreshToken'),
+      },
+    })
+    if (data && data.sessionToken) {
+      console.log('Refreshed session token')
+      localStorage.setItem('sessionToken', data.sessionToken)
+      localStorage.setItem('refreshToken', data.refreshToken)
     }
   },
   setSessionToken: async (token) => {
@@ -217,6 +231,10 @@ export default {
   restoreBackup: async ({ ws, created }) => (await axios.post(urls.restoreBackup, {
     ws,
     created,
+  })).data,
+  setDefaultZoomLevel: async (wsPath, zoomLevel) => (await axios.post(urls.setDefaultZoomLevel, {
+    wsPath,
+    zoomLevel,
   })).data,
 }
 

@@ -78,6 +78,7 @@ export default {
         this.loading = true
         const data = await api.login(this.userLogin, this.userPassword)
         localStorage.setItem('sessionToken', data.sessionToken)
+        localStorage.setItem('refreshToken', data.refreshToken)
         localStorage.setItem('sessionUser', data.login)
         // this.$store.dispatch('app/setUser', data.login);
         await api.setSessionToken(data.sessionToken)
