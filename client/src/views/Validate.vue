@@ -87,6 +87,7 @@
 import axios from 'axios'
 import { isProduction, getFileServerPath } from '@/utils'
 import command from '../mixins/command'
+import api from '../utils/api'
 
 export default {
   name: 'Validate',
@@ -165,6 +166,7 @@ export default {
     },
   },
   mounted() {
+    api.refreshToken()
     this.fetch()
   },
 }

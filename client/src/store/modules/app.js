@@ -41,6 +41,9 @@ export default {
     SET_EXPANDED: (state, val) => {
       state.expanded = val
     },
+    SET_DEFAULT_ZOOM: (state, zoom) => {
+      state.explorerConfig.defaultZoom = zoom
+    },
     ADD_EXPANDED: (state, { flag, path }) => {
       const filtered = state.expanded.filter((x) => (flag ? x === path : x.includes(path)))
       if (flag) {
@@ -71,9 +74,13 @@ export default {
     setUser: ({ commit }, user) => {
       commit('SET_USER', user)
     },
+    setDefaultZoom: ({ commit }, zoom) => {
+      commit('SET_DEFAULT_ZOOM', zoom)
+    },
     logout({ commit }) {
       commit('SET_CONFIG', {})
       localStorage.removeItem('sessionToken')
+      localStorage.removeItem('refreshToken')
       api.setSessionToken('')
     },
   },

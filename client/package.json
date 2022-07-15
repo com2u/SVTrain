@@ -1,11 +1,11 @@
 {
   "name": "svtrain",
-  "version": "1.4.19",
+  "version": "1.4.20",
   "private": true,
   "scripts": {
     "serve": "cross-env NODE_ENV=development vue-cli-service serve",
-    "build": "cross-env NODE_ENV=production vue-cli-service build",
-    "buildPublic": "cross-env NODE_ENV=production vue-cli-service build && node buildAndCopy.js",
+    "build": "node licensesAggregator.js && cross-env NODE_ENV=production vue-cli-service build",
+    "buildPublic": "node licensesAggregator.js && cross-env NODE_ENV=production vue-cli-service build && node buildAndCopy.js",
     "lint": "vue-cli-service lint",
     "lint-fix": "vue-cli-service lint --fix"
   },
@@ -22,6 +22,7 @@
     "core-js": "^3.6.4",
     "fs-extra": "^9.0.0",
     "jsoneditor": "^8.6.4",
+    "legal-eagle": "^0.16.0",
     "lodash": "^4.17.20",
     "lodash.set": "^4.3.2",
     "v-jsoneditor": "^1.2.3",

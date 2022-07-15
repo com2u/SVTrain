@@ -3,7 +3,7 @@
     <div class="logo">
       <img src="../assets/footer.png" alt="footer">
     </div>
-    <div>&copy; Seidenader Maschinenbau GmbH. All rights reserved.</div>
+    <div>&copy; Körber Pharma Inspection GmbH. All rights reserved.</div>
   </footer>
 </template>
 <script></script>

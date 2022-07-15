@@ -35,6 +35,7 @@
 </template>
 <script>
 import command from '../mixins/command'
+import api from '../utils/api'
 
 export default {
   name: 'Test',
@@ -56,6 +57,9 @@ export default {
         },
       ],
     }
+  },
+  mounted() {
+    api.refreshToken()
   },
 }
 </script>

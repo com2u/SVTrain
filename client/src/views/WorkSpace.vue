@@ -232,6 +232,7 @@ export default {
   },
   async mounted() {
     // this.loadFolders()
+    api.refreshToken()
     await api.calculateStatistic(null, true)
     this.loadFoldersByPath()
     EventBus.$on('load-sub-folders', this.loadSubfolder)

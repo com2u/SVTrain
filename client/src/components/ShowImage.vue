@@ -4,36 +4,48 @@
       <b-row class="my-1">
         <b-col sm="12">
           <b-form-input v-if="defaultZoomApplied" type="range" v-model="zoom" />
-          <b-form-input v-else type="range" disabled="true" v-model="defaultZoom" />
+          <b-form-input
+            v-else
+            type="range"
+            disabled="true"
+            v-model="defaultZoom"
+          />
         </b-col>
       </b-row>
     </b-container>
-        zoom: {{options.zoomFactor}}
-    <div
-      class="mb-4 inline-round-zoomer-base-container"
-      ref="imgPreview"
-    >
+    zoom: {{ options.zoomFactor }}
+    <div class="mb-4 inline-round-zoomer-base-container" ref="imgPreview">
       <vue-photo-zoom-pro
         :high-url="imgDataUrl"
         :loaded="imgDataUrl !== ''"
         ref="zoomer"
         :scale="options.zoomFactor"
         :selector="options.zoomFactor > 1"
-        style="width:100%"
-        width="300"
-        height="180"
+        style="width: 100%"
+        :width="300"
+        :height="180"
         disable-reactive
       >
-        <img ref="img"
+        <img
+          ref="img"
           v-auth-image="srcIMG"
           @load="applyImagesFilters"
           class="responsive-image unloaded"
-          style="height:auto"
+          style="height: auto"
         />
       </vue-photo-zoom-pro>
+      <div class="file-details">
+        <div>
+          <div><b>Path:</b> {{ file.path }}</div>
+          <div><b>FileName:</b> {{ file.name }}</div>
+        </div>
+        <div class="download">
+          <a :download="file.name" target="_blank" v-bind:href="imgDataUrl">
+            <b-button variant="primary">Download</b-button>
+          </a>
+        </div>
+      </div>
     </div>
-    <div>{{ file.path }}</div>
-    <div>{{ file.name }}</div>
   </div>
 </template>
 
@@ -42,6 +54,9 @@ import { getFileServerPath } from '@/utils'
 import axios from 'axios'
 import { mapGetters } from 'vuex'
 import VuePhotoZoomPro from 'vue-photo-zoom-pro'
+import { debounce } from 'lodash'
+import api from '../utils/api'
+import store from '../store'
 import 'vue-photo-zoom-pro/dist/style/vue-photo-zoom-pro.css'
 
 export default {
@@ -76,10 +91,7 @@ export default {
   },
   methods: {
     convertURIPath(p) {
-      return `${p}?token=${localStorage.getItem(
-        'sessionToken',
-        null,
-      )}`
+      return `${p}?token=${localStorage.getItem('sessionToken', null)}`
     },
     onKeyUp(key) {
       let flag = false
@@ -129,17 +141,19 @@ export default {
             imgRef.src = out
             setDataUrl(out)
             imgRef.classList.remove('unloaded')
+            imgRef.classList.remove('changed')
             setZoom()
           })
         })
       } else {
         this.$refs.img.classList.remove('unloaded')
+        this.$refs.img.classList.remove('changed')
         setZoom()
       }
     },
   },
   computed: {
-    ...mapGetters(['imageInvert', 'imageColorMap', 'defaultZoom']),
+    ...mapGetters(['imageInvert', 'imageColorMap', 'defaultZoom', 'currentWs']),
   },
   mounted() {
     document.addEventListener('keyup', this.onKeyUp)
@@ -154,25 +168,37 @@ export default {
     },
     zoom() {
       this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.zoom}%`)
+      store.dispatch('app/setDefaultZoom', this.zoom)
     },
+    defaultZoom: debounce(function () { // eslint-disable-line
+      api.setDefaultZoomLevel(this.currentWs, this.zoom)
+    }, 500),
     file() {
       this.zoomKey += 1
     },
     async showMode() {
-      if (this.showMode === 'Original') {
+      if (!this.showMode || this.showMode === 'Original') {
+        if (!this.$refs.img.classList.contains('changed')) return
+        this.$refs.img.classList.add('unloaded')
         this.srcIMG = encodeURI(this.file.serverPath)
+        this.imgDataUrl = ''
       } else {
+        this.$refs.img.classList.add('changed')
         const path = encodeURIComponent(this.file.relativePath)
         const uri = `${getFileServerPath().replace(
           'data',
           'api',
         )}visualizeHeatmap?mode=${encodeURIComponent(
           this.showMode,
-        )}&image=${path}`
+        )}&image=${path}&sessionToken=${localStorage.getItem(
+          'sessionToken',
+          null,
+        )}`
         this.srcIMG = await axios
           .get(uri)
           .then(() => uri)
           .catch(() => encodeURIComponent(this.file.serverPath))
+        this.imgDataUrl = this.srcIMG
       }
     },
   },
@@ -189,5 +215,16 @@ export default {
 }
 .unloaded {
   visibility: hidden;
+}
+.file-details {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  div {
+    &.download {
+      position: absolute;
+      right: 10rem;
+    }
+  }
 }
 </style>

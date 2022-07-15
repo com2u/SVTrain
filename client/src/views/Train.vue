@@ -88,6 +88,7 @@ export default {
       ],
       trainLog: null,
       tenserBoard: null,
+      interval: null,
     }
   },
   computed: {
@@ -119,8 +120,12 @@ export default {
     },
   },
   mounted() {
+    api.refreshToken()
     this.fetch(true)
-    setInterval(this.fetch, 2000)
+    this.interval = setInterval(this.fetch, 2000)
+  },
+  beforeDestroy() {
+    clearInterval(this.interval)
   },
 }
 </script>

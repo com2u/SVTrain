@@ -13,10 +13,14 @@
   padding: 5px;
   cursor: pointer;
   float: left;
+  svg {
+    fill: rgb(0, 96, 255)
+  }
   .text {
     font-size: 12px;
     padding: 1px;
     margin-left: .25rem;
+    color:  rgb(0, 96, 255);
   }
 }
 </style>

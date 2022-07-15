@@ -2039,6 +2039,17 @@ class ExplorerController {
     }
   }
 
+  async setDefaultZoomLevel({request, response}) {
+    const { wsPath, zoomLevel } = request.post();
+    const workspaceCfg = path.join(CONST_PATHS.root, wsPath, ".cfg");
+    if (fs.existsSync(workspaceCfg)) {
+      const cfg = JSON.parse(fs.readFileSync(workspaceCfg, "utf8"));
+      cfg.defaultZoom = zoomLevel;
+      fs.writeFileSync(workspaceCfg, JSON.stringify(cfg, null, 2));
+      logger.info(`User ${request.currentUser.username} set default zoom level to ${zoomLevel}% for ${wsPath}`);
+      return true
+    }
+  }
 
   async init () {
     // calculate statistics on server boot

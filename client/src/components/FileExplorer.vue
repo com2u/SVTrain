@@ -22,13 +22,10 @@
               v-b-popover.hover.html.top="'<b>+</b>'" title="Shortcut"
               icon-class="zoom-in" class="section-icon" @click="zoomIn"/>
             <svg-icon icon-class="info" class="section-icon" @click="showShortcutsModal"/>
-            <b-button @click="showStatistic" :disabled="!canViewStatistics" class="statistic-btn">
+            <b-button @click="showStatistic" :disabled="!canViewStatistics" class="statistic-btn sandy-color">
               <b-icon icon="bar-chart-fill"/>
               <span> Statistic</span>
             </b-button>
-          </div>
-          <div v-if="imageViewer" class="image-viewer-ctn">
-            <b-button variant="primary" :disabled="!viewerImages.length" @click="showImageViewer">Show selected images</b-button>
           </div>
         </div>
         <div v-if="systemConfig.moveMenu" class="right-side-section">
@@ -70,7 +67,7 @@
             </div>
           </div>
           <div v-else>
-            (Select one or more images to show defect class buttons)
+            Select one or more images to (re)label the data
           </div>
         </div>
         <div v-if="systemConfig.forwardLocation === 'right'" class="right-side-section">
@@ -89,12 +86,14 @@
                 v-b-popover.hover.html.top="'<b>PageUp</b>'" title="Shortcut"
                 variant="primary"
                 size="sm"
+                class="sandy-color"
                 @click="backward()">
                 <b-icon icon="chevron-left"></b-icon>
                 Backward
               </b-button>
               <b-button
-                style="margin-left: 10px"
+                class="sandy-color"
+                style="margin-left: 10px;"
                 v-b-popover.hover.html.top="'<b>PageDown</b>'" title="Shortcut"
                 variant="primary" size="sm" @click="forward()">Forward
                 <b-icon icon="chevron-right"></b-icon>
@@ -132,19 +131,19 @@
           <b-button :disabled="isLoading.updating" variant="primary" @click="updateImageData">Update</b-button>
         </div>
         <div v-if="showExplorerNotes" class="right-side-section">
-          <h4>Folder</h4>
+          <h4>Workspace notes</h4>
           <b-form-textarea :disabled="!systemConfig['editExplorerNotes']" id="textarea" v-model="notesContent" rows="3" placeholder="Note"/>
         </div>
         <div class="right-side-section">
           <b-form-checkbox v-model="notesHighlight" :disabled="! (showExplorerNotes && systemConfig['editExplorerNotes'])">Highlight Note</b-form-checkbox>
         </div>
         <div v-if="showExplorerNotes && systemConfig['editExplorerNotes']" class="right-side-section">
-          <b-button size="sm" variant="primary" @click="saveNotes()">Save notes</b-button>
+          <b-button size="sm" style="background: rgb(0, 96, 255);" variant="primary" @click="saveNotes()">Save notes</b-button>
         </div>
       </template>
       <template v-slot:main>
         <div class="mb-2 d-flex flex-column">
-          <div><strong>{{relativeDir}}</strong></div>
+          <div><strong>{{relativeDir.replace(/^\/|\/$/g, '')}}</strong></div>
           <div class="filters">
             <div class="filter-item">
               <span class="filter-select"  v-if="showSortBy">
@@ -189,6 +188,7 @@
             </div>
           </div>
           <div v-if="!['defectclass', 'batch', 'ws'].includes(type)" class="list-folders">
+            <back-button @click.native="goToPreviousDir()" v-if="relativeDir.replace(/^\/|\/$/g, '').indexOf('/') > -1"></back-button>
             <div class="list-folder-item" v-for="file in folder.folders" :key="file.path">
               <file
                 v-if="file.shortcut"
@@ -222,13 +222,17 @@
         <div class="mb-2 mt-2" v-if="systemConfig.forwardLocation === 'top'">
           <div class="pagination-group">
             <b-button
-              class="mr-2"
+              class="mr-2 sandy-color"
               variant="primary"
               size="sm"
               @click="backward()">
               <b-icon icon="chevron-left"></b-icon>Backward
             </b-button>
-            <b-button variant="primary" size="sm" @click="forward()">Forward
+            <b-button
+              variant="primary sandy-color"
+              size="sm"
+              @click="forward()">
+              Forward
               <b-icon icon="chevron-right"></b-icon>
             </b-button>
             <span v-if="currentIndexPage()" class="ml-2">{{currentIndexPage()}}</span>
@@ -237,9 +241,7 @@
         <div class="file-explorer-grid">
           <file
             zoom-able
-            v-for="(file, index) in screenFiles"
-            v-b-popover.hover.html.top="index < 10 ? `<b>${(index + 1) % 10}</b>` : null"
-            :title="index< 10 ? 'Shortcut' : null"
+            v-for="(file) in screenFiles"
             :show-file-name="showFileName"
             :id="`file_${file.path}`"
             :file="file"
@@ -306,6 +308,7 @@ import ShowFile from './ShowFile.vue'
 import CreatingFolder from './CreatingFolder.vue'
 import NewFolderButton from './NewFolderButton.vue'
 import ImportFilesButton from './ImportFilesButton.vue'
+import BackButton from './BackButton.vue'
 import WindowSplitting from './WindowSplitting.vue'
 
 function preventDefaultScrolling(e) {
@@ -326,6 +329,7 @@ export default {
     CreatingFolder,
     NewFolderButton,
     ImportFilesButton,
+    BackButton,
     WindowSplitting,
   },
   data: () => ({
@@ -557,7 +561,6 @@ export default {
       const relevantKeys = ['note', 'tags', 'stars']
       relevantKeys.forEach((key) => {
         if (!imagesData.every((imageData) => imageData[key] === imagesData[0][key])) {
-          console.log(key, !imagesData.every((imageData) => imageData[key] === imagesData[0][key]))
           dirty = true
         }
       })
@@ -597,6 +600,7 @@ export default {
     },
     saveNotes() {
       this.$store.dispatch('notes/save')
+      api.refreshToken()
     },
     showImageViewer() {
       if (this.selectedFiles.length) {
@@ -940,6 +944,7 @@ export default {
         this.page = this.page_count
       }
       this.sortChanged()
+      api.refreshToken()
       return {
         currentPath: content.path,
       }
@@ -1018,6 +1023,7 @@ export default {
         })
         this.screenFiles[0].cursor = true
       }
+      api.refreshToken()
     },
     currentIndexPage() {
       if (!this.perPage) {
@@ -1166,7 +1172,6 @@ export default {
       EventBus.$emit('show-statistic', this.path)
     },
     createNewFolder() {
-      console.log('create new folder')
       EventBus.$emit('create-new-folder', this.path)
     },
     shiftingMove(e, flag) {
@@ -1206,10 +1211,8 @@ export default {
       const ctx = canvas.getContext('2d')
       canvas.width = imgEl.width
       canvas.height = imgEl.height
-      console.log(imgEl.src, imgEl.naturalWidth, imgEl.naturalHeight, imgEl.complete)
       ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height)
       const sequencer = window.ImageSequencer()
-      console.log(canvas.toDataURL('image/png'), canvas.width, canvas.height)
       sequencer.loadImage(canvas.toDataURL('image/png'), function callback() {
         this.addSteps(filters)
         this.run((out) => {
@@ -1258,6 +1261,15 @@ export default {
         return f
       })
       this.sortChanged()
+      api.refreshToken()
+    },
+    goToPreviousDir() {
+      const path = this.relativeDir.split('/')
+      path.pop()
+      this.goToTheFolder({
+        path: path.join('/'),
+        type: path.join('/').replace(/^\/|\/$/g, '').indexOf('/') > -1 ? 'folder' : null,
+      })
     },
   },
   async created() {
@@ -1300,6 +1312,18 @@ export default {
     outline: none;
     min-height: 100%;
     display: flex;
+  }
+
+  .sandy-color {
+    background-color: rgb(211, 204, 194);
+    border: 1px solid rgb(211, 204, 194);
+    color: rgb(0, 0, 0);
+
+    &:hover, &:focus, &:active {
+      background: #D9D4CF !important;
+      color: #000 !important;
+      border-color: #000;
+    }
   }
 
   .file-container {
@@ -1375,11 +1399,18 @@ export default {
   }
 
   .section-item {
+    display: flex;
+    align-items: center;
     .section-icon {
-      margin-right: 20px;
+      &:not(:last-of-type) {
+        margin-right: 20px;
+      }
 
       font-size: 20px;
       cursor: pointer;
+    }
+    .statistic-btn {
+      margin-left: auto;
     }
   }
 
@@ -1398,17 +1429,6 @@ export default {
         border-radius: 2px;
         box-shadow: 0 1px 6px -2px #777;
       }
-    }
-  }
-
-  .statistic-btn {
-    color: #000;
-    background: #D9D4CF;
-    border: 1px solid #D9D4CF;
-
-    &:hover, &:focus, &:active {
-      background: #D9D4CF !important;
-      color: #000 !important;
     }
   }
 
@@ -1451,12 +1471,12 @@ export default {
     word-break: break-word;
 
     &.matched {
-      background: #a0fcac;
+      background: rgb(153, 191, 255);
       color: black;
     }
 
     &.missmatched {
-      background: rgb(255, 183, 183);
+      background: rgb(254, 182, 123);
       color: black;
     }
   }

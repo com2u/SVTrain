@@ -108,7 +108,7 @@ export default {
         unsupported: 'unsupported',
       },
       magnify: 1,
-      showMode: 'Original',
+      showMode: null,
       showModes: [],
     }
   },
@@ -122,6 +122,7 @@ export default {
     },
     onHidden(e) {
       this.$emit('hidden', e)
+      this.showMode = null
     },
     closeModal() {
       this.$refs.modal.hide()
@@ -154,7 +155,10 @@ export default {
   },
   created() {
     const ws = this.currentWs.split('/').pop()
-    this.showModes = [{ text: 'Original', value: 'Original' }]
+    this.showModes = [
+      { text: 'Heatmap...', value: null, disabled: true },
+      { text: 'Original', value: 'Original' },
+    ]
     axios
       .get(`${getFileServerPath()}${ws}/TFSettings.json`)
       .then(({ data }) => {
