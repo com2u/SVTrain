@@ -1680,7 +1680,8 @@ class ExplorerController {
     }
     const newBackup = `${config['backupPath'] ? config['backupPath'] : wsName}__${(new Date()).getTime()}.zip`
     child_process.execSync(`zip -r ${backupPath}/${newBackup} *`, {
-      cwd: ws
+      cwd: ws,
+      stdio: 'ignore',
     });
     logger.info(`User ${request.currentUser.username} has backup workspace: "${wsName}"`);
     return {

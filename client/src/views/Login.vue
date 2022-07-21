@@ -94,13 +94,6 @@ export default {
   },
   mounted() {
     this.$refs.password.focus()
-    this.$bvToast.toast('Mounted', {
-      title: 'Error',
-      autoHideDelay: 5000,
-      variant: 'danger',
-      toaster: 'b-toaster-bottom-right',
-      solid: true,
-    })
   },
 }
 </script>
