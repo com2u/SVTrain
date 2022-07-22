@@ -15,7 +15,7 @@
             <div class="overflow-hidden">
               <img
                 ref="img"
-                :src="convertURIPath(file.serverPath)"
+                :src="src"
                 class="file-explorer-preview unloaded"
                 alt=""
                 :class="imageFit === 'fit' ? 'image-fit' : 'image-fill'"
@@ -82,6 +82,14 @@ export default {
       type: String,
       default: null,
     },
+  },
+  data() {
+    return {
+      src: null,
+    }
+  },
+  mounted() {
+    this.src = this.convertURIPath(this.file.serverPath)
   },
   computed: {
     ...mapGetters(['imageSpacing', 'imageFit', 'imageInvert', 'imageColorMap']),
