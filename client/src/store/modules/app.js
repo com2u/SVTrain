@@ -42,8 +42,14 @@ export default {
       state.expanded = val
     },
     SET_DEFAULT_ZOOM: (state, zoom) => {
-      console.log(state, zoom)
-      state.config.defaultZoom = zoom
+      state.config = {
+        ...state.config,
+        defaultZoom: zoom,
+      }
+      state.explorerConfig = {
+        ...state.explorerConfig,
+        defaultZoom: zoom,
+      }
     },
     ADD_EXPANDED: (state, { flag, path }) => {
       const filtered = state.expanded.filter((x) => (flag ? x === path : x.includes(path)))

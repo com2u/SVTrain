@@ -8,12 +8,12 @@
             v-else
             type="range"
             disabled="true"
-            v-model="defaultZoom"
+            :value="defaultZoom"
           />
         </b-col>
       </b-row>
     </b-container>
-    zoom: {{ options.zoomFactor }}
+    Magnifier: X{{ options.zoomFactor }} | Zoom: {{ zoom || defaultZoom }}%
     <div class="mb-4 inline-round-zoomer-base-container" ref="imgPreview">
       <vue-photo-zoom-pro
         :high-url="imgDataUrl"
@@ -85,7 +85,7 @@ export default {
       zoomKey: 1,
       srcIMG: this.file.serverPath,
       imgDataUrl: '',
-      zoom: 100,
+      zoom: null,
       defaultZoomApplied: false,
     }
   },
