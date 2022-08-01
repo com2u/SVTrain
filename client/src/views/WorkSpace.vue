@@ -156,9 +156,9 @@ export default {
     //   await api.getSubfolders('root');
     //   this.loading = false;
     // },
-    async loadFoldersByPath(dir = null) {
+    async loadFoldersByPath(dir = null, useCache = true) {
       this.loading = true
-      const response = await api.getFoldersByPath(dir)
+      const response = await api.getFoldersByPath(dir, null, null, useCache)
       response.forEach((f) => {
         this.populatedFolders.push(f.path)
       })
@@ -168,7 +168,7 @@ export default {
     saveNotes() {
       this.$store.dispatch('notes/save')
         .then(() => {
-          this.loadFoldersByPath()
+          this.loadFoldersByPath(null, true)
         })
     },
     saveConfig() {
@@ -207,7 +207,7 @@ export default {
       })
     },
     onFolderCreated() {
-      this.loadFoldersByPath()
+      this.loadFoldersByPath(null, true)
     },
     toAiPage() {
       this.$router.push({ name: 'main' })
@@ -232,13 +232,17 @@ export default {
   },
   async mounted() {
     // this.loadFolders()
-    api.refreshToken()
-    await api.calculateStatistic(null, true)
-    this.loadFoldersByPath()
+    this.loadFoldersByPath(null, true)
+    EventBus.$on('refreshWorkspaces', () => {
+      this.loadFoldersByPath(null, true)
+    })
     EventBus.$on('load-sub-folders', this.loadSubfolder)
+    api.refreshToken()
+    api.calculateStatistic(null, true)
   },
   destroyed() {
     EventBus.$off('load-sub-folders')
+    EventBus.$off('refreshWorkspaces')
   },
 }
 </script>
