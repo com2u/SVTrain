@@ -1,5 +1,6 @@
 <template>
   <div>
+    <notifications group="header-notifications" position="top center" />
     <div class="header" :class="{ 'nav-hidden': !showHeader }">
       <div class="notch" @click="toggleHeader()">
         <v-icon :name="showHeader ? 'chevron-up' : 'chevron-down'"></v-icon>
@@ -127,8 +128,19 @@
                 "
               >
                 <v-icon name="key"></v-icon>
-                <span>Change password</span> </b-nav-item
-              ><b-nav-item
+                <span>Change password</span>
+              </b-nav-item>
+              <b-nav-item
+                class="nav-item-link"
+                @click="
+                  clearCache()
+                  hide()
+                "
+              >
+                <v-icon name="sync"></v-icon>
+                <span>REFRESH WORKSPACE</span>
+              </b-nav-item>
+              <b-nav-item
                 class="nav-item-link"
                 :to="{ name: 'AboutPage' }"
                 @click="hide"
@@ -165,6 +177,8 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import api from '../utils/api'
+import EventBus from '../utils/eventbus'
 
 export default {
   data() {
@@ -194,6 +208,30 @@ export default {
     logout() {
       this.$store.dispatch('app/logout')
       this.$router.push({ name: 'LoginPage' })
+    },
+    async clearCache() {
+      this.$notify({
+        group: 'header-notifications',
+        type: 'info',
+        duration: -1,
+        text: 'Refreshing workspaces...',
+      })
+      try {
+        await api.calculateStatistic(null, false)
+        await api.getFoldersByPath(null, null, null, false)
+      } finally {
+        this.$notify({
+          group: 'header-notifications',
+          clean: true,
+        })
+      }
+      this.$notify({
+        group: 'header-notifications',
+        type: 'success',
+        duration: 2000,
+        text: 'Workspaces refreshed.',
+      })
+      EventBus.$emit('refreshWorkspaces')
     },
     gotoPage(page) {
       const permissionMap = {

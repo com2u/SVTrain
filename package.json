@@ -34,9 +34,12 @@
     "extract-zip": "^2.0.1",
     "fast-folder-size": "^1.7.0",
     "glob": "^7.1.6",
+    "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.5",
     "kue": "^0.11.6",
     "log4js": "^6.3.0",
     "password-hash": "^1.2.2",
+    "ramda": "^0.25.0",
     "read-last-lines": "^1.7.1",
     "recursive-readdir": "^2.2.2",
     "sequelize": "^6.19.0",
@@ -45,7 +48,6 @@
     "uuid": "^8.3.2",
     "uuid4": "^2.0.2"
   },
-  "devDependencies": {},
   "autoload": {
     "App": "./app"
   }

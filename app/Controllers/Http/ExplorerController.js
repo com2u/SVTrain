@@ -42,6 +42,7 @@ const extract = require('extract-zip');
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: 'imageData.sqlite',
+  logging: false
 });
 
 const ImageData = sequelize.define('image_data', {
@@ -81,6 +82,19 @@ const escapeFileName = (str) => {
   return str.replace(/[#;{}%]/g, (match) => {
     return `%${match.charCodeAt(0).toString(16)}`
   })
+}
+
+const deleteCacheFileFromDir = async (dir) => {
+  const cacheDir = path.join(dir, '/.cache');
+  if (await exists(cacheDir)) {
+    try {
+      await fs.unlink(cacheDir, (err) => {
+        if (err) console.log(err)      
+      })
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 const queue = kue.createQueue({
@@ -197,7 +211,7 @@ const getCfg = async (dir) => {
       let cfg = await readFile(cfgPath, 'utf-8');
       results.config = JSON.parse(cfg);
     } catch (e) {
-      logger.error(`ExplorerController.getCfg: ${e.message}`);
+      logger.error(`ExplorerController.getCfg: ${e.message} at ${dir}`);
     }
   }
   return results;
@@ -294,7 +308,7 @@ const classifyFilesOfDir = async (dir) => {
   }
 };
 
-const calculate = async (job, done) => {
+const asyncCalculate = async (job, done) => {
   // job.data has the following structure:
   // {
   //   dir: 'path/to/dir', // falls back to root if not set
@@ -302,14 +316,17 @@ const calculate = async (job, done) => {
   //                       // for performance reasons
   // }
   const folderToRecalculate = job.data.dir || CONST_PATHS.root;
+  const uniqueWorkspaces = new Set();
   try {
     const dirs = await recursive(folderToRecalculate);
     await Promise.all(
       dirs.map(async (dir) => {
-        if (job.data.safe) {
+        if (job.data.safe === 'true' || (typeof job.data.safe === 'boolean' && job.data.safe)) {
           // if safe, only recalculate folders that haven't been calculated yet
           const alreadyCalculated = await Statistic.get(dir)
           if (alreadyCalculated.calculated !== false) return;
+        } else {
+            uniqueWorkspaces.add(path.join(CONST_PATHS.root, dir.replace(CONST_PATHS.root, '').split('/').filter(x => x?.length)[0]));
         }
         // calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
         const { localStateData, subfolders } = await classifyFilesOfDir(dir);
@@ -326,7 +343,12 @@ const calculate = async (job, done) => {
         );
       })
     );
-    done();
+    await Promise.all(
+      Array.from(uniqueWorkspaces).map(async (workspace) => {
+        // delete cache file of workspace
+        await deleteCacheFileFromDir(workspace);
+      })
+    );
     return true;
   } catch (e) {
     logger.error(`ExplorerController.calculate: ${e.message}`);
@@ -334,13 +356,13 @@ const calculate = async (job, done) => {
   }
 };
 
-queue.process('asyncCalculate', 1, calculate)
-
 // create a calculation job for a folder
-const recalculateDir = (dir) => {
-  queue.create("asyncCalculate", { dir }).save(function (error) {
-    if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
-  });
+const recalculateDir = async (dir) => {
+  await asyncCalculate({
+      data: {
+        dir: dir
+      }
+  }, () => null)
 };
 
 class ExplorerController {
@@ -1048,7 +1070,6 @@ class ExplorerController {
   */
   async createFolder({request}) {
     let {name, folder} = request.post();
-    console.log(folder);
     if (folder === 'root') {
       folder = CONST_PATHS.root;
     }
@@ -1124,12 +1145,12 @@ class ExplorerController {
     const { dir, safe } = request.get();
     // safe: boolean // if true and !dir then calculate statistic for all folders that have no .statistic file
     // if dir exists, safe is ignored, used to recalculate statistic for a specific folder
-    queue.create('asyncCalculate', {
-      dir: dir ? path.join(CONST_PATHS.root, dir) : null,
-      safe,
-    }).save(function(error) {
-      if (error) logger.error(`ExplorerController.calculate: ${error.message}`);
-    });
+    await asyncCalculate({
+      data: {
+        dir: dir ? path.join(CONST_PATHS.root, dir) : null,
+        safe,
+      }
+    }, () => null);
     return true
   }
 
@@ -1244,7 +1265,7 @@ class ExplorerController {
     const currentCfg = await this.getSystemConfig();
     const user = request.currentUser;
     const resConfig = {...currentCfg, user, root: CONST_PATHS.root};
-    response.json(resConfig);
+    return response.json(resConfig);
   }
 
   async getExplorerConfig({request, response}) {
@@ -1418,7 +1439,7 @@ class ExplorerController {
   isDirectory = async (source) => lstat(source).then(stat => stat.isDirectory());
 
   async getSubFolderByPath({request, response}) {
-    let {dir, type, ws} = request.get()
+    let {dir, type, ws, useCache=false } = request.get()
     if (!dir) {
       dir = CONST_PATHS.root
     } else {
@@ -1511,6 +1532,15 @@ class ExplorerController {
         }
         const subDir = path.join(dir, name);
         if ((await lstat(subDir)).isDirectory()) {
+          if (useCache) {
+            try {
+              const cached = fs.readFileSync(path.join(subDir, '.cache'), 'utf8');
+              if (cached) {
+                folders.push(JSON.parse(cached));
+                continue;
+              }
+            } catch (e) {}
+          }
           let file = await this.countSync(subDir,name)
           // Read notes
           const { notes, notesPath, highlight } = await getNotes(subDir.replace(CONST_PATHS.root, ""));
@@ -1527,10 +1557,14 @@ class ExplorerController {
             config,
             cfgPath: cfgPath ? cfgPath.replace(CONST_PATHS.root, "") : null,
           }
+          fs.writeFile(path.join(subDir, '.cache'), JSON.stringify(file), (err) => {
+            if (err) console.log(err)
+          })
           folders.push(file);
         }
       }
     }
+    fs.writeFileSync(path.join(CONST_PATHS.root, 'foldersCache.json'), JSON.stringify(folders, null, 2))
     return folders;
   }
 
@@ -2054,7 +2088,22 @@ class ExplorerController {
 
   async init () {
     // calculate statistics on server boot
-    recalculateDir()
+    await recalculateDir()
+    this.getSubFolderByPath({
+      request: {
+        get() {
+          return {
+            useCache: false,
+            dir: null, // root
+          }
+        },
+        currentUser: {
+          permissions: {
+            workspaces: ['**']
+          }
+        }
+      },
+    })
   }
 }
 

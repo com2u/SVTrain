@@ -1,5 +1,7 @@
 import axios from 'axios'
+
 import { isProduction } from '@/utils/index'
+
 import EventBus from './eventbus'
 
 const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`
@@ -175,9 +177,9 @@ export default {
     path,
     config,
   })).data,
-  getFoldersByPath: async (dir, type, ws) => (await axios.get(urls.getFoldersByPath, {
+  getFoldersByPath: async (dir, type, ws, useCache) => (await axios.get(urls.getFoldersByPath, {
     params: {
-      dir, type, ws,
+      dir, type, ws, useCache,
     },
   })).data,
   listStatistics: async (dirs = []) => (await axios.post(urls.listStatistics, {
