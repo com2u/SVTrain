@@ -11,7 +11,7 @@
           <div>{{currentFolder}}</div>
           <div>
             Matched: {{this.statistic.matched}}
-            | Mismatched: {{this.statistic.missmatched}}
+            | Mismatched: {{this.statistic.mismatched}}
             | Unclassified: {{this.statistic.unclassified}}
           </div>
         </div>

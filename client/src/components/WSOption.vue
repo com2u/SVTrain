@@ -85,7 +85,7 @@ export default {
             type: types.SLIDER,
             options: {
               max: 200,
-              min: 100,
+              min: 0,
             },
           },
           {
@@ -94,7 +94,7 @@ export default {
             type: types.SLIDER,
             options: {
               max: 200,
-              min: 100,
+              min: 0,
             },
           },
           {

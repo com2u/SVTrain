@@ -43,7 +43,7 @@
     <span
       v-if="showFileName"
       v-bind:class="{
-        missmatched: !file.match && file.image,
+        mismatched: !file.match && file.image,
         matched: file.match && file.image,
         other: !file.image,
       }"

@@ -368,7 +368,7 @@ export default {
       calculated: false,
       matched: null,
       missed: null,
-      missmatched: null,
+      mismatched: null,
       table: null,
     },
     lastSelectedFileIndex: null,
@@ -855,14 +855,14 @@ export default {
       const {
         matched,
         missed,
-        missmatched,
+        mismatched,
         calculated,
         table,
       } = await api.getStatistic(path)
       this.statistic.calculated = calculated
       this.statistic.matched = matched
       this.statistic.missed = missed
-      this.statistic.missmatched = missmatched
+      this.statistic.mismatched = mismatched
       this.statistic.table = table
     },
     onFolderCreated() {
@@ -1475,7 +1475,7 @@ export default {
       color: black;
     }
 
-    &.missmatched {
+    &.mismatched {
       background: rgb(254, 182, 123);
       color: black;
     }

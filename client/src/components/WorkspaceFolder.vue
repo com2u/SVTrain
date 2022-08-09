@@ -252,10 +252,11 @@ export default {
       )
     },
     progress() {
-      if (this.info.classified || this.info.unclassified) {
+      if (this.info.matched !== undefined) {
+        if (!this.info.mismatched) return 100
         return +(
-          (this.info.classified / // eslint-disable-line operator-linebreak
-            (this.info.classified + this.info.unclassified)) * // eslint-disable-line operator-linebreak
+          (this.info.matched / // eslint-disable-line operator-linebreak
+            (this.info.matched + this.info.mismatched)) * // eslint-disable-line operator-linebreak
           100
         ).toFixed(1)
       }

@@ -235,13 +235,13 @@ const getNotes = async (dir) => {
   return results;
 }
 
-// calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
+// calculate the count of matched, missed, mismatched, classified and unclassified files inside a folder
 // return an object with the calculated values, and the list of subfolders found.
 const classifyFilesOfDir = async (dir) => {
   let localStateData = {
     missed: 0,
     matched: 0,
-    missmatched: 0,
+    mismatched: 0,
     classified: 0,
     unclassified: 0,
   };
@@ -266,7 +266,7 @@ const classifyFilesOfDir = async (dir) => {
         if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
           localStateData.matched++;
         } else {
-          localStateData.missmatched++;
+          localStateData.mismatched++;
           if (
             path
               .basename(f)
@@ -328,7 +328,7 @@ const asyncCalculate = async (job, done) => {
         } else {
             uniqueWorkspaces.add(path.join(CONST_PATHS.root, dir.replace(CONST_PATHS.root, '').split('/').filter(x => x?.length)[0]));
         }
-        // calculate the count of matched, missed, missmatched, classified and unclassified files inside a folder
+        // calculate the count of matched, missed, mismatched, classified and unclassified files inside a folder
         const { localStateData, subfolders } = await classifyFilesOfDir(dir);
         try {
           localStateData.table = await buildSubfolderTable(dir, subfolders);
@@ -1430,6 +1430,17 @@ class ExplorerController {
       if (await exists(xpath)) {
         logger.info(`User ${request.currentUser.username} has changed the .cfg file "${xpath}"`);
         await writeFile(xpath, configStr, {encoding: 'utf8'});
+        const cachedConfigPath = path.join(xpath.replace(".cfg", ""), '.cache')
+        if (fs.existsSync(cachedConfigPath)) {
+          let cached = fs.readFileSync(cachedConfigPath, 'utf8');
+          if (cached) {
+            cached = {
+              ...JSON.parse(cached),
+              config: config
+            }
+            fs.writeFileSync(cachedConfigPath, JSON.stringify(cached), 'utf8');
+          }
+        }
         return true;
       }
     }
