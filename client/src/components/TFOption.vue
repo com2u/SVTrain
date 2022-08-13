@@ -829,10 +829,16 @@ export default {
       if (!this.canEditConfigAIUI && this.editor) {
         this.data = this.editor.get()
       }
-      const data = {
+      let data = {
         ...this.fields,
         ...this.data,
       }
+      data = this.transformEachChild(data, (child) => {
+        if (!Number.isNaN(Number(child)) && typeof child === 'string') {
+          return Number(child)
+        }
+        return child
+      })
       const filePath = `${this.ws}/TFSettings.json`
       console.log(JSON.stringify(data, null, 2))
       await api.saveFile(filePath, JSON.stringify(data, null, 2))
@@ -840,6 +846,18 @@ export default {
     },
     onOpen() {
       this.loadFile()
+    },
+    transformEachChild(obj, callback) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const k in obj) {
+        // eslint-disable-next-line no-prototype-builtins
+        if (obj.hasOwnProperty(k) && obj[k] && typeof obj[k] === 'object') {
+          this.transformEachChild(obj[k], callback)
+        } else {
+          obj[k] = callback(obj[k]) // eslint-disable-line no-param-reassign
+        }
+      }
+      return obj
     },
   },
   computed: {

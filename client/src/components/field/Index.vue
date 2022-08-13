@@ -119,12 +119,7 @@ export default {
   },
   methods: {
     handleInput(value) {
-      if (this.schema.type === types.NUMBER) {
-        // eslint-disable-next-line radix
-        this.temp = Number.parseFloat(value)
-      } else {
-        this.temp = value
-      }
+      this.temp = value
     },
     toggleAuto() {
       // const fallbackJson = this.schema.type === types.J_ARRAY ? new Array(this.schema.options?.schema?.length || 0).fill(0) : {}
