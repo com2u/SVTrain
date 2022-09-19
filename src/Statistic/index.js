@@ -23,7 +23,7 @@ module.exports = class Statistic {
     } catch {
       deleteFile(path.join(folderPath, this.filename))
       // delete workspace cache
-      const wsPath = folderPath.replace(ROOT_PATH, '').split('/')[1]
+      const wsPath = folderPath.replace(ROOT_PATH, '').split(path.sep)[1]
       deleteFile(path.join(ROOT_PATH, wsPath, '/.cache'))
       return { calculated: false }
     }

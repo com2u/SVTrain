@@ -1369,24 +1369,38 @@ class ExplorerController {
       }
       const parentDir = dir.split(path.sep).slice(2, -1).join(path.sep);
       const selectedPath = currentCfg.selectedPath || 'Selected';
-      const absSelectedPath = path.join(workingRoot, parentDir, selectedPath);
+      const absSelectedPath = path.join(workingRoot, selectedPath);
+      const absSelectedPathWithParent = path.join(workingRoot, parentDir, selectedPath);
       const notSelectedPath = currentCfg.notSelectedPath || 'NotSelected';
-      const absNotSelectedPath = path.join(workingRoot, parentDir, notSelectedPath);
+      const absNotSelectedPath = path.join(workingRoot, notSelectedPath);
+      const absNotSelectedPathWithParent = path.join(workingRoot, parentDir, notSelectedPath);
       const user = request.currentUser.username;
       // Create delete directory if not exist
-      if (!await exists(absSelectedPath)) {
+      if (!await exists(absSelectedPath) && !await exists(absSelectedPathWithParent)) {
         logger.error(`ExplorerController.doForwardOnly: Folder ${absSelectedPath} does not exist, cannot move files`);
         throw Error(`Does not exist`);
       }
-      if (!await exists(absNotSelectedPath)) {
+      if (!await exists(absNotSelectedPath) && !await exists(absNotSelectedPathWithParent)) {
         logger.error(`ExplorerController.doForwardOnly: Folder ${absSelectedPath} does not exist, cannot move files`);
         throw Error(`Does not exist`);
       }
-      const selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
-      const notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
-      // recalculate statistics for parent dir, and all selected/notSelected folders
-      recalculateDir(absSelectedPath);
-      recalculateDir(absNotSelectedPath);
+      let selected;
+      let notSelected;
+      if (await exists(absSelectedPathWithParent)) {
+        selected = await this.moveFiles(selectedFiles, absSelectedPathWithParent, user);
+        recalculateDir(absSelectedPathWithParent);
+      } else {
+        selected = await this.moveFiles(selectedFiles, absSelectedPath, user);
+        recalculateDir(absSelectedPath);
+      }
+      if (await exists(absNotSelectedPathWithParent)) {
+        notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPathWithParent, user);
+        recalculateDir(absNotSelectedPathWithParent);
+      } else {
+        notSelected = await this.moveFiles(notSelectedFiles, absNotSelectedPath, user);
+        recalculateDir(absNotSelectedPath);
+      }
+      // recalculate statistics for parent dir, and all selected/notSelected folders (done above)
       recalculateDir(workingRoot);
       response.json({
         selected,
