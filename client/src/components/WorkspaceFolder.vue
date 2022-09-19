@@ -256,7 +256,8 @@ export default {
       return this.$store.state.app.config
     },
     totalFiles() {
-      return (this.info.matched + this.info.mismatched).toLocaleString()
+      const totalFiles = this.info.matched + this.info.mismatched
+      return Number.isNaN(totalFiles) ? 0 : totalFiles.toLocaleString()
     },
     indent() {
       return { marginLeft: `${this.depth * 50}px` }

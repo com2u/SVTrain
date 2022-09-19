@@ -89,7 +89,7 @@ const deleteCacheFileFromDir = async (dir) => {
   if (await exists(cacheDir)) {
     try {
       await fs.unlink(cacheDir, (err) => {
-        if (err) console.log(err)      
+        if (err) console.log(err)
       })
     } catch (e) {
       console.log(e);
@@ -1867,7 +1867,7 @@ class ExplorerController {
     const backupZips = []
     if (!request.currentUser?.permissions?.manageWorkspaces)
       return response.status(401).send("You don't have permission to manage workspaces")
-    
+
     const rootFolders = await readdir(CONST_PATHS.root);
 
     for (let i = 0; i < rootFolders.length; ++i) {
@@ -1909,7 +1909,7 @@ class ExplorerController {
       // remove path either if it is a folder or a file
 
     const absolutePath = path.join(isBackup ? path.join(Env.get("STORAGE_PATH"), "backups") : CONST_PATHS.root, wsPath);
-    
+
     // a failsafe to prevent deleting the root folder
     if (absolutePath === CONST_PATHS.root || absolutePath === path.join(Env.get("STORAGE_PATH"), "backups")) {
       return response.status(400).send("You can't delete root folder")
@@ -1945,7 +1945,7 @@ class ExplorerController {
 
   async downloadBackup({request, response}) {
     const { backupPath } = request.get();
-    
+
     const backupFoldersPath = path.join(Env.get("STORAGE_PATH"), "backups");
     if (!request.currentUser?.permissions?.manageWorkspaces)
     return response.status(401).send("You don't have permission to manage workspaces")
@@ -1993,7 +1993,7 @@ class ExplorerController {
     const { wsPath, newName } = request.post();
     if (!request.currentUser?.permissions?.manageWorkspaces)
       return response.status(401).send("You don't have permission to manage workspaces")
-      
+
     const absoluteWorkspacePath = path.join(CONST_PATHS.root, wsPath);
     if (fs.existsSync(absoluteWorkspacePath)) {
       const newAbsoluteWorkspacePath = path.join(CONST_PATHS.root, newName);
@@ -2027,7 +2027,7 @@ class ExplorerController {
                 [Op.like]: `/${wsPath}/%`
               },
             },
-            { 
+            {
               folder: `/${wsPath}`
             }
           ]
