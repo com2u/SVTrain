@@ -89,7 +89,7 @@ const deleteCacheFileFromDir = async (dir) => {
   if (await exists(cacheDir)) {
     try {
       await fs.unlink(cacheDir, (err) => {
-        if (err) console.log(err)      
+        if (err) console.log(err)
       })
     } catch (e) {
       console.log(e);
@@ -304,7 +304,12 @@ const classifyFilesOfDir = async (dir) => {
                         suffix);
     });
   } else {
-    fs.copyFileSync(src, dest.replace(/(\.[\w\d_-]+)$/i, `${suffix}$1`));
+    if (src.includes('.cache')) return;
+    if (regexpForImages.test(src)) {
+      fs.copyFileSync(src, dest.replace(/(\.[\w\d_-]+)$/i, `${suffix}$1`));
+    } else {
+      fs.copyFileSync(src, dest);
+    }
   }
 };
 
@@ -1867,7 +1872,7 @@ class ExplorerController {
     const backupZips = []
     if (!request.currentUser?.permissions?.manageWorkspaces)
       return response.status(401).send("You don't have permission to manage workspaces")
-    
+
     const rootFolders = await readdir(CONST_PATHS.root);
 
     for (let i = 0; i < rootFolders.length; ++i) {
@@ -1945,7 +1950,7 @@ class ExplorerController {
 
   async downloadBackup({request, response}) {
     const { backupPath } = request.get();
-    
+
     const backupFoldersPath = path.join(Env.get("STORAGE_PATH"), "backups");
     if (!request.currentUser?.permissions?.manageWorkspaces)
     return response.status(401).send("You don't have permission to manage workspaces")
@@ -1993,7 +1998,7 @@ class ExplorerController {
     const { wsPath, newName } = request.post();
     if (!request.currentUser?.permissions?.manageWorkspaces)
       return response.status(401).send("You don't have permission to manage workspaces")
-      
+
     const absoluteWorkspacePath = path.join(CONST_PATHS.root, wsPath);
     if (fs.existsSync(absoluteWorkspacePath)) {
       const newAbsoluteWorkspacePath = path.join(CONST_PATHS.root, newName);
@@ -2027,7 +2032,7 @@ class ExplorerController {
                 [Op.like]: `/${wsPath}/%`
               },
             },
-            { 
+            {
               folder: `/${wsPath}`
             }
           ]
@@ -2050,7 +2055,7 @@ class ExplorerController {
       if (fs.existsSync(newAbsoluteWorkspacePath)) {
         return response.status(400).send("Workspace with this name already exists")
       }
-      const copySuffix = '_copy';
+      const copySuffix = `_copy_${newName}`;
       copyRecursiveSync(absoluteWorkspacePath, newAbsoluteWorkspacePath, copySuffix);
       // update images in database
       ImageData.findAll({
