@@ -85,6 +85,10 @@ export default {
   data() {
     let temp = this.value
     if (temp === null) {
+      if (this.schema.options.default !== undefined) {
+        temp = this.schema.options.default
+        this.$emit('input', temp)
+      }
       if (this.schema.type === types.JSON) {
         temp = {}
         this.$emit('input', temp)

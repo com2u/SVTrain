@@ -18,6 +18,7 @@
   "deleteDefaultFolder": "Deleted_files",
   "selectedPath": "Selected_new",
   "notSelectedPath": "Not_Selected",
+  "unclassifiedPath": "Unclassified",
   "forwardOnly": true,
   "buttonFontSize": "1rem",
   "titleFontSize": "1rem",

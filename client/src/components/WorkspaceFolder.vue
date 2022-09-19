@@ -50,7 +50,7 @@
             class="option-progress-text"
             v-if="
               showSubFolderProgress &&
-              info.name.toLowerCase() !== 'unclassified' &&
+              info.name.toLowerCase() !== info.unclassifiedPath &&
               totalFiles > 0
             "
           >
@@ -63,17 +63,17 @@
             v-bind:class="{
               'opacity-0':
                 !(showSubFolderProgress || depth === 0) ||
-                info.name.toLowerCase() === 'unclassified' ||
+                info.name.toLowerCase() === info.unclassifiedPath ||
                 totalFiles <= 0,
               'cursor-pointer':
                 totalFiles > 0 &&
-                info.name.toLowerCase() !== 'unclassified' &&
+                info.name.toLowerCase() !== info.unclassifiedPath &&
                 (showSubFolderProgress || depth === 0),
             }"
             @click="
               !(
                 !(showSubFolderProgress || depth === 0) ||
-                info.name.toLowerCase() === 'unclassified' ||
+                info.name.toLowerCase() === info.unclassifiedPath ||
                 totalFiles <= 0
               ) && canViewStatistics
                 ? showStatistic()
@@ -428,9 +428,6 @@ export default {
           ...this.getSubFolderStatistics(currentSubFolder),
         }
         Object.entries(subFolderStats).forEach(([key, value]) => {
-          if (subFolderStats.path === '/Something4/test') {
-            console.log(key, value)
-          }
           if (!Number.isInteger(value)) return
           totalStats[key] = (totalStats[key] || 0) + value // eslint-disable-line no-param-reassign
         })

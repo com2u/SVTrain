@@ -192,6 +192,15 @@ export default {
             },
           },
           {
+            label: 'Unclassified path',
+            field: 'unclassifiedPath',
+            type: types.TEXT,
+            options: {
+              help: 'Folder name where the labeling starts. Reference for progress bar calculation',
+              default: 'Unclassified',
+            },
+          },
+          {
             label: 'Confirm Button',
             field: 'forwardLocation',
             type: types.SELECT,

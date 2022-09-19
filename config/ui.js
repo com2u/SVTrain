@@ -18,6 +18,7 @@ module.exports = {
   deleteDefaultFolder: 'Deleted_files',
   selectedPath: 'Selected_new',
   notSelectedPath: 'Not_Selected',
+  unclassifiedPath: 'Unclassified',
   forwardOnly: false,
   buttonFontSize: '1rem',
   titleFontSize: '1rem',
