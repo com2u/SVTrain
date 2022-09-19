@@ -46,18 +46,40 @@
           <span class="file-nums option-progress-text"
             >{{ totalFiles }} files</span
           >
-          <span class="option-progress-text" v-if="showSubFolderProgress"
-            >{{ progress }}%</span
+          <span
+            class="option-progress-text"
+            v-if="
+              showSubFolderProgress &&
+              info.name.toLowerCase() !== 'unclassified' &&
+              totalFiles > 0
+            "
+          >
+            {{ progress }}%</span
           >
           <progress
             :max="100"
             :value="progress"
             class="ws-progress"
             v-bind:class="{
-              'opacity-0': !(showSubFolderProgress || depth === 0),
+              'opacity-0':
+                !(showSubFolderProgress || depth === 0) ||
+                info.name.toLowerCase() === 'unclassified' ||
+                totalFiles <= 0,
+              'cursor-pointer':
+                totalFiles > 0 &&
+                info.name.toLowerCase() !== 'unclassified' &&
+                (showSubFolderProgress || depth === 0),
             }"
-          >
-          </progress>
+            @click="
+              !(
+                !(showSubFolderProgress || depth === 0) ||
+                info.name.toLowerCase() === 'unclassified' ||
+                totalFiles <= 0
+              ) && canViewStatistics
+                ? showStatistic()
+                : null
+            "
+          ></progress>
         </div>
         <div>
           <div class="icon-wrapper" title="AI Statistic">
@@ -234,7 +256,7 @@ export default {
       return this.$store.state.app.config
     },
     totalFiles() {
-      return (this.info.unclassified + this.info.classified).toLocaleString()
+      return (this.info.matched + this.info.mismatched).toLocaleString()
     },
     indent() {
       return { marginLeft: `${this.depth * 50}px` }
@@ -252,11 +274,11 @@ export default {
       )
     },
     progress() {
-      if (this.info.matched !== undefined) {
-        if (!this.info.mismatched) return 100
+      if (this.info.classified !== undefined) {
+        if (!this.info.unclassified) return 100
         return +(
-          (this.info.matched / // eslint-disable-line operator-linebreak
-            (this.info.matched + this.info.mismatched)) * // eslint-disable-line operator-linebreak
+          (this.info.classified / // eslint-disable-line operator-linebreak
+            (this.info.classified + this.info.unclassified)) * // eslint-disable-line operator-linebreak
           100
         ).toFixed(1)
       }
@@ -317,7 +339,16 @@ export default {
     },
     getSubFolderStatistics(folderInfo) {
       if (folderInfo.hasSubFolders && folderInfo.subFolders) {
-        return this.sumObjectsByKey(...folderInfo.subFolders)
+        return this.sumObjectsByKey(
+          {
+            classified: folderInfo.classified,
+            unclassified: folderInfo.unclassified,
+            missed: folderInfo.missed,
+            matched: folderInfo.matched,
+            mismatched: folderInfo.mismatched,
+          },
+          ...folderInfo.subFolders,
+        )
       }
       return folderInfo
     },
@@ -397,6 +428,9 @@ export default {
           ...this.getSubFolderStatistics(currentSubFolder),
         }
         Object.entries(subFolderStats).forEach(([key, value]) => {
+          if (subFolderStats.path === '/Something4/test') {
+            console.log(key, value)
+          }
           if (!Number.isInteger(value)) return
           totalStats[key] = (totalStats[key] || 0) + value // eslint-disable-line no-param-reassign
         })
@@ -430,22 +464,29 @@ export default {
 .tooltip {
   opacity: 1;
 }
+
 .icon-wrapper {
-      display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
+
 .ws-progress {
   -webkit-appearance: none;
-   appearance: none;
+  appearance: none;
   height: 1rem;
   border-radius: 0.25rem;
   overflow: hidden;
   width: 150px;
   background: black;
+
   &[value]::-webkit-progress-value {
     background: black;
   }
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>
