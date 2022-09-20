@@ -468,8 +468,9 @@ export default {
     },
     configFilePerPage() {
       const config = this.systemConfig
-      if (Number.isInteger(config.filePerPage) && config.filePerPage >= 0) {
-        return config.filePerPage
+      const configFilePerPage = parseInt(config.filePerPage, 10)
+      if (Number.isInteger(configFilePerPage) && configFilePerPage > 0) {
+        return configFilePerPage
       }
       return 0
     },
@@ -1044,7 +1045,7 @@ export default {
       }
     },
     forward() {
-      if (!this.forwardOnly || this.selectedFiles.length === 0) {
+      if (!this.forwardOnly) {
         if (this.page < this.page_count) {
           this.page += 1
           this.calculatePage(this.page)
