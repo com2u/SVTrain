@@ -204,7 +204,7 @@ const folderTravel = async (dir_str, flag, fileExtensions) => {
 
 const getCfg = async (dir) => {
   const results = {}
-  const cfgPath = path.join(CONST_PATHS.root, dir, '.cfg');
+  const cfgPath = path.join(CONST_PATHS.root, dir.replace(CONST_PATHS.root, ''), '.cfg');
   results.cfgPath = path.join(dir, '.cfg');;
   if (await exists(cfgPath) && (await lstat(cfgPath)).isFile()) {
     try {
@@ -237,21 +237,25 @@ const getNotes = async (dir) => {
 
 // calculate the count of matched, missed, mismatched, classified and unclassified files inside a folder
 // return an object with the calculated values, and the list of subfolders found.
-const classifyFilesOfDir = async (dir) => {
+const classifyFilesOfDir = async (dir, currentWsDir) => {
   let localStateData = {
     missed: 0,
     matched: 0,
     mismatched: 0,
     classified: 0,
     unclassified: 0,
+    unclassifiedPath: 'unclassified',
   };
   let dirname = path.basename(dir);
   let files = await readdir(dir);
   const subfolders = [];
+  const wsConfig = await getCfg(currentWsDir);
+  const unclassifiedPathName = wsConfig.config?.unclassifiedPath?.toLowerCase() || 'unclassified';
+  localStateData.unclassifiedPath = unclassifiedPathName;
   const isUnclassified = dir
     .toString()
     .toLowerCase()
-    .includes("unclassified");
+    .includes(unclassifiedPathName)
   await Promise.all(
     files.map(async (f) => {
       let filepath = path.join(dir, f);
@@ -321,15 +325,16 @@ const asyncCalculate = async (job, done) => {
     const dirs = await recursive(folderToRecalculate);
     await Promise.all(
       dirs.map(async (dir) => {
+        const currentWsDir = path.join(CONST_PATHS.root, dir.replace(CONST_PATHS.root, '').split('/').filter(x => x?.length)[0])
         if (job.data.safe === 'true' || (typeof job.data.safe === 'boolean' && job.data.safe)) {
           // if safe, only recalculate folders that haven't been calculated yet
           const alreadyCalculated = await Statistic.get(dir)
           if (alreadyCalculated.calculated !== false) return;
         } else {
-            uniqueWorkspaces.add(path.join(CONST_PATHS.root, dir.replace(CONST_PATHS.root, '').split('/').filter(x => x?.length)[0]));
+            uniqueWorkspaces.add(currentWsDir);
         }
         // calculate the count of matched, missed, mismatched, classified and unclassified files inside a folder
-        const { localStateData, subfolders } = await classifyFilesOfDir(dir);
+        const { localStateData, subfolders } = await classifyFilesOfDir(dir, currentWsDir)
         try {
           localStateData.table = await buildSubfolderTable(dir, subfolders);
         } catch (e) {
@@ -1005,7 +1010,7 @@ class ExplorerController {
       if (flstat.isDirectory()) {
         const nextDir = path.join(dir, file);
         let subResult = {};
-        if (file.toLowerCase() === 'unclassified' || unclassified) {
+        if (file.toLowerCase() === (result?.unclassifiedPath?.toLowerCase() || 'unclassified') || unclassified) {
           subResult = await this.countSync(nextDir, file, true);
         } else {
           subResult = await this.countSync(nextDir, file, false);
@@ -1444,6 +1449,7 @@ class ExplorerController {
       if (await exists(xpath)) {
         logger.info(`User ${request.currentUser.username} has changed the .cfg file "${xpath}"`);
         await writeFile(xpath, configStr, {encoding: 'utf8'});
+        recalculateDir(xpath.replace(".cfg", ""));
         const cachedConfigPath = path.join(xpath.replace(".cfg", ""), '.cache')
         if (fs.existsSync(cachedConfigPath)) {
           let cached = fs.readFileSync(cachedConfigPath, 'utf8');
