@@ -308,7 +308,12 @@ const classifyFilesOfDir = async (dir, currentWsDir) => {
                         suffix);
     });
   } else {
-    fs.copyFileSync(src, dest.replace(/(\.[\w\d_-]+)$/i, `${suffix}$1`));
+    if (src.includes('.cache')) return;
+    if (regexpForImages.test(src)) {
+      fs.copyFileSync(src, dest.replace(/(\.[\w\d_-]+)$/i, `${suffix}$1`));
+    } else {
+      fs.copyFileSync(src, dest);
+    }
   }
 };
 
@@ -2070,7 +2075,7 @@ class ExplorerController {
       if (fs.existsSync(newAbsoluteWorkspacePath)) {
         return response.status(400).send("Workspace with this name already exists")
       }
-      const copySuffix = '_copy';
+      const copySuffix = `_copy_${newName}`;
       copyRecursiveSync(absoluteWorkspacePath, newAbsoluteWorkspacePath, copySuffix);
       // update images in database
       ImageData.findAll({
