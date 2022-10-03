@@ -7,7 +7,7 @@
           <b-form-input
             v-else
             type="range"
-            disabled="true"
+            :disabled="true"
             :value="defaultZoom"
           />
         </b-col>
@@ -21,17 +21,17 @@
         ref="zoomer"
         :scale="options.zoomFactor"
         :selector="options.zoomFactor > 1"
-        style="width: 100%"
         :width="300"
         :height="180"
+        :style="`width: ${zoom || defaultZoom}%;`"
         disable-reactive
       >
         <img
           ref="img"
           v-auth-image="srcIMG"
           @load="applyImagesFilters"
-          class="responsive-image unloaded"
-          style="height: auto"
+          class="unloaded"
+          style="height: auto; width: 100%;"
         />
       </vue-photo-zoom-pro>
       <div class="file-details">
@@ -123,15 +123,17 @@ export default {
         this.imgDataUrl = dataUrl
       }
       const imgRef = this.$refs.img
+      imgRef.style.setProperty('width', '100vw')
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      canvas.width = imgRef.width
+      canvas.height = imgRef.height
+      ctx.drawImage(imgRef, 0, 0, canvas.width, canvas.height)
+      imgRef.style.setProperty('width', '100%')
       if (!imgRef || !imgRef.classList.contains('unloaded')) return
       if (this.imageInvert || this.imageColorMap) {
         if (!imgRef.complete || imgRef.naturalHeight === 0) return
         const filters = []
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        canvas.width = imgRef.width
-        canvas.height = imgRef.height
-        ctx.drawImage(imgRef, 0, 0, canvas.width, canvas.height)
         if (this.imageInvert) filters.push('invert')
         if (this.imageColorMap) filters.push('colormap')
         const sequencer = window.ImageSequencer()
@@ -148,6 +150,7 @@ export default {
       } else {
         this.$refs.img.classList.remove('unloaded')
         this.$refs.img.classList.remove('changed')
+        setDataUrl(canvas.toDataURL('image/png'))
         setZoom()
       }
     },
@@ -167,7 +170,7 @@ export default {
       this.zoomKey += 1
     },
     zoom() {
-      this.$refs.image_viewing.style.setProperty('--img--zoom', `${this.zoom}%`)
+      document.body.style.setProperty('--img--zoom', `${this.zoom}%`)
       store.dispatch('app/setDefaultZoom', this.zoom)
     },
     defaultZoom: debounce(function () { // eslint-disable-line

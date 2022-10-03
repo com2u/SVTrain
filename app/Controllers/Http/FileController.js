@@ -90,9 +90,7 @@ class FileController {
           "path_file_export_images": Env.get('OUT_FOLDER_EXPORT_IMAGES'),
           "path_train": Env.get('FOLDER_TRAIN'),
           "path_test": Env.get('FOLDER_TEST'),
-          "path_validate": Env.get('FOLDER_VALIDATE'),
-          "defaultEpoch": null,
-          "defaultLearningRate": null
+          "path_validate": Env.get('FOLDER_VALIDATE')
         })
       }
     }

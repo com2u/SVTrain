@@ -22,8 +22,6 @@ module.exports = {
   forwardOnly: false,
   buttonFontSize: '1rem',
   titleFontSize: '1rem',
-  defaultEpoch: 1,
-  defaultLearningRate: 1,
 
   // top or right
   forwardLocaltion: 'right',
