@@ -149,14 +149,6 @@
               <td><p>Set a value for the font size applied to the title.</p></td>
             </tr>
             <tr>
-              <td>defaultEpoch</td>
-              <td><p>A default setting for the training mechanism.</p></td>
-            </tr>
-            <tr>
-              <td>defaultLearningRate</td>
-              <td><p>A default setting for the training mechanism.</p></td>
-            </tr>
-            <tr>
               <td>forwardLocation</td>
               <td><p>Set a value for the location of the forward button. You can set right or top.</p></td>
             <tr>

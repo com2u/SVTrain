@@ -173,46 +173,6 @@
       />
     </b-form-group>
 
-    <!-- Augmentation noise std -->
-    <b-form-group
-      v-bind:state="errors.augmentation_noise_std === null ? null : false"
-      v-bind:invalid-feedback="errors.augmentation_noise_std"
-      v-bind:label="titles.augmentation_noise_std"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      label-for="augmentation_noise_std"
-    >
-      <b-form-input
-        v-on:input="errors.augmentation_noise_std = validateFloat(fields.augmentation_noise_std)"
-        v-bind:state="errors.augmentation_noise_std === null ? null : false"
-        id="augmentation_noise_std"
-        type="number"
-        step="0.01"
-        v-model="fields.augmentation_noise_std"
-        name="augmentation_noise_std"
-      />
-    </b-form-group>
-
-    <!-- Augmentation brightness delta -->
-    <b-form-group
-      v-bind:state="errors.augmentation_brightness_delta === null ? null : false"
-      v-bind:invalid-feedback="errors.augmentation_brightness_delta"
-      v-bind:label="titles.augmentation_brightness_delta"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      label-for="augmentation_brightness_delta"
-    >
-      <b-form-input
-        v-on:input="errors.augmentation_brightness_delta = validateFloat(fields.augmentation_brightness_delta)"
-        v-bind:state="errors.augmentation_brightness_delta === null ? null : false"
-        id="augmentation_brightness_delta"
-        type="number"
-        step="0.1"
-        v-model="fields.augmentation_brightness_delta"
-        name="augmentation_brightness_delta"
-      />
-    </b-form-group>
-
     <!-- Learning rate -->
     <b-form-group
       v-bind:state="errors.learning_rate === null ? null : false"
@@ -230,62 +190,6 @@
         v-bind:state="errors.learning_rate === null ? null : false"
         v-model="fields.learning_rate"
         name="learning_rate"
-      />
-    </b-form-group>
-
-    <!-- Enable linear stretch images -->
-    <b-form-group
-      v-bind:label="titles.enable_linear_stretch_images"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      label-for="enable_linear_stretch_images"
-    >
-      <b-form-checkbox
-        id="enable_linear_stretch_images"
-        v-model="fields.enable_linear_stretch_images"
-        name="enable_linear_stretch_images"
-      />
-    </b-form-group>
-
-    <!-- Enable augmentation noise -->
-    <b-form-group
-      v-bind:label="titles.enable_augmentation_noise"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      label-for="enable_augmentation_noise"
-    >
-      <b-form-checkbox
-        id="enable_augmentation_noise"
-        v-model="fields.enable_augmentation_noise"
-        name="enable_augmentation_noise"
-      />
-    </b-form-group>
-
-    <!-- Enable augmentation mirror  -->
-    <b-form-group
-      v-bind:label="titles.enable_augmentation_mirror"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      label-for="enable_augmentation_mirror"
-    >
-      <b-form-checkbox
-        id="enable_augmentation_mirror"
-        v-model="fields.enable_augmentation_mirror"
-        name="enable_augmentation_mirror"
-      />
-    </b-form-group>
-
-    <!-- Enable augmentation brightness -->
-    <b-form-group
-      v-bind:label="titles.enable_augmentation_brightness"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      label-for="enable_augmentation_brightness"
-    >
-      <b-form-checkbox
-        id="enable_augmentation_brightness"
-        v-model="fields.enable_augmentation_brightness"
-        name="enable_augmentation_brightness"
       />
     </b-form-group>
 
@@ -419,7 +323,7 @@ export default {
     return {
       originalJSON: '',
       parseInt: ['max_train_steps', 'batch_size', 'input_width', 'input_height', 'input_depth', 'log_every_n_steps'],
-      parseFloat: ['augmentation_noise_std', 'augmentation_brightness_delta', 'learning_rate'],
+      parseFloat: ['learning_rate'],
       existing_classes: {
         Boden: 'Boden',
         Bubble: 'Bubble',
@@ -442,18 +346,11 @@ export default {
         input_width: 0,
         input_height: 0,
         input_depth: 0,
-        augmentation_noise_std: 0.0,
-        augmentation_brightness_delta: 0.0,
         learning_rate: 0.0,
-        enable_linear_stretch_images: false,
-        enable_augmentation_noise: false,
-        enable_augmentation_mirror: false,
-        enable_augmentation_brightness: false,
         rename: false,
         network_architecture: '',
         good_class: '',
         log_every_n_steps: 0,
-        workspace: '',
       },
       errors: {
         max_train_steps: null,
@@ -465,18 +362,11 @@ export default {
         input_width: null,
         input_height: null,
         input_depth: null,
-        augmentation_noise_std: null,
-        augmentation_brightness_delta: null,
         learning_rate: null,
-        enable_linear_stretch_images: null,
-        enable_augmentation_noise: null,
-        enable_augmentation_mirror: null,
-        enable_augmentation_brightness: null,
         rename: null,
         network_architecture: null,
         good_class: null,
         log_every_n_steps: null,
-        workspace: null,
       },
       titles: {
         max_train_steps: 'Max train steps',
@@ -488,18 +378,11 @@ export default {
         input_width: 'Input width',
         input_height: 'Input height',
         input_depth: 'Input depth',
-        augmentation_noise_std: 'Augmentation noise std',
-        augmentation_brightness_delta: 'Augmentation brightness delta',
         learning_rate: 'Learning rate',
-        enable_linear_stretch_images: 'Enable linear stretch images',
-        enable_augmentation_noise: 'Enable augmentation noise',
-        enable_augmentation_mirror: 'Enable augmentation mirror',
-        enable_augmentation_brightness: 'Enable augmentation brightness',
         rename: 'Rename',
         network_architecture: 'Network architecture',
         good_class: 'Good class',
         log_every_n_steps: 'Log every N steps',
-        workspace: 'Workspace',
       },
     }
   },

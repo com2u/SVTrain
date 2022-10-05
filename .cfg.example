@@ -22,8 +22,6 @@
   "forwardOnly": true,
   "buttonFontSize": "1rem",
   "titleFontSize": "1rem",
-  "defaultEpoch": 1,
-  "defaultLearningRate": 1,
   "forwardLocaltion": "right",
   "moveMenu": true,
   "newFolder": true,

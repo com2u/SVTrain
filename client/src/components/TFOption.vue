@@ -142,7 +142,7 @@ export default {
             field: 'GPU',
             type: types.BOOLEAN,
             options: {
-              help: 'Add defect class to the image file names',
+              help: 'Use GPU for training',
             },
           },
           {
@@ -152,32 +152,8 @@ export default {
             options: {
               dataset: [
                 {
-                  value: 'Adadelta',
-                  label: 'Adadelta',
-                },
-                {
-                  value: 'Adagrad',
-                  label: 'Adagrad',
-                },
-                {
                   value: 'Adam',
                   label: 'Adam',
-                },
-                {
-                  value: 'Adamax',
-                  label: 'Adamax',
-                },
-                {
-                  value: 'Ftrl',
-                  label: 'Ftrl',
-                },
-                {
-                  value: 'Nadam',
-                  label: 'Nadam',
-                },
-                {
-                  value: 'Optimizer',
-                  label: 'Optimizer',
                 },
                 {
                   value: 'RMSprop',
@@ -508,42 +484,6 @@ export default {
             type: types.AUGMENTATIONS,
             options: {},
           },
-          {
-            label: 'Augmentation noise std',
-            field: 'augmentation_noise_std',
-            type: types.NUMBER,
-            options: {},
-          },
-          {
-            label: 'Augmentation brightness delta',
-            field: 'augmentation_brightness_delta',
-            type: types.NUMBER,
-            options: {},
-          },
-          {
-            label: 'Enable linear stretch images',
-            field: 'enable_linear_stretch_images',
-            type: types.BOOLEAN,
-            options: {},
-          },
-          {
-            label: 'Enable augmentation noise',
-            field: 'enable_augmentation_noise',
-            type: types.BOOLEAN,
-            options: {},
-          },
-          {
-            label: 'Enable augmentation mirror',
-            field: 'enable_augmentation_mirror',
-            type: types.BOOLEAN,
-            options: {},
-          },
-          {
-            label: 'Enable augmentation brightness',
-            field: 'enable_augmentation_brightness',
-            type: types.BOOLEAN,
-            options: {},
-          },
         ],
         'Scrips & Folders': [
           {
@@ -761,16 +701,9 @@ export default {
         monitor_mode: '',
         // next
         model_dir: '',
-        augmentation_noise_std: 0.0,
-        augmentation_brightness_delta: 0.0,
-        enable_linear_stretch_images: false,
-        enable_augmentation_noise: false,
-        enable_augmentation_mirror: false,
-        enable_augmentation_brightness: false,
         network_architecture: '',
         good_class: '',
         log_every_n_steps: 0,
-        workspace: '',
         script_training: null,
         script_test: null,
         script_validate: null,
@@ -795,8 +728,6 @@ export default {
         path_train: null,
         path_test: null,
         path_validate: null,
-        defaultEpoch: null,
-        defaultLearningRate: null,
         LiveViewURL: null,
         heatmap_types: [],
       },
