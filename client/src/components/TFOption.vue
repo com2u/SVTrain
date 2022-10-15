@@ -167,6 +167,14 @@ export default {
             },
           },
           {
+            label: 'Epsilon',
+            field: 'epsilon',
+            type: types.NUMBER,
+            options: {
+              help: 'Is used only by some specific optimizers',
+            },
+          },
+          {
             label: 'Learning rate',
             field: 'learning_rate',
             type: types.NUMBER,
@@ -271,14 +279,6 @@ export default {
             type: types.NUMBER,
             options: {
               help: 'Defines the dropout layers of the model',
-            },
-          },
-          {
-            label: 'Epsilon',
-            field: 'epsilon',
-            type: types.NUMBER,
-            options: {
-              help: 'Is used only by some specific optimizers',
             },
           },
           {
