@@ -42,8 +42,8 @@
       </b-col>
       <b-col cols="9" class="has-board">
         <b-tabs>
-          <b-tab title="Logfiles" active>
-            <pre v-html="trainLog"></pre>
+          <b-tab title="Logs" active>
+            <pre v-html="trainLog" class="logs"></pre>
           </b-tab>
           <b-tab v-if="tenserBoard" title="TensorBoard">
             <iframe :src="tenserBoard"></iframe>
@@ -145,5 +145,10 @@ export default {
       height: 100%;
     }
   }
+}
+.logs {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
 }
 </style>

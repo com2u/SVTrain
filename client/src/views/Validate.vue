@@ -68,11 +68,14 @@
               <div style="clear: both" />
             </div>
           </template>
-          <pre class="py-4" v-html="logs.validate.lastLine"></pre></div
-      ></b-col>
+        </div>
+      </b-col>
       <b-col cols="9" class="has-board">
         <b-tabs>
-          <b-tab title="Generate AI Report" active>
+          <b-tab title="Logs" active>
+            <pre v-html="validateLog" class="logs"></pre>
+          </b-tab>
+          <b-tab title="Generate AI Report">
             <iframe :src="generateAIReportURL"></iframe>
           </b-tab>
           <b-tab title="Last Report">
@@ -132,6 +135,8 @@ export default {
           icon: 'save',
         },
       ],
+      validateLog: null,
+      interval: null,
       generateAIReportURL: null,
       lastReportURL: null,
     }
@@ -164,10 +169,20 @@ export default {
           }
         })
     },
+    async getLog() {
+      await api.getLogFor('validate').then((res) => {
+        this.validateLog = res
+      })
+    },
   },
   mounted() {
     api.refreshToken()
     this.fetch()
+    this.getLog()
+    this.interval = setInterval(this.getLog, 2000)
+  },
+  beforeDestroy() {
+    clearInterval(this.interval)
   },
 }
 </script>
@@ -187,5 +202,10 @@ export default {
       height: 100%;
     }
   }
+}
+.logs {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
 }
 </style>
