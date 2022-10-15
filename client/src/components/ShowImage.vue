@@ -145,6 +145,7 @@ export default {
             imgRef.classList.remove('unloaded')
             imgRef.classList.remove('changed')
             setZoom()
+            this.$emit('set-loading-show-mode', false)
           })
         })
       } else {
@@ -152,6 +153,7 @@ export default {
         this.$refs.img.classList.remove('changed')
         setDataUrl(canvas.toDataURL('image/png'))
         setZoom()
+        this.$emit('set-loading-show-mode', false)
       }
     },
   },
@@ -186,6 +188,7 @@ export default {
         this.srcIMG = encodeURI(this.file.serverPath)
         this.imgDataUrl = ''
       } else {
+        this.$emit('set-loading-show-mode', true)
         this.$refs.img.classList.add('changed')
         const path = encodeURIComponent(this.file.relativePath)
         const uri = `${getFileServerPath().replace(
@@ -202,6 +205,7 @@ export default {
           .then(() => uri)
           .catch(() => encodeURIComponent(this.file.serverPath))
         this.imgDataUrl = this.srcIMG
+        this.$emit('set-loading-show-mode', false)
       }
     },
   },
