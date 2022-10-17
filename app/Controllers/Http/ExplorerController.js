@@ -396,7 +396,7 @@ class ExplorerController {
     }
   */
   async all({request}) {
-    let {dir, type, batch, to, isStatistic, oldFilenameIgnore = false } = request.get();
+    let {dir, type, batch, to, isStatistic, oldFilenameIgnore = false, includeImageData = false } = request.get();
     const relativeFilesDir = dir;
     if (!dir) {
       dir = CONST_PATHS.root
@@ -527,18 +527,21 @@ class ExplorerController {
             };
             result.folders.push(folder);
           } else if (flstat.isFile() && f !== iconName) {
-            const imageData = await ImageData.findOne({
-              where: {
-                fileName: JSON.parse(oldFilenameIgnore)? f.replace(/^[^___]*___/, '') : f,
-                folder: relativeFilesDir
-              },
-              attributes: ['stars', 'note', 'tags'],
-              raw: true,
-            });
-            const parsedImageData = {
-              stars: imageData?.stars || 0,
-              note: imageData?.note || '',
-              tags: JSON.parse(imageData?.tags || '[]')
+            let parsedImageData = {}
+            if (includeImageData === 'true') {
+              const imageData = await ImageData.findOne({
+                where: {
+                  fileName: JSON.parse(oldFilenameIgnore)? f.replace(/^[^___]*___/, '') : f,
+                  folder: relativeFilesDir
+                },
+                attributes: ['stars', 'note', 'tags'],
+                raw: true,
+              });
+              parsedImageData = {
+                stars: imageData?.stars || 0,
+                note: imageData?.note || '',
+                tags: JSON.parse(imageData?.tags || '[]')
+              }
             }
             result.files.push({
               path: fPath.replace(CONST_PATHS.root, ""),

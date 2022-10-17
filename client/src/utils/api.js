@@ -53,7 +53,7 @@ const urls = {
 }
 
 export default {
-  getFiles: async (path, to, type, batch, isStatistic, oldFilenameIgnore) => (await axios.get(urls.getFiles, {
+  getFiles: async (path, to, type, batch, isStatistic, oldFilenameIgnore, includeImageData) => (await axios.get(urls.getFiles, {
     params: {
       dir: path,
       to,
@@ -61,6 +61,7 @@ export default {
       batch,
       isStatistic,
       oldFilenameIgnore,
+      includeImageData,
     },
   })).data,
   getParent: async (path, type, batch) => (await axios.get(urls.getParentDirectory, {
