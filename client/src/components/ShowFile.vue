@@ -51,6 +51,14 @@
           class="ml-4 mb-2 mr-sm-2 mb-sm-0"
           :options="showModes"
         ></b-form-select>
+        <span>
+          <v-icon
+            v-if="loadingShowModeImage"
+            class="ml-2 pulse"
+            name="spinner"
+          >
+          </v-icon>
+        </span>
       </b-form>
     </div>
     <ShowImage
@@ -59,6 +67,7 @@
       v-bind:file="file"
       @zoom-change="magnify = $event"
       :showMode="showMode"
+      @set-loading-show-mode="loadingShowModeImage = $event"
     />
     <ShowJSON
       v-if="fileType === types.json"
@@ -110,6 +119,7 @@ export default {
       magnify: 1,
       showMode: null,
       showModes: [],
+      loadingShowModeImage: false,
     }
   },
   methods: {
@@ -196,6 +206,21 @@ export default {
         height: 90vh !important;
         overflow: scroll;
       }
+    }
+  }
+
+  .pulse > g {
+    animation: spin 1s infinite steps(8);
+    transform-origin: center;
+  }
+  @keyframes spin {
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(359deg);
+      transform: rotate(359deg);
     }
   }
 }

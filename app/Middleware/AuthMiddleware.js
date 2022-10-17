@@ -3,6 +3,7 @@ const { getRoles } = require('../utils')
 const { path, find, compose, flip, curryN } = require('ramda')
 const jwt = require('jsonwebtoken')
 const jwkToPem = require('jwk-to-pem')
+const logger = require('../../logger')
 
 const cache = {}
 const KEYCLOAK_URI = process.env.KEYCLOAK_URI
@@ -40,7 +41,8 @@ class AuthMiddleware {
           response.status(401).send('Session expired')
           return
         }
-        const role = user['roles'].length ? user['roles'][0] : null
+        const validRoles = Object.keys(getRoles())
+        const role = user['roles']?.length ? user['roles'].filter(r => validRoles.includes(r)).slice(-1)[0] : null
         if (role) {
           const permissions = getRoles()[role]
           if (properties.length) {
@@ -57,6 +59,7 @@ class AuthMiddleware {
           await next()
           return
         }
+        logger.error(`Missing role for user: ${user.preferred_username}`)
       }
     }
     response.unauthorized('LoginFirst')

@@ -1433,8 +1433,33 @@ class ExplorerController {
     } else {
       if (highlight) {
         notes = `${highlightPrefix}${notes}`;
+      } else {
+        notes = notes?.replaceAll(highlightPrefix, '')
       }
       await writeFile(xpath, notes, {encoding: 'utf8', flag: 'w'});
+      const cachedConfigPath = path.join(CONST_PATHS.root, xpath.replace(CONST_PATHS.root, '').split('/').filter(x => x?.length)[0], '.cache')
+      if (fs.existsSync(cachedConfigPath)) {
+        let cached = fs.readFileSync(cachedConfigPath, 'utf8');
+        const isWsNote = path.join(CONST_PATHS.root, xpath.replace(CONST_PATHS.root, '').replace('notes.txt',''), '.cache') == cachedConfigPath
+        if (cached) {
+          const parsedCache = JSON.parse(cached)
+          cached = {
+            ...parsedCache,
+            notes: isWsNote ? notes : parsedCache.notes,
+            highlight: isWsNote ? notes?.startsWith(highlightPrefix) : parsedCache.highlight,
+          }
+          if (!isWsNote) {
+            const folderIndex = cached.subFolders?.findIndex(
+              subfolder => subfolder.notesPath == xpath.replace(CONST_PATHS.root, '')
+            )
+            if (folderIndex > -1) {
+              cached.subFolders[folderIndex].notes = notes
+              cached.subFolders[folderIndex].highlight = notes?.startsWith(highlightPrefix)
+            }
+          }
+          fs.writeFileSync(cachedConfigPath, JSON.stringify(cached), 'utf8');
+        }
+      }
     }
     return true;
   }
