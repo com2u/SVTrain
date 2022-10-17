@@ -561,7 +561,7 @@ export default {
       let dirty = imagesData.length && imagesData.length !== this.selectedFiles.length && this.selectedFiles.length > 1 && (!this.oldFilenameIgnore || this.selectedFiles.some((file) => file.name.replace(/^[^___]*___/, '') !== this.selectedFiles[0].name.replace(/^[^___]*___/, '')))
       const relevantKeys = ['note', 'tags', 'stars']
       relevantKeys.forEach((key) => {
-        if (!imagesData.every((imageData) => imageData[key] === imagesData[0][key])) {
+        if (imagesData.some((imageData) => imageData[key] !== imagesData[0][key] && !(!imageData[key] && !imagesData[0][key])) && imagesData.length > 1) {
           dirty = true
         }
       })
@@ -1061,6 +1061,7 @@ export default {
       const { type, batch } = this.$route.query
       await api.doForwardOnly(selected, notSelected, type, batch)
       this.folder.files = this.folder.files.filter((f) => !([...selected, ...notSelected]).includes(f.path))
+      this.selectedFiles = []
       this.sortChanged()
       api.refreshToken()
     },
@@ -1096,6 +1097,7 @@ export default {
       await api.deleteFiles(this.selectedFiles.map((f) => f.path), type, batch)
       this.isLoading.deleting = false
       this.folder.files = this.folder.files.filter((f) => !this.selectedFiles.map((df) => df.path).includes(f.path))
+      this.selectedFiles = []
       this.sortChanged()
       api.refreshToken()
     },
@@ -1107,6 +1109,7 @@ export default {
       await api.moveFiles(this.selectedFiles.map((f) => f.path), dest, this.type)
       this.isLoading.moving = false
       this.folder.files = this.folder.files.filter((f) => !this.selectedFiles.map((df) => df.path).includes(f.path))
+      this.selectedFiles = []
       this.sortChanged()
       api.refreshToken()
     },
