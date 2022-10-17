@@ -1060,7 +1060,9 @@ export default {
         .map((f) => f.path)
       const { type, batch } = this.$route.query
       await api.doForwardOnly(selected, notSelected, type, batch)
-      await this.loadFiles(this.path)
+      this.folder.files = this.folder.files.filter((f) => !([...selected, ...notSelected]).includes(f.path))
+      this.sortChanged()
+      api.refreshToken()
     },
     async goToTheFolder(file) {
       if (file.path === this.path) {
@@ -1093,17 +1095,20 @@ export default {
       const { type, batch } = this.$route.query
       await api.deleteFiles(this.selectedFiles.map((f) => f.path), type, batch)
       this.isLoading.deleting = false
-      // delete that files from folder
-      await this.loadFiles(this.path)
+      this.folder.files = this.folder.files.filter((f) => !this.selectedFiles.map((df) => df.path).includes(f.path))
+      this.sortChanged()
+      api.refreshToken()
     },
     async moveFiles(dest) {
       if (this.selectedFiles.length === 0) return
       if (this.nextFolders.length === 0) return
+      if (dest.endsWith(this.folder.files[0].path.substring(0, this.folder.files[0].path.lastIndexOf('/')))) return
       this.isLoading.moving = true
       await api.moveFiles(this.selectedFiles.map((f) => f.path), dest, this.type)
       this.isLoading.moving = false
-      // move files
-      await this.loadFiles(this.path)
+      this.folder.files = this.folder.files.filter((f) => !this.selectedFiles.map((df) => df.path).includes(f.path))
+      this.sortChanged()
+      api.refreshToken()
     },
     fileChanged() {
       const self = this
