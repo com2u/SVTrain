@@ -98,7 +98,7 @@ export default {
   },
   methods: {
     async fetch(flag) {
-      await api.getLogFor('training.log').then((res) => {
+      await api.getLogFor('training').then((res) => {
         this.trainLog = res
       })
       if (this.workspace && flag) {
