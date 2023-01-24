@@ -1255,15 +1255,17 @@ class ExplorerController {
 
   async logsFor({request, response}) {
     let file = request.params.file;
-    if (file === 'training.log') {
-      const ws = await this.getWorkspace();
-      const wsPath = ws.toString();
-      const configPath = path.join(wsPath, 'TFSettings.json');
-      const cfg = await this.getJsonConfig(configPath);
-      file = cfg["path_log_training"] || Env.get('PATH_LOG_TRAINING')
-    } else {
+
+    const ws = await this.getWorkspace();
+    const wsPath = ws.toString();
+    const configPath = path.join(wsPath, 'TFSettings.json');
+    const cfg = await this.getJsonConfig(configPath);
+    file = cfg[`path_log_${file}`] || Env.get(`PATH_LOG_${file.toUpperCase()}`)
+
+    if (!file) {
       file = `${file}.log`
     }
+
     const logPath = path.join(Env.get('COMMAND_FILES_PATH'), file);
     if (!await exists(logPath)) {
       return ""
