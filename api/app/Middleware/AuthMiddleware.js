@@ -3,7 +3,7 @@ const { getRoles } = require('../utils')
 const { path, find, compose, flip, curryN } = require('ramda')
 const jwt = require('jsonwebtoken')
 const jwkToPem = require('jwk-to-pem')
-const logger = require('../../logger')
+const logger = require('../../services/logger')
 
 const cache = {}
 const KEYCLOAK_URI = process.env.KEYCLOAK_URI

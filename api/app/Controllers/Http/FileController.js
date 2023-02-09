@@ -13,7 +13,7 @@ const rootPath = Env.get('ROOT_PATH');
 const scriptPath = Env.get('COMMAND_FILES_PATH');
 const storagePath = Env.get('STORAGE_PATH');
 const child_process = require("child_process");
-const logger = require('../../../logger');
+const logger = require('../../../services/logger');
 
 String.prototype.replaceAll = function (str1, str2, ignore) {
   return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);

@@ -6,14 +6,14 @@ class AppProvider extends ServiceProvider {
 
   _registerStatistic() {
     this.app.singleton('Statistic', () => {
-      const Statistic = require('../src/Statistic/')
+      const Statistic = require('../services/Statistic/')
       return new Statistic()
     })
   }
 
   _registerWatcher() {
     this.app.singleton('Watcher', () => {
-      const Statistic = require('../src/Watcher/')
+      const Statistic = require('../services/Watcher/')
       return new Statistic()
     })
   }
