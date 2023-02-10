@@ -15,6 +15,8 @@ ONBUILD ADD ./api/yarn.lock /app/api/
 ONBUILD ADD ./ui/package.json /app/ui/
 ONBUILD ADD ./ui/yarn.lock /app/ui/
 
+# provide env file to adonisjs to prevent exception
+ONBUILD RUN touch /app/api/.env
 
 FROM builder-base AS dev-builder
 
@@ -52,7 +54,6 @@ USER svtrain
 VOLUME [ "/data" ]
 # Do not use `VOLUME` for files, but instead
 # initialize them with sane values here
-RUN touch /app/.env
 RUN echo '{}' > /app/api/roles.json
 RUN echo '{}' > /app/api/sessions.json
 RUN echo '{}' > /app/api/users.json
