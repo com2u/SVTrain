@@ -2974,23 +2974,6 @@
   "resolved" "https://registry.npmjs.org/koalas/-/koalas-1.0.2.tgz"
   "version" "1.0.2"
 
-"kue@^0.11.6":
-  "integrity" "sha512-56Jic22qSqdJ3nNpkhVr6RUx/QKalfdBdU0m70hgBKEkhBAgdt6Qr74evec+bM+LGmNbEC6zGGDskX4mcgBYcQ=="
-  "resolved" "https://registry.npmjs.org/kue/-/kue-0.11.6.tgz"
-  "version" "0.11.6"
-  dependencies:
-    "body-parser" "^1.12.2"
-    "express" "^4.12.2"
-    "lodash" "^4.0.0"
-    "nib" "~1.1.2"
-    "node-redis-warlock" "~0.2.0"
-    "pug" "^2.0.0-beta3"
-    "redis" "~2.6.0-2"
-    "stylus" "~0.54.5"
-    "yargs" "^4.0.0"
-  optionalDependencies:
-    "reds" "^0.2.5"
-
 "kuler@^2.0.0":
   "integrity" "sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A=="
   "resolved" "https://registry.npmjs.org/kuler/-/kuler-2.0.0.tgz"
@@ -4510,28 +4493,6 @@
   "integrity" "sha1-Uu0J2srBCPGmMcB+m2mUHnoZUEs="
   "resolved" "https://registry.npmjs.org/redis-parser/-/redis-parser-2.6.0.tgz"
   "version" "2.6.0"
-
-"redis@^0.12.1":
-  "integrity" "sha1-ZN92rQ/IrOuuvSoGReikj6xJGF4="
-  "resolved" "https://registry.npmjs.org/redis/-/redis-0.12.1.tgz"
-  "version" "0.12.1"
-
-"redis@~2.6.0-2":
-  "integrity" "sha1-h8Hv9KSJ+Utwhx89CLaYjyOpVoc="
-  "resolved" "https://registry.npmjs.org/redis/-/redis-2.6.5.tgz"
-  "version" "2.6.5"
-  dependencies:
-    "double-ended-queue" "^2.1.0-0"
-    "redis-commands" "^1.2.0"
-    "redis-parser" "^2.0.0"
-
-"reds@^0.2.5":
-  "integrity" "sha1-OKdn92Y810kDaEhpfYLHT9KbwB8="
-  "resolved" "https://registry.npmjs.org/reds/-/reds-0.2.5.tgz"
-  "version" "0.2.5"
-  dependencies:
-    "natural" "^0.2.0"
-    "redis" "^0.12.1"
 
 "regenerator-runtime@^0.11.0":
   "integrity" "sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg=="

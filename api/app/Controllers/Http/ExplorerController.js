@@ -1,6 +1,5 @@
 'use strict';
 const Env = use('Env');
-const kue = require('kue');
 const child_process = require("child_process");
 const Statistic = use('Statistic');
 const path = require('path');
@@ -97,12 +96,6 @@ const deleteCacheFileFromDir = async (dir) => {
   }
 }
 
-const queue = kue.createQueue({
-  redis: {
-    port: process.env.REDIS_PORT || 6379,
-    host: process.env.REDIS_HOSTNAME || "localhost",
-  }
-});
 // if file is landing under root directory
 // prevent access to that file
 const accessToFile = (root, file) => {
