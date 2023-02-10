@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  svtrain:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev-builder
+    command: sh -c "node --inspect=0.0.0.0 server.js"
+    working_dir: /app/api
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3333:3333"
+    volumes:
+      - ./api:/app/api:cached
+      - ./ui:/app/ui:cached
+      - /app/api/node_modules
+      - /app/ui/node_modules
