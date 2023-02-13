@@ -3,16 +3,14 @@
 *.log
 /.dockerignore
 /.editorconfig
-/.env
 /.gitignore
 
-/roles.json
-/sessions.json
-/statistics.data
-/users.json
+api/roles.json
+api/sessions.json
+api/statistics.data
+api/users.json
 
-/Dockerfile
-/client/node_modules
+Dockerfile
+/api/node_modules
 /data
-/node_modules
-/public
+/ui/node_modules

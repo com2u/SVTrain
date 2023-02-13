@@ -1,49 +1,63 @@
-FROM node:14-alpine3.15 AS frontend-build
+FROM node:14-alpine3.15 AS builder-base
 
-WORKDIR /build
-COPY ./client/package.json /build/
-COPY ./client/yarn.lock /build/
-RUN apk --no-cache add --virtual native-deps \
-  g++ gcc libgcc libstdc++ linux-headers make python2 && \
-  yarn install --frozen-lockfile && \
-  apk del native-deps
+ONBUILD RUN apk update
 
-COPY .git/ /build/.git/
-RUN apk --no-cache add git
+# install dependencies required for api
+ONBUILD RUN apk --no-cache add make gcc g++ python2 bash curl zip
+# TODO: tensorflow/python3 dependencies check later
+ONBUILD RUN apk --no-cache add python3
 
-COPY ./client /build/
-RUN ./node_modules/.bin/cross-env GITHUB_SHA=$(git rev-parse --short HEAD) \
-  GITHUB_REPOSITORY=$(git config --get remote.origin.url | sed -e 's/^git@.*:\([[:graph:]]*\).git/\1/') \
-  yarn build
+# install dependencies required for ui
+ONBUILD RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python2
 
-RUN rm -rf /build/.git
+ONBUILD ADD ./api/package.json /app/api/
+ONBUILD ADD ./api/yarn.lock /app/api/
+ONBUILD ADD ./ui/package.json /app/ui/
+ONBUILD ADD ./ui/yarn.lock /app/ui/
 
-FROM node:14-bullseye
+# provide env file to adonisjs to prevent exception
+ONBUILD RUN touch /app/api/.env
+
+FROM builder-base AS dev-builder
+
+# fetch api and install dependencies
+WORKDIR /app/api
+RUN yarn install --frozen-lockfile
+
+# fetch ui and install dependencies
+WORKDIR /app/ui
+RUN yarn install --frozen-lockfile
+
+FROM builder-base as prod-builder
+
+# fetch api and install dependencies
+WORKDIR /app/api
+COPY ./api/ /app/api/
+RUN yarn install --frozen-lockfile
+
+# fetch ui and install dependencies
+WORKDIR /app/ui
+COPY ./ui/ /app/ui/
+RUN yarn install --frozen-lockfile
+ENV PATH="/app/ui/node_modules/.bin:${PATH}"
+RUN yarn build
+
+FROM node:14-bullseye as prod-image
 
 WORKDIR /app
+COPY --from=prod-builder /app/api/ ./
+COPY --from=prod-builder /app/ui/dist/ ./public/
 
-COPY package.json .
-COPY yarn.lock .
-
+# TODO: taking over legacy dependencies from old Dockerfile, to be refactored, see details in SWT-678
 RUN apt update
 RUN apt install -y python3 python3-pip bash curl zip jq
-
-RUN apt install -y g++ && yarn install --production
-
+RUN apt install -y g++
 RUN pip3 install \
   tensorflow==2.8 \
   matplotlib==3.4.3 \
   imagesize
-
 RUN pip3 install numpy==1.22.2
-# tensorflow comes with this dependency but then conflicts with it since there are two keras: keras and tf.keras
-# RUN pip3 uninstall keras
-
-COPY . .
-
-# remove client dir as we copy the dist file from the build stage
-RUN rm -rf /app/client/
-COPY --from=frontend-build /build/dist/ /app/public/
+# end legacy dependencies
 
 RUN adduser --disabled-password svtrain
 RUN chown -R svtrain: .
@@ -53,7 +67,6 @@ USER svtrain
 VOLUME [ "/data" ]
 # Do not use `VOLUME` for files, but instead
 # initialize them with sane values here
-RUN touch /app/.env
 RUN echo '{}' > /app/roles.json
 RUN echo '{}' > /app/sessions.json
 RUN echo '{}' > /app/users.json
@@ -62,4 +75,7 @@ RUN echo '{}' > /app/statistic.data
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
-ENTRYPOINT [ "yarn", "start" ]
+WORKDIR /app
+
+EXPOSE 3333
+ENTRYPOINT ["yarn", "start"]

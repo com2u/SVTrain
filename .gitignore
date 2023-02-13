@@ -5,12 +5,9 @@ package-lock.json
 # Adonis directory for storing tmp files
 tmp
 
-# Environment variables, never commit this file
-.env
-
 # The development sqlite file
-database/development.sqlite
-imageData.sqlite
+api/database/development.sqlite
+api/imageData.sqlite
 
 # VSCode & Webstorm history directories
 .history
@@ -29,5 +26,4 @@ SVTrain.log
 
 # role config
 roles.json
-/development/
-/development/
+api/development
