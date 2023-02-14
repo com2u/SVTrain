@@ -31,27 +31,39 @@ RUN yarn install --frozen-lockfile
 FROM builder-base as prod-builder
 
 # fetch api and install dependencies
-WORKDIR /app/api
 COPY ./api/ /app/api/
+WORKDIR /app/api
 RUN yarn install --frozen-lockfile
 
 # fetch ui and install dependencies
-WORKDIR /app/ui
 COPY ./ui/ /app/ui/
+WORKDIR /app/ui
 RUN yarn install --frozen-lockfile
 ENV PATH="/app/ui/node_modules/.bin:${PATH}"
-RUN yarn build
+COPY /.git ./app
+RUN apk --no-cache add git
+RUN cross-env GITHUB_SHA=$(git rev-parse --short HEAD) \
+   GITHUB_REPOSITORY=$(git config --get remote.origin.url | sed -e 's/^git@.*:\([[:graph:]]*\).git/\1/') \
+   yarn build
 
+RUN rm -rf /app/.git
 FROM node:14-bullseye as prod-image
 
 WORKDIR /app
-COPY --from=prod-builder /app/api/ ./
+# we need to copy only package.json and yarn.lock file and rebuilt. if we don't we run into musl errors (linking of C libs as difference between prodimage and builder image
+#COPY --from=prod-builder /app/api/ ./
+COPY --from=prod-builder /app/api/package.json ./
+COPY --from=prod-builder /app/api/yarn.lock ./
 COPY --from=prod-builder /app/ui/dist/ ./public/
 
 # TODO: taking over legacy dependencies from old Dockerfile, to be refactored, see details in SWT-678
 RUN apt update
 RUN apt install -y python3 python3-pip bash curl zip jq
 RUN apt install -y g++
+
+# we need to build node modules for api once again, the node modules from builder image cannot be used see comment above -> musl error
+RUN yarn install --production
+
 RUN pip3 install \
   tensorflow==2.8 \
   matplotlib==3.4.3 \
