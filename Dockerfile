@@ -50,6 +50,7 @@ RUN rm -rf /app/.git
 FROM node:14-bullseye as prod-image
 
 WORKDIR /app
+COPY --from=prod-builder /app/api/ ./
 # we need to copy only package.json and yarn.lock file and rebuilt. if we don't we run into musl errors (linking of C libs as difference between prodimage and builder image
 #COPY --from=prod-builder /app/api/ ./
 COPY --from=prod-builder /app/api/package.json ./
@@ -61,7 +62,9 @@ RUN apt update
 RUN apt install -y python3 python3-pip bash curl zip jq
 RUN apt install -y g++
 
+# We need to rebuild node modules. if we don't we run into musl errors (linking of C libs as difference between prodimage and builder image
 # we need to build node modules for api once again, the node modules from builder image cannot be used see comment above -> musl error
+RUN rm -rf ./node_modules
 RUN yarn install --production
 
 RUN pip3 install \
