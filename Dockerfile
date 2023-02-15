@@ -40,11 +40,15 @@ COPY ./ui/ /app/ui/
 WORKDIR /app/ui
 RUN yarn install --frozen-lockfile
 ENV PATH="/app/ui/node_modules/.bin:${PATH}"
+SHELL ["/bin/bash", "-c"]
+RUN echo $(set) > ./env_vars.txt
+RUN cat ./env_vars.txt
 RUN yarn build
 
 FROM node:14-bullseye as prod-image
 
 WORKDIR /app
+COPY --from=prod-builder /app/ui/env_vars.txt ./
 COPY --from=prod-builder /app/api/ ./
 # we need to copy only package.json and yarn.lock file and rebuilt. if we don't we run into musl errors (linking of C libs as difference between prodimage and builder image
 #COPY --from=prod-builder /app/api/ ./
