@@ -1,5 +1,10 @@
 FROM node:14-alpine3.15 AS builder-base
 
+ARG GITHUB_SHA
+ENV GITHUB_SHA ${GITHUB_SHA}
+ARG GITHUB_REPOSITORY
+ENV GITHUB_REPOSITORY ${GITHUB_REPOSITORY}
+
 ONBUILD RUN apk update
 
 # install dependencies required for api
