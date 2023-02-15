@@ -27,6 +27,8 @@ services:
     working_dir: /app/ui
     environment:
       - NODE_ENV=development
+      - GITHUB_SHA=localdev
+      - GITHUB_REPOSITORY=com2u/SVTrain
     expose:
       - "8080"
     volumes:
