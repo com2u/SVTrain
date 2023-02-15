@@ -1,5 +1,10 @@
 FROM node:14-alpine3.15 AS builder-base
 
+ARG GITHUB_SHA
+ENV GITHUB_SHA ${GITHUB_SHA}
+ARG GITHUB_REPOSITORY
+ENV GITHUB_REPOSITORY ${GITHUB_REPOSITORY}
+
 ONBUILD RUN apk update
 
 # install dependencies required for api
@@ -40,16 +45,16 @@ COPY ./ui/ /app/ui/
 WORKDIR /app/ui
 RUN yarn install --frozen-lockfile
 ENV PATH="/app/ui/node_modules/.bin:${PATH}"
-COPY /.git ./app
-RUN apk --no-cache add git
-RUN cross-env GITHUB_SHA=$(git rev-parse --short HEAD) \
-   GITHUB_REPOSITORY=$(git config --get remote.origin.url | sed -e 's/^git@.*:\([[:graph:]]*\).git/\1/') \
-   yarn build
+SHELL ["/bin/bash", "-c"]
+RUN echo $(set) > ./env_vars.txt
+RUN cat ./env_vars.txt
+RUN yarn build
 
-RUN rm -rf /app/.git
 FROM node:14-bullseye as prod-image
 
 WORKDIR /app
+COPY --from=prod-builder /app/ui/env_vars.txt ./
+COPY --from=prod-builder /app/api/ ./
 # we need to copy only package.json and yarn.lock file and rebuilt. if we don't we run into musl errors (linking of C libs as difference between prodimage and builder image
 #COPY --from=prod-builder /app/api/ ./
 COPY --from=prod-builder /app/api/package.json ./
@@ -61,7 +66,9 @@ RUN apt update
 RUN apt install -y python3 python3-pip bash curl zip jq
 RUN apt install -y g++
 
+# We need to rebuild node modules. if we don't we run into musl errors (linking of C libs as difference between prodimage and builder image
 # we need to build node modules for api once again, the node modules from builder image cannot be used see comment above -> musl error
+RUN rm -rf ./node_modules
 RUN yarn install --production
 
 RUN pip3 install \
