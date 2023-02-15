@@ -40,13 +40,8 @@ COPY ./ui/ /app/ui/
 WORKDIR /app/ui
 RUN yarn install --frozen-lockfile
 ENV PATH="/app/ui/node_modules/.bin:${PATH}"
-COPY /.git ./app
-RUN apk --no-cache add git
-RUN cross-env GITHUB_SHA=$(git rev-parse --short HEAD) \
-   GITHUB_REPOSITORY=$(git config --get remote.origin.url | sed -e 's/^git@.*:\([[:graph:]]*\).git/\1/') \
-   yarn build
+RUN yarn build
 
-RUN rm -rf /app/.git
 FROM node:14-bullseye as prod-image
 
 WORKDIR /app
