@@ -14,9 +14,6 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_SHA: ${{ github.sha }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
       -
         name: Checkout
@@ -79,6 +76,9 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          build-args: |
+            "GITHUB_SHA=${{ github.sha }}"
+            "GITHUB_REPOSITORY=${{ github.repository }}"
           push: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.repository.full_name) || github.event_name == 'push' }}
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
