@@ -1,40 +1,55 @@
 # How to start and configure server
 
-## Set up environment variables
+## Setup local development workspace
 
-1. Copy file .env.example to .env
-2. Set up variable HOST, PORT for file-explorer server
-3. Set up variable STATIC_SERVER_PORT, STATIC_SERVER_HOST for the static server that serve files from directories with exploring files (That server will be process files from ROOT_PATH directory)
-4. Set up variable ROOT_PATH. It is path to directory with exploring files.
-5. Set up variable COMMAND_FILES_PATH, set it with directory which consists files train.bat, validate.bat etc.
-6. Update variables in file `/config/ui.js` if you want to change default GUI variables file right menu's width, number of images for page, ...
+1. Modify `development.env` that meets your requirements
+2. By default, the application points to a keycloak instance of a test stage; not yet mocked 
+3. Update variables in file `/config/ui.js` if you want to change default GUI variables file right menu's width, number of images for page, ...
 
-## Install npm packages
+### Environment variable explanations
+| Variable           | default value                 | Description                                                            |
+|--------------------|-------------------------------|------------------------------------------------------------------------|
+| ENV_SILENT         | true                          | Keep default value, details see AdonisJS reference                     |
+| HOST               | 0.0.0.0                       | Configures AdonisJS api backend, should be default                     |
+| PORT               | 3333                          | Configures AdonisJS api backend, should be default                     |
+| NODE_ENV           | development                   | Keep default value, production can be used for simulation purposes     |
+| SESSION_DRIVER     | cookie                        | See AdonisJS for reference                                             |
+| KEYCLOAK_URI_*     | see env file                  | Keycloak parameters point to test instance; should be mocked in future |
+| STORAGE_PATH       | ./development/storages        | Contains backups                                                       |
+| ROOT_PATH          | ./development/mlexplorer-root | Files in workspaces are processed there, e.g. labeling, training, etc. |
+| COMMAND_FILES_PATH | ./development/script          | Location of scripts                                                    |
+| STATIC_SERVER_PORT | 2929                          | Keep default value                                                     |
+| STATIC_SERVER_HOST | 0.0.0.0                       | Keep default value                                                     |
+| SCRIPT_*           | see env file                  | Location of script files                                               |
+| PATH_LOG_*         | see env file                  | Location of respective log files                                       |
+| OUT_*              | see env file                  | Configure location of training output                                  |
+| FOLDER_*           | see env file                  | Subfolder configuration                                                |
+| DB_CONNECTION      | sqlite                        | Until now keep default value, but sqlite not yet used                  |
 
-Execute `npm install` command
+## Start workspace with Docker
 
-## Start up the application
+1. Make sure that your Docker environment is fully operational, e.g. install Docker Desktop
+2. Start your local development environment: `docker-compose up -d`. This will provide you:
+   1. A nginx that acts as a reverse proxy in order to serve backend and frontend dev environments at the same time
+   2. Executes `node --inspect=0.0.0.0 server.js` of api component (backend part based on AdonisJS)
+   3. Executes `yarn run serve --host 0.0.0.0` of ui component (frontend part of application based on VueJS)
+   4. Both ui and api components are started with auto refresh with live code changes and debugging
+   5. Node modules being created a locally mounted (means persisted between docker restarts), but be aware that node modules being built inside the docker are not compatible with your host OS which is no problem as these are separated
+3. 
+## Optional: Install npm packages
 
-Execute `npm start` command.
+If you require node_modules to be in your local environment (e.g. your IDE requires it for code lookup), please execute `yarn install` command.
+Be aware that we do utilize the lock file here, so running `yarn install --frozen-lockfile` will make sure that exactly the versions that have been selected and bundled are being installed. If you don't use frozen lockfiles, be aware that you will change `yarn.lock` as well which is fine, if you intend to upgrade versions. Otherwise please don't commit changes.
 
 ## Open file explorer
 
-Create new browser window and type http://HOST:PORT/index.html
+Create new browser window and type `http://localhost:3333`. That is the port nginx is listening on your local while reverse proxying to api and ui components.
 
 ## Logging
 
 Check user activities in file "SVTrain.log"
 
 ## Docker
-
-You can also use Docker to run the SVTrain application. To do so under Linux or macOS, use the following steps.
-
-There is 2 ways you can obtain docker image:
-### Building image on your own
-
-```
-docker build -t svtrain .
-```
 
 ### Pulling already built image
 
