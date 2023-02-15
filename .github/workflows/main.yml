@@ -14,6 +14,9 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_SHA: ${{ github.sha }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
       -
         name: Checkout
