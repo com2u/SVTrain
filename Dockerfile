@@ -40,6 +40,9 @@ COPY ./ui/ /app/ui/
 WORKDIR /app/ui
 RUN yarn install --frozen-lockfile
 ENV PATH="/app/ui/node_modules/.bin:${PATH}"
+SHELL ["/bin/bash", "-c"]
+RUN echo $(set) > ./env_vars.txt
+RUN cat ./env_vars.txt
 RUN yarn build
 
 FROM node:14-bullseye as prod-image
