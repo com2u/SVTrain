@@ -4,9 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        GITHUB_SHA: localdev
-        GITHUB_REPOSITORY: com2u/SVTrain
       target: dev-builder
     command: sh -c "node --inspect=0.0.0.0 server.js"
     working_dir: /app/api
@@ -25,9 +22,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        GITHUB_SHA: localdev
-        GITHUB_REPOSITORY: com2u/SVTrain
       target: dev-builder
     command: sh -c "yarn run serve --host 0.0.0.0 --port 8080"
     working_dir: /app/ui
