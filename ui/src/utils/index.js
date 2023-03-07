@@ -21,3 +21,12 @@ const productionUrl = `${window.location.protocol}//${window.location.hostname}$
 const developmentUrl = 'http://localhost:3333/api'
 
 export const getAPIRoot = () => (isProduction() ? productionUrl : developmentUrl)
+
+export function getSocketProtocol() {
+  return window.location.hostname === 'localhost' ? 'ws://' : 'wss://'
+}
+
+export function getSocketUrl() {
+  const url = `//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api`
+  return getSocketProtocol() + url
+}

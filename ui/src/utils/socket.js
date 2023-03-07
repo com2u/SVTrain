@@ -1,10 +1,11 @@
+import { getSocketUrl } from '@/utils/index'
 import 'babel-polyfill'
 import Ws from '@adonisjs/websocket-client'
 
 export default {
   async init() {
     return new Promise((resolve, reject) => {
-      this.ws = Ws('api', { query: { sessionToken: localStorage.getItem('sessionToken') } })
+      this.ws = Ws(getSocketUrl(), { query: { sessionToken: localStorage.getItem('sessionToken') } })
       this.ws.connect()
       this.ws.on('open', () => {
         console.log('Connect opened')
