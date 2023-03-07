@@ -193,7 +193,7 @@ export default {
           {
             label: 'Shuffle buffer',
             field: 'shuffle_buffer',
-            type: types.BOOLEAN,
+            type: types.NUMBER,
             options: {
               help: 'Number of images used to randomly choose batch images',
             },
@@ -693,7 +693,7 @@ export default {
         optimizer: null,
         learning_rate: 0.0,
         batch_size: 0,
-        shuffle_buffer: 0,
+        shuffle_buffer: 100,
         save_best_only: false,
         validation_freq: 1,
         metrics: [],
