@@ -1,11 +1,10 @@
-import { isProduction } from '@/utils/index'
 import 'babel-polyfill'
 import Ws from '@adonisjs/websocket-client'
 
 export default {
   async init() {
     return new Promise((resolve, reject) => {
-      this.ws = Ws(isProduction() ? '' : 'ws://127.0.0.1:3333', { query: { sessionToken: localStorage.getItem('sessionToken') } })
+      this.ws = Ws('api', { query: { sessionToken: localStorage.getItem('sessionToken') } })
       this.ws.connect()
       this.ws.on('open', () => {
         console.log('Connect opened')
