@@ -5,7 +5,9 @@
   "description": "The fullstack application boilerplate for Adonisjs",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint": "eslint app providers services start",
+    "lint-fix": "eslint --fix app providers services start"
   },
   "keywords": [
     "adonisjs",
