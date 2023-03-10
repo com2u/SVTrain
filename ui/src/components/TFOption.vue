@@ -438,12 +438,6 @@ export default {
         ],
         'Data processing': [
           {
-            label: 'Augmentation count',
-            field: 'augmentation_samples_number',
-            type: types.NUMBER,
-            options: {},
-          },
-          {
             label: 'Batch normalization',
             field: 'batch_normalization',
             type: types.BOOLEAN,
@@ -478,6 +472,12 @@ export default {
           },
         ],
         Augmentations: [
+          {
+            label: 'Augmentation count',
+            field: 'augmentation_samples_number',
+            type: types.NUMBER,
+            options: {},
+          },
           {
             label: 'Augmentations',
             field: 'augmentations',
