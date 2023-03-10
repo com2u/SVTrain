@@ -493,7 +493,7 @@ export default {
             options: {},
           },
           {
-            label: 'Tenser Board Url',
+            label: 'Tensor Board Url',
             field: 'LiveViewURL',
             type: types.TEXT,
             options: {},
