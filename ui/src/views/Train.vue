@@ -45,8 +45,8 @@
           <b-tab title="Logs" active>
             <pre v-html="trainLog" class="logs"></pre>
           </b-tab>
-          <b-tab v-if="tenserBoard" title="TensorBoard">
-            <iframe :src="tenserBoard"></iframe>
+          <b-tab v-if="tensorBoard" title="tensorBoard">
+            <iframe :src="tensorBoard"></iframe>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -87,7 +87,7 @@ export default {
         },
       ],
       trainLog: null,
-      tenserBoard: null,
+      tensorBoard: null,
       interval: null,
     }
   },
@@ -105,7 +105,7 @@ export default {
         const ws = this.workspace.split('/').pop()
         await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
           if (data) {
-            this.tenserBoard = data.LiveViewURL
+            this.tensorBoard = data.LiveViewURL
           }
         })
       }
