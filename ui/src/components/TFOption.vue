@@ -485,7 +485,7 @@ export default {
             options: {},
           },
         ],
-        'Scrips & Folders': [
+        'Scripts & Folders': [
           {
             label: 'The numbers of lines to be displayed',
             field: 'ViewLogLines',
