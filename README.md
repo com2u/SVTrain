@@ -67,9 +67,9 @@ List of all available images (tags) can be found under: https://github.com/com2u
 *Be carefull when using `edge`, if you already have that pulled on your computer, docker will not pull newer version, so it's recommended to use `sha-<hash>` image versions instead.*
 
 When you already obtain information about which tag do you want to run use, prepare your local configuration:
-1. Copy `.env.example` to `.env` and adapt accordingly, esp. `ROOT_PATH` and `COMMAND_FILES_PATH`. It is recommended to use `/data/root` and `/data`, respectiveley. Make sure to change the docker run commend below, in case you use different values.
-2. Copy `roles.json.example` to `roles.json`. Adapt if needed.
-3. Generate a `user.json` file by running `node setPassword`
+1. Adapt `development.env` accordingly, esp. `ROOT_PATH` and `COMMAND_FILES_PATH`. It is recommended to use `/data/root` and `/data`, respectiveley. Make sure to change the docker run commend below, in case you use different values.
+2. Copy `api/roles.json.example` to `api/roles.json`. Adapt if needed.
+3. Generate a `user.json` file by running `node setPassword` in directory `api`
 4. Prepare and empty data dir by running `mkdir -p ./data/root/`
 
 Now you can run the docker image as follows:
