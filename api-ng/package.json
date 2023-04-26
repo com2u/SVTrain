@@ -57,8 +57,27 @@
   "dependencies": {
     "@adonisjs/core": "^5.9.0",
     "@adonisjs/repl": "^3.1.11",
+    "archiver": "^5.3.1",
+    "bcrypt": "^5.1.0",
+    "bree": "^9.1.3",
+    "chokidar": "^3.5.3",
+    "extract-zip": "^2.0.1",
+    "fast-folder-size": "^1.7.1",
+    "glob": "^10.2.2",
+    "jsonwebtoken": "^9.0.0",
+    "jwk-to-pem": "^2.0.5",
+    "log4js": "^6.9.1",
+    "password-hash": "^1.2.2",
     "proxy-addr": "^2.0.7",
+    "ramda": "^0.29.0",
+    "read-last-lines": "^1.8.0",
+    "recursive-readdir": "^2.2.3",
     "reflect-metadata": "^0.1.13",
-    "source-map-support": "^0.5.21"
+    "sequelize": "^6.31.0",
+    "source-map-support": "^0.5.21",
+    "sqlite3": "^5.1.6",
+    "static-server": "^2.2.1",
+    "uuid": "^9.0.0",
+    "uuid4": "^2.0.3"
   }
 }
