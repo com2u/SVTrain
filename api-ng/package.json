@@ -55,8 +55,13 @@
     "youch-terminal": "^2.2.0"
   },
   "dependencies": {
+    "@adonisjs/auth": "^8.2.3",
     "@adonisjs/core": "^5.9.0",
+    "@adonisjs/cors": "^1.0.7",
     "@adonisjs/repl": "^3.1.11",
+    "@adonisjs/session": "^6.4.0",
+    "@adonisjs/shield": "^7.1.0",
+    "@adonisjs/websocket": "^1.0.12",
     "archiver": "^5.3.1",
     "bcrypt": "^5.1.0",
     "bree": "^9.1.3",
