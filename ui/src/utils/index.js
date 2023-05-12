@@ -15,7 +15,7 @@ export const getFileServerPath = () => `${window.location.protocol}//${window.lo
   window.location.port
     ? `:${(process.env.NODE_ENV || 'production') === 'production' ? window.location.port : 3333}`
     : ''
-}/data/`
+}/api/data/`
 
 const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api`
 const developmentUrl = 'http://localhost:3333/api'
