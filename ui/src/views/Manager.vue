@@ -87,10 +87,10 @@
                 v-b-tooltip.hover
                 title="Backup Workspace"
               >
-                <v-icon
+              <b-icon
                   class="clickable-icon"
-                  name="archive"
-                  scale="1.5"
+                  icon="server"
+                  font-scale="1.5"
                   @click="backupWs(folder.path)"
                 />
               </div>
