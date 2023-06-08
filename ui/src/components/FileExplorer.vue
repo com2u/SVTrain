@@ -583,6 +583,7 @@ export default {
     const c = this.systemConfig && this.systemConfig.imgContrast ? this.systemConfig.imgContrast : 100
     const b = this.systemConfig && this.systemConfig.imgBrightness ? this.systemConfig.imgBrightness : 100
     document.getElementsByTagName('body')[0].style.setProperty('--image--filter', `contrast(${c}%) brightness(${b}%)`)
+    window.addEventListener('keyup', this.onKeyUp)
   },
   methods: {
     convertURIPath(p) {
@@ -1292,7 +1293,7 @@ export default {
     // subscribe for that folder
     socket.subscibeForFolder(this.path, this.fileChanged())
     // add keyup event listener
-    window.addEventListener('keyup', this.onKeyUp)
+    // moved keyup event inside mounted lifecycle hook.
     // get status
     this.status = await api.getRunningState()
     socket.subscibeForFolder('running.lock', (data) => {
