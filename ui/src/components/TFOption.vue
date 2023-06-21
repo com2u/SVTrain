@@ -64,6 +64,71 @@ export default {
       limitAIUI: ['AI Training'],
       expandedCategory: null,
       schemas: {
+        Splitting: [
+          {
+            label: 'Split Strategy',
+            field: 'group_by_strategy',
+            type: types.SELECT,
+            options: {
+              dataset: [
+                {
+                  value: 'RandomSplitDataset',
+                  label: 'RandomSplitDataset',
+                },
+              ],
+            },
+          },
+          {
+            label: 'seed',
+            field: 'seed',
+            type: types.NUMBER,
+            default: null,
+            options: {
+              min: 0,
+              max: 10000000000,
+              placeholder: '',
+            },
+          },
+          {
+            label: 'Split Stages',
+            field: 'split_stages',
+            type: types.JSON,
+            options: {
+              schemas: [
+                {
+                  label: 'Train',
+                  field: 'train',
+                  type: types.NUMBER,
+                  options: {
+                    min: 0,
+                    max: 1,
+                    placeholder: '0.0',
+                  },
+                },
+                {
+                  label: 'Test',
+                  field: 'test',
+                  type: types.NUMBER,
+                  options: {
+                    min: 0,
+                    max: 1,
+                    placeholder: '0.0',
+                  },
+                },
+                {
+                  label: 'Validation',
+                  field: 'val',
+                  type: types.NUMBER,
+                  options: {
+                    min: 0,
+                    max: 1,
+                    placeholder: '0.0',
+                  },
+                },
+              ],
+            },
+          },
+        ],
         'AI Training': [
           {
             label: 'Max Train Steps',
@@ -109,6 +174,35 @@ export default {
                 },
               ],
               help: 'The Image Size and color depth. "Auto" as default',
+            },
+          },
+          {
+            label: 'Resize',
+            field: 'resize',
+            type: types.J_ARRAY,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'width',
+                  field: '0',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+                {
+                  label: 'height',
+                  field: '1',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ],
+              help: 'Specified Resolution for training and model',
             },
           },
           {
@@ -730,6 +824,10 @@ export default {
         path_validate: null,
         LiveViewURL: null,
         heatmap_types: [],
+        group_by_strategy: null,
+        seed: null,
+        split_stages: {},
+        resize: {},
       },
       fetchCount: 1,
       editor: null,
@@ -760,10 +858,22 @@ export default {
       if (!this.canEditConfigAIUI && this.editor) {
         this.data = this.editor.get()
       }
+
       let data = {
         ...this.fields,
         ...this.data,
       }
+
+      // convert to json
+      data.splits_params = {
+        group_by_strategy: data.group_by_strategy,
+        seed: data.seed,
+        split_stages: data.split_stages,
+      }
+      delete data.group_by_strategy
+      delete data.seed
+      delete data.split_stages
+
       data = this.transformEachChild(data, (child) => {
         if (!Number.isNaN(Number(child)) && typeof child === 'string') {
           return Number(child)
