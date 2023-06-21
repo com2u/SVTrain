@@ -5,24 +5,22 @@ const fs = require('fs')
 const clientDir = process.cwd()
 const serverDir = path.resolve(__dirname, '..')
 
-Object.filter = (obj, predicate) =>
-  Object.fromEntries(Object.entries(obj).filter(predicate))
+Object.filter = (obj, predicate) => Object.fromEntries(Object.entries(obj).filter(predicate))
 
-const getLicensesFromDir = async (dir) =>
-  new Promise((resolve) => {
-    legalEagle(
-      {
-        path: dir,
-      },
-      (err, licenses) => {
-        if (err) {
-          resolve({})
-        } else {
-          resolve(licenses)
-        }
-      },
-    )
-  })
+const getLicensesFromDir = async (dir) => new Promise((resolve) => {
+  legalEagle(
+    {
+      path: dir,
+    },
+    (err, licenses) => {
+      if (err) {
+        resolve({})
+      } else {
+        resolve(licenses)
+      }
+    },
+  )
+})
 
 const getAllLicenses = async () => {
   const licenses = {}
@@ -35,7 +33,7 @@ const getAllLicenses = async () => {
     JSON.stringify(
       Object.filter(
         licenses,
-        ([name, license]) => license.sourceText || license.repository,
+        ([license]) => license.sourceText || license.repository,
       ),
       null,
       2,

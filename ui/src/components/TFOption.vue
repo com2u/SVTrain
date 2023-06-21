@@ -64,7 +64,7 @@ export default {
       limitAIUI: ['AI Training'],
       expandedCategory: null,
       schemas: {
-        'Splitting': [
+        Splitting: [
           {
             label: 'Split Strategy',
             field: 'group_by_strategy',
@@ -84,8 +84,8 @@ export default {
             type: types.NUMBER,
             default: null,
             options: {
-              min:0,
-              max:10000000000,
+              min: 0,
+              max: 10000000000,
               placeholder: '',
             },
           },
@@ -866,13 +866,13 @@ export default {
 
       // convert to json
       data.splits_params = {
-        'group_by_strategy' : data.group_by_strategy,
-        'seed': data.seed,
-        'split_stages': data.split_stages
+        group_by_strategy: data.group_by_strategy,
+        seed: data.seed,
+        split_stages: data.split_stages,
       }
-      delete data.group_by_strategy;
-      delete data.seed;
-      delete data.split_stages;
+      delete data.group_by_strategy
+      delete data.seed
+      delete data.split_stages
 
       data = this.transformEachChild(data, (child) => {
         if (!Number.isNaN(Number(child)) && typeof child === 'string') {
