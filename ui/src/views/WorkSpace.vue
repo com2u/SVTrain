@@ -197,6 +197,7 @@ export default {
     },
     async setWorkspace(e, folder) {
       await api.setWorkspace(folder.name, folder.isDB)
+      api.runCommand('script_workspace_changed')
       api.getConfig(folder.isDB)
         .then((data) => {
           this.$store.dispatch('app/setConfig', data)

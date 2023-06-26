@@ -125,7 +125,8 @@ const CONST_PATHS = {
     script_export_result: "SCRIPT_EXPORT_RESULT",
     script_export_image: "SCRIPT_EXPORT_IMAGE",
     script_report: "SCRIPT_REPORT",
-    script_split_data: "SCRIPT_SPLIT_DATA"
+    script_split_data: "SCRIPT_SPLIT_DATA",
+    script_workspace_changed: "SCRIPT_WORKSPACE_CHANGED"
   },
   ignoreFiles: ['.DS_Store']
 };
