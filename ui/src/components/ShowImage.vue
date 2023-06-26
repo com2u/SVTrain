@@ -128,6 +128,7 @@ export default {
       const ctx = canvas.getContext('2d')
       canvas.width = imgRef.width
       canvas.height = imgRef.height
+      ctx.imageSmoothingEnabled = false
       ctx.drawImage(imgRef, 0, 0, canvas.width, canvas.height)
       imgRef.style.setProperty('width', '100%')
       if (!imgRef || !imgRef.classList.contains('unloaded')) return
