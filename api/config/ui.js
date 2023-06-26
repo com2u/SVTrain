@@ -25,7 +25,7 @@ module.exports = {
 
   // top or right
   forwardLocaltion: 'right',
-  moveMenu: true,
+  defectMethod: true,
   newFolder: true,
   newWorkspace: true,
 

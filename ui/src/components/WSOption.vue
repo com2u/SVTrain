@@ -160,17 +160,17 @@ export default {
               help: 'Use the Confirm method to automatically move the selected images to one folder and the not selected images to another folder',
               onChange(enabled) {
                 const forwardLocation = document.getElementById('forwardLocation')
-                const moveMenu = document.getElementById('moveMenu')
+                const defectMethod = document.getElementById('defectMethod')
                 if (enabled) {
                   forwardLocation.value = 'right'
-                  moveMenu.checked = false
+                  defectMethod.checked = false
                   forwardLocation.dispatchEvent(new Event('change'))
-                  moveMenu.dispatchEvent(new Event('change'))
+                  defectMethod.dispatchEvent(new Event('change'))
                 } else {
                   forwardLocation.value = 'top'
-                  moveMenu.checked = true
+                  defectMethod.checked = true
                   forwardLocation.dispatchEvent(new Event('change'))
-                  moveMenu.dispatchEvent(new Event('change'))
+                  defectMethod.dispatchEvent(new Event('change'))
                 }
               },
             },
@@ -269,11 +269,11 @@ export default {
             },
           },
           {
-            label: 'Move menu',
-            field: 'moveMenu',
+            label: 'Select Defect Method',
+            field: 'defectMethod',
             type: types.BOOLEAN,
             options: {
-              help: 'Set true as value if you want to display a menu on the right that allows you to select defect classes',
+              help: 'With this option a label for all existing defect classes can be given. This option may also be combined with the "Confirm" method.',
             },
           },
           {
