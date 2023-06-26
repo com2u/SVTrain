@@ -82,7 +82,7 @@
           ></progress>
         </div>
         <div>
-          <div class="icon-wrapper" title="AI Statistic">
+          <div v-b-tooltip.hover class="icon-wrapper" title="AI Statistic">
             <b-icon
               icon="bar-chart-fill"
               :class="canViewStatistics ? 'clickable-icon' : 'gray-icon'"
@@ -90,7 +90,7 @@
               @click="showStatistic"
             />
           </div>
-          <div class="icon-wrapper" title="Notes">
+          <div v-b-tooltip.hover class="icon-wrapper" title="Notes">
             <b-icon
               :icon="info && info.highlight ? 'file-text-fill' : 'file-text'"
               class="svg-icon clickable-icon"
@@ -99,6 +99,7 @@
             />
           </div>
           <div
+            v-b-tooltip.hover
             v-if="canSeeConfusionMatrix"
             class="icon-wrapper clickable"
             @click="showConfusionMatrix()"
@@ -161,6 +162,7 @@
           <div
             v-if="canSyncDB"
             class="icon-wrapper"
+            v-b-tooltip.hover
             title="Convert to Database"
           >
             <b-icon
@@ -171,7 +173,7 @@
               @click="syncDB"
             />
           </div>
-          <div class="icon-wrapper" title="Workspace Settings">
+          <div class="icon-wrapper" v-b-tooltip.hover title="Workspace Settings">
             <b-icon
               :class="
                 info.config && canEditConfig ? 'clickable-icon' : 'gray-icon'
@@ -181,7 +183,7 @@
               @click="showConfig"
             />
           </div>
-          <div v-if="canBackup" class="icon-wrapper" title="Backup Workspace">
+          <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
             <b-icon
               class="clickable-icon"
               icon="server"
@@ -203,6 +205,7 @@
         @select-workspace="$emit('select-workspace', $event)"
       />
       <div
+        v-b-tooltip.hover
         class="new-ws"
         :style="{
           marginLeft: `${(depth + 1) * 50}px`,
