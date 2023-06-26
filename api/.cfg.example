@@ -23,7 +23,7 @@
   "buttonFontSize": "1rem",
   "titleFontSize": "1rem",
   "forwardLocaltion": "right",
-  "moveMenu": true,
+  "defectMethod": true,
   "newFolder": true,
   "newWorkspace": true,
   "showNavigationIcon": true,

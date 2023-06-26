@@ -28,9 +28,9 @@
             </b-button>
           </div>
         </div>
-        <div v-if="systemConfig.moveMenu" class="right-side-section">
+        <div v-if="systemConfig.defectMethod" class="right-side-section">
           Selected files count: {{ selectedFiles.length }}<br><br>
-          <div v-if="selectedFiles.length > 0 && canSeeMoveMenu">
+          <div v-if="selectedFiles.length > 0 && canSeeDefectMethod">
             <div v-if="forwardOnly && nextFolders.length === 0">
               <div>
               Please confirm images that show a/an
@@ -501,7 +501,7 @@ export default {
     ...mapGetters([
       'newFolder',
       'canViewStatistics',
-      'canSeeMoveMenu',
+      'canSeeDefectMethod',
       'imageViewer',
       'showNavigationIcon',
       'showExplorerNotes',
