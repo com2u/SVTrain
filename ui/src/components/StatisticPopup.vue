@@ -10,14 +10,20 @@
         <div class="caption">
           <div>{{currentFolder}}</div>
           <div>
-            Matched: {{this.statistic.matched}}
-            | Mismatched: {{this.statistic.mismatched}}
-            | Unclassified: {{this.statistic.unclassified}}
+            Matched: {{ this.isDataFormatAbsolute ? this.statistic.matched : convertDecimalUptoTwoDigit((this.statistic.matched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
+            | Mismatched: {{
+              this.isDataFormatAbsolute ? this.statistic.mismatched
+              : convertDecimalUptoTwoDigit((this.statistic.mismatched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
+            | Unclassified: {{
+              this.isDataFormatAbsolute ? this.statistic.unclassified
+              : convertDecimalUptoTwoDigit((this.statistic.unclassified/(this.statistic.matched + this.statistic.mismatched))*100) + '%'
+              }}
           </div>
         </div>
         <statistic-table
           v-bind:folder="dir"
-          v-bind:table="statistic.table"/>
+          v-bind:table="statistic.table"
+          :toggleDataDisplayFormat = "toggleDataDisplayFormat"/>
       </div>
       <div v-else class="right-side-section">
         Statistic didn't calculated
@@ -39,7 +45,8 @@ export default {
       isLoading: false,
       dir: '',
       showTable: false,
-    }
+      isDataFormatAbsolute: true
+    };
   },
   computed: {
     backgroundCalculating() {
@@ -55,6 +62,12 @@ export default {
     },
   },
   methods: {
+    convertDecimalUptoTwoDigit(selectionPercentage) {
+      return selectionPercentage.toFixed(2);
+    },
+    toggleDataDisplayFormat(isDataFormatAbsolute) {
+      this.isDataFormatAbsolute = isDataFormatAbsolute
+    },
     open(dir) {
       if (typeof dir === 'object') {
         this.statistic = dir
