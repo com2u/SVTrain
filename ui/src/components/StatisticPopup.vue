@@ -45,8 +45,8 @@ export default {
       isLoading: false,
       dir: '',
       showTable: false,
-      isDataFormatAbsolute: true
-    };
+      isDataFormatAbsolute: true,
+    }
   },
   computed: {
     backgroundCalculating() {
@@ -63,7 +63,7 @@ export default {
   },
   methods: {
     convertDecimalUptoTwoDigit(selectionPercentage) {
-      return selectionPercentage.toFixed(2);
+      return selectionPercentage.toFixed(2)
     },
     toggleDataDisplayFormat(isDataFormatAbsolute) {
       this.isDataFormatAbsolute = isDataFormatAbsolute

@@ -67,7 +67,7 @@ export default {
   props: {
     table: { type: Object, required: true },
     folder: { type: String, required: true },
-    toggleDataDisplayFormat: { type: Function, required: true }  
+    toggleDataDisplayFormat: { type: Function, required: true },
   },
   data() {
     return {
@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     changeDataDisplayFormat(isDataFormatAbsolute) {
-      this.$props.toggleDataDisplayFormat(isDataFormatAbsolute);
+      this.$props.toggleDataDisplayFormat(isDataFormatAbsolute)
     },
     select(dir1, dir2) {
       const gotoDir = `${this.folder}/${dir1}`
