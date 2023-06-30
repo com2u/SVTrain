@@ -7,7 +7,13 @@
         class="statistic-table">
         <b-thead>
           <b-tr>
-            <b-th colspan="2" rowspan="2">
+            <b-th colspan="2" rowspan="2" class="input-conner">
+              <div class="input-container">
+                <input type="radio" name="responsive" v-model="responsive" id="autofit" :value="false">
+                <label for="autofit">Autofit</label>
+                <input type="radio" name="responsive" v-model="responsive" id="scroll" :value="true">
+                <label for="scroll">Scroll</label>
+              </div>
             </b-th>
             <b-th class="header" :colspan="names.length">AI classification</b-th>
           </b-tr>
@@ -163,6 +169,11 @@ export default {
     }
   }
 
+  .input-conner {
+    padding: 0;
+    vertical-align: middle;
+  }
+  
   .input-container {
     text-align: left;
     label {
