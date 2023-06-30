@@ -39,6 +39,11 @@
               <span class="ml-2">Backups</span>
             </b-button>
           </div>
+          <div class="cmd">
+            <b-button class="svtrain-cmd-btn" @click="flag = 'Remove_lock_file'">
+              <span class="ml-2">Remove Lock File</span>
+            </b-button>
+          </div>
         </div>
       </b-col>
       <b-col cols="10" class="has-board">
@@ -77,6 +82,7 @@ import axios from 'axios'
 import { mapGetters } from 'vuex'
 import { getAPIRoot } from '@/utils'
 import JSONEditor from 'jsoneditor'
+import api from '../utils/api'
 
 export default {
   name: 'Admin',
@@ -129,6 +135,15 @@ export default {
         this.dataTXT = await axios.get(`${getAPIRoot()}/sample-config?type=cfg`).then((res) => res.data)
       } else if (this.flag === 'template_aic') {
         this.dataTXT = await axios.get(`${getAPIRoot()}/sample-config?type=aic`).then((res) => res.data)
+      } else if (this.flag === 'Remove_lock_file') {
+        const res = await api.runCommand('script_remove_lock_file')
+        if (res === true) {
+          this.$notify({
+            type: 'success',
+            title: 'Success',
+            text: 'Action triggered successfully',
+          })
+        }
       }
       if (this.flag && this.flag.includes('template')) {
         this.editor.set(null)
