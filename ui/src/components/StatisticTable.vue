@@ -50,9 +50,9 @@
         </b-tbody>
       </b-table-simple>
       <div class="input-container value-type-input">
-        <input type="radio" name="view" v-model="valuesView" id="absoluteView" value="absolute">
+        <input type="radio" name="view" v-model="valuesView" id="absoluteView" value="absolute" @change="changeDataDisplayFormat(true)">
         <label for="absoluteView">Absolute Numbers</label>
-        <input type="radio" name="view" v-model="valuesView" id="percentageView" value="percentage">
+        <input type="radio" name="view" v-model="valuesView" id="percentageView" value="percentage" @change="changeDataDisplayFormat(false)">
         <label for="percentageView">Percentage</label>
       </div>
     </div>
@@ -64,10 +64,11 @@
 import EventBus from '../utils/eventbus'
 
 export default {
-  props: [
-    'table',
-    'folder',
-  ],
+  props: {
+    table: { type: Object, required: true },
+    folder: { type: String, required: true },
+    toggleDataDisplayFormat: { type: Function, required: true },
+  },
   data() {
     return {
       valuesView: 'absolute',
@@ -77,6 +78,9 @@ export default {
     }
   },
   methods: {
+    changeDataDisplayFormat(isDataFormatAbsolute) {
+      this.$props.toggleDataDisplayFormat(isDataFormatAbsolute)
+    },
     select(dir1, dir2) {
       const gotoDir = `${this.folder}/${dir1}`
       console.log(' goto dir', gotoDir)
