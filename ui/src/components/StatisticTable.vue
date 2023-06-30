@@ -14,12 +14,6 @@
                 <input type="radio" name="responsive" v-model="responsive" id="scroll" :value="true">
                 <label for="scroll">Scroll</label>
               </div>
-              <div class="input-container">
-                <input type="radio" name="exclude" v-model="exclude" id="excludeTrue" v-bind:value="true">
-                <label for="excludeTrue">Exclude</label>
-                <input type="radio" name="exclude" v-model="exclude" id="excludeFalse" v-bind:value="false">
-                <label for="excludeFalse">All</label>
-              </div>
             </b-th>
             <b-th class="header" :colspan="names.length">AI classification</b-th>
           </b-tr>
@@ -179,6 +173,7 @@ export default {
     padding: 0;
     vertical-align: middle;
   }
+  
   .input-container {
     text-align: left;
     label {
