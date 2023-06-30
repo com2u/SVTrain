@@ -317,6 +317,26 @@ const asyncCalculate = async (job, done) => {
   //   safe: boolean,      // if true, only recalculate folders that haven't been calculated yet
   //                       // for performance reasons
   // }
+  
+  
+  // Timer Stuff for measuring time efficiency
+  var startTime, endTime;
+
+  function startTimer() {
+    startTime = new Date();
+  };
+
+  function endTimer() {
+    endTime = new Date();
+    var timeDiff = endTime - startTime; //in ms
+    // strip the ms
+    timeDiff /= 1000;
+
+    // get seconds 
+    var seconds = Math.round(timeDiff);
+    return seconds;
+  }
+
   const folderToRecalculate = job.data.dir || CONST_PATHS.root;
   const uniqueWorkspaces = new Set();
   try {
