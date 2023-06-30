@@ -214,7 +214,7 @@
         @click="createNewFolder"
       >
         <b-icon icon="plus-circle"></b-icon>
-        New Workspace
+        New folder
       </div>
     </div>
   </div>
