@@ -173,7 +173,6 @@ export default {
     padding: 0;
     vertical-align: middle;
   }
-  
   .input-container {
     text-align: left;
     label {
