@@ -354,8 +354,78 @@ export default {
           {
             label: 'Network architecture',
             field: 'network_architecture',
-            type: types.TEXT,
+            type: types.SELECT,
             options: {
+              dataset: [
+                {
+                  value: 'net_CPCP',
+                  label: 'net_CPCP',
+                },
+                {
+                  value: 'net_CPCPCP',
+                  label: 'net_CPCPCP',
+                },
+                {
+                  value: 'net_CPCPCPCP',
+                  label: 'net_CPCPCPCP',
+                },
+                {
+                  value: 'net_CCPCCP',
+                  label: 'net_CCPCCP',
+                },
+                {
+                  value: 'net_CCPCCPCCP',
+                  label: 'net_CCPCCPCCP',
+                },
+                {
+                  value: 'net_CCPCCPCCPCCP',
+                  label: 'net_CCPCCPCCPCCP',
+                },
+                {
+                  value: 'VGG16',
+                  label: 'VGG16',
+                },
+                {
+                  value: 'InceptionV3',
+                  label: 'InceptionV3',
+                },
+                {
+                  value: 'MobileNetV2',
+                  label: 'MobileNetV2',
+                },
+                {
+                  value: 'EfficientNetB0',
+                  label: 'EfficientNetB0',
+                },
+                {
+                  value: 'EfficientNetB1',
+                  label: 'EfficientNetB1',
+                },
+                {
+                  value: 'EfficientNetB2',
+                  label: 'EfficientNetB2',
+                },
+                {
+                  value: 'EfficientNetB3',
+                  label: 'EfficientNetB3',
+                },
+                {
+                  value: 'EfficientNetB4',
+                  label: 'EfficientNetB4',
+                },
+                {
+                  value: 'EfficientNetB5',
+                  label: 'EfficientNetB5',
+                },
+                {
+                  value: 'EfficientNetB6',
+                  label: 'EfficientNetB6',
+                },
+                {
+                  value: 'EfficientNetB7',
+                  label: 'EfficientNetB7',
+                },
+              ],
               help: "is the network architecture e.g. 'net_CPCPCP' or 'InceptionV3'",
             },
           },
