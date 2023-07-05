@@ -55,5 +55,4 @@ const readDirOptimal = async function (dir) {
   return result
 }
 
-
-module.exports = readDirOptimal;
+module.exports.readDirOptimal = readDirOptimal
