@@ -3,7 +3,7 @@ const Env = use('Env');
 const child_process = require("child_process");
 const Statistic = use('Statistic');
 const path = require('path');
-const recursive = require('../../../services/recursive');
+const {readDirOptimal} = require('../../../services/recursive');
 const {promisify} = require('util');
 const fs = require('fs');
 const { Sequelize, DataTypes, Op } = require('sequelize');
@@ -319,10 +319,11 @@ const asyncCalculate = async (job, done) => {
   //   safe: boolean,      // if true, only recalculate folders that haven't been calculated yet
   //                       // for performance reasons
   // }
+
   const folderToRecalculate = job.data.dir || CONST_PATHS.root;
   const uniqueWorkspaces = new Set();
   try {
-    const dirs = await recursive(folderToRecalculate);
+    const dirs = await readDirOptimal(folderToRecalculate);
     await Promise.all(
       dirs.map(async (dir) => {
         const currentWsDir = path.join(CONST_PATHS.root, dir.replace(CONST_PATHS.root, '').split('/').filter(x => x?.length)[0])
