@@ -4,6 +4,7 @@
       class="folder-label"
       :style="indent"
       :class="wsPath === systemConfig.root + info.path ? 'selected' : ''"
+      @click="setWorkspace"
     >
       <div class="folder-label-name" :class="!depth ? 'root-item' : ''">
         <span class="icon-wrapper expand-icon">
@@ -19,14 +20,14 @@
                 v-if="showChildren"
                 icon="triangle-fill"
                 class="option-icon clickable-icon"
-                @click="toggleShowChildren"
+                @click.stop="toggleShowChildren"
               />
               <b-icon
                 v-else
                 rotate="90"
                 icon="triangle-fill"
                 class="option-icon clickable-icon"
-                @click="toggleShowChildren"
+                @click.stop="toggleShowChildren"
               />
             </template>
             <span v-else class="margin-keeper" />
@@ -34,7 +35,6 @@
         </span>
         <span
           class="name"
-          @click="setWorkspace"
           :style="{
             fontSize: subFolderFontSize,
           }"
