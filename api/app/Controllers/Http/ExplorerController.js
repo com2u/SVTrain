@@ -1938,10 +1938,17 @@ class ExplorerController {
       const f = backupFiles[i];
       const flStat = await lstat(path.join(backupPath, f));
       if (flStat.isFile() && f.endsWith(".zip")) {
+        var tmpName = f.split("__")[0]
+        var date_created = f.split("__")[1] 
+        if (date_created){
+          date_created = date_created.replace(".zip", "")
+        }else if (tmpName){
+          tmpName = tmpName.replace(".zip", "")
+        }
         backupZips.push({
           path:   f,
-          name: f.split("__")[0],
-          date_created: f.split("__")[1].replace(".zip", ""),
+          name: tmpName,
+          date_created: date_created,
           size: flStat.size
         })
       }
