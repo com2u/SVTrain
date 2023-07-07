@@ -16,7 +16,7 @@ const developmentUrl = 'http://localhost:3333'
 
 export const getAPIRoot = () => (`${isProduction() ? productionUrl : developmentUrl}/api`)
 
-export const getFileServerPath = () => (isProduction() ? `${productionUrl}/data` : `${developmentUrl}/api/data`)
+export const getFileServerPath = () => (isProduction() ? `${productionUrl}/data/` : `${developmentUrl}/api/data/`)
 
 export function getSocketProtocol() {
   return window.location.hostname === 'localhost' ? 'ws://' : 'wss://'
