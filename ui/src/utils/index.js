@@ -11,16 +11,12 @@ export const getToken = () => localStorage.getItem('sessionToken', null)
 
 export const isProduction = () => (process.env.NODE_ENV || 'production') === 'production'
 
-export const getFileServerPath = () => `${window.location.protocol}//${window.location.hostname}${
-  window.location.port
-    ? `:${(process.env.NODE_ENV || 'production') === 'production' ? window.location.port : 3333}`
-    : ''
-}/api/data/`
+const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}`
+const developmentUrl = 'http://localhost:3333'
 
-const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api`
-const developmentUrl = 'http://localhost:3333/api'
+export const getAPIRoot = () => (`${isProduction() ? productionUrl : developmentUrl}/api`)
 
-export const getAPIRoot = () => (isProduction() ? productionUrl : developmentUrl)
+export const getFileServerPath = () => (isProduction() ? `${productionUrl}/data` : `${developmentUrl}/api/data`)
 
 export function getSocketProtocol() {
   return window.location.hostname === 'localhost' ? 'ws://' : 'wss://'
