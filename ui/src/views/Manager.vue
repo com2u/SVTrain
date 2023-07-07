@@ -443,9 +443,13 @@ export default {
     },
     async loadWorkspacesAndBackups() {
       this.loading = true
-      const response = await api.getRootFolderContent()
-      this.folders = response.folders
-      this.backups = response.backupZips
+      try {
+        const response = await api.getRootFolderContent()
+        this.folders = response.folders
+        this.backups = response.backupZips
+      } catch (error) {
+        console.log(error)
+      }
       this.loading = false
     },
     humanFileSize(bytes, si = false, dp = 1) {

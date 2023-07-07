@@ -158,11 +158,15 @@ export default {
     // },
     async loadFoldersByPath(dir = null, useCache = true) {
       this.loading = true
-      const response = await api.getFoldersByPath(dir, null, null, useCache)
-      response.forEach((f) => {
-        this.populatedFolders.push(f.path)
-      })
-      this.folders = response
+      try {
+        const response = await api.getFoldersByPath(dir, null, null, useCache)
+        response.forEach((f) => {
+          this.populatedFolders.push(f.path)
+        })
+        this.folders = response
+      } catch (error) {
+        console.log(error)
+      }
       this.loading = false
     },
     saveNotes() {
