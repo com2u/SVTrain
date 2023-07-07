@@ -1640,10 +1640,17 @@ class ExplorerController {
     return files.filter(file => file.isDirectory()).length > 0;
   }
 
+  _convertDecimalUptoTwoDigit(selectionPercentage) {
+    if (selectionPercentage % 1 === 0) {
+      return selectionPercentage;
+    }
+    return selectionPercentage.toFixed(2)
+  }
+
   async confusionMatrix({request}) {
     const {left, right} = request.post();
     logger.info(`User ${request.currentUser.username} has compared workspace between ${left} and ${right}`);
-    const cog = await this.getJsonConfig(path.join(right, '.cfg'));
+    const cog = await this.getJsonConfig(path.join(CONST_PATHS.root,right, '.cfg'));
     const compare_folders = (await folderTravel(path.join(CONST_PATHS.root, left), true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder).sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
     const active_folders = (await folderTravel(path.join(CONST_PATHS.root, right), true, cog['CMExtensions'])).filter(x => x.type === FTYPES.folder)
     const compare_names = compare_folders.map(x => x.name);
@@ -1670,8 +1677,10 @@ class ExplorerController {
       new_active_folders[index].files = new_active_folders[index].files.concat(x.files)
     })
     let matrix = [];
+    let percentageMatrix = [];
     for (let i = 0; i < compare_folders.length; i++) {
       matrix[i] = []
+      percentageMatrix[i] = []
       for (let j = 0; j < new_active_folders.length; j++) {
         let count = 0
         const colFiles = compare_folders[i].files
@@ -1682,11 +1691,13 @@ class ExplorerController {
           }
         })
         matrix[i][j] = count
+        percentageMatrix[i][j] = this._convertDecimalUptoTwoDigit((count / compare_folders[i].files.length) * 100);
       }
     }
     return {
       matrix,
       compareNames: compare_names,
+      percentageMatrix
     }
   }
 
@@ -1939,7 +1950,7 @@ class ExplorerController {
       const flStat = await lstat(path.join(backupPath, f));
       if (flStat.isFile() && f.endsWith(".zip")) {
         var tmpName = f.split("__")[0]
-        var date_created = f.split("__")[1] 
+        var date_created = f.split("__")[1]
         if (date_created){
           date_created = date_created.replace(".zip", "")
         }else if (tmpName){

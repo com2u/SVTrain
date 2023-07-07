@@ -26,16 +26,52 @@
               </b-td>
               <b-td style="width: 20%" class="header">{{row}}</b-td>
               <b-td v-for="(col, index2) in cols" :key="index2" :class="{'main-diagonal': index1 === index2}">
-                <span v-if="matrix[index2][index1] > 0" class="clickable-text">
-                  <a href="javascript:;" v-on:click="select(col, row)">
-                    <span>{{ matrix[index2][index1] }}</span>
-                  </a>
-                </span>
-                <span v-else class="gray-text">0</span>
-              </b-td>
+                <div v-if="valuesView === 'absolute'">
+                  <span
+                    v-if="matrix[index2][index1] > 0"
+                    class="clickable-text"
+                  >
+                    <a href="javascript:;" v-on:click="select(col, row)">
+                      <span>{{ matrix[index2][index1] }}</span>
+                    </a>
+                  </span>
+                  <span v-else class="gray-text">0</span>
+                </div>
+                <div v-else>
+                  <span
+                    v-if="percentageMatrix[index2][index1] > 0"
+                    class="clickable-text"
+                  >
+                    <a href="javascript:;" v-on:click="select(col, row)">
+                      <span>{{ percentageMatrix[index2][index1] + "%" }}</span>
+                    </a>
+                  </span>
+                  <span v-else class="gray-text">0%</span>
+                </div>
+               </b-td>
             </b-tr>
           </b-tbody>
         </b-table-simple>
+        <div class="input-container value-type-input">
+          <input
+            type="radio"
+            name="view"
+            v-model="valuesView"
+            id="absoluteView"
+            value="absolute"
+            @click="changeDataDisplayFormat(true)"
+          />
+          <label for="absoluteView">Absolute Numbers</label>
+          <input
+            type="radio"
+            name="view"
+            v-model="valuesView"
+            id="percentageView"
+            value="percentage"
+            @click="changeDataDisplayFormat(false)"
+          />
+          <label for="percentageView">Percentage</label>
+        </div>
       </div>
       <div v-else class="right-side-section">
         <span v-if="isLoading">Data are loading...</span>
@@ -58,6 +94,8 @@ export default {
       subPaths: [],
       currentRight: '',
       matrix: [],
+      percentageMatrix: [],
+      valuesView: 'absolute',
       cols: [],
       rows: [],
     }
@@ -89,8 +127,9 @@ export default {
         left = `${left}/${subPath}`
         right = `${right}/${subPath}`
       }
-      const { matrix, compareNames } = await api.fetchConfusionMatrix(left, right)
+      const { matrix, compareNames, percentageMatrix } = await api.fetchConfusionMatrix(left, right)
       this.matrix = matrix
+      this.percentageMatrix = percentageMatrix
       this.cols = compareNames
       this.rows = compareNames.concat('Order')
       this.isLoading = false
@@ -119,6 +158,13 @@ export default {
           exclude: this.exclude ? '!' : null,
         },
       })
+    },
+    changeDataDisplayFormat(isAbsolute) {
+      if (isAbsolute) {
+        this.valuesView = 'absolute'
+      } else {
+        this.valuesView = 'percentage'
+      }
     },
   },
 }
