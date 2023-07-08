@@ -1,6 +1,6 @@
 {
   "name": "adonis-fullstack-app",
-  "version": "4.1.2",
+  "version": "4.1.1",
   "adonis-version": "4.1.1",
   "description": "The fullstack application boilerplate for Adonisjs",
   "main": "index.js",
