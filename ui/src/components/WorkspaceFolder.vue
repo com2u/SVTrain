@@ -19,14 +19,14 @@
               <b-icon
                 v-if="showChildren"
                 icon="triangle-fill"
-                class="option-icon clickable-icon"
+                class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
               />
               <b-icon
                 v-else
                 rotate="90"
                 icon="triangle-fill"
-                class="option-icon clickable-icon"
+                class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
               />
             </template>
@@ -70,7 +70,7 @@
                 info.name.toLowerCase() !== info.unclassifiedPath &&
                 (showSubFolderProgress || depth === 0),
             }"
-            @click="
+            @click.stop="
               !(
                 !(showSubFolderProgress || depth === 0) ||
                 info.name.toLowerCase() === info.unclassifiedPath ||
@@ -87,7 +87,7 @@
               icon="bar-chart-fill"
               :class="canViewStatistics ? 'clickable-icon' : 'gray-icon'"
               font-scale="1.5"
-              @click="showStatistic"
+              @click.stop="showStatistic"
             />
           </div>
           <div v-b-tooltip.hover class="icon-wrapper" title="Notes">
@@ -95,14 +95,14 @@
               :icon="info && info.highlight ? 'file-text-fill' : 'file-text'"
               class="svg-icon clickable-icon"
               :class="info.highlight ? 'highlight' : ''"
-              @click="showNotes"
+              @click.stop="showNotes"
             />
           </div>
           <div
             v-b-tooltip.hover
             v-if="canSeeConfusionMatrix"
             class="icon-wrapper clickable"
-            @click="showConfusionMatrix()"
+            @click.stop="showConfusionMatrix()"
             title="Compare Workspaces"
           >
             <svg
@@ -170,7 +170,7 @@
               :class="info.isDB ? 'gray-icon' : 'clickable-icon'"
               icon="shuffle"
               font-scale="1.5"
-              @click="syncDB"
+              @click.stop="syncDB"
             />
           </div>
           <div class="icon-wrapper" v-b-tooltip.hover title="Workspace Settings">
@@ -180,7 +180,7 @@
               "
               icon="gear-fill"
               font-scale="1.5"
-              @click="showConfig"
+              @click.stop="showConfig"
             />
           </div>
           <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
@@ -188,7 +188,7 @@
               class="clickable-icon"
               icon="server"
               font-scale="1.5"
-              @click="backup()"
+              @click.stop="backup()"
             />
           </div>
         </div>
@@ -211,7 +211,7 @@
           marginLeft: `${(depth + 1) * 50}px`,
         }"
         v-if="systemConfig.newWorkspace && newWorkspace"
-        @click="createNewFolder"
+        @click.stop="createNewFolder"
       >
         <b-icon icon="plus-circle"></b-icon>
         New folder
