@@ -157,7 +157,7 @@ const buildSubfolderTable = async (dir, subfolders) => {
           await Promise.all(
             flist.map(async fileFromSF => {
               const fileFromSF_lstat = await lstat(path.join(dir, anotherSubfolder, fileFromSF));
-              if (fileFromSF_lstat.isFile() && fileFromSF.toLowerCase().includes(subfolder.toLowerCase())) {
+              if (fileFromSF_lstat.isFile() && fileFromSF.split('___')[0].toLowerCase().includes(subfolder.toLowerCase())) {
                 table[subfolder][anotherSubfolder].all += 1;
                 if (!fileFromSF.includes('!')) {
                   table[subfolder][anotherSubfolder].exclude += 1;
@@ -262,7 +262,7 @@ const classifyFilesOfDir = async (dir, currentWsDir) => {
       ) {
         if (isUnclassified) localStateData.unclassified++;
         else localStateData.classified++;
-        if (f.toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
+        if (f.split('___')[0].toLowerCase().indexOf(dirname.toLowerCase()) > -1) {
           localStateData.matched++;
         } else {
           localStateData.mismatched++;
@@ -545,7 +545,7 @@ class ExplorerController {
               name: f,
               type: FTYPES.file,
               image: regexpForImages.test(f),
-              match: f.toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1,
+              match: f.split('___')[0].toLowerCase().indexOf(dir.split(path.sep)[dir.split(path.sep).length - 1].toLowerCase()) > -1,
               size: flstat.size,
               date_mod: flstat.mtimeMs,
               date_create: flstat.birthtimeMs,
