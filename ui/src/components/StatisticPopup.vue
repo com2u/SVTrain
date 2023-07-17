@@ -10,13 +10,13 @@
         <div class="caption">
           <div>{{currentFolder}}</div>
           <div>
-            Matched: {{ this.isDataFormatAbsolute ? this.statistic.matched : convertDecimalUptoTwoDigit((this.statistic.matched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
+            Matched: {{ this.isDataFormatAbsolute ? this.statistic.matched : convertDecimalUptoTwoDigit((this.statistic.matched/(this.statistic.classified + this.statistic.unclassified))*100) + '%'}}
             | Mismatched: {{
               this.isDataFormatAbsolute ? this.statistic.mismatched
-              : convertDecimalUptoTwoDigit((this.statistic.mismatched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
+              : convertDecimalUptoTwoDigit((this.statistic.mismatched/(this.statistic.classified + this.statistic.unclassified))*100) + '%'}}
             | Unclassified: {{
               this.isDataFormatAbsolute ? this.statistic.unclassified
-              : convertDecimalUptoTwoDigit((this.statistic.unclassified/(this.statistic.matched + this.statistic.mismatched))*100) + '%'
+              : convertDecimalUptoTwoDigit((this.statistic.unclassified/(this.statistic.classified + this.statistic.unclassified))*100) + '%'
               }}
           </div>
         </div>
