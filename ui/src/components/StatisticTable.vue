@@ -27,7 +27,7 @@
               <span class="rotation">User classification</span>
             </b-td>
             <b-td class="header">{{name1}}</b-td>
-            <b-td v-for="(name2, index2) in names" :key="name2" :class="{'main-diagonal': index1 === index2, 'non-diagonal': index1 !== index2}">
+            <b-td v-for="(name2, index2) in names" :key="name2" :class="{'main-diagonal': index1 === index2}">
               <span v-if="table[name2][name1].all > 0" class="clickable-text">
                 <a href="javascript:;" v-on:click="select(name1, name2)">
                   <span v-if="valuesView === 'absolute'">
@@ -135,10 +135,6 @@ export default {
 
     .main-diagonal {
       background: #BFB8AF;
-    }
-
-    .non-diagonal {
-      background: #FFCCCB;
     }
 
     .header {
