@@ -8,37 +8,47 @@
           </div>
         </div>
         <div class="cmd-main-menu">
-          <div>Workspace: <strong>{{ currentWs}}</strong></div>
+          <div>Workspace: <strong>{{ currentWs }}</strong></div>
           <div v-if="running !== null" v-html="running || 'idle'"></div>
           <b v-else>no info</b>
           <b-button v-if="editConfigAI" class="mt-2" @click="showModal()">
-            <v-icon name="cogs"/>
+            <v-icon name="cogs" />
             <span class="ml-2">Settings</span>
           </b-button>
           <template v-for="command in commands">
             <div v-if="aiOptions[command.value]" :key="command.value" class="cmd">
-              <b-button
-                class="svtrain-cmd-btn"
+              <b-button class="svtrain-cmd-btn"
                 :class="command.value === 'script_stop_training' ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_training' && !running || command.value !== 'script_stop_training' && !!running"
                 v-on:click="runCommand(command.value, workspace)">
-                <v-icon v-if="!command.icon" v-bind:name="command.value === 'script_stop_training' ? 'stop' : 'play'"/>
+                <v-icon v-if="!command.icon" v-bind:name="command.value === 'script_stop_training' ? 'stop' : 'play'" />
                 <svg-icon v-else :icon-class="command.icon"></svg-icon>
-                <span class="ml-2">{{command.label}}</span>
+                <span class="ml-2">{{ command.label }}</span>
               </b-button>
               <span v-if="isLoading[command.value]">Running...</span>
-              <pre
-                style="padding-left: 10px"
-                v-if="logs[command.value] && logs[command.value].lastLine"
-                class="log-line"
-                @click="openLogsFor(command.value)"
-                v-html="logs[command.value].lastLine"/>
-              <div style="clear: both"/>
+              <pre style="padding-left: 10px" v-if="logs[command.value] && logs[command.value].lastLine" class="log-line"
+                @click="openLogsFor(command.value)" v-html="logs[command.value].lastLine" />
+              <div style="clear: both" />
+            </div>
+          </template>
+          <template v-for="directExport in directExports">
+            <div class="cmd">
+              <b-button class="svtrain-cmd-btn" :class="!doesFolderExist[directExport.value]
+                ? 'btn-stop-command'
+                : 'btn-command'"
+                v-bind:disabled="!doesFolderExist[directExport.value] || (directExport.value === 'export_image' && isdisabled)"
+                v-on:click="runExport(directExport)">
+                <v-icon v-if="!directExport.icon" />
+                <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
+                <span class="ml-2">{{ directExport.label }}</span>
+                <b-spinner v-if="(directExport.value === 'export_image' && isdisabled)" small class="ml-1"
+                  label="Spinning"></b-spinner>
+              </b-button>
             </div>
           </template>
           <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
-        <t-f-option ref="modal" :ws="workspace"/>
+        <t-f-option ref="modal" :ws="workspace" />
       </b-col>
       <b-col cols="9" class="has-board">
         <b-tabs>
@@ -53,6 +63,7 @@
     </b-row>
   </div>
 </template>
+
 <script>
 import axios from 'axios'
 import { getFileServerPath } from '@/utils'
@@ -86,9 +97,20 @@ export default {
           label: 'Cleanup',
         },
       ],
+      directExports: [
+        {
+          value: 'export_image',
+          name: 'images',
+          label: 'Download images',
+          icon: 'ExportImage',
+          path: ''
+        }
+      ],
+      doesFolderExist: { export_image: false },
       trainLog: null,
       tensorBoard: null,
       interval: null,
+      isdisabled: false,
     }
   },
   computed: {
@@ -110,8 +132,33 @@ export default {
         })
       }
     },
+    async runExport(directExport) {
+      if (directExport.value === 'export_image' && this.isdisabled === false) {
+        this.isdisabled = true
+      }
+      await axios
+        .get(`${getFileServerPath()}${this.workspace}${directExport.path}`, { responseType: 'blob', params: { is_export_stream: true, export_value: directExport.value } })
+        .then(response => {
+          const blob = new Blob([response.data], { type: 'application/zip' })
+          const link = document.createElement('a')
+          link.href = URL.createObjectURL(blob)
+          link.download = `${directExport.name}.zip`
+          link.click()
+          URL.revokeObjectURL(link.href)
+        }).catch(error => {
+          console.error(error)
+        })
+      if (directExport.value === 'export_image' && this.isdisabled === true) {
+        this.isdisabled = false
+      }
+    },
     showModal() {
       this.$refs.modal.$refs.modal.show()
+    },
+    async checkFolderExist() {
+      const workspace = await api.getWorkspace()
+      const exportImage = await api.checkFolder(`${workspace}`)
+      this.doesFolderExist.export_image = exportImage === "ok" ? true : false
     },
   },
   watch: {
@@ -123,6 +170,7 @@ export default {
     api.refreshToken()
     this.fetch(true)
     this.interval = setInterval(this.fetch, 2000)
+    this.checkFolderExist()
   },
   beforeDestroy() {
     clearInterval(this.interval)
@@ -146,6 +194,7 @@ export default {
     }
   }
 }
+
 .logs {
   height: 100%;
   display: flex;

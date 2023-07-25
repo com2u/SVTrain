@@ -2,38 +2,48 @@
   <div class="container-fluid">
     <b-row>
       <b-col cols="3">
-      <div class="title-container">
-        <div>
-          <h4>SVTrain</h4>
-        </div>
-      </div>
-      <div class="cmd-main-menu">
-        <div>Workspace: <strong>{{ currentWs}}</strong></div>
-        <div v-if="running !== null" v-html="running || 'idle'"></div>
-        <b v-else>no info</b>
-        <template v-for="command in commands">
-          <div v-if="aiOptions[command.value]" :key="command.value" class="cmd">
-            <b-button
-              class="svtrain-cmd-btn"
-              :class="command.value === 'script_stop_test' ? 'btn-stop-command' : 'btn-command'"
-              v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_test' && !running || command.value !== 'script_stop_test' && !!running"
-              v-on:click="runCommand(command.value, workspace)">
-              <v-icon v-bind:name="command.value === 'script_stop_test' ? 'stop' : 'play'"/>
-              <span class="ml-2">{{command.label}}</span>
-            </b-button>
-            <span v-if="isLoading[command.value]">Running...</span>
-            <pre
-              style="padding-left: 10px; margin-top: 10px"
-              v-if="logs[command.value] && logs[command.value].lastLine"
-              class="log-line"
-              @click="openLogsFor(command.value)"
-              v-html="logs[command.value].lastLine"/>
-            <div style="clear: both"/>
+        <div class="title-container">
+          <div>
+            <h4>SVTrain</h4>
           </div>
-        </template>
-      </div>
-    </b-col>
-    <b-col cols="9" class="has-board">
+        </div>
+        <div class="cmd-main-menu">
+          <div>Workspace: <strong>{{ currentWs }}</strong></div>
+          <div v-if="running !== null" v-html="running || 'idle'"></div>
+          <b v-else>no info</b>
+          <template v-for="command in commands">
+            <div v-if="aiOptions[command.value]" :key="command.value" class="cmd">
+              <b-button class="svtrain-cmd-btn"
+                :class="command.value === 'script_stop_test' ? 'btn-stop-command' : 'btn-command'"
+                v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_test' && !running || command.value !== 'script_stop_test' && !!running"
+                v-on:click="runCommand(command.value, workspace)">
+                <v-icon v-bind:name="command.value === 'script_stop_test' ? 'stop' : 'play'" />
+                <span class="ml-2">{{ command.label }}</span>
+              </b-button>
+              <span v-if="isLoading[command.value]">Running...</span>
+              <pre style="padding-left: 10px; margin-top: 10px" v-if="logs[command.value] && logs[command.value].lastLine"
+                class="log-line" @click="openLogsFor(command.value)" v-html="logs[command.value].lastLine" />
+              <div style="clear: both" />
+            </div>
+          </template>
+          <template v-for="directExport in directExports">
+            <div class="cmd">
+              <b-button class="svtrain-cmd-btn" :class="!doesFolderExist[directExport.value]
+                ? 'btn-stop-command'
+                : 'btn-command'"
+                v-bind:disabled="!doesFolderExist[directExport.value] || (directExport.value === 'export_image' && isdisabled)"
+                v-on:click="runExport(directExport)">
+                <v-icon v-if="!directExport.icon" />
+                <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
+                <span class="ml-2">{{ directExport.label }}</span>
+                <b-spinner v-if="(directExport.value === 'export_image' && isdisabled)" small class="ml-1"
+                  label="Spinning"></b-spinner>
+              </b-button>
+            </div>
+          </template>
+        </div>
+      </b-col>
+      <b-col cols="9" class="has-board">
         <b-tabs>
           <b-tab title="Logs" active>
             <pre v-html="testLog" class="logs"></pre>
@@ -46,6 +56,8 @@
 <script>
 import command from '../mixins/command'
 import api from '../utils/api'
+import { getFileServerPath } from '@/utils'
+import axios from 'axios'
 
 export default {
   name: 'Test',
@@ -66,8 +78,19 @@ export default {
           label: 'Prepare Data',
         },
       ],
+      directExports: [
+        {
+          value: 'export_image',
+          name: 'images',
+          label: 'Download images',
+          icon: 'ExportImage',
+          path: ''
+        }
+      ],
+      doesFolderExist: { export_image: false },
       testLog: null,
       interval: null,
+      isdisabled: false,
     }
   },
   methods: {
@@ -76,11 +99,37 @@ export default {
         this.testLog = res
       })
     },
+    async runExport(directExport) {
+      if (directExport.value === 'export_image' && this.isdisabled === false) {
+        this.isdisabled = true
+      }
+      await axios
+        .get(`${getFileServerPath()}${this.workspace}${directExport.path}`, { responseType: 'blob', params: { is_export_stream: true, export_value: directExport.value } })
+        .then(response => {
+          const blob = new Blob([response.data], { type: 'application/zip' })
+          const link = document.createElement('a')
+          link.href = URL.createObjectURL(blob)
+          link.download = `${directExport.name}.zip`
+          link.click()
+          URL.revokeObjectURL(link.href)
+        }).catch(error => {
+          console.error(error)
+        })
+      if (directExport.value === 'export_image' && this.isdisabled === true) {
+        this.isdisabled = false
+      }
+    },
+    async checkFolderExist() {
+      const workspace = await api.getWorkspace()
+      const exportImage = await api.checkFolder(`${workspace}`)
+      this.doesFolderExist.export_image = exportImage === "ok" ? true : false
+    },
   },
   mounted() {
     api.refreshToken()
     this.getLog()
     this.interval = setInterval(this.getLog, 2000)
+    this.checkFolderExist()
   },
   beforeDestroy() {
     clearInterval(this.interval)

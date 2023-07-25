@@ -20,11 +20,11 @@ String.prototype.replaceAll = function (str1, str2, ignore) {
 }
 
 class FileController {
-  async download({request, params, response}) {
+  async download({ request, params, response }) {
     params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     }) : []
-    const {is_export, sessionToken, field} = request.get()
+    const { is_export, sessionToken, field, is_export_stream, export_value } = request.get()
     if (is_export) {
       logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
@@ -61,6 +61,8 @@ class FileController {
           return response.attachment(fullPath);
         }
       }
+    } else if (is_export_stream) {
+      return this.createZip(export_value, params, response)
     } else {
       const filePath = params.filePath.join('/');
       const isExist = await Drive.exists(decodeURIComponent(filePath));
@@ -77,9 +79,6 @@ class FileController {
           "script_stop_training": Env.get('SCRIPT_STOP_TRAINING'),
           "script_stop_test": Env.get('SCRIPT_STOP_TEST'),
           "script_stop_validation": Env.get('SCRIPT_STOP_VALIDATE'),
-          "script_export_model": Env.get('SCRIPT_EXPORT_MODEL'),
-          "script_export_result": Env.get('SCRIPT_EXPORT_RESULT'),
-          "script_export_image": Env.get('SCRIPT_EXPORT_IMAGE'),
           "script_report": Env.get('SCRIPT_REPORT'),
           "script_split_data": Env.get('SCRIPT_SPLIT_DATA'),
           "path_log_training": Env.get('PATH_LOG_TRAINING'),
@@ -96,6 +95,53 @@ class FileController {
     }
     return 'File does not exist';
   }
+
+  async createZip(export_value, params, response) {
+    const sourceFolder = `/${params.filePath.join('/')}`;
+    const isExportImage = export_value === 'export_image'
+    const cfgFile = isExportImage && JSON.parse(await readFile(`${sourceFolder}/.cfg`, 'utf-8'));
+    const CMExtensions = cfgFile['CMExtensions']
+    const isExist = await exists(sourceFolder);
+    if (isExist) {
+      // Create a writable stream to the response
+      response.header('Content-Type', 'application/zip');
+      response.header('Content-Disposition', 'attachment; filename=final.zip');
+      // Create a new zip archive
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      archive.pipe(response.response);
+      // Recursive function to add files to the zip archive
+      function addFilesToArchive(directory) {
+        const files = fs.readdirSync(directory);
+        files.forEach((file) => {
+          const filePath = path.join(directory, file);
+          const fileExtension = path.extname(filePath).toLowerCase().slice(1);
+          const stat = fs.statSync(filePath);
+          if ((isExportImage && CMExtensions.includes(fileExtension))
+            || (export_value === 'export_model' && stat.isFile())
+            || (export_value === 'export_result' && fileExtension === 'csv')) {
+            // Add the file to the archive, provide some detection for images here
+            archive.file(filePath, { name: file });
+          } else if (stat.isDirectory()) {
+            // Recursively add files from subdirectories
+            addFilesToArchive(filePath);
+          }
+        });
+      }
+      // Start adding files from the specified directory
+      addFilesToArchive(sourceFolder);
+      // throw error
+      archive.on('error', function (err) {
+        throw err;
+      });
+      // Finalize the archive and send it to the client
+      archive.on('end', () => {
+        console.log('Folder zipped successfully.');
+      })
+      await archive.finalize();
+      return true
+    }
+  }
+
 }
 
 module.exports = FileController;
