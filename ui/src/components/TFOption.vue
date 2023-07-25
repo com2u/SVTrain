@@ -213,7 +213,7 @@ export default {
                 },
               ],
               help: 'Specified Resolution for training and model',
-            }
+            },
           },
           {
             label: 'Training Classes',
