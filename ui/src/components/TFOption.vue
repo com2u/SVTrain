@@ -187,18 +187,18 @@ export default {
                   label: 'width',
                   field: '0',
                   type: types.NUMBER,
-                  default: 0,
+                  default: 203,
                   options: {
-                    placeholder: '0',
+                    placeholder: '203',
                   },
                 },
                 {
                   label: 'height',
                   field: '1',
                   type: types.NUMBER,
-                  default: 0,
+                  default: 139,
                   options: {
-                    placeholder: '0',
+                    placeholder: '139',
                   },
                 },
               ],
