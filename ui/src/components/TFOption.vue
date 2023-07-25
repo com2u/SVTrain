@@ -187,18 +187,18 @@ export default {
                   label: 'width',
                   field: '0',
                   type: types.NUMBER,
-                  default: 203,
+                  default: 0,
                   options: {
-                    placeholder: '203',
+                    placeholder: '0',
                   },
                 },
                 {
                   label: 'height',
                   field: '1',
                   type: types.NUMBER,
-                  default: 139,
+                  default: 0,
                   options: {
-                    placeholder: '139',
+                    placeholder: '0',
                   },
                 },
               ],
@@ -887,6 +887,12 @@ export default {
       let data = {
         ...this.fields,
         ...this.data,
+      }
+
+      //changing the resize: [] to resize: {size: []}
+      data = {
+        ...data,
+        resize: data.resize === 'auto' ? data.resize : { size: data.resize }
       }
 
       // convert to json
