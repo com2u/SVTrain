@@ -31,11 +31,10 @@
               <div style="clear: both" />
             </div>
           </template>
-          <template v-for="directExport in directExports">
+          <div v-for="directExport in directExports" :key="directExport.value">
             <div class="cmd">
-              <b-button class="svtrain-cmd-btn" :class="!doesFolderExist[directExport.value]
-                ? 'btn-stop-command'
-                : 'btn-command'"
+              <b-button class="svtrain-cmd-btn"
+                :class="!doesFolderExist[directExport.value] ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!doesFolderExist[directExport.value] || (directExport.value === 'export_image' && isdisabled)"
                 v-on:click="runExport(directExport)">
                 <v-icon v-if="!directExport.icon" />
@@ -45,7 +44,7 @@
                   label="Spinning"></b-spinner>
               </b-button>
             </div>
-          </template>
+          </div>
           <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
         <t-f-option ref="modal" :ws="workspace" />
@@ -63,7 +62,6 @@
     </b-row>
   </div>
 </template>
-
 <script>
 import axios from 'axios'
 import { getFileServerPath } from '@/utils'
@@ -103,8 +101,8 @@ export default {
           name: 'images',
           label: 'Download images',
           icon: 'ExportImage',
-          path: ''
-        }
+          path: '',
+        },
       ],
       doesFolderExist: { export_image: false },
       trainLog: null,
@@ -138,14 +136,14 @@ export default {
       }
       await axios
         .get(`${getFileServerPath()}${this.workspace}${directExport.path}`, { responseType: 'blob', params: { is_export_stream: true, export_value: directExport.value } })
-        .then(response => {
+        .then((response) => {
           const blob = new Blob([response.data], { type: 'application/zip' })
           const link = document.createElement('a')
           link.href = URL.createObjectURL(blob)
           link.download = `${directExport.name}.zip`
           link.click()
           URL.revokeObjectURL(link.href)
-        }).catch(error => {
+        }).catch((error) => {
           console.error(error)
         })
       if (directExport.value === 'export_image' && this.isdisabled === true) {
@@ -158,7 +156,7 @@ export default {
     async checkFolderExist() {
       const workspace = await api.getWorkspace()
       const exportImage = await api.checkFolder(`${workspace}`)
-      this.doesFolderExist.export_image = exportImage === "ok" ? true : false
+      this.doesFolderExist.export_image = exportImage === 'ok'
     },
   },
   watch: {
