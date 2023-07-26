@@ -181,14 +181,14 @@ export default {
             field: 'resize',
             type: types.JSON,
             options: {
-              hasAuto: true,
+              hasAuto: false,
               schemas: [
                 {
                   label: 'Size',
                   field: 'size',
                   type: types.J_ARRAY,
                   options: {
-                    hasAuto: false,
+                    hasAuto: true,
                     schemas: [
                       {
                         label: 'width',
