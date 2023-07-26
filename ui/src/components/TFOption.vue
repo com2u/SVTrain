@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-on:shown="onOpen" size="md" ref="modal" title="AI Settings">
+  <b-modal v-on:shown="onOpen" size="xl" ref="modal" title="AI Settings">
     <template v-if="!canEditConfigAIUI">
       <div id="wsjsoneditor" style="height: 400px" />
     </template>
@@ -179,26 +179,36 @@ export default {
           {
             label: 'Resize',
             field: 'resize',
-            type: types.J_ARRAY,
+            type: types.JSON,
             options: {
-              hasAuto: true,
+              hasAuto: false,
               schemas: [
                 {
-                  label: 'width',
-                  field: '0',
-                  type: types.NUMBER,
-                  default: 0,
+                  label: 'Size',
+                  field: 'size',
+                  type: types.J_ARRAY,
                   options: {
-                    placeholder: '0',
-                  },
-                },
-                {
-                  label: 'height',
-                  field: '1',
-                  type: types.NUMBER,
-                  default: 0,
-                  options: {
-                    placeholder: '0',
+                    hasAuto: true,
+                    schemas: [
+                      {
+                        label: 'width',
+                        field: '0',
+                        type: types.NUMBER,
+                        default: 0,
+                        options: {
+                          placeholder: '0',
+                        },
+                      },
+                      {
+                        label: 'height',
+                        field: '1',
+                        type: types.NUMBER,
+                        default: 0,
+                        options: {
+                          placeholder: '0',
+                        },
+                      },
+                    ],
                   },
                 },
               ],
