@@ -873,9 +873,19 @@ export default {
   methods: {
     async loadFile() {
       const ws = this.ws.split('/').pop()
-      const { data } = await axios.get(
+      let { data } = await axios.get(
         `${getFileServerPath()}${ws}/TFSettings.json`,
       )
+      
+      data = {
+        ...data,
+        group_by_strategy: data.splits_params.group_by_strategy,
+        seed: data.splits_params.seed,
+        split_stages: data.splits_params.split_stages,
+      }
+
+      delete data.splits_params
+
       Object.keys(this.fields).forEach((field) => {
         if (field === 'resize') {
           if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
