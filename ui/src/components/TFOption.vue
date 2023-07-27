@@ -862,7 +862,9 @@ export default {
         group_by_strategy: null,
         seed: null,
         split_stages: {},
-        resize: {},
+        resize: {
+          size: "auto"
+        },
       },
       fetchCount: 1,
       editor: null,
@@ -875,6 +877,11 @@ export default {
         `${getFileServerPath()}${ws}/TFSettings.json`,
       )
       Object.keys(this.fields).forEach((field) => {
+        if (field === 'resize') {
+          if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
+            data[field] = { 'size': data[field] }
+          }
+        }
         this.fields[field] = data[field] || this.fields[field]
       })
       this.fetchCount += 1
