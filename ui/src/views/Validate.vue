@@ -39,16 +39,16 @@
               <div style="clear: both" />
             </div>
           </template>
-          <div v-for="directExport in directExports" :key="directExport.value">
+          <div v-for="directExport in directExports" :key="directExport.mode">
             <div class="cmd">
               <b-button class="svtrain-cmd-btn"
-                :class="!doesFolderExist[directExport.value] ? 'btn-stop-command' : 'btn-command'"
-                v-bind:disabled="!doesFolderExist[directExport.value] || (directExport.value === 'export_image' && isdisabled)"
+                :class="!doesFolderExist[directExport.mode] ? 'btn-stop-command' : 'btn-command'"
+                v-bind:disabled="!doesFolderExist[directExport.mode] || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
                 <v-icon v-if="!directExport.icon" />
                 <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
                 <span class="ml-2">{{ directExport.label }}</span>
-                <b-spinner v-if="(directExport.value === 'export_image' && isdisabled)" small class="ml-1"
+                <b-spinner v-if="(directExport.mode === 'images' && isdisabled)" small class="ml-1"
                   label="Spinning"></b-spinner>
               </b-button>
             </div>
@@ -104,66 +104,65 @@ export default {
       ],
       directExports: [
         {
-          value: 'export_model',
+          mode: 'model',
           label: 'Download model',
           name: 'final',
           icon: 'export',
           path: '/model/final',
         },
         {
-          value: 'export_result',
+          mode: 'result',
           label: 'Download results',
           name: 'results',
           icon: 'export',
-          path: '/model',
+          path: '/model/',
         },
         {
-          value: 'export_image',
+          mode: 'images',
           name: 'images',
           label: 'Download images',
           icon: 'ExportImage',
-          path: '',
+          path: '/validate',
         },
       ],
       validateLog: null,
       interval: null,
       generateAIReportURL: null,
       lastReportURL: null,
-      doesFolderExist: { export_model: false, export_result: false, export_image: false },
+      doesFolderExist: { model: false, result: false, images: false },
       isdisabled: false,
+      workspace: '',
     }
   },
   methods: {
     async runExport(directExport) {
-      if (directExport.value === 'export_image' && this.isdisabled === false) {
+      if (directExport.mode === 'images' && this.isdisabled === false) {
         this.isdisabled = true
       }
-      await axios
-        .get(`${getFileServerPath()}${this.workspace}${directExport.path}`, { responseType: 'blob', params: { is_export_stream: true, export_value: directExport.value } })
-        .then((response) => {
-          const blob = new Blob([response.data], { type: 'application/zip' })
-          const link = document.createElement('a')
-          link.href = URL.createObjectURL(blob)
-          link.download = `${directExport.name}.zip`
-          link.click()
-          URL.revokeObjectURL(link.href)
-        }).catch((error) => {
-          console.error(error)
-        })
-      if (directExport.value === 'export_image' && this.isdisabled === true) {
+      try {
+        const response = await api.exportFiles({ responseType: 'blob', params: { mode: directExport.mode, workspace: this.workspace + directExport.path } })
+        const blob = new Blob([response], { type: 'application/zip' })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = `${directExport.name}.zip`
+        link.click()
+        URL.revokeObjectURL(link.href)
+      } catch (error) {
+        console.log(error.message)
+      }
+      if (directExport.mode === 'images' && this.isdisabled === true) {
         this.isdisabled = false
       }
     },
     async checkFolderExist() {
-      const workspace = await api.getWorkspace()
-      const exportModel = await api.checkFolder(`${workspace}/model/final`)
-      this.doesFolderExist.export_model = exportModel === 'ok'
-      this.doesFolderExist.export_result = true
-      this.doesFolderExist.export_image = true
+      this.workspace = await api.getWorkspace()
+      this.doesFolderExist.model = await api.checkFileExists('model', `${this.workspace}/model/final`)
+      this.doesFolderExist.result = await api.checkFileExists('result', `${this.workspace}/model`)
+      this.doesFolderExist.images = await api.checkFileExists('images', `${this.workspace}/validate`)
     },
     downloadExport(field) {
       if (this.logs[field] === 1) return
-      const url = `${isProduction() ? '' : 'http://127.0.0.1:3333'}api/data/${this.logs[field]
+      const url = `${isProduction() ? '' : 'http://127.0.0.1:3333'}/data/${this.logs[field]
       }?sessionToken=${localStorage.getItem(
         'sessionToken',
       )}&is_export=true&field=${field}`

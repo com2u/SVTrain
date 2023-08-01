@@ -26,16 +26,16 @@
               <div style="clear: both" />
             </div>
           </template>
-          <div v-for="directExport in directExports" :key="directExport.value">
+          <div v-for="directExport in directExports" :key="directExport.mode">
             <div class="cmd">
               <b-button class="svtrain-cmd-btn"
-                :class="!doesFolderExist[directExport.value] ? 'btn-stop-command' : 'btn-command'"
-                v-bind:disabled="!doesFolderExist[directExport.value] || (directExport.value === 'export_image' && isdisabled)"
+                :class="!doesFolderExist[directExport.mode] ? 'btn-stop-command' : 'btn-command'"
+                v-bind:disabled="!doesFolderExist[directExport.mode] || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
                 <v-icon v-if="!directExport.icon" />
                 <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
                 <span class="ml-2">{{ directExport.label }}</span>
-                <b-spinner v-if="(directExport.value === 'export_image' && isdisabled)" small class="ml-1"
+                <b-spinner v-if="(directExport.mode === 'images' && isdisabled)" small class="ml-1"
                   label="Spinning"></b-spinner>
               </b-button>
             </div>
@@ -53,8 +53,6 @@
   </div>
 </template>
 <script>
-import { getFileServerPath } from '@/utils'
-import axios from 'axios'
 import api from '../utils/api'
 import command from '../mixins/command'
 
@@ -79,14 +77,14 @@ export default {
       ],
       directExports: [
         {
-          value: 'export_image',
+          mode: 'images',
           name: 'images',
           label: 'Download images',
           icon: 'ExportImage',
-          path: '',
+          path: '/test',
         },
       ],
-      doesFolderExist: { export_image: false },
+      doesFolderExist: { images: false },
       testLog: null,
       interval: null,
       isdisabled: false,
@@ -99,29 +97,27 @@ export default {
       })
     },
     async runExport(directExport) {
-      if (directExport.value === 'export_image' && this.isdisabled === false) {
+      if (directExport.mode === 'images' && this.isdisabled === false) {
         this.isdisabled = true
       }
-      await axios
-        .get(`${getFileServerPath()}${this.workspace}${directExport.path}`, { responseType: 'blob', params: { is_export_stream: true, export_value: directExport.value } })
-        .then((response) => {
-          const blob = new Blob([response.data], { type: 'application/zip' })
-          const link = document.createElement('a')
-          link.href = URL.createObjectURL(blob)
-          link.download = `${directExport.name}.zip`
-          link.click()
-          URL.revokeObjectURL(link.href)
-        }).catch((error) => {
-          console.error(error)
-        })
-      if (directExport.value === 'export_image' && this.isdisabled === true) {
+      try {
+        const response = await api.exportFiles({ responseType: 'blob', params: { mode: directExport.mode, workspace: this.workspace + directExport.path } })
+        const blob = new Blob([response], { type: 'application/zip' })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = `${directExport.name}.zip`
+        link.click()
+        URL.revokeObjectURL(link.href)
+      } catch (error) {
+        console.log(error.message)
+      }
+      if (directExport.mode === 'images' && this.isdisabled === true) {
         this.isdisabled = false
       }
     },
     async checkFolderExist() {
-      const workspace = await api.getWorkspace()
-      const exportImage = await api.checkFolder(workspace)
-      this.doesFolderExist.export_image = exportImage === 'ok'
+      this.workspace = await api.getWorkspace()
+      this.doesFolderExist.images = await api.checkFileExists('images', `${this.workspace}/test`)
     },
   },
   mounted() {

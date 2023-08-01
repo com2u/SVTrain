@@ -14,9 +14,43 @@ const scriptPath = Env.get('COMMAND_FILES_PATH');
 const storagePath = Env.get('STORAGE_PATH');
 const child_process = require("child_process");
 const logger = require('../../../services/logger');
+const glob = require('glob');
 
 String.prototype.replaceAll = function (str1, str2, ignore) {
   return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
+}
+
+const CONSTANTS = {
+  DEFAULT_CMEXTENSIONS: [
+    "jpg",
+    "png",
+    "bmp"
+  ],
+  pattern: (CMExtensions) => (
+    {
+      images: `**/*.{${CMExtensions ?? CMExtensions.join(',')}}`,
+      result: '**/*.csv',
+      model: '**/*',
+    }
+  )
+}
+
+const retrieveFileExtensionsForImagesFromConfiguration = async (mode, workspace) => {
+  try {
+    const isExportImage = mode === 'images'
+    return isExportImage && await JSON.parse(readFile(`${workspace}.cfgss`, 'utf-8'))['CMExtensions']
+  } catch (error) {
+    logger.error(`Error reading or parsing the configuration file: ${error.message}`);
+    return CONSTANTS.DEFAULT_CMEXTENSIONS
+  }
+}
+const buildFileList = async (mode, workspace) => {
+  try {
+    const CMExtensions = await retrieveFileExtensionsForImagesFromConfiguration(mode, workspace)
+    return glob.sync(CONSTANTS.pattern(CMExtensions)[mode], { cwd: workspace })
+  } catch (error) {
+    logger.error(`Failed to Build File: ${error.message}`);
+  }
 }
 
 class FileController {
@@ -24,7 +58,7 @@ class FileController {
     params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     }) : []
-    const { is_export, sessionToken, field, is_export_stream, export_value } = request.get()
+    const { is_export, sessionToken, field, is_export_stream, mode } = request.get()
     if (is_export) {
       logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
@@ -62,7 +96,7 @@ class FileController {
         }
       }
     } else if (is_export_stream) {
-      return this.createZip(export_value, params, response)
+      return this.createZip(mode, params, response)
     } else {
       const filePath = params.filePath.join('/');
       const isExist = await Drive.exists(decodeURIComponent(filePath));
@@ -95,53 +129,64 @@ class FileController {
     }
     return 'File does not exist';
   }
-
-  async createZip(export_value, params, response) {
-    const sourceFolder = `/${params.filePath.join('/')}`;
-    const isExportImage = export_value === 'export_image'
-    const cfgFile = isExportImage && JSON.parse(await readFile(`${sourceFolder}/.cfg`, 'utf-8'));
-    const CMExtensions = cfgFile['CMExtensions']
-    const isExist = await exists(sourceFolder);
-    if (isExist) {
-      // Create a writable stream to the response
-      response.header('Content-Type', 'application/zip');
-      response.header('Content-Disposition', 'attachment; filename=final.zip');
-      // Create a new zip archive
-      const archive = archiver('zip', { zlib: { level: 9 } });
-      archive.pipe(response.response);
-      // Recursive function to add files to the zip archive
-      function addFilesToArchive(directory) {
-        const files = fs.readdirSync(directory);
-        files.forEach((file) => {
-          const filePath = path.join(directory, file);
-          const fileExtension = path.extname(filePath).toLowerCase().slice(1);
-          const stat = fs.statSync(filePath);
-          if ((isExportImage && CMExtensions.includes(fileExtension))
-            || (export_value === 'export_model' && stat.isFile())
-            || (export_value === 'export_result' && fileExtension === 'csv')) {
-            // Add the file to the archive, provide some detection for images here
-            archive.file(filePath, { name: file });
-          } else if (stat.isDirectory()) {
-            // Recursively add files from subdirectories
-            addFilesToArchive(filePath);
-          }
-        });
-      }
-      // Start adding files from the specified directory
-      addFilesToArchive(sourceFolder);
-      // throw error
-      archive.on('error', function (err) {
-        throw err;
-      });
-      // Finalize the archive and send it to the client
-      archive.on('end', () => {
-        console.log('Folder zipped successfully.');
-      })
-      await archive.finalize();
-      return true
+  async export({ request, params, response }) {
+    const { mode, workspace } = request.get()
+    const isExist = await exists(workspace);
+    if (!isExist) {
+      return response.status(404).json({ message: 'File does not exist' })
     }
-  }
+    // Create a writable stream to the response
+    response.header('Content-Type', 'application/zip');
+    response.header('Content-Disposition', 'attachment; filename=final.zip');
+    // Create a new zip archive
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(response.response);
+    const files = await buildFileList(mode, workspace)
+    files.forEach((file) => {
+      archive.file(`${workspace}/${file}`, { name: file });
+    });
 
+    archive.on('error', function (err) {
+      logger.error(`Problem archiving files : ${err.message}`);
+      response.status(500).send('Failed to Compress File.')
+    });
+    // Finalize the archive and send it to the client
+    archive.on('end', () => {
+      logger.info('Folder zipped successfully.');
+    })
+    await archive.finalize();
+    return true
+  }
+  async checkFileExists({ request, params, response }) {
+    response.implicitEnd = false
+    const { mode, workspace } = request.get()
+    const isExist = await exists(workspace);
+    if (!isExist) {
+      return response.status(404).json({ message: 'File does not exist' })
+    }
+    const files = await buildFileList(mode, workspace)
+    // Initialize an array to store file information
+    const fileData = [];
+    let totalSize = 0;
+    files.forEach((file) => {
+      fs.stat(`${workspace}/${file}`, (error, stats) => {
+        if (error) {
+          logger.error('Error while getting file stats:', error.message);
+          return;
+        }
+        totalSize += stats.size;
+        // Store the file information in the fileData array
+        fileData.push({
+          file,
+          size: stats.size,
+          lastModified: stats.mtime,
+        });
+        if (files.indexOf(file) === files.length - 1) {
+          return response.status(200).json({ fileExist: !!files.length, metadata: fileData, totalSize })
+        }
+      });
+    });
+  }
 }
 
 module.exports = FileController;
