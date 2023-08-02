@@ -35,7 +35,7 @@ const CONSTANTS = {
   )
 }
 
-const retrieveFileExtensionsForImagesFromConfiguration = async (mode, workspace) => {
+const retriveFileExtensions = async (mode, workspace) => {
   try {
     const isExportImage = mode === 'images'
     return isExportImage && await JSON.parse(readFile(`${workspace}.cfgss`, 'utf-8'))['CMExtensions']
@@ -46,7 +46,7 @@ const retrieveFileExtensionsForImagesFromConfiguration = async (mode, workspace)
 }
 const buildFileList = async (mode, workspace) => {
   try {
-    const CMExtensions = await retrieveFileExtensionsForImagesFromConfiguration(mode, workspace)
+    const CMExtensions = await retriveFileExtensions(mode, workspace)
     return glob.sync(CONSTANTS.pattern(CMExtensions)[mode], { cwd: workspace })
   } catch (error) {
     logger.error(`Failed to Build File: ${error.message}`);
