@@ -1,6 +1,7 @@
 <template>
   <div class="ws-container">
     <div
+      data-testid="folder-label"
       class="folder-label"
       :style="indent"
       :class="wsPath === systemConfig.root + info.path ? 'selected' : ''"

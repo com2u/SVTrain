@@ -10,6 +10,7 @@
             placeholder="Login"
             v-model="userLogin"
             @keydown.enter="login"
+            data-testid="userLogin"
           />
         </li>
         <li>
@@ -19,6 +20,7 @@
             placeholder="Type password..."
             v-model="userPassword"
             @keydown.enter="login"
+            data-testid="userPassword"
           />
         </li>
         <li>
@@ -26,11 +28,12 @@
             :disabled="loading"
             @click="login"
             @keydown.enter="login"
+            data-testid="loginButton"
           >
             Login
           </b-button>
         </li>
-        <li v-show="errorMessage.length > 0" class="error-message">
+        <li v-show="errorMessage.length > 0" class="error-message" data-testid="errorMessage">
           {{ errorMessage }}
         </li>
       </ul>
