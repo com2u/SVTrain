@@ -97,27 +97,28 @@ export default {
       })
     },
     async runExport(directExport) {
-      if (directExport.mode === 'images' && this.isdisabled === false) {
+      const { mode, path, name } = directExport
+      if (mode === 'images' && this.isdisabled === false) {
         this.isdisabled = true
       }
       try {
-        const response = await api.exportFiles({ responseType: 'blob', params: { mode: directExport.mode, workspace: this.workspace + directExport.path } })
+        const response = await api.exportFiles({ responseType: 'blob', params: { mode, workspace: this.workspace, path } })
         const blob = new Blob([response], { type: 'application/zip' })
         const link = document.createElement('a')
         link.href = URL.createObjectURL(blob)
-        link.download = `${directExport.name}.zip`
+        link.download = `${name}.zip`
         link.click()
         URL.revokeObjectURL(link.href)
       } catch (error) {
         console.log(error.message)
       }
-      if (directExport.mode === 'images' && this.isdisabled === true) {
+      if (mode === 'images' && this.isdisabled === true) {
         this.isdisabled = false
       }
     },
     async checkFolderExist() {
       this.workspace = await api.getWorkspace()
-      this.doesFolderExist.images = await api.checkFileExists('images', `${this.workspace}/test`)
+      this.doesFolderExist.images = await api.checkFileExists('images', this.workspace, '/test')
     },
   },
   mounted() {

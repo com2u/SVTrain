@@ -38,16 +38,18 @@ const CONSTANTS = {
 const retriveFileExtensions = async (mode, workspace) => {
   try {
     const isExportImage = mode === 'images'
-    return isExportImage && await JSON.parse(readFile(`${workspace}.cfgss`, 'utf-8'))['CMExtensions']
+    const workspaceFile = path.join(workspace, '.cfg');
+    return isExportImage && JSON.parse(await readFile(workspaceFile, 'utf-8'))['CMExtensions']
   } catch (error) {
-    logger.error(`Error reading or parsing the configuration file: ${error.message}`);
+    logger.error(`assuming default values for file extensions: ${error.message}`);
     return CONSTANTS.DEFAULT_CMEXTENSIONS
   }
 }
-const buildFileList = async (mode, workspace) => {
+const buildFileList = async (mode, workspace, path) => {
   try {
     const CMExtensions = await retriveFileExtensions(mode, workspace)
-    return glob.sync(CONSTANTS.pattern(CMExtensions)[mode], { cwd: workspace })
+    const cwd = workspace + path
+    return await glob.sync(CONSTANTS.pattern(CMExtensions)[mode], { cwd })
   } catch (error) {
     logger.error(`Failed to Build File: ${error.message}`);
   }
@@ -58,7 +60,7 @@ class FileController {
     params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     }) : []
-    const { is_export, sessionToken, field, is_export_stream, mode } = request.get()
+    const { is_export, sessionToken, field } = request.get()
     if (is_export) {
       logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
@@ -95,8 +97,6 @@ class FileController {
           return response.attachment(fullPath);
         }
       }
-    } else if (is_export_stream) {
-      return this.createZip(mode, params, response)
     } else {
       const filePath = params.filePath.join('/');
       const isExist = await Drive.exists(decodeURIComponent(filePath));
@@ -130,8 +130,8 @@ class FileController {
     return 'File does not exist';
   }
   async export({ request, params, response }) {
-    const { mode, workspace } = request.get()
-    const isExist = await exists(workspace);
+    const { mode, workspace, path } = request.get()
+    const isExist = await exists(workspace + path);
     if (!isExist) {
       return response.status(404).json({ message: 'File does not exist' })
     }
@@ -141,9 +141,9 @@ class FileController {
     // Create a new zip archive
     const archive = archiver('zip', { zlib: { level: 9 } });
     archive.pipe(response.response);
-    const files = await buildFileList(mode, workspace)
+    const files = await buildFileList(mode, workspace, path)
     files.forEach((file) => {
-      archive.file(`${workspace}/${file}`, { name: file });
+      archive.file(`${workspace + path}/${file}`, { name: file });
     });
 
     archive.on('error', function (err) {
@@ -159,17 +159,17 @@ class FileController {
   }
   async checkFileExists({ request, params, response }) {
     response.implicitEnd = false
-    const { mode, workspace } = request.get()
-    const isExist = await exists(workspace);
+    const { mode, workspace, path } = request.get()
+    const isExist = await exists(workspace + path);
     if (!isExist) {
       return response.status(404).json({ message: 'File does not exist' })
     }
-    const files = await buildFileList(mode, workspace)
+    const files = await buildFileList(mode, workspace, path)
     // Initialize an array to store file information
     const fileData = [];
     let totalSize = 0;
     files.forEach((file) => {
-      fs.stat(`${workspace}/${file}`, (error, stats) => {
+      fs.stat(`${workspace + path}/${file}`, (error, stats) => {
         if (error) {
           logger.error('Error while getting file stats:', error.message);
           return;
