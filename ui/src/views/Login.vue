@@ -10,7 +10,7 @@
             placeholder="Login"
             v-model="userLogin"
             @keydown.enter="login"
-            data-testid="userLogin"
+            data-e2e-testid="userLogin"
           />
         </li>
         <li>
@@ -20,7 +20,7 @@
             placeholder="Type password..."
             v-model="userPassword"
             @keydown.enter="login"
-            data-testid="userPassword"
+            data-e2e-testid="userPassword"
           />
         </li>
         <li>
@@ -28,12 +28,12 @@
             :disabled="loading"
             @click="login"
             @keydown.enter="login"
-            data-testid="loginButton"
+            data-e2e-testid="loginButton"
           >
             Login
           </b-button>
         </li>
-        <li v-show="errorMessage.length > 0" class="error-message" data-testid="errorMessage">
+        <li v-show="errorMessage.length > 0" class="error-message" data-e2e-testid="errorMessage">
           {{ errorMessage }}
         </li>
       </ul>

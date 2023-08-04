@@ -4,7 +4,8 @@
       <b-table-simple
         striped
         :class="{'statistic-table-responsive': responsive}"
-        class="statistic-table">
+        class="statistic-table"
+        data-e2e-testid="statistic-table">
         <b-thead>
           <b-tr>
             <b-th colspan="2" rowspan="2" class="input-conner">
@@ -28,7 +29,7 @@
             </b-td>
             <b-td class="header">{{name1}}</b-td>
             <b-td v-for="(name2, index2) in names" :key="name2" :class="{'main-diagonal': index1 === index2}">
-              <span v-if="table[name2][name1].all > 0" class="clickable-text">
+              <span v-if="table[name2][name1].all > 0" class="clickable-text" :data-e2e-testid="`table${index2}${index1}`">
                 <a href="javascript:;" v-on:click="select(name1, name2)">
                   <span v-if="valuesView === 'absolute'">
                     {{ (table[name2][name1][exclude ? 'exclude' : 'all']).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -38,15 +39,15 @@
                   </span>
                 </a>
               </span>
-              <span v-else class="gray-text">0<span v-show="valuesView === 'percentage'">%</span></span>
+              <span v-else class="gray-text" :data-e2e-testid="`table${index2}${index1}`">0<span v-show="valuesView === 'percentage'">%</span></span>
             </b-td>
           </b-tr>
         </b-tbody>
       </b-table-simple>
       <div class="input-container value-type-input">
-        <input type="radio" name="view" v-model="valuesView" id="absoluteView" value="absolute" @change="changeDataDisplayFormat(true)">
+        <input type="radio" name="view" v-model="valuesView" id="absoluteView" data-e2e-testid="absoluteView" value="absolute" @change="changeDataDisplayFormat(true)">
         <label for="absoluteView">Absolute Numbers</label>
-        <input type="radio" name="view" v-model="valuesView" id="percentageView" value="percentage" @change="changeDataDisplayFormat(false)">
+        <input type="radio" name="view" v-model="valuesView" id="percentageView" data-e2e-testid="percentageView" value="percentage" @change="changeDataDisplayFormat(false)">
         <label for="percentageView">Percentage</label>
       </div>
     </div>

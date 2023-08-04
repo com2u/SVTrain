@@ -2,7 +2,7 @@
   <div class="mt-4">
     <b-row>
       <b-col>
-        <div class="title-container" data-testid="admin-panel">
+        <div class="title-container" data-e2e-testid="admin-panel">
           <div>
             <h4>Admin Panel</h4>
           </div>
@@ -25,11 +25,11 @@
             </b-button>
           </div>
           <div class="cmd">
-            <b-button class="svtrain-cmd-btn" @click="flag = 'log'" data-testid="show-audit-trail">
+            <b-button class="svtrain-cmd-btn" @click="flag = 'log'" data-e2e-testid="show-audit-trail">
               <span class="ml-2">Show Audit Trail</span>
             </b-button>
           </div>
-          <div class="cmd" @click="downloadLog()" data-testid="download-audit-trail">
+          <div class="cmd" @click="downloadLog()" data-e2e-testid="download-audit-trail">
             <b-button class="svtrain-cmd-btn">
               <span class="ml-2">Download Audit Trail</span>
             </b-button>
@@ -47,7 +47,7 @@
         </div>
       </b-col>
       <b-col cols="10" class="has-board">
-        <pre class="main-content" data-testid="main-content" v-show="flag === 'log'" v-html="dataTXT"></pre>
+        <pre class="main-content" data-e2e-testid="main-content" v-show="flag === 'log'" v-html="dataTXT"></pre>
         <div v-show="flag && flag.includes('template_')" class="main-content">
           <div class="mb-4" id="wsjsoneditor" style="height: 650px;"/>
           <b-button variant="primary" @click="saveFile">Save</b-button>
