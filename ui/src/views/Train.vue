@@ -11,7 +11,7 @@
           <div>Workspace: <strong>{{ currentWs}}</strong></div>
           <div v-if="running !== null" v-html="running || 'idle'"></div>
           <b v-else>no info</b>
-          <b-button v-if="editConfigAI" class="mt-2" @click="showModal()">
+          <b-button v-if="editConfigAI" data-e2e-testid="edit-settings" class="mt-2" @click="showModal()">
             <v-icon name="cogs"/>
             <span class="ml-2">Settings</span>
           </b-button>

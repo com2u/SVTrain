@@ -9,6 +9,7 @@
           :key="category"
           v-if="canEditConfigFullAIUI || limitAIUI.includes(category)"
           :class="{ expanded: expandedCategory === category }"
+          :data-e2e-testid="`${category.trim()}`"
         >
           <h5
             @click="
