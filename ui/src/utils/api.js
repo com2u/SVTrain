@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { isProduction } from '@/utils/index'
+import { isProduction, getFileServerPath } from '@/utils/index'
 
 import EventBus from './eventbus'
 
@@ -50,6 +50,9 @@ const urls = {
   deleteWorkspaceImages: `${baseurl}deleteWorkspaceImages`,
   restoreBackup: `${baseurl}restore-backup`,
   setDefaultZoomLevel: `${baseurl}setDefaultZoomLevel`,
+  getExportFiles: `${baseurl}setDefaultZoomLevel`,
+  checkFileExists: `${getFileServerPath()}checkFileExists`,
+  exportFiles: `${getFileServerPath()}export`,
 }
 
 export default {
@@ -161,6 +164,8 @@ export default {
     },
   })).data,
   getExplorerConfig: async (dir, type) => (await axios.get(urls.getExplorerConfig, { params: { dir, type } })).data,
+  checkFileExists: async (mode, workspace, path) => (await axios.get(urls.checkFileExists, { params: { mode, workspace, path } })).data,
+  exportFiles: async (payload) => (await axios.get(urls.exportFiles, { ...payload })).data,
   doForwardOnly: async (selectedFiles, notSelectedFiles, type, batch) => (await axios.post(urls.forwardOnly, {
     selectedFiles,
     notSelectedFiles,

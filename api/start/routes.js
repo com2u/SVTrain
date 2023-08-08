@@ -68,6 +68,8 @@ Route.group(() => {
   Route.post('/restore-backup', 'ExplorerController.restoreBackup').middleware('auth')
 }).prefix('api')
 Route.group(() => {
+  Route.get('/checkFileExists', 'FileController.checkFileExists').middleware('auth')
+  Route.get('/export', 'FileController.export').middleware('auth')
   Route.get('/:filePath*', 'FileController.download').middleware('auth')
 }).prefix('data');
 Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))

@@ -739,24 +739,6 @@ export default {
             options: {},
           },
           {
-            label: 'Export model script',
-            field: 'script_export_model',
-            type: types.TEXT,
-            options: {},
-          },
-          {
-            label: 'Export result script',
-            field: 'script_export_result',
-            type: types.TEXT,
-            options: {},
-          },
-          {
-            label: 'Export images script',
-            field: 'script_export_image',
-            type: types.TEXT,
-            options: {},
-          },
-          {
             label: 'Report script',
             field: 'script_report',
             type: types.TEXT,
@@ -843,9 +825,6 @@ export default {
         script_stop_training: null,
         script_stop_test: null,
         script_stop_validation: null,
-        script_export_model: null,
-        script_export_result: null,
-        script_export_image: null,
         script_report: null,
         script_split_data: null,
         script_visualize_heatmap: null,
@@ -889,7 +868,11 @@ export default {
       Object.keys(this.fields).forEach((field) => {
         if (field === 'resize') {
           if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
+<<<<<<< HEAD
             data[field] = { 
+=======
+            data[field] = {
+>>>>>>> master
               size: data[field],
             }
           }

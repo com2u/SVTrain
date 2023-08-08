@@ -14,17 +14,53 @@ const scriptPath = Env.get('COMMAND_FILES_PATH');
 const storagePath = Env.get('STORAGE_PATH');
 const child_process = require("child_process");
 const logger = require('../../../services/logger');
+const glob = require('glob');
 
 String.prototype.replaceAll = function (str1, str2, ignore) {
   return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof (str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
 }
 
+const CONSTANTS = {
+  DEFAULT_CMEXTENSIONS: [
+    "jpg",
+    "png",
+    "bmp"
+  ],
+  pattern: (CMExtensions) => (
+    {
+      images: `**/*.{${CMExtensions ?? CMExtensions.join(',')}}`,
+      result: '**/*.csv',
+      model: '**/*',
+    }
+  )
+}
+
+const retriveFileExtensions = async (mode, workspace) => {
+  try {
+    const isExportImage = mode === 'images'
+    const workspaceFile = path.join(workspace, '.cfg');
+    return isExportImage && JSON.parse(await readFile(workspaceFile, 'utf-8'))['CMExtensions']
+  } catch (error) {
+    logger.error(`assuming default values for file extensions: ${error.message}`);
+    return CONSTANTS.DEFAULT_CMEXTENSIONS
+  }
+}
+const buildFileList = async (mode, workspace, path) => {
+  try {
+    const CMExtensions = await retriveFileExtensions(mode, workspace)
+    const cwd = workspace + path
+    return await glob.sync(CONSTANTS.pattern(CMExtensions)[mode], { cwd })
+  } catch (error) {
+    logger.error(`Failed to Build File: ${error.message}`);
+  }
+}
+
 class FileController {
-  async download({request, params, response}) {
+  async download({ request, params, response }) {
     params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     }) : []
-    const {is_export, sessionToken, field} = request.get()
+    const { is_export, sessionToken, field } = request.get()
     if (is_export) {
       logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
@@ -77,9 +113,6 @@ class FileController {
           "script_stop_training": Env.get('SCRIPT_STOP_TRAINING'),
           "script_stop_test": Env.get('SCRIPT_STOP_TEST'),
           "script_stop_validation": Env.get('SCRIPT_STOP_VALIDATE'),
-          "script_export_model": Env.get('SCRIPT_EXPORT_MODEL'),
-          "script_export_result": Env.get('SCRIPT_EXPORT_RESULT'),
-          "script_export_image": Env.get('SCRIPT_EXPORT_IMAGE'),
           "script_report": Env.get('SCRIPT_REPORT'),
           "script_split_data": Env.get('SCRIPT_SPLIT_DATA'),
           "path_log_training": Env.get('PATH_LOG_TRAINING'),
@@ -95,6 +128,64 @@ class FileController {
       }
     }
     return 'File does not exist';
+  }
+  async export({ request, params, response }) {
+    const { mode, workspace, path } = request.get()
+    const isExist = await exists(workspace + path);
+    if (!isExist) {
+      return response.status(404).json({ message: 'File does not exist' })
+    }
+    // Create a writable stream to the response
+    response.header('Content-Type', 'application/zip');
+    response.header('Content-Disposition', 'attachment; filename=final.zip');
+    // Create a new zip archive
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(response.response);
+    const files = await buildFileList(mode, workspace, path)
+    files.forEach((file) => {
+      archive.file(`${workspace + path}/${file}`, { name: file });
+    });
+
+    archive.on('error', function (err) {
+      logger.error(`Problem archiving files : ${err.message}`);
+      response.status(500).send('Failed to Compress File.')
+    });
+    // Finalize the archive and send it to the client
+    archive.on('end', () => {
+      logger.info('Folder zipped successfully.');
+    })
+    await archive.finalize();
+    return true
+  }
+  async checkFileExists({ request, params, response }) {
+    response.implicitEnd = false
+    const { mode, workspace, path } = request.get()
+    const isExist = await exists(workspace + path);
+    if (!isExist) {
+      return response.status(404).json({ message: 'File does not exist' })
+    }
+    const files = await buildFileList(mode, workspace, path)
+    // Initialize an array to store file information
+    const fileData = [];
+    let totalSize = 0;
+    files.forEach((file) => {
+      fs.stat(`${workspace + path}/${file}`, (error, stats) => {
+        if (error) {
+          logger.error('Error while getting file stats:', error.message);
+          return;
+        }
+        totalSize += stats.size;
+        // Store the file information in the fileData array
+        fileData.push({
+          file,
+          size: stats.size,
+          lastModified: stats.mtime,
+        });
+        if (files.indexOf(file) === files.length - 1) {
+          return response.status(200).json({ fileExist: !!files.length, metadata: fileData, totalSize })
+        }
+      });
+    });
   }
 }
 
