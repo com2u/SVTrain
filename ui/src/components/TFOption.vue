@@ -843,7 +843,7 @@ export default {
         seed: null,
         split_stages: {},
         resize: {
-          size: 'auto',
+          size: 'auto'
         },
       },
       fetchCount: 1,
@@ -856,6 +856,7 @@ export default {
       let { data } = await axios.get(
         `${getFileServerPath()}${ws}/TFSettings.json`,
       )
+
       data = {
         ...data,
         group_by_strategy: data.splits_params.group_by_strategy,
@@ -870,10 +871,14 @@ export default {
           if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
 <<<<<<< HEAD
             data[field] = { 
+<<<<<<< Updated upstream
 =======
             data[field] = {
 >>>>>>> master
               size: data[field],
+=======
+              size: data[field]
+>>>>>>> Stashed changes
             }
           }
         }
