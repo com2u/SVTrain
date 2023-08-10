@@ -868,7 +868,7 @@ export default {
       Object.keys(this.fields).forEach((field) => {
         if (field === 'resize') {
           if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
-            data[field] = { 
+            data[field] = {
               size: data[field],
             }
           }
