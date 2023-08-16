@@ -29,8 +29,8 @@
           <div v-for="directExport in directExports" :key="directExport.mode">
             <div class="cmd">
               <b-button class="svtrain-cmd-btn"
-                :class="!doesFolderExist[directExport.mode] ? 'btn-stop-command' : 'btn-command'"
-                v-bind:disabled="!doesFolderExist[directExport.mode] || (directExport.mode === 'images' && isdisabled)"
+                :class="!doesFolderExist[directExport.mode].fileExist ? 'btn-stop-command' : 'btn-command'"
+                v-bind:disabled="!doesFolderExist[directExport.mode].fileExist || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
                 <v-icon v-if="!directExport.icon" />
                 <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
@@ -84,7 +84,7 @@ export default {
           path: '/test',
         },
       ],
-      doesFolderExist: { images: false },
+      doesFolderExist: { images: { fileExist: false } },
       testLog: null,
       interval: null,
       isdisabled: false,

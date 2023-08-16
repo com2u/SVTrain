@@ -162,7 +162,7 @@ class FileController {
     const { mode, workspace, path } = request.get()
     const isExist = await exists(workspace + path);
     if (!isExist) {
-      return response.status(404).json({ message: 'File does not exist' })
+      return response.status(200).json({ message: 'File does not exist', fileExist: false })
     }
     const files = await buildFileList(mode, workspace, path)
     // Initialize an array to store file information
