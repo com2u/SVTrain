@@ -194,7 +194,6 @@ export default {
     },
   },
   mounted() {
-    api.refreshToken()
     this.fetch()
     this.getLog()
     this.interval = setInterval(this.getLog, 2000)
