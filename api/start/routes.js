@@ -13,9 +13,12 @@
 |
 */
 
+const logger = use('Logger')
+
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 const Helpers = use('Helpers')
+
 Route.group(() => {
   Route.get('/getFiles', 'ExplorerController.all').middleware('auth')
   Route.get('/getParent', 'ExplorerController.parent').middleware('auth')
@@ -73,4 +76,3 @@ Route.group(() => {
   Route.get('/:filePath*', 'FileController.download').middleware('auth')
 }).prefix('data');
 Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))
-

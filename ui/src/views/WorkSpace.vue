@@ -242,7 +242,6 @@ export default {
       this.loadFoldersByPath(null, true)
     })
     EventBus.$on('load-sub-folders', this.loadSubfolder)
-    api.refreshToken()
     api.calculateStatistic(null, true)
   },
   destroyed() {

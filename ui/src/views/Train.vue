@@ -164,7 +164,6 @@ export default {
     },
   },
   mounted() {
-    api.refreshToken()
     this.fetch(true)
     this.interval = setInterval(this.fetch, 2000)
     this.checkFolderExist()
