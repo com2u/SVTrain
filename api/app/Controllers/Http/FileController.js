@@ -165,27 +165,10 @@ class FileController {
       return response.status(200).json({ message: 'File does not exist', fileExist: false })
     }
     const files = await buildFileList(mode, workspace, path)
-    // Initialize an array to store file information
-    const fileData = [];
-    let totalSize = 0;
-    files.forEach((file) => {
-      fs.stat(`${workspace + path}/${file}`, (error, stats) => {
-        if (error) {
-          logger.error('Error while getting file stats:', error.message);
-          return;
-        }
-        totalSize += stats.size;
-        // Store the file information in the fileData array
-        fileData.push({
-          file,
-          size: stats.size,
-          lastModified: stats.mtime,
-        });
-        if (files.indexOf(file) === files.length - 1) {
-          return response.status(200).json({ fileExist: !!files.length, metadata: fileData, totalSize })
-        }
-      });
-    });
+    if (files.length > 0) {
+      return response.status(200).json({ fileExist: true, })
+    }
+    return response.status(200).json({ fileExist: false, })
   }
 }
 
