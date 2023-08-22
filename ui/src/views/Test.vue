@@ -122,7 +122,6 @@ export default {
     },
   },
   mounted() {
-    api.refreshToken()
     this.getLog()
     this.interval = setInterval(this.getLog, 2000)
     this.checkFolderExist()

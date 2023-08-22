@@ -8,6 +8,7 @@ const routes = [
   {
     name: 'loggedRoutes',
     path: '/',
+    redirect: '/workspace',
     component: LoggedInLayout,
     children: [
       {
@@ -59,7 +60,7 @@ const routes = [
       },
       {
         name: 'WorkSpacePage',
-        path: '/',
+        path: '/workspace',
         component: () => import('../views/WorkSpace'),
       },
       {
@@ -93,11 +94,6 @@ const routes = [
         },
       },
     ],
-  },
-  {
-    name: 'LoginPage',
-    path: '/login',
-    component: () => import('../views/Login.vue'),
   },
 ]
 

@@ -28,7 +28,6 @@ const urls = {
   getLastLogs: `${baseurl}getLastLogs`,
   getLogFor: `${baseurl}logs`,
   login: `${baseurl}login`,
-  refreshToken: `${baseurl}refreshToken`,
   logout: `${baseurl}logout`,
   getConfig: `${baseurl}config`,
   getExplorerConfig: `${baseurl}explorerConfig`,
@@ -246,7 +245,31 @@ export default {
   })).data,
 }
 
-axios.interceptors.response.use((response) => response, (error) => {
+// map session info to local storage to keep legacy code working
+const mapUserInfo = (session) => {
+  try {
+    localStorage.setItem('sessionToken', session.access_token)
+    localStorage.setItem('session', session)
+    localStorage.setItem('sessionUser', session.user.preferred_username)
+    localStorage.setItem('sessionRoles', session.user.roles)
+    localStorage.setItem('refreshToken', session.access_token)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+axios.interceptors.response.use((response) => {
+  try {
+    if (response.headers['x-usersession'] !== '') {
+      const decoded = atob(response.headers['x-usersession'])
+      const jsonSessionInfo = JSON.parse(decoded)
+      mapUserInfo(jsonSessionInfo)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  return response
+}, (error) => {
   console.log(error)
 
   EventBus.$emit('auth_api_error', error)

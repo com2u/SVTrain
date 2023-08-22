@@ -602,7 +602,6 @@ export default {
     },
     saveNotes() {
       this.$store.dispatch('notes/save')
-      api.refreshToken()
     },
     showImageViewer() {
       if (this.selectedFiles.length) {
@@ -946,7 +945,6 @@ export default {
         this.page = this.page_count
       }
       this.sortChanged()
-      api.refreshToken()
       return {
         currentPath: content.path,
       }
@@ -1025,7 +1023,6 @@ export default {
         })
         this.screenFiles[0].cursor = true
       }
-      api.refreshToken()
     },
     currentIndexPage() {
       if (!this.perPage) {
@@ -1064,7 +1061,6 @@ export default {
       this.folder.files = this.folder.files.filter((f) => !([...selected, ...notSelected]).includes(f.path))
       this.selectedFiles = []
       this.sortChanged()
-      api.refreshToken()
     },
     async goToTheFolder(file) {
       if (file.path === this.path) {
@@ -1100,7 +1096,6 @@ export default {
       this.folder.files = this.folder.files.filter((f) => !this.selectedFiles.map((df) => df.path).includes(f.path))
       this.selectedFiles = []
       this.sortChanged()
-      api.refreshToken()
     },
     async moveFiles(dest) {
       if (this.selectedFiles.length === 0) return
@@ -1112,7 +1107,6 @@ export default {
       this.folder.files = this.folder.files.filter((f) => !this.selectedFiles.map((df) => df.path).includes(f.path))
       this.selectedFiles = []
       this.sortChanged()
-      api.refreshToken()
     },
     fileChanged() {
       const self = this
@@ -1271,7 +1265,6 @@ export default {
         return f
       })
       this.sortChanged()
-      api.refreshToken()
     },
     goToPreviousDir() {
       const path = this.relativeDir.split('/')
