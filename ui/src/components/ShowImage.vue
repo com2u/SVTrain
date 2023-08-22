@@ -90,9 +90,6 @@ export default {
     }
   },
   methods: {
-    convertURIPath(p) {
-      return `${p}?token=${localStorage.getItem('sessionToken', null)}`
-    },
     onKeyUp(key) {
       let flag = false
       if (key.keyCode === 187 && this.options.zoomFactor < 8) {

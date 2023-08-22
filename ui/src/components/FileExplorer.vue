@@ -457,7 +457,7 @@ export default {
       },
     },
     viewerImages() {
-      return this.selectedFiles.map((file) => this.convertURIPath(file.serverPath))
+      return this.selectedFiles.map((file) => file.serverPath)
     },
     fontSize() {
       const config = this.systemConfig
@@ -586,9 +586,6 @@ export default {
     window.addEventListener('keyup', this.onKeyUp)
   },
   methods: {
-    convertURIPath(p) {
-      return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem('sessionToken', null)}`
-    },
     imageShowNavigate(flag) {
       const files = this.screenFiles.filter((x) => !x.selected || x.path === this.viewingFile.path)
       const index = files.map((x) => x.path).indexOf(this.viewingFile.path)

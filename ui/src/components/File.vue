@@ -89,7 +89,7 @@ export default {
     }
   },
   mounted() {
-    this.src = this.convertURIPath(this.file.serverPath)
+    this.src = this.file.serverPath
   },
   computed: {
     ...mapGetters(['imageSpacing', 'imageFit', 'imageInvert', 'imageColorMap']),
@@ -103,12 +103,6 @@ export default {
     },
   },
   methods: {
-    convertURIPath(p) {
-      return `${p.replaceAll('#', '{hash_tag}')}?token=${localStorage.getItem(
-        'sessionToken',
-        null,
-      )}`
-    },
     applyImagesFilters() {
       const imgRef = this.$refs.img
       if (!imgRef.classList.contains('unloaded')) return
