@@ -1,0 +1,26 @@
+@startuml
+
+participant "Client" as C
+participant "Openresty\n(Reverse Proxy)" as O
+participant "Keycloak" as K
+participant "Frontend\nApplication" as F
+participant "Backend\nApplication" as B
+
+C -> O : HTTP Request
+note over O : Inspects Session
+
+alt Not Authenticated
+    O -> K : Redirect for SSO
+    K -> O : Authenticated (Access Token)
+    O -> O : Add "X-USERSESSION" header
+end
+
+O -> F : HTTP Request\n("X-USERSESSION" header included)
+F -> B : HTTP Request\n("X-USERSESSION" header included)
+B -> F : HTTP Response\n("X-USERSESSION" header included)
+F -> O : HTTP Response\n("X-USERSESSION" header included)
+
+O -> O : Add "X-USERSESSION" header
+O -> C : HTTP Response\n("X-USERSESSION" header included)
+
+@enduml

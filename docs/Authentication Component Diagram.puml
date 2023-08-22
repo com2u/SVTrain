@@ -7,6 +7,7 @@
 !include AWSPuml/Compute/EC2.puml
 !define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
 !includeurl ICONURL/common.puml
+!includeurl ICONURL/font-awesome/cloud.puml
 !includeurl ICONURL/devicons/docker.puml
 !includeurl ICONURL/devicons/linux.puml
 !includeurl ICONURL/devicons/java.puml
@@ -18,6 +19,10 @@
 !includeurl ICONURL/devicons/nodejs.puml
 !includeurl ICONURL/devicons2/jupyter.puml
 !includeurl ICONURL/devicons2/vuejs.puml
+
+FA_CLOUD(internet,internet,cloud) {
+
+}
 
 package "$EC2IMG() EjectX Instance" {
   DEV_UBUNTU(ubuntu,Ubuntu,node) {
@@ -45,11 +50,11 @@ package "$EC2IMG() EjectX Training with GPU On Demand Instance" {
   }
 }
 
-[svtrain_frontend] -> [keycloak] : OpenID Connect
-[keycloak] -> [svtrain_frontend] : Returns Access/Refresh Token
-[svtrain_frontend] -> [svtrain_backend] : Sends Tokens
-[svtrain_backend] -> [dispatcher] : Orchestrates Dispatcher for new instance
-[dispatcher] -> [mlbackend] : Creates new on demand instance, runs training and watches status
-[dispatcher] -> [svtrain_backend] : Returns Training Status
+[internet] ---> [revproxy] : HTTPS
+[revproxy] --> [svtrain_frontend] : HTTPS with X-USERSESSION header
+[revproxy] --> [jupyter] : HTTPS with X-USERSESSION header
+[revproxy] --> [grafana] : HTTPS with X-USERSESSION header
 
+[revproxy] --> [keycloak] : "SSO Authentication"
+[keycloak] --> [revproxy] : Returns Access/Refresh Token
 @enduml
