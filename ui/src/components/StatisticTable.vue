@@ -29,7 +29,7 @@
             </b-td>
             <b-td class="header">{{name1}}</b-td>
             <b-td v-for="(name2, index2) in names" :key="name2" :class="{'main-diagonal': index1 === index2}">
-              <span v-if="table[name2][name1].all > 0" class="clickable-text" :data-e2e-testid="`table${index2}${index1}`">
+              <span v-if="table[name2][name1].all > 0" class="clickable-text" :data-e2e-testid="`table${name2}${name1}`">
                 <a href="javascript:;" v-on:click="select(name1, name2)">
                   <span v-if="valuesView === 'absolute'">
                     {{ (table[name2][name1][exclude ? 'exclude' : 'all']).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}
@@ -39,7 +39,7 @@
                   </span>
                 </a>
               </span>
-              <span v-else class="gray-text" :data-e2e-testid="`table${index2}${index1}`">0<span v-show="valuesView === 'percentage'">%</span></span>
+              <span v-else class="gray-text" :data-e2e-testid="`table${name2}${name1}`">0<span v-show="valuesView === 'percentage'">%</span></span>
             </b-td>
           </b-tr>
         </b-tbody>

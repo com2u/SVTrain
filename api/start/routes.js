@@ -54,6 +54,7 @@ Route.group(() => {
   Route.post('/deleteWorkspaceImages', 'ExplorerController.deleteWorkspaceImages').middleware('auth')
   Route.post('/backupWorkspace', 'ExplorerController.backupWorkspace').middleware('auth')
   Route.get('/downloadBackup', 'ExplorerController.downloadBackup').middleware('auth')
+  Route.post('/uploadBackup', 'ChunkedUploadController.upload')
   Route.post('/listStatistics', 'ExplorerController.listStatistic').middleware('auth')
   Route.post('/fetchConfusionMatrix', 'ExplorerController.confusionMatrix').middleware('auth')
   Route.post('/convertToDatabase', 'ExplorerController.convert2DB').middleware('auth')

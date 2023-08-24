@@ -1,7 +1,7 @@
 <template>
   <div class="ws-container">
     <div
-      :data-e2e-testid="wsPath === systemConfig.root + info.path ? 'folder-label selected': 'folder-label'"
+      :data-e2e-testid="`workspace-${info.name}`"
       class="folder-label"
       :style="indent"
       :class="wsPath === systemConfig.root + info.path ? 'selected' : ''"
@@ -37,7 +37,7 @@
           </template>
         </span>
         <span
-          data-e2e-testid="workspace-name"
+          :data-e2e-testid="`workspace-inner-folder-${info.name}`"
           class="name"
           :style="{
             fontSize: subFolderFontSize,

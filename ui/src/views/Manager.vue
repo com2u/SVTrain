@@ -148,7 +148,7 @@
         v-bind:key="backup.path"
       >
         <div class="folder-label">
-          <div class="folder-label-name root-item">
+          <div class="folder-label-name root-item" :data-e2e-testid="`${backup.name}`">
             <v-icon name="archive" data-e2e-testid="backup-icon"></v-icon>
             <span
               class="name"
