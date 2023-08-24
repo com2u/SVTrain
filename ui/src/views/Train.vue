@@ -193,7 +193,6 @@ export default {
 
 .logs {
   height: 100%;
-  display: flex;
-  flex-direction: column-reverse;
+  padding: .5rem;
 }
 </style>
