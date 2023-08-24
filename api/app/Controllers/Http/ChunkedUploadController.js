@@ -5,48 +5,17 @@ const fs = require("fs");
 const os = require("os");
 
 const TIMEOUT = 10*60000; // Timeout in milliseconds (30 seconds)
-let chunks = []; // storing chunk's timestamp
 
 class ChunkedUploadController {
-  storeChunkTimeStamp(chunkIndex) {
-    chunks[chunkIndex] = Date.now(); // Update timestamp for chunk
-  }
-
-  checkMissingChunk(totalChunks) {
-    if (chunks.length != totalChunks) {
-      return response.status(400).json({
-        error: "Chunk Missing",
-        message:
-          "Not all chunks were received within the specified time frame.",
-      });
+  deletePartialStoredChunks(totalChunks) {
+    const uploadPath = os.tmpdir();
+    for (let i = 0; i < totalChunks; i++) {
+      const tmpFilePath = path.join(uploadPath, `tempfile${index}.bin`);
+      fs.unlinkSync(tmpFilePath); // Remove individual chunk files
     }
   }
 
-  chunkProcessing(response) {
-    const now = Date.now();
-    for (const chunkIndex in chunks) {
-      if (now - chunks[chunkIndex] > TIMEOUT) {
-        const uploadPath = os.tmpdir();
-        for (const index in chunks) {
-          const tmpFilePath = path.join(uploadPath, `tempfile${index}.bin`);
-          fs.unlinkSync(tmpFilePath); // Remove individual chunk files
-        }
-
-        return response.status(400).json({
-          error: "Chunk Timeout",
-          message:
-            "The upload process took too long within the specified time frame.",
-          hint: "Please ensure a stable internet connection and make sure all chunks are sent in a timely manner.",
-        });
-      }
-    }
-  }
-
-  notifyLastChunkReceived() {
-    chunks = [];
-  }
-
-  async upload({ request, response }) {
+  async upload({ request, response, session }) {
     const { chunk } = request.post();
     const { chunkNumber, totalChunks, filename } = request.only([
       "chunkNumber",
@@ -54,28 +23,39 @@ class ChunkedUploadController {
       "filename",
     ]);
     const file = chunk;
+    const chunkKey = `${filename}_${totalChunks}`;
+    const chunks = session.get(chunkKey, []);
+    chunks[chunkNumber] = Date.now();
+    session.put(chunkKey, chunks);
+
+    const timeoutId = setTimeout(() => {
+      this.deletePartialStoredChunks(totalChunks); // Handle the timeout here, e.g., delete incomplete data or notify the client.
+      session.forget(chunkKey); // Clean up session data
+      response.status(408).send("Chunk upload timeout");
+    }, TIMEOUT);
+
     if (!file) {
       return response.status(400).json({ message: "File not provided" });
     }
-    this.storeChunkTimeStamp(chunkNumber);
     const uploadPath = os.tmpdir();
     const chunkHash = `tempfile${chunkNumber}.bin`;
     const tmpFilePath = path.join(uploadPath, chunkHash);
     try {
-      fs.writeFileSync(tmpFilePath, file, { flag: "a", encoding: "base64" });
-      this.chunkProcessing(response);
-      if (Number(chunkNumber) === Number(totalChunks) - 1) {
+      fs.writeFileSync(tmpFilePath, file, { flag: "w", encoding: "base64" });
+      const allChunksReceived = chunks.length == totalChunks;
+      if (allChunksReceived) {
         return this.combineChunks(totalChunks, filename)
           .then(() => {
             response
               .status(200)
               .json({ message: "File uploaded successfully" });
-
-            this.notifyLastChunkReceived();
+            session.forget(chunkKey);
+            clearTimeout(timeoutId);
           })
           .catch((error) => {
-            // reject(error);
-            this.notifyLastChunkReceived();
+            this.deletePartialStoredChunks(totalChunks);
+            session.forget(chunkKey);
+            clearTimeout(timeoutId);
           });
       } else {
         return response
@@ -83,6 +63,7 @@ class ChunkedUploadController {
           .json({ message: "Chunk uploaded successfully" });
       }
     } catch (error) {
+      this.deletePartialStoredChunks(totalChunks);
       console.error("Error creating write stream:", error);
     }
   }
@@ -102,7 +83,10 @@ class ChunkedUploadController {
     }
     const combinedFilePath = path.join(backupPath, filename);
     try {
-      fs.writeFileSync(combinedFilePath, readStreams.toString(), { flag: "w", encoding: "base64" });
+      fs.writeFileSync(combinedFilePath, readStreams.toString(), {
+        flag: "w",
+        encoding: "base64",
+      });
     } catch (error) {
       console.log("Error creating write stream:", error);
     }
