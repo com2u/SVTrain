@@ -45,8 +45,8 @@ package "$EC2IMG() EjectX Training with GPU On Demand Instance" {
   }
 }
 
-[svtrain_backend] -> [dispatcher] : Orchestrates Dispatcher for new instance
-[dispatcher] -> [mlbackend] : Creates new on demand instance, runs training and watches status
-[dispatcher] -> [svtrain_backend] : Returns Training Status
+[svtrain_backend] --> [dispatcher] : Orchestrates Dispatcher for new instance
+[dispatcher] --> [mlbackend] : Creates new on demand instance, runs training and watches status
+[dispatcher] --> [svtrain_backend] : Returns Training Status
 
 @enduml
