@@ -37,6 +37,7 @@ Route.group(() => {
   Route.get('/getSubfolders', 'ExplorerController.getSubfolders').middleware('auth')
   Route.get('/checkFolder', 'ExplorerController.checkFolder').middleware('auth')
   Route.post('/createFolder', 'ExplorerController.createFolder').middleware('auth')
+  Route.post('/createWorkspace', 'ExplorerController.createWorkspace').middleware('auth')
   Route.get('/getWorkspace', 'ExplorerController.getWorkspace').middleware('auth')
   Route.post('/setWorkspace', 'ExplorerController.setWorkspace').middleware('auth')
   Route.get('/getLastLogs', 'ExplorerController.getLastLogs').middleware('auth')
