@@ -164,9 +164,7 @@ export default {
     downloadExport(field) {
       if (this.logs[field] === 1) return
       const url = `${isProduction() ? '' : 'http://127.0.0.1:3333'}/data/${this.logs[field]
-      }?sessionToken=${localStorage.getItem(
-        'sessionToken',
-      )}&is_export=true&field=${field}`
+      }?is_export=true&field=${field}`
       const link = document.createElement('a')
       link.href = url
       link.setAttribute(

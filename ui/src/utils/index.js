@@ -7,8 +7,6 @@ export const get = (obj, path, defaultValue) => {
   return result === undefined || result === obj ? defaultValue : result
 }
 
-export const getToken = () => localStorage.getItem('sessionToken', null)
-
 export const isProduction = () => (process.env.NODE_ENV || 'production') === 'production'
 
 const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}`

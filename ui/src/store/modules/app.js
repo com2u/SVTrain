@@ -1,5 +1,3 @@
-import api from '../../utils/api'
-
 export default {
   namespaced: true,
   state: {
@@ -86,9 +84,6 @@ export default {
     },
     logout({ commit }) {
       commit('SET_CONFIG', {})
-      localStorage.removeItem('sessionToken')
-      localStorage.removeItem('refreshToken')
-      api.setSessionToken('')
     },
   },
   getters: {

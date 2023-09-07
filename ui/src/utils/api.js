@@ -145,24 +145,6 @@ export default {
       throw e
     }
   },
-  refreshToken: async () => {
-    const { data } = await axios.get(urls.refreshToken, {
-      headers: {
-        refreshToken: localStorage.getItem('refreshToken'),
-      },
-    })
-    if (data && data.sessionToken) {
-      console.log('Refreshed session token')
-      localStorage.setItem('sessionToken', data.sessionToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-    }
-  },
-  setSessionToken: async (token) => {
-    if (!token) {
-      await axios.post(urls.logout)
-    }
-    axios.defaults.headers.common.Authorization = token
-  },
   getConfig: async (isDB) => (await axios.get(urls.getConfig, {
     params: {
       isDB,
@@ -254,11 +236,8 @@ export default {
 // map session info to local storage to keep legacy code working
 const mapUserInfo = (session) => {
   try {
-    localStorage.setItem('sessionToken', session.access_token)
-    localStorage.setItem('session', session)
-    localStorage.setItem('sessionUser', session.user.preferred_username)
-    localStorage.setItem('sessionRoles', session.user.roles)
-    localStorage.setItem('refreshToken', session.access_token)
+    localStorage.setItem('sessionUser', session.preferred_username)
+    localStorage.setItem('sessionRoles', session.roles)
   } catch (e) {
     console.log(e)
   }

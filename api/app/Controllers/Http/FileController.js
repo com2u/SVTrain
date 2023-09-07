@@ -60,7 +60,7 @@ class FileController {
     params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     }) : []
-    const { is_export, sessionToken, field } = request.get()
+    const { is_export, field } = request.get()
     if (is_export) {
       logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
