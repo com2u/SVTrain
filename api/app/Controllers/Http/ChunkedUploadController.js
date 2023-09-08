@@ -7,7 +7,7 @@ const glob = require("glob");
 const { promisify } = require("util");
 const globAsync = promisify(glob);
 const uploadPath = os.tmpdir();
-
+const TIMEOUT = 600000;
 class ChunkedUploadController {
   async deletePartialStoredChunks(testUser) {
     const filePattern = `*_${testUser}.bin`;
@@ -38,6 +38,12 @@ class ChunkedUploadController {
     chunks[chunkNumber] = Date.now();
     session.put(chunkKey, chunks);
 
+    // all the chunks received within 10 mins.
+    if (chunks[chunkNumber] - chunks[0] > TIMEOUT) {
+      this.deletePartialStoredChunks(testUser);
+      return response.status(400).json({ message: "Timeout exceed" });
+    }
+
     if (!file) {
       return response.status(400).json({ message: "File not provided" });
     }
@@ -47,8 +53,8 @@ class ChunkedUploadController {
       fs.writeFileSync(tmpFilePath, file, "base64");
       const allChunksReceived = chunks.length == totalChunks;
       if (allChunksReceived) {
-        try{
-          await this.combineChunks(filename, testUser)
+        try {
+          await this.combineChunks(filename, testUser);
           session.forget(chunkKey);
           this.deletePartialStoredChunks(testUser);
           return response
@@ -58,9 +64,9 @@ class ChunkedUploadController {
           this.deletePartialStoredChunks(testUser);
           session.forget(chunkKey);
           return response
-          .status(500)
-          .json({ message: "File not received properly" });
-        };
+            .status(500)
+            .json({ message: "File not received properly" });
+        }
       } else {
         return response
           .status(200)
@@ -70,8 +76,8 @@ class ChunkedUploadController {
       this.deletePartialStoredChunks(testUser);
       console.error("Error creating write stream:", error);
       return response
-            .status(500)
-            .json({ message: "Error while uploading file" });
+        .status(500)
+        .json({ message: "Error while uploading file" });
     }
   }
 
