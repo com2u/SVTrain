@@ -54,18 +54,18 @@ class ChunkedUploadController {
       const allChunksReceived = chunks.length == totalChunks;
       if (allChunksReceived) {
         try {
-          await this.combineChunks(filename, testUser);
+          await this.combineChunks(filename, testUser, totalChunks);
           session.forget(chunkKey);
           this.deletePartialStoredChunks(testUser);
           return response
             .status(200)
-            .json({ message: "File received successfully" });
+            .json({ message: "All chunks received successfully" });
         } catch (error) {
           this.deletePartialStoredChunks(testUser);
           session.forget(chunkKey);
           return response
             .status(500)
-            .json({ message: "File not received properly" });
+            .json({ message: `All chunks does not received: ${error}` });
         }
       } else {
         return response
@@ -110,6 +110,9 @@ class ChunkedUploadController {
     try {
       // Use await with the promisified globAsync function.
       const files = await globAsync(`${uploadPath}/${filePattern}`);
+      if (files.length !== totalChunks) {
+        throw "some chunks are missing.";
+      }
       //sort file based on index number
       const sortedFiles = this.sortFileBasedOnIndex(files);
       for (const file of sortedFiles) {
@@ -129,6 +132,7 @@ class ChunkedUploadController {
       outputStream.end();
     } catch (err) {
       console.error("Error reading files:", err);
+      throw err;
     }
   }
 }
