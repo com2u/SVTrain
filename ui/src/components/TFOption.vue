@@ -792,6 +792,89 @@ export default {
             options: {},
           },
         ],
+        'AI Report': [
+          {
+            label: 'Include good class',
+            field: 'include_good_class',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Include train parameters',
+            field: 'include_train_parameters',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Good class',
+            field: 'good_class',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Images per row',
+            field: 'n_images_per_row',
+            type: types.NUMBER,
+            options: {},
+          },
+          {
+            label: 'Train',
+            field: 'include_train',
+            type: types.NUMBER,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'Images',
+                  field: 'n_images',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ]
+            },
+          },
+          {
+            label: 'Test',
+            field: 'include_test',
+            type: types.NUMBER,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'Images',
+                  field: 'n_images',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ]
+            }
+          },
+          {
+            label: 'Validate',
+            field: 'include_validate',
+            type: types.NUMBER,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'Images',
+                  field: 'n_images',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ]
+            }
+          },
+        ]
       },
       data: {},
       fields: {
@@ -844,6 +927,13 @@ export default {
         resize: {
           size: 'auto',
         },
+        include_train_parameters: false,
+        include_good_class: false,
+        good_class: "good",
+        n_images_per_row: 0,
+        include_train: false,
+        include_test: false,
+        include_validate: false,
       },
       fetchCount: 1,
       editor: null,
@@ -895,6 +985,25 @@ export default {
         ...this.fields,
         ...this.data,
       }
+
+      // convert to json to AI Report
+      data.ai_report = {
+        include_train_parameters: data.include_train_parameters,
+        include_good_class: data.include_good_class,
+        good_class: data.good_class,
+        n_images_per_row: data.n_images_per_row,
+        include_train: data.include_train === 'auto' ? false : { n_images: data.include_train },
+        include_test: data.include_test === 'auto' ? false : { n_images: data.include_test },
+        include_validate: data.include_validate === 'auto' ? false : { n_images: data.include_validate },
+      }
+
+      delete data.include_train_parameters
+      delete data.include_good_class
+      delete data.good_class
+      delete data.n_images_per_row
+      delete data.include_train
+      delete data.include_test
+      delete data.include_validate
 
       // convert to json
       data.splits_params = {
