@@ -807,7 +807,7 @@ export default {
           },
           {
             label: 'Good class',
-            field: 'good_class',
+            field: 'ai_report_good_class',
             type: types.TEXT,
             options: {},
           },
@@ -855,7 +855,7 @@ export default {
                 },
               ],
               help: 'If auto is set, then include_test: false',
-            }
+            },
           },
           {
             label: 'Validate',
@@ -875,7 +875,7 @@ export default {
                 },
               ],
               help: 'If auto is set, then include_validate: false',
-            }
+            },
           },
         ]
       },
@@ -932,7 +932,7 @@ export default {
         },
         include_train_parameters: false,
         include_good_class: false,
-        good_class: "good",
+        ai_report_good_class: 'good',
         n_images_per_row: 0,
         include_train: false,
         include_test: false,
@@ -993,7 +993,7 @@ export default {
       data.ai_report = {
         include_train_parameters: data.include_train_parameters,
         include_good_class: data.include_good_class,
-        good_class: data.good_class,
+        good_class: data.ai_report_good_class,
         n_images_per_row: data.n_images_per_row,
         include_train: data.include_train === 'auto' ? false : { n_images: data.include_train },
         include_test: data.include_test === 'auto' ? false : { n_images: data.include_test },
@@ -1002,7 +1002,7 @@ export default {
 
       delete data.include_train_parameters
       delete data.include_good_class
-      delete data.good_class
+      delete data.ai_report_good_class
       delete data.n_images_per_row
       delete data.include_train
       delete data.include_test
