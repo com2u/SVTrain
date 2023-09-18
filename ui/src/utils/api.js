@@ -53,6 +53,7 @@ const urls = {
   getExportFiles: `${baseurl}setDefaultZoomLevel`,
   checkFileExists: `${getFileServerPath()}checkFileExists`,
   exportFiles: `${getFileServerPath()}export`,
+  getPdf: (folder) => `${getFileServerPath()}${folder}`,
 }
 
 export default {
@@ -153,6 +154,7 @@ export default {
   getExplorerConfig: async (dir, type) => (await axios.get(urls.getExplorerConfig, { params: { dir, type } })).data,
   checkFileExists: async (mode, workspace, path) => (await axios.get(urls.checkFileExists, { params: { mode, workspace, path } })).data,
   exportFiles: async (payload) => (await axios.get(urls.exportFiles, { ...payload })).data,
+  getPdf: async (payload, folder) => (await axios.get(urls.getPdf(folder), { ...payload })).data,
   doForwardOnly: async (selectedFiles, notSelectedFiles, type, batch) => (await axios.post(urls.forwardOnly, {
     selectedFiles,
     notSelectedFiles,

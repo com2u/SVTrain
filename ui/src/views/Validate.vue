@@ -176,12 +176,13 @@ export default {
     },
     async fetch() {
       const ws = this.currentWs.split('/').pop()
+      const response = await api.getPdf({ responseType: 'blob' }, `${ws}/model/AI-Report.pdf`)
+      this.lastReportURL = URL.createObjectURL(response)
       await axios
         .get(`${getFileServerPath()}${ws}/externalpath.json`)
         .then(({ data }) => {
           if (data) {
             this.generateAIReportURL = data.generateAIReportURL
-            this.lastReportURL = data.lastReportURL
           }
         })
     },
