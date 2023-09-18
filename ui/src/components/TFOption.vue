@@ -833,7 +833,8 @@ export default {
                     placeholder: '0',
                   },
                 },
-              ]
+              ],
+              help: 'If auto is set, then include_train: false',
             },
           },
           {
@@ -852,7 +853,8 @@ export default {
                     placeholder: '0',
                   },
                 },
-              ]
+              ],
+              help: 'If auto is set, then include_test: false',
             }
           },
           {
@@ -871,7 +873,8 @@ export default {
                     placeholder: '0',
                   },
                 },
-              ]
+              ],
+              help: 'If auto is set, then include_validate: false',
             }
           },
         ]
