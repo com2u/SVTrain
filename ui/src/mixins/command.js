@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     openLogsFor(command) {
-      window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`)
+      window.open(`/logs/${command}`)
     },
     async checkStatus() {
       this.running = await api.getRunningState()

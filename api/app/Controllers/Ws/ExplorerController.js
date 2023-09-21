@@ -5,10 +5,9 @@ const uuidv4 = require('uuid').v4
 
 class ExplorerController {
   constructor ({ socket, request }) {
-    const {sessionToken} = request.get()
     this.socket = socket
     this.request = request
-    this.id = sessionToken || uuidv4()
+    this.id = uuidv4()
 
     this.socket.on('close', () => {
       Watcher.deleteSocket(this.id)

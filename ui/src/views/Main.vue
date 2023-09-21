@@ -134,12 +134,9 @@ export default {
       console.log('Calculate statistic process started')
     },
     openLogsFor(command) {
-      window.open(`/logs/${command}?sessionToken=${localStorage.getItem('sessionToken')}`)
+      window.open(`/logs/${command}`)
     },
     logout() {
-      localStorage.removeItem('sessionToken')
-      localStorage.removeItem('refreshToken')
-      api.setSessionToken('')
       this.$router.push({ name: 'LoginPage' })
     },
     gotoWorkspace() {
