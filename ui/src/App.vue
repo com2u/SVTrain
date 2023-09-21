@@ -30,6 +30,12 @@ export default {
     if (this.$store.state.app.user.username) {
       await this.initSocket()
     }
+    const ejectxInstanceNameRegex = /\/\/(.*?)\.ejectx\.de/
+    const match = document.URL.match(ejectxInstanceNameRegex)
+    if (match && match.length > 1) {
+      const ejectxInstanceName = match[1]
+      document.title = `${document.title}${ejectxInstanceName}`
+    }
   },
   watch: {
     // eslint-disable-next-line func-names
