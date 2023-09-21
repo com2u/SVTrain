@@ -1127,7 +1127,7 @@ class ExplorerController {
     if (!folder || !name) return response.status(404).json({ message: 'ExplorerController.createWorkspace: Parameters name and folder are needed' });
     if (!accessToFile(CONST_PATHS.root, folder)) {
       logger.error(`ExplorerController.createFolder: ${request.currentUser.username} had\'t access to ${folder} directory`);
-      return response.status(404).json({ message: 'Access denied' });
+      return response.status(403).json({ message: 'Access denied' });
     }
     const newFolderPath = path.join(folder, name);
     await mkdir(newFolderPath);
@@ -1140,7 +1140,7 @@ class ExplorerController {
     }
     await copyFile(defaultCfgPath, path.join(newFolderPath, '.cfg'));
     logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
-    return response.status(200).json({ message: 'Workspace successfully created!' });
+    return true
   }
 
   /*

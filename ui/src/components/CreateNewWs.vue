@@ -59,6 +59,7 @@ export default {
       this.folders = []
     },
     handleEnter() {
+      if (!this.name) return
       this.createWorkspace().then(() => {
         this.$refs.modal.hide()
       })
