@@ -236,8 +236,8 @@ export default {
 // map session info to local storage to keep legacy code working
 const mapUserInfo = (session) => {
   try {
-    localStorage.setItem('sessionUser', session.preferred_username)
-    localStorage.setItem('sessionRoles', session.roles)
+    localStorage.setItem('sessionUser', session.id_token.preferred_username)
+    localStorage.setItem('sessionRoles', session.id_token.roles)
   } catch (e) {
     console.log(e)
   }

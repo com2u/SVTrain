@@ -12,8 +12,8 @@ const KEYCLOAK_URI = process.env.KEYCLOAK_URI
 const mapUserInfo = (session) => {
   const mapped_session = {}
   try {
-    mapped_session.preferred_username = session.user.preferred_username
-    mapped_session.roles = session.user.roles
+    mapped_session.preferred_username = session.id_token.preferred_username
+    mapped_session.roles = session.id_token.roles
   } catch (e) {
     console.log(e)
   }
