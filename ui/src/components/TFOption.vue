@@ -877,7 +877,7 @@ export default {
               help: 'If auto is set, then include_validate: false',
             },
           },
-        ]
+        ],
       },
       data: {},
       fields: {
@@ -934,15 +934,30 @@ export default {
         include_good_class: false,
         ai_report_good_class: 'good',
         n_images_per_row: 0,
-        include_train: false,
-        include_test: false,
-        include_validate: false,
+        include_train: 'auto',
+        include_test: 'auto',
+        include_validate: 'auto',
       },
       fetchCount: 1,
       editor: null,
     }
   },
   methods: {
+    readAIReportForTFSetting(data) {
+      const updatedData = {
+        ...data,
+        include_train_parameters: data.ai_report.include_train_parameters,
+        include_good_class: data.ai_report.include_good_class,
+        ai_report_good_class: data.ai_report.good_class,
+        n_images_per_row: data.ai_report.n_images_per_row,
+        include_train: data.ai_report.include_train === false ? 'auto' : data.ai_report.include_train.n_images,
+        include_test: data.ai_report.include_test === false ? 'auto' : data.ai_report.include_test.n_images,
+        include_validate: data.ai_report.include_validate === false ? 'auto' : data.ai_report.include_validate.n_images,
+      }
+
+      delete updatedData.ai_report
+      return updatedData
+    },
     async loadFile() {
       const ws = this.ws.split('/').pop()
       let { data } = await axios.get(
@@ -957,6 +972,7 @@ export default {
 
       delete data.splits_params
 
+      data = this.readAIReportForTFSetting(data)
       Object.keys(this.fields).forEach((field) => {
         if (field === 'resize') {
           if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
@@ -979,6 +995,27 @@ export default {
         editor.set(this.data)
       }
     },
+    writeAIReportToTFSetting(data) {
+      const updatedData = data
+      // convert to json to AI Report
+      updatedData.ai_report = {
+        include_train_parameters: data.include_train_parameters,
+        include_good_class: data.include_good_class,
+        good_class: data.ai_report_good_class,
+        n_images_per_row: data.n_images_per_row,
+        include_train: data.include_train === 'auto' ? false : { n_images: data.include_train },
+        include_test: data.include_test === 'auto' ? false : { n_images: data.include_test },
+        include_validate: data.include_validate === 'auto' ? false : { n_images: data.include_validate },
+      }
+
+      delete updatedData.include_train_parameters
+      delete updatedData.include_good_class
+      delete updatedData.ai_report_good_class
+      delete updatedData.n_images_per_row
+      delete updatedData.include_train
+      delete updatedData.include_validate
+      return updatedData
+    },
     async saveFile() {
       if (!this.canEditConfigAIUI && this.editor) {
         this.data = this.editor.get()
@@ -989,24 +1026,7 @@ export default {
         ...this.data,
       }
 
-      // convert to json to AI Report
-      data.ai_report = {
-        include_train_parameters: data.include_train_parameters,
-        include_good_class: data.include_good_class,
-        good_class: data.ai_report_good_class,
-        n_images_per_row: data.n_images_per_row,
-        include_train: data.include_train === 'auto' ? false : { n_images: data.include_train },
-        include_test: data.include_test === 'auto' ? false : { n_images: data.include_test },
-        include_validate: data.include_validate === 'auto' ? false : { n_images: data.include_validate },
-      }
-
-      delete data.include_train_parameters
-      delete data.include_good_class
-      delete data.ai_report_good_class
-      delete data.n_images_per_row
-      delete data.include_train
-      delete data.include_test
-      delete data.include_validate
+      data = this.writeAIReportToTFSetting(data)
 
       // convert to json
       data.splits_params = {
