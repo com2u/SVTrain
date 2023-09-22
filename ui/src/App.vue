@@ -30,11 +30,11 @@ export default {
     if (this.$store.state.app.user.username) {
       await this.initSocket()
     }
-    const ejectxInstanceNameRegex = /\/\/(.*?)\.ejectx\.de/
-    const match = document.URL.match(ejectxInstanceNameRegex)
+    const ejectxInstanceNameRegex = /^(.*?)\.ejectx\.de/
+    const match = window.location.hostname.match(ejectxInstanceNameRegex)
     if (match && match.length > 1) {
       const ejectxInstanceName = match[1]
-      document.title = `${document.title}${ejectxInstanceName}`
+      window.document.title = `${window.document.title}${ejectxInstanceName}`
     }
   },
   watch: {
