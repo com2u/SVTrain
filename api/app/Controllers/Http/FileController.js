@@ -158,13 +158,23 @@ class FileController {
     return true
   }
   async checkFileExists({ request, params, response }) {
-    response.implicitEnd = false
-    const { mode, workspace, path } = request.get()
+    const { mode, workspace, path, type } = request.get()
     const isExist = await exists(workspace + path);
     if (!isExist) {
       return response.status(200).json({ message: 'File does not exist', fileExist: false })
     }
     const files = await buildFileList(mode, workspace, path)
+    // validation for Revert Image Name (to remove class and probability from image file name)
+    if(type === "revertImageName"){
+      for(let file of files){
+        const splitFilename = file.split('/')[file.split('/').length -1].split(/[_][0-1][.][0-9]{4}[_]{1,3}/);
+        if(splitFilename.length === 2){
+          return response.status(200).json({ fileExist: true, })
+        }
+          return response.status(200).json({ fileExist: false, })
+      }
+    }
+
     if (files.length > 0) {
       return response.status(200).json({ fileExist: true, })
     }

@@ -8,7 +8,7 @@
           </div>
         </div>
         <div class="cmd-main-menu">
-          <div>Workspace: <strong>{{ currentWs}}</strong></div>
+          <div>Workspace: <strong>{{ currentWs }}</strong></div>
           <div class="cmd">
             <b-button @click="openLink" class="svtrain-cmd-btn">
               <span class="ml-2">User management</span>
@@ -44,36 +44,51 @@
               <span class="ml-2">Remove Lock File</span>
             </b-button>
           </div>
+          <div class="cmd">
+            <b-button :disabled="isRevertImageNameDisabled"  class="svtrain-cmd-btn d-flex align-items-center justify-content-between" @click="showConfirmationModal">
+              <span class="ml-2">Revert image names</span>
+              <div
+                v-b-tooltip.hover
+                @click.stop=""
+                title="Clicking this button will permanently remove class and probability information from all images in the active workspace. This action is irreversible."
+              >
+              <b-icon icon="info-circle" v-b-tooltip.hover></b-icon>
+              </div>
+            </b-button>
+          </div>
         </div>
       </b-col>
       <b-col cols="10" class="has-board">
         <pre class="main-content" v-show="flag === 'log'" v-html="dataTXT"></pre>
         <div v-show="flag && flag.includes('template_')" class="main-content">
-          <div class="mb-4" id="wsjsoneditor" style="height: 650px;"/>
+          <div class="mb-4" id="wsjsoneditor" style="height: 650px;" />
           <b-button variant="primary" @click="saveFile">Save</b-button>
         </div>
         <table v-if="flag === 'backup'" class="table">
           <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Workspace</th>
-            <th scope="col">Size</th>
-            <th scope="col">Created</th>
-            <th scope="col">Action</th>
-          </tr>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Workspace</th>
+              <th scope="col">Size</th>
+              <th scope="col">Created</th>
+              <th scope="col">Action</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for="item in backups" :key="item.sz">
-            <th scope="row">1</th>
-            <td>{{item.ws}}</td>
-            <td>{{ (item.sz / 1024).toFixed(3) }} kb</td>
-            <td>{{new Date(Number.parseInt(item.created)).toLocaleString()}}</td>
-            <td><b-button @click="restoreBU(item)">Restore</b-button></td>
-          </tr>
+            <tr v-for="item in backups" :key="item.sz">
+              <th scope="row">1</th>
+              <td>{{ item.ws }}</td>
+              <td>{{ (item.sz / 1024).toFixed(3) }} kb</td>
+              <td>{{ new Date(Number.parseInt(item.created)).toLocaleString() }}</td>
+              <td><b-button @click="restoreBU(item)">Restore</b-button></td>
+            </tr>
           </tbody>
         </table>
       </b-col>
     </b-row>
+    <div>
+      <confirmation-modal :id="'confirmation-modal'" @confirmed="handleRenameConfirmation" :confirmationText="confirmationText"></confirmation-modal>
+    </div>
   </div>
 </template>
 
@@ -83,6 +98,7 @@ import { mapGetters } from 'vuex'
 import { getAPIRoot } from '@/utils'
 import JSONEditor from 'jsoneditor'
 import api from '../utils/api'
+import ConfirmationModal from '../components/ConfirmationModal.vue'
 
 export default {
   name: 'Admin',
@@ -92,7 +108,12 @@ export default {
       dataTXT: null,
       backups: [],
       editor: null,
+      confirmationText: 'Are you sure about removing class and probability information from all image names and renaming them? This action cannot be undone.',
+      isRevertImageNameDisabled: false,
     }
+  },
+  components: {
+    ConfirmationModal,
   },
   computed: {
     ...mapGetters([
@@ -109,6 +130,14 @@ export default {
     openLink() {
       this.showLog = false
       window.open(this.KCManagementUri)
+    },
+    handleRenameConfirmation(isConfirmed) {
+      if (isConfirmed) {
+        api.runCommand('run_remove_class_and_probability')
+      }
+    },
+    showConfirmationModal() {
+      this.$bvModal.show('confirmation-modal') // Show the confirmation modal
     },
     async downloadLog() {
       await axios({
@@ -163,12 +192,19 @@ export default {
         })
       })
     },
+    async checkFolderExist() {
+      this.workspace = await api.getWorkspace()
+      api.checkFileExists('images', this.workspace, '', 'revertImageName').then((response) => {
+        this.isRevertImageNameDisabled = !response.fileExist
+      })
+    },
   },
   mounted() {
     const container = document.getElementById('wsjsoneditor')
     const options = {
       mode: 'code',
     }
+    this.checkFolderExist()
     this.editor = new JSONEditor(container, options)
   },
 }

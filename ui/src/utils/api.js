@@ -151,7 +151,11 @@ export default {
     },
   })).data,
   getExplorerConfig: async (dir, type) => (await axios.get(urls.getExplorerConfig, { params: { dir, type } })).data,
-  checkFileExists: async (mode, workspace, path) => (await axios.get(urls.checkFileExists, { params: { mode, workspace, path } })).data,
+  checkFileExists: async (mode, workspace, path, type) => (await axios.get(urls.checkFileExists, {
+    params: {
+      mode, workspace, path, type,
+    },
+  })).data,
   exportFiles: async (payload) => (await axios.get(urls.exportFiles, { ...payload })).data,
   doForwardOnly: async (selectedFiles, notSelectedFiles, type, batch) => (await axios.post(urls.forwardOnly, {
     selectedFiles,
