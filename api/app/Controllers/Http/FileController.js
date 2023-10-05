@@ -180,6 +180,6 @@ class FileController {
     }
     return response.status(200).json({ fileExist: false, })
   }
-}
+} 
 
 module.exports = FileController;

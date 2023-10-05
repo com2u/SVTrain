@@ -792,6 +792,92 @@ export default {
             options: {},
           },
         ],
+        'AI Report': [
+          {
+            label: 'Include good class',
+            field: 'include_good_class',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Include train parameters',
+            field: 'include_train_parameters',
+            type: types.BOOLEAN,
+            options: {},
+          },
+          {
+            label: 'Good class',
+            field: 'ai_report_good_class',
+            type: types.TEXT,
+            options: {},
+          },
+          {
+            label: 'Images per row',
+            field: 'n_images_per_row',
+            type: types.NUMBER,
+            options: {},
+          },
+          {
+            label: 'Train',
+            field: 'include_train',
+            type: types.NUMBER,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'Images',
+                  field: 'n_images',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ],
+              help: 'If auto is set, then include_train: false',
+            },
+          },
+          {
+            label: 'Test',
+            field: 'include_test',
+            type: types.NUMBER,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'Images',
+                  field: 'n_images',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ],
+              help: 'If auto is set, then include_test: false',
+            },
+          },
+          {
+            label: 'Validate',
+            field: 'include_validate',
+            type: types.NUMBER,
+            options: {
+              hasAuto: true,
+              schemas: [
+                {
+                  label: 'Images',
+                  field: 'n_images',
+                  type: types.NUMBER,
+                  default: 0,
+                  options: {
+                    placeholder: '0',
+                  },
+                },
+              ],
+              help: 'If auto is set, then include_validate: false',
+            },
+          },
+        ],
       },
       data: {},
       fields: {
@@ -844,12 +930,34 @@ export default {
         resize: {
           size: 'auto',
         },
+        include_train_parameters: false,
+        include_good_class: false,
+        ai_report_good_class: 'good',
+        n_images_per_row: 0,
+        include_train: 'auto',
+        include_test: 'auto',
+        include_validate: 'auto',
       },
       fetchCount: 1,
       editor: null,
     }
   },
   methods: {
+    readAIReportForTFSetting(data) {
+      const updatedData = {
+        ...data,
+        include_train_parameters: data.ai_report.include_train_parameters,
+        include_good_class: data.ai_report.include_good_class,
+        ai_report_good_class: data.ai_report.good_class,
+        n_images_per_row: data.ai_report.n_images_per_row,
+        include_train: data.ai_report.include_train === false ? 'auto' : data.ai_report.include_train.n_images,
+        include_test: data.ai_report.include_test === false ? 'auto' : data.ai_report.include_test.n_images,
+        include_validate: data.ai_report.include_validate === false ? 'auto' : data.ai_report.include_validate.n_images,
+      }
+
+      delete updatedData.ai_report
+      return updatedData
+    },
     async loadFile() {
       const ws = this.ws.split('/').pop()
       let { data } = await axios.get(
@@ -864,6 +972,7 @@ export default {
 
       delete data.splits_params
 
+      data = this.readAIReportForTFSetting(data)
       Object.keys(this.fields).forEach((field) => {
         if (field === 'resize') {
           if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
@@ -886,6 +995,27 @@ export default {
         editor.set(this.data)
       }
     },
+    writeAIReportToTFSetting(data) {
+      const updatedData = data
+      // convert to json to AI Report
+      updatedData.ai_report = {
+        include_train_parameters: data.include_train_parameters,
+        include_good_class: data.include_good_class,
+        good_class: data.ai_report_good_class,
+        n_images_per_row: data.n_images_per_row,
+        include_train: data.include_train === 'auto' ? false : { n_images: data.include_train },
+        include_test: data.include_test === 'auto' ? false : { n_images: data.include_test },
+        include_validate: data.include_validate === 'auto' ? false : { n_images: data.include_validate },
+      }
+
+      delete updatedData.include_train_parameters
+      delete updatedData.include_good_class
+      delete updatedData.ai_report_good_class
+      delete updatedData.n_images_per_row
+      delete updatedData.include_train
+      delete updatedData.include_validate
+      return updatedData
+    },
     async saveFile() {
       if (!this.canEditConfigAIUI && this.editor) {
         this.data = this.editor.get()
@@ -895,6 +1025,8 @@ export default {
         ...this.fields,
         ...this.data,
       }
+
+      data = this.writeAIReportToTFSetting(data)
 
       // convert to json
       data.splits_params = {

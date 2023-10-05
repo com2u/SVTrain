@@ -2,8 +2,8 @@
   <b-modal :id="id" title="Create a workspace and select template" ok-title="Create" ref="modal" @ok="createWorkspace"
     @hidden="handleHidden" @shown="handleShown" :ok-disabled="!isValid">
     <b-form @submit.prevent>
-      <b-form-group label="Name" label-for="workspace-name" :invalid-feedback="'Name is required'" :state="isValid">
-        <b-form-input ref="workspaceName" @keyup.enter="handleEnter" v-model="name" :state="isValid" trim />
+      <b-form-group label="Name" label-for="workspace-name" :invalid-feedback="'Name is required'" :state="isWSNameValid">
+        <b-form-input ref="workspaceName" @keyup.enter="handleEnter" v-model="name" :state="isWSNameValid" trim />
       </b-form-group>
 
       <b-form-group label="Choose Workspace by selecting appropriate template">
@@ -15,7 +15,8 @@
 
       <b-form-group label="Add Folder Names">
         <div class="folder-name" v-for="(folder, index) in folders" :key="index">
-          <b-form-input class="folder-name-input" v-model="folders[index]" placeholder="Folder Name" />
+          <b-form-input class="folder-name-input" v-model="folders[index]" placeholder="Folder Name"
+            :state="folders[index] !== ''" />
           <b-icon class="folder-name-delete" @click="removeFolder(index)" icon="trash" aria-hidden="true"></b-icon>
         </div>
         <button class="folder-name-add" @click="addFolder">Add Folder <b-icon icon="plus-circle"
@@ -48,6 +49,9 @@ export default {
   },
   computed: {
     isValid() {
+      return (this.name === null ? this.name : !!this.name) && !this.folders.filter((ele) => ele === '').length
+    },
+    isWSNameValid() {
       return this.name === null ? this.name : !!this.name
     },
   },
@@ -81,6 +85,10 @@ export default {
       }
     },
     addFolder() {
+      const inputFieldFocused = document.activeElement === this.$refs.workspaceName.$el
+      if (inputFieldFocused) {
+        return
+      }
       this.folders.push('')
     },
     removeFolder(index) {
