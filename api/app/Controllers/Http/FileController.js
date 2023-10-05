@@ -60,7 +60,7 @@ class FileController {
     params.filePath = params.filePath ? params.filePath.filter(x => Boolean(x)).map(x => {
       return x.replaceAll("%7Bhash_tag%7D", "#").replaceAll("{hash_tag}", "#")
     }) : []
-    const { is_export, sessionToken, field } = request.get()
+    const { is_export, field } = request.get()
     if (is_export) {
       logger.info(`User ${request.currentUser.username} has downloaded "${field}"`);
       if (field === 'export_images') {
@@ -158,35 +158,17 @@ class FileController {
     return true
   }
   async checkFileExists({ request, params, response }) {
-    response.implicitEnd = false
     const { mode, workspace, path } = request.get()
     const isExist = await exists(workspace + path);
     if (!isExist) {
-      return response.status(404).json({ message: 'File does not exist' })
+      return response.status(200).json({ message: 'File does not exist', fileExist: false })
     }
     const files = await buildFileList(mode, workspace, path)
-    // Initialize an array to store file information
-    const fileData = [];
-    let totalSize = 0;
-    files.forEach((file) => {
-      fs.stat(`${workspace + path}/${file}`, (error, stats) => {
-        if (error) {
-          logger.error('Error while getting file stats:', error.message);
-          return;
-        }
-        totalSize += stats.size;
-        // Store the file information in the fileData array
-        fileData.push({
-          file,
-          size: stats.size,
-          lastModified: stats.mtime,
-        });
-        if (files.indexOf(file) === files.length - 1) {
-          return response.status(200).json({ fileExist: !!files.length, metadata: fileData, totalSize })
-        }
-      });
-    });
+    if (files.length > 0) {
+      return response.status(200).json({ fileExist: true, })
+    }
+    return response.status(200).json({ fileExist: false, })
   }
-}
+} 
 
 module.exports = FileController;

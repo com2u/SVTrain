@@ -42,8 +42,8 @@
           <div v-for="directExport in directExports" :key="directExport.mode">
             <div class="cmd">
               <b-button class="svtrain-cmd-btn"
-                :class="!doesFolderExist[directExport.mode] ? 'btn-stop-command' : 'btn-command'"
-                v-bind:disabled="!doesFolderExist[directExport.mode] || (directExport.mode === 'images' && isdisabled)"
+                :class="!doesFolderExist[directExport.mode].fileExist ? 'btn-stop-command' : 'btn-command'"
+                v-bind:disabled="!doesFolderExist[directExport.mode].fileExist || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
                 <v-icon v-if="!directExport.icon" />
                 <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
@@ -129,7 +129,7 @@ export default {
       interval: null,
       generateAIReportURL: null,
       lastReportURL: null,
-      doesFolderExist: { model: false, result: false, images: false },
+      doesFolderExist: { model: { fileExist: false }, result: { fileExist: false }, images: { fileExist: false } },
       isdisabled: false,
       workspace: '',
     }
@@ -164,9 +164,7 @@ export default {
     downloadExport(field) {
       if (this.logs[field] === 1) return
       const url = `${isProduction() ? '' : 'http://127.0.0.1:3333'}/data/${this.logs[field]
-      }?sessionToken=${localStorage.getItem(
-        'sessionToken',
-      )}&is_export=true&field=${field}`
+      }?is_export=true&field=${field}`
       const link = document.createElement('a')
       link.href = url
       link.setAttribute(
@@ -178,12 +176,18 @@ export default {
     },
     async fetch() {
       const ws = this.currentWs.split('/').pop()
+      axios
+        .get(`${getFileServerPath()}${ws}/model/AI-Report.pdf`, { responseType: 'blob' })
+        .then(({ data }) => {
+          if (data) {
+            this.lastReportURL = URL.createObjectURL(data)
+          }
+        })
       await axios
         .get(`${getFileServerPath()}${ws}/externalpath.json`)
         .then(({ data }) => {
           if (data) {
             this.generateAIReportURL = data.generateAIReportURL
-            this.lastReportURL = data.lastReportURL
           }
         })
     },
@@ -194,7 +198,6 @@ export default {
     },
   },
   mounted() {
-    api.refreshToken()
     this.fetch()
     this.getLog()
     this.interval = setInterval(this.getLog, 2000)
@@ -225,7 +228,6 @@ export default {
 
 .logs {
   height: 100%;
-  display: flex;
-  flex-direction: column-reverse;
+  padding: .5rem;
 }
 </style>

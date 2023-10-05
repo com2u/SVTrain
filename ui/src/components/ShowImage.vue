@@ -90,9 +90,6 @@ export default {
     }
   },
   methods: {
-    convertURIPath(p) {
-      return `${p}?token=${localStorage.getItem('sessionToken', null)}`
-    },
     onKeyUp(key) {
       let flag = false
       if (key.keyCode === 187 && this.options.zoomFactor < 8) {
@@ -197,10 +194,7 @@ export default {
           'api',
         )}visualizeHeatmap?mode=${encodeURIComponent(
           this.showMode,
-        )}&image=${path}&sessionToken=${localStorage.getItem(
-          'sessionToken',
-          null,
-        )}`
+        )}&image=${path}`
         this.srcIMG = await axios
           .get(uri)
           .then(() => uri)

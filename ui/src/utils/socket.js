@@ -5,7 +5,7 @@ import Ws from '@adonisjs/websocket-client'
 export default {
   async init() {
     return new Promise((resolve, reject) => {
-      this.ws = Ws(getSocketUrl(), { query: { sessionToken: localStorage.getItem('sessionToken') } })
+      this.ws = Ws(getSocketUrl())
       this.ws.connect()
       this.ws.on('open', () => {
         console.log('Connect opened')

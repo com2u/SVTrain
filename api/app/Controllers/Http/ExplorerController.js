@@ -96,6 +96,22 @@ const deleteCacheFileFromDir = async (dir) => {
   }
 }
 
+async function createFolders(dirs, newFolderPath) {
+  for (const dir of dirs) {
+    const folderPath = path.join(newFolderPath, dir);
+    try {
+      await mkdir(folderPath);
+        logger.info(`Folder created: ${folderPath}`);
+    } catch (error) {
+      if (error.code === 'EEXIST') {
+        logger.info(`Folder already exists: ${folderPath}`);
+      } else {
+        logger.info(`Error creating folder ${folderPath}: ${error.message}`);
+      }
+    }
+  }
+}
+
 // if file is landing under root directory
 // prevent access to that file
 const accessToFile = (root, file) => {
@@ -1101,6 +1117,30 @@ class ExplorerController {
     await copyFile(defaultCfgPath, path.join(newFolderPath, '.cfg'));
     logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
     return true;
+  }
+
+  async createWorkspace({request}) {
+    let {name, folder, subDirs} = request.post();
+    if (folder === 'root') {
+      folder = CONST_PATHS.root;
+    }
+    if (!folder || !name) return response.status(404).json({ message: 'ExplorerController.createWorkspace: Parameters name and folder are needed' });
+    if (!accessToFile(CONST_PATHS.root, folder)) {
+      logger.error(`ExplorerController.createFolder: ${request.currentUser.username} had\'t access to ${folder} directory`);
+      return response.status(403).json({ message: 'Access denied' });
+    }
+    const newFolderPath = path.join(folder, name);
+    await mkdir(newFolderPath);
+    if (folder === CONST_PATHS.root) {
+      if(subDirs.length){
+        await createFolders(subDirs, newFolderPath)
+      }
+      await copyFile(defaultTFSPath, path.join(newFolderPath, 'TFSettings.json'));
+      await copyFile(defaultExternalPaths, path.join(newFolderPath, 'externalpath.json'));
+    }
+    await copyFile(defaultCfgPath, path.join(newFolderPath, '.cfg'));
+    logger.info(`User ${request.currentUser.username} has created new folder "${path.join(folder, name)}"`);
+    return true
   }
 
   /*

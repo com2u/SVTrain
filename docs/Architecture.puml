@@ -1,0 +1,52 @@
+@startuml
+' Uncomment the line below for "dark mode" styling
+'!$AWS_DARK = true
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v16.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/Compute/EC2.puml
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/devicons/docker.puml
+!includeurl ICONURL/devicons/linux.puml
+!includeurl ICONURL/devicons/java.puml
+!includeurl ICONURL/devicons/ubuntu.puml
+!includeurl ICONURL/devicons/redis.puml
+!includeurl ICONURL/devicons/nginx.puml
+!includeurl ICONURL/devicons/postgresql.puml
+!includeurl ICONURL/devicons/python.puml
+!includeurl ICONURL/devicons/nodejs.puml
+!includeurl ICONURL/devicons2/jupyter.puml
+!includeurl ICONURL/devicons2/vuejs.puml
+
+package "$EC2IMG() EjectX Instance" {
+  DEV_UBUNTU(ubuntu,Ubuntu,node) {
+    DEV_DOCKER(docker,Docker,node) {
+      DEV_NGINX(revproxy,"Openresty (valian/docker-nginx-auto-ssl)",node)
+      DEV_DOCKER(svtrain,"SVTrain",node) {
+        DEV2_VUEJS(svtrain_frontend,"Data Mgmt & Labelling Frontend",node)
+        DEV_NODEJS(svtrain_backend,"SVTrain middleware AdonisJS",node)
+      }
+      DEV_NODEJS(dispatcher,"Train Dispatcher",node)
+      DEV_REDIS(redis,Redis,node)
+      DEV_JAVA(keycloak,"Keycloak (jboss/keycloak:15.0.1)",node)
+      DEV_POSTGRESQL(db,"PostgreSQL (postgis/postgis:15-3.3)",node)
+      DEV2_JUPYTER(jupyter,"Jupyter Notebook",node)
+      DEV_DOCKER(sftp,"SFTP (atmoz/sftp)",node)
+      DEV_DOCKER(grafana,"Grafana (grafana/grafana:9.5.1)",node)
+    }
+  }
+}
+
+package "$EC2IMG() EjectX Training with GPU On Demand Instance" {
+  DEV_UBUNTU(on_demand_ubuntu,Ubuntu,node) {
+    DEV_DOCKER(on_demand_docker,Docker,node) {
+      DEV_PYTHON(mlbackend,"KPMSDev",node)
+  }
+}
+
+[svtrain_backend] -> [dispatcher] : Orchestrates Dispatcher for new instance
+[dispatcher] -> [mlbackend] : Creates new on demand instance, runs training and watches status
+[dispatcher] -> [svtrain_backend] : Returns Training Status
+
+@enduml

@@ -13,9 +13,12 @@
 |
 */
 
+const logger = use('Logger')
+
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 const Helpers = use('Helpers')
+
 Route.group(() => {
   Route.get('/getFiles', 'ExplorerController.all').middleware('auth')
   Route.get('/getParent', 'ExplorerController.parent').middleware('auth')
@@ -34,13 +37,11 @@ Route.group(() => {
   Route.get('/getSubfolders', 'ExplorerController.getSubfolders').middleware('auth')
   Route.get('/checkFolder', 'ExplorerController.checkFolder').middleware('auth')
   Route.post('/createFolder', 'ExplorerController.createFolder').middleware('auth')
+  Route.post('/createWorkspace', 'ExplorerController.createWorkspace').middleware('auth')
   Route.get('/getWorkspace', 'ExplorerController.getWorkspace').middleware('auth')
   Route.post('/setWorkspace', 'ExplorerController.setWorkspace').middleware('auth')
   Route.get('/getLastLogs', 'ExplorerController.getLastLogs').middleware('auth')
   Route.get('/logs/:file', 'ExplorerController.logsFor').middleware('auth')
-  Route.post('/login', 'LoginController.login')
-  Route.get('/refreshToken', 'LoginController.refreshToken').middleware('auth')
-  Route.post('/logout', 'LoginController.logout')
   Route.get('/config', 'ExplorerController.getConfig').middleware('auth')
   Route.get('/explorerConfig', 'ExplorerController.getExplorerConfig').middleware('auth')
   Route.post('/forwardOnly', 'ExplorerController.doForwardOnly').middleware('auth')
@@ -74,4 +75,3 @@ Route.group(() => {
   Route.get('/:filePath*', 'FileController.download').middleware('auth')
 }).prefix('data');
 Route.any('*', ({response}) => response.download(Helpers._appRoot + '/public/index.html'))
-

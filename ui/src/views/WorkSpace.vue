@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="title-container">
-      <div>
-        <h1 :style="{ fontSize: workspaceFontSize }">Work Spaces</h1>
+      <div class="create-new-ws">
+        <h1 :style="{ fontSize: workspaceFontSize }">Work Spaces</h1><div  v-if="systemConfig.newWorkspace && newWorkspace"><new-folder-button @click.native="createNewWs"/></div>
       </div>
     </div>
     <div>
@@ -81,6 +81,11 @@
       path="root"
       id="create-ws-folder"
     />
+    <creating-new-ws
+      @folder-created="onFolderCreated"
+      path="root"
+      id="create-ws-folder"
+    />
   </div>
 </template>
 <script>
@@ -91,7 +96,9 @@ import WSOption from '@/components/WSOption'
 import api from '../utils/api'
 import WorkspaceFolder from '../components/WorkspaceFolder.vue'
 import CreatingFolder from '../components/CreatingFolder.vue'
+import CreatingNewWs from '../components/CreateNewWs.vue'
 import EventBus from '../utils/eventbus'
+import NewFolderButton from '../components/NewFolderButton.vue'
 
 export default {
   name: 'WorkSpace',
@@ -99,6 +106,8 @@ export default {
     WSOption,
     WorkspaceFolder,
     CreatingFolder,
+    CreatingNewWs,
+    NewFolderButton,
   },
   data() {
     return {
@@ -236,6 +245,9 @@ export default {
     createNewFolder() {
       EventBus.$emit('create-new-folder', 'root')
     },
+    createNewWs() {
+      EventBus.$emit('create-new-ws', 'root')
+    },
   },
   async mounted() {
     // this.loadFolders()
@@ -244,7 +256,6 @@ export default {
       this.loadFoldersByPath(null, true)
     })
     EventBus.$on('load-sub-folders', this.loadSubfolder)
-    api.refreshToken()
     api.calculateStatistic(null, true)
   },
   destroyed() {
@@ -426,5 +437,9 @@ export default {
       border: 1px solid #D9D4CF;
       color: #000;
     }
+  }
+  .create-new-ws{
+    display: flex;
+    gap: .5rem;
   }
 </style>

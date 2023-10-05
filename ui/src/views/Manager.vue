@@ -400,10 +400,7 @@ export default {
               const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/`
               const developmentUrl = 'http://localhost:3333/api/'
               const baseurl = isProduction() ? productionUrl : developmentUrl
-              const url = `${baseurl}downloadBackup?backupPath=${backupPath}&sessionToken=${localStorage.getItem(
-                'sessionToken',
-                null,
-              )}`
+              const url = `${baseurl}downloadBackup?backupPath=${backupPath}`
               const link = document.createElement('a')
               link.href = url
               link.download = backupPath.split('/').pop()

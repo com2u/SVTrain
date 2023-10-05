@@ -23,12 +23,12 @@ const urls = {
   checkFolder: (folder) => `${baseurl}checkFolder?folder=${folder}`,
   getSubfolders: (folder) => `${baseurl}getSubfolders?folder=${folder}`,
   createFolder: `${baseurl}createFolder`,
+  createWorkspace: `${baseurl}createWorkspace`,
   getWorkspace: `${baseurl}getWorkspace`,
   setWorkspace: `${baseurl}setWorkspace`,
   getLastLogs: `${baseurl}getLastLogs`,
   getLogFor: `${baseurl}logs`,
   login: `${baseurl}login`,
-  refreshToken: `${baseurl}refreshToken`,
   logout: `${baseurl}logout`,
   getConfig: `${baseurl}config`,
   getExplorerConfig: `${baseurl}explorerConfig`,
@@ -119,6 +119,11 @@ export default {
     folder,
     name,
   })).data,
+  createWorkspace: async (folder, name, subDirs) => (await axios.post(urls.createWorkspace, {
+    folder,
+    name,
+    subDirs,
+  })).data,
   getWorkspace: async () => (await axios.get(urls.getWorkspace)).data,
   setWorkspace: async (workspace, isDB) => (await axios.post(urls.setWorkspace, { workspace, isDB })).data,
   getLastLogs: async () => (await axios.get(urls.getLastLogs)).data,
@@ -139,24 +144,6 @@ export default {
       }
       throw e
     }
-  },
-  refreshToken: async () => {
-    const { data } = await axios.get(urls.refreshToken, {
-      headers: {
-        refreshToken: localStorage.getItem('refreshToken'),
-      },
-    })
-    if (data && data.sessionToken) {
-      console.log('Refreshed session token')
-      localStorage.setItem('sessionToken', data.sessionToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-    }
-  },
-  setSessionToken: async (token) => {
-    if (!token) {
-      await axios.post(urls.logout)
-    }
-    axios.defaults.headers.common.Authorization = token
   },
   getConfig: async (isDB) => (await axios.get(urls.getConfig, {
     params: {
@@ -246,7 +233,28 @@ export default {
   })).data,
 }
 
-axios.interceptors.response.use((response) => response, (error) => {
+// map session info to local storage to keep legacy code working
+const mapUserInfo = (session) => {
+  try {
+    localStorage.setItem('sessionUser', session.id_token.preferred_username)
+    localStorage.setItem('sessionRoles', session.id_token.roles)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+axios.interceptors.response.use((response) => {
+  try {
+    if (response.headers['x-usersession'] !== '') {
+      const decoded = atob(response.headers['x-usersession'])
+      const jsonSessionInfo = JSON.parse(decoded)
+      mapUserInfo(jsonSessionInfo)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  return response
+}, (error) => {
   console.log(error)
 
   EventBus.$emit('auth_api_error', error)
