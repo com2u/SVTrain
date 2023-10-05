@@ -176,12 +176,18 @@ export default {
     },
     async fetch() {
       const ws = this.currentWs.split('/').pop()
+      axios
+        .get(`${getFileServerPath()}${ws}/model/AI-Report.pdf`, { responseType: 'blob' })
+        .then(({ data }) => {
+          if (data) {
+            this.lastReportURL = URL.createObjectURL(data)
+          }
+        })
       await axios
         .get(`${getFileServerPath()}${ws}/externalpath.json`)
         .then(({ data }) => {
           if (data) {
             this.generateAIReportURL = data.generateAIReportURL
-            this.lastReportURL = data.lastReportURL
           }
         })
     },

@@ -158,7 +158,6 @@ class FileController {
     return true
   }
   async checkFileExists({ request, params, response }) {
-    response.implicitEnd = false
     const { mode, workspace, path } = request.get()
     const isExist = await exists(workspace + path);
     if (!isExist) {
@@ -170,6 +169,6 @@ class FileController {
     }
     return response.status(200).json({ fileExist: false, })
   }
-}
+} 
 
 module.exports = FileController;
