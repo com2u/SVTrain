@@ -50,7 +50,7 @@
               <div
                 v-b-tooltip.hover
                 @click.stop=""
-                title="Clicking this button will permanently remove class and probability information from all images in the active workspace. This action is irreversible."
+                title="Clicking this button will permanently remove class and probability information from all images in the active workspace."
               >
               <b-icon icon="info-circle" v-b-tooltip.hover></b-icon>
               </div>
@@ -108,7 +108,7 @@ export default {
       dataTXT: null,
       backups: [],
       editor: null,
-      confirmationText: 'Are you sure about removing class and probability information from all image names and renaming them? This action cannot be undone.',
+      confirmationText: 'Are you sure about removing class and probability information from all image names and renaming them?',
       isRevertImageNameDisabled: false,
     }
   },
@@ -133,7 +133,10 @@ export default {
     },
     handleRenameConfirmation(isConfirmed) {
       if (isConfirmed) {
-        api.runCommand('run_remove_class_and_probability')
+        const res = api.runCommand('run_remove_class_and_probability')
+        if (res === true) {
+          this.checkFolderExist()
+        }
       }
     },
     showConfirmationModal() {
