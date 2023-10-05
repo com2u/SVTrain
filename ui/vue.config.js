@@ -26,7 +26,7 @@ module.exports = {
       .plugin('html')
       .tap((args) => {
         // eslint-disable-next-line no-param-reassign
-        args[0].title = 'SVTrain'
+        args[0].title = 'Eject-X: '
         return args
       })
 
