@@ -1301,7 +1301,7 @@ export default {
       notes: this.systemConfig.notes || null,
       highlight: Boolean(this.systemConfig.highlight),
     })
-    // this.imageTags = await api.getImageTags()
+    this.imageTags = await api.getImageTags()
   },
   beforeDestroy() {
     window.removeEventListener('keyup', this.onKeyUp)
