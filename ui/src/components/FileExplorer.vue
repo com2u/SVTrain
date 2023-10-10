@@ -942,6 +942,11 @@ export default {
         this.page = this.page_count
       }
       this.sortChanged()
+      const allowedExtensions = ['.bmp', '.png', '.tiff', '.jpg']
+      this.screenFiles = this.screenFiles.filter((screenFile) => {
+        const extension = screenFile.name.split('.').pop().toLowerCase()
+        return allowedExtensions.includes(`.${extension}`)
+      })
       return {
         currentPath: content.path,
       }
@@ -1296,7 +1301,7 @@ export default {
       notes: this.systemConfig.notes || null,
       highlight: Boolean(this.systemConfig.highlight),
     })
-    this.imageTags = await api.getImageTags()
+    // this.imageTags = await api.getImageTags()
   },
   beforeDestroy() {
     window.removeEventListener('keyup', this.onKeyUp)
