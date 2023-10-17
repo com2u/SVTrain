@@ -65,12 +65,20 @@ class ChunkedUploadController {
           session.forget(chunkKey);
           return response
             .status(500)
-            .json({ message: `All chunks does not received: ${error}` });
+            .json({ message: `Error in combining the chunks: ${error}` });
         }
       } else {
-        return response
-          .status(200)
-          .json({ message: "Chunk uploaded successfully" });
+        if (chunks.length != chunkNumber + 1) {
+          this.deletePartialStoredChunks(testUser);
+          session.forget(chunkKey);
+          return response
+            .status(500)
+            .json({ message: "Some chunks is missing" });
+        } else {
+          return response
+            .status(200)
+            .json({ message: "Chunk uploaded successfully" });
+        }
       }
     } catch (error) {
       this.deletePartialStoredChunks(testUser);
