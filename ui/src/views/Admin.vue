@@ -56,6 +56,11 @@
               </div>
             </b-button>
           </div>
+          <div class="cmd">
+            <b-button class="svtrain-cmd-btn d-flex align-items-center justify-content-between" @click="reloadPage">
+              <span class="ml-2">Reload Configuration</span>
+            </b-button>
+          </div>
         </div>
       </b-col>
       <b-col cols="10" class="has-board">
@@ -130,6 +135,9 @@ export default {
     openLink() {
       this.showLog = false
       window.open(this.KCManagementUri)
+    },
+    reloadPage() {
+      window.location.reload()
     },
     handleRenameConfirmation(isConfirmed) {
       if (isConfirmed) {
