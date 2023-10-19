@@ -273,8 +273,38 @@ export default {
           {
             label: 'Epsilon',
             field: 'epsilon',
-            type: types.NUMBER,
+            type: types.SELECT,
             options: {
+              dataset: [
+                {
+                  value: 1e-10,
+                  label: '1e-10',
+                },
+                {
+                  value: 1e-9,
+                  label: '1e-9',
+                },
+                {
+                  value: 1e-8,
+                  label: '1e-8',
+                },
+                {
+                  value: 1e-7,
+                  label: '1e-7',
+                },
+                {
+                  value: 1e-6,
+                  label: '1e-6',
+                },
+                {
+                  value: 1e-5,
+                  label: '1e-5',
+                },
+                {
+                  value: 1e-4,
+                  label: '1e-4',
+                },
+              ],
               help: 'Is used only by some specific optimizers',
             },
           },
@@ -888,6 +918,7 @@ export default {
         rename_after_test: false,
         GPU: false,
         optimizer: null,
+        epsilon: null,
         learning_rate: 0.0,
         batch_size: 0,
         shuffle_buffer: 100,
