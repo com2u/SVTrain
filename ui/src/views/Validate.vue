@@ -23,9 +23,9 @@
     (command.value !== 'script_stop_validate' && !!running) ||
     (command.isNew)
     " v-on:click="runCommand(command.value, workspace)">
-                <b-icon v-if="!command.icon" :icon="command.value === 'script_stop_validate' ? 'stop-circle-fill' : 'file-earmark-play-fill'
+                <v-icon v-if="!command.icon" v-bind:name="command.value === 'script_stop_validate' ? 'stop' : 'play'
                   " />
-                <b-icon v-else :icon="command.icon"></b-icon>
+                <svg-icon v-else :icon-class="command.icon"></svg-icon>
                 <span class="ml-2">{{ command.label }}</span>
               </b-button>
               <b-button v-if="command.btn && ![null, undefined].includes(logs[command.btn])
@@ -45,8 +45,8 @@
                 :class="!doesFolderExist[directExport.mode].fileExist ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!doesFolderExist[directExport.mode].fileExist || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
-                <b-icon v-if="!directExport.icon" />
-                <b-icon v-else :icon="directExport.icon"></b-icon>
+                <v-icon v-if="!directExport.icon" />
+                <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
                 <span class="ml-2">{{ directExport.label }}</span>
                 <b-spinner v-if="(directExport.mode === 'images' && isdisabled)" small class="ml-1"
                   label="Spinning"></b-spinner>
@@ -94,12 +94,12 @@ export default {
         {
           value: 'script_report',
           label: 'Report',
-          icon: 'file-earmark-pdf-fill',
+          icon: 'report',
         },
         {
           value: 'script_validate2',
           label: 'Backup',
-          icon: 'floppy-fill',
+          icon: 'save',
         },
       ],
       directExports: [
@@ -107,21 +107,21 @@ export default {
           mode: 'model',
           label: 'Download model',
           name: 'final',
-          icon: 'cloud-arrow-down-fill',
+          icon: 'export',
           path: '/model/final',
         },
         {
           mode: 'result',
           label: 'Download results',
           name: 'results',
-          icon: 'cloud-arrow-down-fill',
+          icon: 'export',
           path: '/model/',
         },
         {
           mode: 'images',
           name: 'images',
           label: 'Download images',
-          icon: 'cloud-arrow-down-fill',
+          icon: 'ExportImage',
           path: '/validate',
         },
       ],

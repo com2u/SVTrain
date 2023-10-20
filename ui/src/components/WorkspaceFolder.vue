@@ -18,13 +18,14 @@
             <template v-if="info.hasSubFolders">
               <b-icon
                 v-if="showChildren"
-                icon="folder2-open"
+                icon="triangle-fill"
                 class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
               />
               <b-icon
                 v-else
-                icon="folder-fill"
+                rotate="90"
+                icon="triangle-fill"
                 class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
               />
