@@ -299,7 +299,7 @@
 /* eslint no-plusplus: 0 */
 /* eslint no-param-reassign: 0 */
 import { mapGetters } from 'vuex'
-import { getFileServerPath } from '@/utils'
+import { getFileServerPath, isFileExtensionAllowed } from '@/utils'
 import api from '@/utils/api'
 import socket from '@/utils/socket'
 import EventBus from '@/utils/eventbus'
@@ -942,10 +942,9 @@ export default {
         this.page = this.page_count
       }
       this.sortChanged()
-      const allowedExtensions = ['.bmp', '.png', '.tiff', '.jpg']
       this.screenFiles = this.screenFiles.filter((screenFile) => {
         const extension = screenFile.name.split('.').pop().toLowerCase()
-        return allowedExtensions.includes(`.${extension}`)
+        return isFileExtensionAllowed(`.${extension}`)
       })
       return {
         currentPath: content.path,
