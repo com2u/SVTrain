@@ -299,7 +299,7 @@
 /* eslint no-plusplus: 0 */
 /* eslint no-param-reassign: 0 */
 import { mapGetters } from 'vuex'
-import { getFileServerPath, isFileExtensionAllowed } from '@/utils'
+import { getFileServerPath } from '@/utils'
 import api from '@/utils/api'
 import socket from '@/utils/socket'
 import EventBus from '@/utils/eventbus'
@@ -942,9 +942,10 @@ export default {
         this.page = this.page_count
       }
       this.sortChanged()
+      const allowedExtensions = this.$store.getters['app/workspaceConfig'].CMExtensions
       this.screenFiles = this.screenFiles.filter((screenFile) => {
         const extension = screenFile.name.split('.').pop().toLowerCase()
-        return isFileExtensionAllowed(`.${extension}`)
+        return allowedExtensions.includes(`${extension}`)
       })
       return {
         currentPath: content.path,

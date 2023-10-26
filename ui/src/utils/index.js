@@ -12,11 +12,6 @@ export const isProduction = () => (process.env.NODE_ENV || 'production') === 'pr
 const productionUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}`
 const developmentUrl = 'http://localhost:3333'
 
-const allowedFileExtensions = ['.bmp', '.png', '.tiff', '.jpg']
-export const isFileExtensionAllowed = (extension) => {
-  allowedFileExtensions.includes(`.${extension}`)
-}
-
 export const getAPIRoot = () => (`${isProduction() ? productionUrl : developmentUrl}/api`)
 
 export const getFileServerPath = () => (isProduction() ? `${productionUrl}/data/` : `${developmentUrl}/api/data/`)
