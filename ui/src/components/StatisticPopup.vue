@@ -21,6 +21,7 @@
           </div>
         </div>
         <statistic-table
+          v-if="statistic.table"
           v-bind:folder="dir"
           v-bind:table="statistic.table"
           :toggleDataDisplayFormat = "toggleDataDisplayFormat"/>
@@ -56,7 +57,7 @@ export default {
     currentFolder() {
       const { root } = this.$store.state.app.config
       if (root && this.dir) {
-        return this.dir.substring(root.length)
+        return this.dir
       }
       return ''
     },
