@@ -182,6 +182,11 @@
               font-scale="1.5"
               @click.stop="showConfig"
             />
+            <b-icon
+              v-if='!info.config && canEditConfig && depth === 0'
+              icon='exclamation-lg' variant='danger'
+              font-scale='1.5'
+            />
           </div>
           <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
             <b-icon
