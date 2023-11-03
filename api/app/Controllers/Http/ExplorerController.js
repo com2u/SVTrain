@@ -1022,7 +1022,9 @@ class ExplorerController {
       cfgPath: cfgPath.replace(CONST_PATHS.root, ""),
     }
 
-    const files = await readdir(dir);
+    const files = (await readdir(dir)).sort((firstFile, secondFile) => {
+      return firstFile.toLowerCase().localeCompare(secondFile.toLowerCase());
+    });
     for (const file of files) {
       const flstat = await lstat(path.join(dir, file));
       if (flstat.isDirectory()) {
