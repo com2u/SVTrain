@@ -173,20 +173,23 @@
               @click.stop="syncDB"
             />
           </div>
-          <div class="icon-wrapper" v-b-tooltip.hover title="Workspace Settings">
-            <b-icon
-              :class="
-                info.config && canEditConfig ? 'clickable-icon' : 'gray-icon'
-              "
-              icon="gear-fill"
-              font-scale="1.5"
-              @click.stop="showConfig"
-            />
-            <b-icon
-              v-if='!info.config && canEditConfig && depth === 0'
-              icon='exclamation-lg' variant='danger'
-              font-scale='1.5'
-            />
+          <div class="icon-wrapper text-center" v-b-tooltip.hover title="Workspace Settings">
+            <b-iconstack>
+              <b-icon
+                :class="
+                  info.config && canEditConfig ? 'clickable-icon' : 'gray-icon'
+                "
+                icon="gear-fill"
+                font-scale='1.5'
+                @click.stop="showConfig"
+              />
+              <b-icon
+                v-if='!info.config && canEditConfig && depth === 0'
+                icon='exclamation-lg'
+                font-scale='1.5'
+                variant='danger'
+              />
+            </b-iconstack>
           </div>
           <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
             <b-icon
