@@ -8,7 +8,6 @@
           </div>
         </div>
         <div class="cmd-main-menu">
-          <div>Workspace: <strong>{{ currentWs }}</strong></div>
           <div class="cmd">
             <b-button @click="openLink" class="svtrain-cmd-btn">
               <span class="ml-2">User management</span>
