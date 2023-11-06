@@ -10,12 +10,12 @@
         <div class="caption">
           <div>{{currentFolder}}</div>
           <div>
-            Matched: {{ this.isDataFormatAbsolute ? this.statistic.matched : convertDecimalUptoTwoDigit((this.statistic.matched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
+            Matched: {{ this.isDataFormatAbsolute ? formatNumberWithCommas(this.statistic.matched) : convertDecimalUptoTwoDigit((this.statistic.matched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
             | Mismatched: {{
-              this.isDataFormatAbsolute ? this.statistic.mismatched
+              this.isDataFormatAbsolute ? formatNumberWithCommas(this.statistic.mismatched)
               : convertDecimalUptoTwoDigit((this.statistic.mismatched/(this.statistic.matched + this.statistic.mismatched))*100) + '%'}}
             | Unclassified: {{
-              this.isDataFormatAbsolute ? this.statistic.unclassified
+              this.isDataFormatAbsolute ? formatNumberWithCommas(this.statistic.unclassified)
               : convertDecimalUptoTwoDigit((this.statistic.unclassified/(this.statistic.matched + this.statistic.mismatched))*100) + '%'
               }}
           </div>
@@ -62,6 +62,9 @@ export default {
     },
   },
   methods: {
+    formatNumberWithCommas(number) {
+      return number.toLocaleString()
+    },
     convertDecimalUptoTwoDigit(selectionPercentage) {
       return selectionPercentage.toFixed(2)
     },
