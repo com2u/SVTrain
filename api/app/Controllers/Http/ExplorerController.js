@@ -141,7 +141,8 @@ const CONST_PATHS = {
     script_split_data: "SCRIPT_SPLIT_DATA",
     script_workspace_changed: "SCRIPT_WORKSPACE_CHANGED",
     script_remove_lock_file: "SCRIPT_REMOVE_LOCK_FILE",
-    run_remove_class_and_probability: "SCRIPT_REMOVE_CLASS_AND_PROBABILITY"
+    run_remove_class_and_probability: "SCRIPT_REMOVE_CLASS_AND_PROBABILITY",
+    script_run_test_on_train:'SCRIPT_RUN_TEST_ON_TRAIN'
   },
   ignoreFiles: ['.DS_Store']
 };

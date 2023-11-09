@@ -49,6 +49,7 @@
   "script_stop_validation": "script-stop-validate.sh",
   "script_report": "script-report.sh",
   "script_split_data": "script-split-data.sh",
+  "script_run_test_on_train": "run_test_on_train.sh",
   "path_log_training": "training.log",
   "path_log_test": "test.log",
   "path_log_validate": "validate.log",
