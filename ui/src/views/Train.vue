@@ -52,7 +52,7 @@
       <b-col cols="9" class="has-board">
         <b-tabs>
           <b-tab title="Logs" active>
-            <pre v-html="trainLog" class="logs"></pre>
+            <div class="logs">{{ trainLog }}</div>
           </b-tab>
           <b-tab v-if="tensorBoard" title="tensorBoard">
             <iframe :src="tensorBoard"></iframe>
@@ -194,5 +194,6 @@ export default {
 .logs {
   height: 100%;
   padding: .5rem;
+  white-space: pre-wrap;
 }
 </style>

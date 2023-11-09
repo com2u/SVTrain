@@ -45,7 +45,7 @@
       <b-col cols="9" class="has-board">
         <b-tabs>
           <b-tab title="Logs" active>
-            <pre v-html="testLog" class="logs"></pre>
+            <div class="logs">{{ testLog }}</div>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -136,5 +136,6 @@ export default {
 .logs {
   height: 100%;
   padding: .5rem;
+  white-space: pre-wrap;
 }
 </style>
