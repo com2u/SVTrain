@@ -942,6 +942,11 @@ export default {
         this.page = this.page_count
       }
       this.sortChanged()
+      const allowedExtensions = this.$store.getters['app/workspaceConfig'].CMExtensions
+      this.screenFiles = this.screenFiles.filter((screenFile) => {
+        const extension = screenFile.name.split('.').pop().toLowerCase()
+        return allowedExtensions.includes(`${extension}`)
+      })
       return {
         currentPath: content.path,
       }
