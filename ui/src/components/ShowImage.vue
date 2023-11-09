@@ -176,8 +176,9 @@ export default {
     defaultZoom: debounce(function () { // eslint-disable-line
       api.setDefaultZoomLevel(this.currentWs, this.zoom)
     }, 500),
-    file() {
+    file(newServerPath) {
       this.zoomKey += 1
+      this.srcIMG = newServerPath.serverPath
     },
     async showMode() {
       if (!this.showMode || this.showMode === 'Original') {
