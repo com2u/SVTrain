@@ -3,13 +3,19 @@ const {promisify} = require("util")
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
 const path = require('path');
-const roles = require('../../roles.json')
 const users = require('../../users.json')
 const Env = use('Env');
 const uuid4 = require('uuid4');
+const rolesFilePath = path.join(__dirname, '../../roles.json')
+const logger = require('../../services/logger')
 
-function getRoles() {
-  return roles
+async function getRoles() {
+  try {
+    const data = fs.readFileSync(rolesFilePath, 'utf8');
+    return data
+  } catch (err) {
+    logger.error('Error reading the roles file:', err.message);
+  }
 }
 
 function getUsers() {
