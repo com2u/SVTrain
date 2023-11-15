@@ -44,7 +44,7 @@
       <div class="options">
         <div class="option-progress" title="Percentage Classified">
           <span class="file-nums option-progress-text"
-            >{{ totalFiles }} files</span
+            >{{ formatNumberWithCommas(totalFiles) }} files</span
           >
           <span
             class="option-progress-text"
@@ -329,6 +329,9 @@ export default {
     ]),
   },
   methods: {
+    formatNumberWithCommas(number) {
+      return number.toLocaleString()
+    },
     toggleShowChildren() {
       this.showChildren = !this.showChildren
       this.$store.commit('app/ADD_EXPANDED', {
