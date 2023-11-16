@@ -231,9 +231,11 @@
 import { mapGetters } from 'vuex'
 import api from '@/utils/api'
 import EventBus from '../utils/eventbus'
+import utilsMixin from '../mixins/utilsMixin'
 
 export default {
   name: 'WorkspaceFolder',
+  mixins: [utilsMixin],
   props: {
     rawInfo: {
       type: Object,
@@ -329,9 +331,6 @@ export default {
     ]),
   },
   methods: {
-    formatNumberWithCommas(number) {
-      return number.toLocaleString()
-    },
     toggleShowChildren() {
       this.showChildren = !this.showChildren
       this.$store.commit('app/ADD_EXPANDED', {
