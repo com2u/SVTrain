@@ -298,18 +298,22 @@ export default {
       return this.$store.state.app.config.wsPath
     },
     info() {
-      if (this.rawInfo.hasSubFolders && this.rawInfo.subFolders) {
+      const excludedFolders = ['model']
+      const filteredSubFolder = this.rawInfo.subFolders.filter((folder) => !excludedFolders.includes(folder.name.toLowerCase()))
+      const pseudoRawInfo = this.rawInfo
+      pseudoRawInfo.subFolders = filteredSubFolder
+      if (pseudoRawInfo.hasSubFolders && pseudoRawInfo.subFolders) {
         return {
-          ...this.rawInfo,
+          ...pseudoRawInfo,
           ...this.sumObjectsByKey(
             {
-              classified: this.rawInfo.classified,
-              unclassified: this.rawInfo.unclassified,
-              missed: this.rawInfo.missed,
-              matched: this.rawInfo.matched,
-              mismatched: this.rawInfo.mismatched,
+              classified: pseudoRawInfo.classified,
+              unclassified: pseudoRawInfo.unclassified,
+              missed: pseudoRawInfo.missed,
+              matched: pseudoRawInfo.matched,
+              mismatched: pseudoRawInfo.mismatched,
             },
-            ...this.rawInfo.subFolders,
+            ...pseudoRawInfo.subFolders,
           ),
         }
       }
