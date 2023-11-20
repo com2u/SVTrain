@@ -1,7 +1,7 @@
 <template>
   <div>
     <SField v-for="(sch, i) in schema.options.schemas" :key="i" :schema="sch" :value="temp[sch.field]"
-             @input="temp[sch.field] = $event"/>
+             @input="(value) => handleIP(value, sch)"/>
   </div>
 </template>
 
@@ -19,10 +19,16 @@ export default {
       temp: this.value,
     }
   },
+  methods: {
+    handleIP(eventValue, sch) {
+      this.$emit('jsonFieldVal', { [sch.field]: eventValue })
+      this.temp[sch.field] = eventValue
+    },
+  },
   watch: {
     temp: {
       // eslint-disable-next-line no-unused-vars
-      handler(after, before) {
+      handler(after) {
         this.$emit('input', after)
       },
       deep: true,
