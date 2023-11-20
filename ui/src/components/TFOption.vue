@@ -972,18 +972,69 @@ export default {
   },
   methods: {
     readAIReportForTFSetting(data) {
+      let includeTrainParameters
+      let includeGoodClass
+      let aiReportGoodClass
+      let nImagesPerRow
+      let includeTrain
+      let includeTest
+      let includeValidate
+
+      if (data.ai_report) {
+        includeTrainParameters = data.ai_report.include_train_parameters
+        includeGoodClass = data.ai_report.include_good_class
+        aiReportGoodClass = data.ai_report.good_class
+        nImagesPerRow = data.ai_report.n_images_per_row
+        includeTrain = data.ai_report.include_train === false ? 'auto' : data.ai_report.include_train.n_images
+        includeTest = data.ai_report.include_test === false ? 'auto' : data.ai_report.include_test.n_images
+        includeValidate = data.ai_report.include_validate === false ? 'auto' : data.ai_report.include_validate.n_images
+      } else {
+        includeTrainParameters = false
+        includeGoodClass = false
+        aiReportGoodClass = 'good'
+        nImagesPerRow = 0
+        includeTrain = 'auto'
+        includeTest = 'auto'
+        includeValidate = 'auto'
+      }
+
       const updatedData = {
         ...data,
-        include_train_parameters: data.ai_report.include_train_parameters,
-        include_good_class: data.ai_report.include_good_class,
-        ai_report_good_class: data.ai_report.good_class,
-        n_images_per_row: data.ai_report.n_images_per_row,
-        include_train: data.ai_report.include_train === false ? 'auto' : data.ai_report.include_train.n_images,
-        include_test: data.ai_report.include_test === false ? 'auto' : data.ai_report.include_test.n_images,
-        include_validate: data.ai_report.include_validate === false ? 'auto' : data.ai_report.include_validate.n_images,
+        include_train_parameters: includeTrainParameters,
+        include_good_class: includeGoodClass,
+        ai_report_good_class: aiReportGoodClass,
+        n_images_per_row: nImagesPerRow,
+        include_train: includeTrain,
+        include_test: includeTest,
+        include_validate: includeValidate,
       }
 
       delete updatedData.ai_report
+      return updatedData
+    },
+    readSplitParameterForTFSetting(data) {
+      let groupByStrategy
+      let seed
+      let splitStages
+
+      if (data.splits_params) {
+        groupByStrategy = data.splits_params.group_by_strategy
+        seed = data.splits_params.seed
+        splitStages = data.splits_params.split_stages
+      } else {
+        groupByStrategy = null
+        seed = null
+        splitStages = {}
+      }
+
+      const updatedData = {
+        ...data,
+        group_by_strategy: groupByStrategy,
+        seed,
+        split_stages: splitStages,
+      }
+
+      delete updatedData.splits_params
       return updatedData
     },
     async loadFile() {
@@ -991,15 +1042,7 @@ export default {
       let { data } = await axios.get(
         `${getFileServerPath()}${ws}/TFSettings.json`,
       )
-      data = {
-        ...data,
-        group_by_strategy: data.splits_params.group_by_strategy,
-        seed: data.splits_params.seed,
-        split_stages: data.splits_params.split_stages,
-      }
-
-      delete data.splits_params
-
+      data = this.readSplitParameterForTFSetting(data)
       data = this.readAIReportForTFSetting(data)
       Object.keys(this.fields).forEach((field) => {
         if (field === 'resize') {
