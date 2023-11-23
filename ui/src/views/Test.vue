@@ -43,9 +43,16 @@
         </div>
       </b-col>
       <b-col cols="9" class="has-board">
+        <div class="logs-slider-label" v-if="true">Logs Font Size</div>
+        <div class="logs-font-size-slider col-5" v-if="true">
+          <s-field
+                :schema="this.schema"
+                @input="handleInput"
+              />
+        </div>
         <b-tabs>
           <b-tab title="Logs" active>
-            <div class="logs">{{ testLog }}</div>
+            <div class="logs" :style="`font-size:${this.logsFontSize}pt`">{{ testLog }}</div>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -53,14 +60,27 @@
   </div>
 </template>
 <script>
+import { debounce } from 'lodash'
 import api from '../utils/api'
 import command from '../mixins/command'
+// eslint-disable-next-line no-unused-vars
+import SField from '../components/field/Index.vue'
+import * as types from '../components/field/data_types'
 
 export default {
   name: 'Test',
   mixins: [command],
   data() {
     return {
+      schema: {
+        type: types.SLIDER,
+        sliderSign: 'pt',
+        options: {
+          max: 30,
+          min: 8,
+          default: 10,
+        },
+      },
       commands: [
         {
           value: 'script_test',
@@ -88,9 +108,13 @@ export default {
       testLog: null,
       interval: null,
       isdisabled: false,
+      logsFontSize: 10,
     }
   },
   methods: {
+    handleInput: debounce(function handleInputFunction(eventValue) {
+      this.logsFontSize = eventValue
+    }, 300),
     async getLog() {
       await api.getLogFor('test').then((res) => {
         this.testLog = res
@@ -137,5 +161,17 @@ export default {
   height: 100%;
   padding: .5rem;
   white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+.logs-font-size-slider{
+    position: absolute;
+    top: 15px;
+    right: 0px;
+}
+.logs-slider-label{
+  position: absolute;
+  right: 21%;
+  top: 15px;
+  font-size: 14px;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="mt-4">
-    <b-row>
-      <b-col>
+    <b-row class="mb-2">
+      <b-col cols="12" lg="2">
         <div class="title-container">
           <div>
             <h4>Admin Panel</h4>
@@ -21,6 +21,11 @@
           <div class="cmd">
             <b-button class="svtrain-cmd-btn" @click="flag = 'template_aic'">
               <span class="ml-2">Update TFSetting template</span>
+            </b-button>
+          </div>
+          <div class="cmd">
+            <b-button class="svtrain-cmd-btn" @click="flag = 'admin_log'">
+              <span class="ml-2">Show Admin Logs</span>
             </b-button>
           </div>
           <div class="cmd">
@@ -44,14 +49,12 @@
             </b-button>
           </div>
           <div class="cmd">
-            <b-button :disabled="isRevertImageNameDisabled"  class="svtrain-cmd-btn d-flex align-items-center justify-content-between" @click="showConfirmationModal">
+            <b-button :disabled="isRevertImageNameDisabled"
+              class="svtrain-cmd-btn d-flex align-items-center justify-content-between" @click="showConfirmationModal">
               <span class="ml-2">Revert image names</span>
-              <div
-                v-b-tooltip.hover
-                @click.stop=""
-                title="Clicking this button will permanently remove class and probability information from all images in the active workspace."
-              >
-              <b-icon icon="info-circle" v-b-tooltip.hover></b-icon>
+              <div v-b-tooltip.hover @click.stop=""
+                title="Clicking this button will permanently remove class and probability information from all images in the active workspace.">
+                <b-icon icon="info-circle" v-b-tooltip.hover></b-icon>
               </div>
             </b-button>
           </div>
@@ -62,8 +65,24 @@
           </div>
         </div>
       </b-col>
-      <b-col cols="10" class="has-board">
-        <pre class="main-content" v-show="flag === 'log'" v-html="dataTXT"></pre>
+      <b-col cols="12" lg="10" class="has-board pl-lg-5">
+        <div class="logs-slider-label" v-if="true">Logs Font Size</div>
+        <div class="logs-font-size-slider col-5" v-if="true">
+          <s-field
+                :schema="this.schema"
+                @input="handleInput"
+              />
+        </div>
+        <b-tabs v-show="flag === 'log' || flag === 'admin_log'">
+          <b-tab :title="flag === 'admin_log' ?'Admin Logs': 'Audit Trail'" active>
+            <div v-show="flag === 'admin_log'" :style="`font-size:${this.logsFontSize}pt`" class="logs">
+              {{ adminLogs }}
+            </div>
+            <div v-show="flag === 'log'"  :style="`font-size:${this.logsFontSize}pt`" class="logs">
+            {{ dataTXT }}
+          </div>
+          </b-tab>
+        </b-tabs>
         <div v-show="flag && flag.includes('template_')" class="main-content">
           <div class="mb-4" id="wsjsoneditor" style="height: 650px;" />
           <b-button variant="primary" @click="saveFile">Save</b-button>
@@ -104,13 +123,26 @@ import axios from 'axios'
 import { mapGetters } from 'vuex'
 import { getAPIRoot } from '@/utils'
 import JSONEditor from 'jsoneditor'
+import { debounce } from 'lodash'
 import api from '../utils/api'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
+// eslint-disable-next-line no-unused-vars
+import SField from '../components/field/Index.vue'
+import * as types from '../components/field/data_types'
 
 export default {
   name: 'Admin',
   data() {
     return {
+      schema: {
+        type: types.SLIDER,
+        sliderSign: 'pt',
+        options: {
+          max: 30,
+          min: 8,
+          default: 10,
+        },
+      },
       flag: null,
       dataTXT: null,
       backups: [],
@@ -119,6 +151,8 @@ export default {
       isRevertImageNameDisabled: false,
       workspacePath: null,
       currentWS: null,
+      logsFontSize: 10,
+      adminLogs: null,
     }
   },
   components: {
@@ -136,6 +170,14 @@ export default {
     },
   },
   methods: {
+    handleInput: debounce(function handleInputFunction(eventValue) {
+      this.logsFontSize = eventValue
+    }, 300),
+    async fetch() {
+      await api.getLogFor('admin').then((res) => {
+        this.adminLogs = res
+      })
+    },
     openLink() {
       this.showLog = false
       window.open(this.KCManagementUri)
@@ -223,12 +265,19 @@ export default {
     }
     this.checkFolderExist()
     this.editor = new JSONEditor(container, options)
+    this.fetch(true)
+    this.interval = setInterval(this.fetch, 2000)
+    this.flag = 'admin_log'
+  },
+  beforeDestroy() {
+    clearInterval(this.interval)
   },
 }
 </script>
 
 <style lang="scss">
 .has-board {
+
   .main-content,
   .tab-content {
     height: calc(100vh - 200px);
@@ -244,13 +293,32 @@ export default {
       height: 100%;
     }
   }
+
   .tab-content {
     border-color: transparent #dee2e6 #dee2e6;
   }
 }
 
 .app .cmd-main-menu .svtrain-cmd-btn {
-  width: 250px;
+  width: 240px;
+}
+
+.logs {
+  height: 100%;
+  padding: .5rem;
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+.logs-font-size-slider{
+    position: absolute;
+    top: 15px;
+    right: 0px;
+}
+.logs-slider-label{
+  position: absolute;
+  right: 21%;
+  top: 15px;
+  font-size: 14px;
 }
 .workspace{
  font-weight: 700;

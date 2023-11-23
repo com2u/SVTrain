@@ -53,6 +53,7 @@
   "path_log_training": "training.log",
   "path_log_test": "test.log",
   "path_log_validate": "validate.log",
+  "path_log_admin": "admin.log",
   "path_field_export_model": "/export_model",
   "path_field_export_results": "/export_result",
   "path_field_export_images": "/export_images",

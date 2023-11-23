@@ -43,7 +43,7 @@
       <span class="slider-input-percent-sign">%</span>
           </template>
           <template v-else>
-            <code>{{ temp }}%</code>
+            <code>{{ temp }}{{sliderSign? sliderSign : "%"}}</code>
           </template>
         </b-col>
       </b-row>
@@ -112,8 +112,9 @@ export default {
       types,
       temp,
       percent: (temp / (this.schema.options.max || 200)) * 100,
-      showSliderInputField: true,
       multiValue: [],
+      showSliderInputField: null,
+      sliderSign: null,
     }
   },
   watch: {
@@ -152,6 +153,7 @@ export default {
   },
   mounted() {
     this.showSliderInputField = this.schema.showSliderInputField
+    this.sliderSign = this.schema.sliderSign
   },
 }
 </script>
