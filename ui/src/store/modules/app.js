@@ -89,5 +89,6 @@ export default {
   getters: {
     showHeader: (state) => state.showHeader,
     user: (state) => state.user,
+    workspaceConfig: (state) => state.config,
   },
 }

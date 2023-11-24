@@ -17,13 +17,18 @@
           </b-button>
           <template v-for="command in commands">
             <div v-if="aiOptions[command.value]" :key="command.value" class="cmd">
-              <b-button class="svtrain-cmd-btn"
+              <b-button class="svtrain-train-cmd-btn"
                 :class="command.value === 'script_stop_training' ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_training' && !running || command.value !== 'script_stop_training' && !!running"
                 v-on:click="runCommand(command.value, workspace)">
                 <v-icon v-if="!command.icon" v-bind:name="command.value === 'script_stop_training' ? 'stop' : 'play'" />
                 <svg-icon v-else :icon-class="command.icon"></svg-icon>
                 <span class="ml-2">{{ command.label }}</span>
+                <div v-if="command.value === 'script_run_test_on_train'" class="info-circle" v-b-tooltip.hover
+                  @click.stop=""
+                  title="Clicking this button will add the highest pseudo probability and its corresponding defect class to the beginning of the file name. It is required to display the confusion matrix correctly. This function is required for training runs that were done outside of the Eject-X platform.">
+                  <b-icon icon="info-circle" v-b-tooltip.hover></b-icon>
+                </div>
               </b-button>
               <span v-if="isLoading[command.value]">Running...</span>
               <pre style="padding-left: 10px" v-if="logs[command.value] && logs[command.value].lastLine" class="log-line"
@@ -33,7 +38,7 @@
           </template>
           <div v-for="directExport in directExports" :key="directExport.mode">
             <div class="cmd">
-              <b-button class="svtrain-cmd-btn"
+              <b-button class="svtrain-train-cmd-btn"
                 :class="!doesFolderExist[directExport.mode].fileExist ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!doesFolderExist[directExport.mode].fileExist || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
@@ -52,7 +57,7 @@
       <b-col cols="9" class="has-board">
         <b-tabs>
           <b-tab title="Logs" active>
-            <pre v-html="trainLog" class="logs"></pre>
+            <div class="logs">{{ trainLog }}</div>
           </b-tab>
           <b-tab v-if="tensorBoard" title="tensorBoard">
             <iframe :src="tensorBoard"></iframe>
@@ -93,6 +98,10 @@ export default {
         {
           value: 'script_training2',
           label: 'Cleanup',
+        },
+        {
+          value: 'script_run_test_on_train',
+          label: 'Run test on folder train',
         },
       ],
       directExports: [
@@ -191,8 +200,21 @@ export default {
   }
 }
 
+.svtrain-train-cmd-btn {
+  width: 230px;
+  text-align: left;
+  position: relative;
+  .info-circle {
+    margin-left: 5px;
+    position: absolute;
+    top: 7px;
+    right: 6px;
+  }
+}
+
 .logs {
   height: 100%;
   padding: .5rem;
+  white-space: pre-wrap;
 }
 </style>

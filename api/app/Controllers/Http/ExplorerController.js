@@ -140,7 +140,9 @@ const CONST_PATHS = {
     script_report: "SCRIPT_REPORT",
     script_split_data: "SCRIPT_SPLIT_DATA",
     script_workspace_changed: "SCRIPT_WORKSPACE_CHANGED",
-    script_remove_lock_file: "SCRIPT_REMOVE_LOCK_FILE"
+    script_remove_lock_file: "SCRIPT_REMOVE_LOCK_FILE",
+    run_remove_class_and_probability: "SCRIPT_REMOVE_CLASS_AND_PROBABILITY",
+    script_run_test_on_train:'SCRIPT_RUN_TEST_ON_TRAIN'
   },
   ignoreFiles: ['.DS_Store']
 };
@@ -1021,7 +1023,9 @@ class ExplorerController {
       cfgPath: cfgPath.replace(CONST_PATHS.root, ""),
     }
 
-    const files = await readdir(dir);
+    const files = (await readdir(dir)).sort((firstFile, secondFile) => {
+      return firstFile.toLowerCase().localeCompare(secondFile.toLowerCase());
+    });
     for (const file of files) {
       const flstat = await lstat(path.join(dir, file));
       if (flstat.isDirectory()) {

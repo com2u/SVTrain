@@ -179,16 +179,21 @@
               @click.stop="syncDB"
             />
           </div>
-          <div class="icon-wrapper" v-b-tooltip.hover title="Workspace Settings">
-            <b-icon
-              :class="
-                info.config && canEditConfig ? 'clickable-icon' : 'gray-icon'
-              "
-              icon="gear-fill"
-              font-scale="1.5"
-              data-e2e-testid="workspace-settings"
-              @click.stop="showConfig"
-            />
+          <div class="icon-wrapper" :style="{'margin-right': '15px', 'padding-top': '-15px'}" v-b-tooltip.hover title="Workspace Settings">
+            <b-iconstack font-scale='1.3'>
+              <b-icon
+                :class="
+                  info.config && canEditConfig ? 'clickable-icon' : 'gray-icon'
+                "
+                icon="gear-fill"
+                @click.stop="showConfig"
+              />
+              <b-icon
+                v-if='!info.config && canEditConfig && depth === 0'
+                icon='exclamation-lg'
+                variant='danger'
+              />
+            </b-iconstack>
           </div>
           <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
             <b-icon
@@ -299,18 +304,22 @@ export default {
       return this.$store.state.app.config.wsPath
     },
     info() {
-      if (this.rawInfo.hasSubFolders && this.rawInfo.subFolders) {
+      const excludedFolders = ['model']
+      const filteredSubFolder = this.rawInfo.subFolders.filter((folder) => !excludedFolders.includes(folder.name.toLowerCase()))
+      const pseudoRawInfo = this.rawInfo
+      pseudoRawInfo.subFolders = filteredSubFolder
+      if (pseudoRawInfo.hasSubFolders && pseudoRawInfo.subFolders) {
         return {
-          ...this.rawInfo,
+          ...pseudoRawInfo,
           ...this.sumObjectsByKey(
             {
-              classified: this.rawInfo.classified,
-              unclassified: this.rawInfo.unclassified,
-              missed: this.rawInfo.missed,
-              matched: this.rawInfo.matched,
-              mismatched: this.rawInfo.mismatched,
+              classified: pseudoRawInfo.classified,
+              unclassified: pseudoRawInfo.unclassified,
+              missed: pseudoRawInfo.missed,
+              matched: pseudoRawInfo.matched,
+              mismatched: pseudoRawInfo.mismatched,
             },
-            ...this.rawInfo.subFolders,
+            ...pseudoRawInfo.subFolders,
           ),
         }
       }

@@ -58,7 +58,7 @@
       <b-col cols="9" class="has-board">
         <b-tabs>
           <b-tab title="Logs" active>
-            <pre v-html="validateLog" class="logs"></pre>
+            <div class="logs">{{ validateLog }}</div>
           </b-tab>
           <b-tab title="Generate AI Report">
             <iframe :src="generateAIReportURL"></iframe>
@@ -229,5 +229,6 @@ export default {
 .logs {
   height: 100%;
   padding: .5rem;
+  white-space: pre-wrap;
 }
 </style>

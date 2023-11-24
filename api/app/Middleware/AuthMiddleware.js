@@ -37,10 +37,11 @@ class AuthMiddleware {
       logger.info(`Request type is ${request.method()}`)
       logger.info(`Request url is ${request.url()}`)
       const user = verifyHeaderAndReturnUserSessionIfAvailable(request.header('x-usersession'))
-      const validRoles = Object.keys(getRoles())
+      const rolesObj = JSON.parse(await getRoles())
+      const validRoles = Object.keys(rolesObj)
       const role = user['roles']?.length ? user['roles'].filter(r => validRoles.includes(r)).slice(-1)[0] : null
       if (role) {
-        const permissions = getRoles()[role]
+        const permissions = rolesObj[role]
         if (properties.length) {
           for (const permission of properties) {
             response.unauthorized('PermissionDenied')
