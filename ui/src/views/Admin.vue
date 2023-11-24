@@ -91,7 +91,10 @@
       </b-col>
     </b-row>
     <div>
-      <confirmation-modal :id="'confirmation-modal'" @confirmed="handleRenameConfirmation" :confirmationText="confirmationText"></confirmation-modal>
+      <confirmation-modal :id="'confirmation-modal'" @confirmed="handleRenameConfirmation" :confirmationText="confirmationText">
+        <div>Workspace: <span class="workspace">{{ this.currentWS }}</span></div>
+        <br>
+      </confirmation-modal>
     </div>
   </div>
 </template>
@@ -114,6 +117,8 @@ export default {
       editor: null,
       confirmationText: 'Are you sure about removing class and probability information from all image names and renaming them?',
       isRevertImageNameDisabled: false,
+      workspacePath: null,
+      currentWS: null,
     }
   },
   components: {
@@ -203,8 +208,10 @@ export default {
       })
     },
     async checkFolderExist() {
-      this.workspace = await api.getWorkspace()
-      api.checkFileExists('images', this.workspace, '', 'revertImageName').then((response) => {
+      this.workspacePath = await api.getWorkspace()
+      const workspacePathArray = this.workspacePath.split('/')
+      this.currentWS = workspacePathArray[workspacePathArray.length - 1]
+      api.checkFileExists('images', this.workspacePath, '', 'revertImageName').then((response) => {
         this.isRevertImageNameDisabled = !response.fileExist
       })
     },
@@ -244,5 +251,8 @@ export default {
 
 .app .cmd-main-menu .svtrain-cmd-btn {
   width: 250px;
+}
+.workspace{
+ font-weight: 700;
 }
 </style>
