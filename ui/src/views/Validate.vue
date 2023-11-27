@@ -60,10 +60,7 @@
           <b-tab title="Logs" active>
             <div class="logs">{{ validateLog }}</div>
           </b-tab>
-          <b-tab title="Generate AI Report">
-            <iframe :src="generateAIReportURL"></iframe>
-          </b-tab>
-          <b-tab title="Last Report">
+          <b-tab title="Last Report" @click="handleLastReportClick">
             <iframe :src="lastReportURL"></iframe>
           </b-tab>
         </b-tabs>
@@ -127,7 +124,6 @@ export default {
       ],
       validateLog: null,
       interval: null,
-      generateAIReportURL: null,
       lastReportURL: null,
       doesFolderExist: { model: { fileExist: false }, result: { fileExist: false }, images: { fileExist: false } },
       isdisabled: false,
@@ -135,6 +131,9 @@ export default {
     }
   },
   methods: {
+    handleLastReportClick() {
+      this.fetch()
+    },
     async runExport(directExport) {
       const { mode, path, name } = directExport
       if (mode === 'images' && this.isdisabled === false) {
@@ -181,13 +180,6 @@ export default {
         .then(({ data }) => {
           if (data) {
             this.lastReportURL = URL.createObjectURL(data)
-          }
-        })
-      await axios
-        .get(`${getFileServerPath()}${ws}/externalpath.json`)
-        .then(({ data }) => {
-          if (data) {
-            this.generateAIReportURL = data.generateAIReportURL
           }
         })
     },
