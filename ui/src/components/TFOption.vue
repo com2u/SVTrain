@@ -26,8 +26,11 @@
                 :key="`${schema.field}-${fetchCount}`"
                 :schema="schema"
                 :value="data[schema.field]"
-                @input="data[schema.field] = $event"
+                @input="(eventValue) => handleInputChange(eventValue, schema)"
               />
+              <p :key="`${schema.field}`"  :class="{ 'text-danger': !splitStages.isValidated, 'text-primary': splitStages.isValidated }">
+                {{ schema.field === 'split_stages'? splitStages.validationText : ""}}
+              </p>
             </template>
           </div>
         </section>
@@ -45,6 +48,7 @@ import axios from 'axios'
 import api from '@/utils/api'
 import { getFileServerPath } from '@/utils'
 import JSONEditor from 'jsoneditor'
+import Vue from 'vue'
 import * as types from './field/data_types'
 import SField from './field/Index.vue'
 
@@ -98,31 +102,34 @@ export default {
                 {
                   label: 'Train',
                   field: 'train',
-                  type: types.NUMBER,
+                  type: types.SLIDER,
+                  showSliderInputField: true,
                   options: {
+                    max: 100,
                     min: 0,
-                    max: 1,
-                    placeholder: '0.0',
+                    default: 65,
                   },
                 },
                 {
                   label: 'Test',
                   field: 'test',
-                  type: types.NUMBER,
+                  type: types.SLIDER,
+                  showSliderInputField: true,
                   options: {
+                    max: 100,
                     min: 0,
-                    max: 1,
-                    placeholder: '0.0',
+                    default: 25,
                   },
                 },
                 {
                   label: 'Validation',
                   field: 'val',
-                  type: types.NUMBER,
+                  type: types.SLIDER,
+                  showSliderInputField: true,
                   options: {
+                    max: 100,
                     min: 0,
-                    max: 1,
-                    placeholder: '0.0',
+                    default: 10,
                   },
                 },
               ],
@@ -954,7 +961,8 @@ export default {
         heatmap_types: [],
         group_by_strategy: null,
         seed: null,
-        split_stages: {},
+        split_stages: {
+        },
         resize: {
           size: 'auto',
         },
@@ -966,11 +974,38 @@ export default {
         include_test: 'auto',
         include_validate: 'auto',
       },
+      splitValues: {},
+      splitStages: {
+        isValidated: true, over: null, under: null, validationText: '', sum: 0, splitValArray: [0],
+      },
       fetchCount: 1,
       editor: null,
     }
   },
   methods: {
+    handleInputChange(eventValue, schema) {
+      if (schema.field === 'split_stages') {
+        const fields = Object.keys(eventValue)
+        const values = Object.values(eventValue)
+        if (values[0] > 1) {
+          Vue.set(this.splitValues, fields[0], values[0])
+        }
+        this.splitSum()
+      }
+    },
+    splitSum() {
+      const splitValArray = Object.values(this.splitValues)?.map((splitValue) => {
+        if (typeof splitValue === 'string' || typeof splitValue === 'number') {
+          return parseInt(splitValue, 10)
+        }
+        return 0
+      })
+      this.splitStages.splitValArray = splitValArray?.filter((ele) => ele > 0)
+      if (this.splitStages.splitValArray.length) {
+        const sum = this.splitStages.splitValArray?.reduce((a, c) => a + c)
+        this.splitStages.sum = sum
+      }
+    },
     readAIReportForTFSetting(data) {
       let includeTrainParameters
       let includeGoodClass
@@ -1020,7 +1055,14 @@ export default {
       if (data.splits_params) {
         groupByStrategy = data.splits_params.group_by_strategy
         seed = data.splits_params.seed
-        splitStages = data.splits_params.split_stages
+        if (Object.keys(data.splits_params.split_stages)) {
+          const splitStagesData = data.splits_params.split_stages
+          splitStages = {
+            test: splitStagesData.test * 100,
+            train: splitStagesData.train * 100,
+            val: splitStagesData.val * 100,
+          }
+        }
       } else {
         groupByStrategy = null
         seed = null
@@ -1088,6 +1130,14 @@ export default {
       return updatedData
     },
     async saveFile() {
+      if (this.splitStages.sum !== 100) {
+        this.$notify({
+          type: 'error',
+          title: 'Error',
+          text: 'The sum of values across all alloted stages (Test, Train, and Validation) must equal 100%.',
+        })
+        return
+      }
       if (!this.canEditConfigAIUI && this.editor) {
         this.data = this.editor.get()
       }
@@ -1096,7 +1146,9 @@ export default {
         ...this.fields,
         ...this.data,
       }
-
+      data.split_stages.test = parseInt(this.splitValues.test, 10) / 100
+      data.split_stages.train = parseInt(this.splitValues.train, 10) / 100
+      data.split_stages.val = parseInt(this.splitValues.val, 10) / 100
       data = this.writeAIReportToTFSetting(data)
 
       // convert to json
@@ -1108,7 +1160,6 @@ export default {
       delete data.group_by_strategy
       delete data.seed
       delete data.split_stages
-
       data = this.transformEachChild(data, (child) => {
         if (!Number.isNaN(Number(child)) && typeof child === 'string') {
           return Number(child)
@@ -1118,7 +1169,7 @@ export default {
       const filePath = `${this.ws}/TFSettings.json`
       console.log(JSON.stringify(data, null, 2))
       await api.saveFile(filePath, JSON.stringify(data, null, 2))
-      // this.$refs.modal.hide()
+      this.$refs.modal.hide()
     },
     onOpen() {
       this.loadFile()
@@ -1138,6 +1189,20 @@ export default {
   },
   computed: {
     ...mapGetters(['canEditConfigAIUI', 'canEditConfigFullAIUI']),
+  },
+  watch: {
+    splitValues: {
+      handler() {
+        if (this.splitStages.sum > 100 || this.splitStages.sum < 100) {
+          this.splitStages.isValidated = false
+          this.splitStages.validationText = `ERROR: SUM = ${this.splitStages.sum}% => 100% required`
+        } else {
+          this.splitStages.isValidated = true
+          this.splitStages.validationText = 'OK: SUM = 100%'
+        }
+      },
+      deep: true,
+    },
   },
 }
 </script>
