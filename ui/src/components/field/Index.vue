@@ -140,9 +140,9 @@ export default {
       this.$emit('input', value)
     },
     toggleAuto() {
-// const fallbackJson = this.schema.type === types.J_ARRAY ? new Array(this.schema.options?.schema?.length || 0).fill(0) : {}
+      // const fallbackJson = this.schema.type === types.J_ARRAY ? new Array(this.schema.options?.schema?.length || 0).fill(0) : {}
       const fallbackString = this.value === 'auto' ? this.value.replace('auto', '') : this.value
-// const fallback = this.value === null && (this.schema.type === types.JSON || this.schema.type === types.J_ARRAY) ? fallbackJson : fallbackString
+      // const fallback = this.value === null && (this.schema.type === types.JSON || this.schema.type === types.J_ARRAY) ? fallbackJson : fallbackString
       this.temp = this.temp !== 'auto' ? 'auto' : fallbackString
       if (this.schema.type === types.T_ARRAY && this.temp !== 'auto') this.temp = []
       if (this.schema.type === types.JSON && this.temp !== 'auto') this.temp = {}
