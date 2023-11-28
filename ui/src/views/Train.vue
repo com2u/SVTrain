@@ -59,17 +59,12 @@
           <b-tab title="Logs" active>
             <div class="logs">{{ trainLog }}</div>
           </b-tab>
-          <b-tab v-if="tensorBoard" title="tensorBoard">
-            <iframe :src="tensorBoard"></iframe>
-          </b-tab>
         </b-tabs>
       </b-col>
     </b-row>
   </div>
 </template>
 <script>
-import axios from 'axios'
-import { getFileServerPath } from '@/utils'
 import TFOption from '@/components/TFOption'
 import { mapGetters } from 'vuex'
 import command from '../mixins/command'
@@ -115,7 +110,6 @@ export default {
       ],
       doesFolderExist: { images: { fileExist: false } },
       trainLog: null,
-      tensorBoard: null,
       interval: null,
       isdisabled: false,
     }
@@ -126,18 +120,10 @@ export default {
     ]),
   },
   methods: {
-    async fetch(flag) {
+    async fetch() {
       await api.getLogFor('training').then((res) => {
         this.trainLog = res
       })
-      if (this.workspace && flag) {
-        const ws = this.workspace.split('/').pop()
-        await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
-          if (data) {
-            this.tensorBoard = data.LiveViewURL
-          }
-        })
-      }
     },
     async runExport(directExport) {
       const { mode, path, name } = directExport
@@ -169,11 +155,11 @@ export default {
   },
   watch: {
     workspace() {
-      this.fetch(true)
+      this.fetch()
     },
   },
   mounted() {
-    this.fetch(true)
+    this.fetch()
     this.interval = setInterval(this.fetch, 2000)
     this.checkFolderExist()
   },
