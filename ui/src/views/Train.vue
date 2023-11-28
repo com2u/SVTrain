@@ -54,10 +54,17 @@
         </div>
         <t-f-option ref="modal" :ws="workspace" />
       </b-col>
-      <b-col cols="9" class="has-board">
+        <b-col cols="9" class="has-board">
+         <div class="logs-slider-label" v-if="true">Logs Font Size</div>
+        <div class="logs-font-size-slider col-5" v-if="true">
+          <s-field
+                :schema="this.schema"
+                @input="handleInput"
+              />
+        </div>
         <b-tabs>
           <b-tab title="Logs" active>
-            <div class="logs">{{ trainLog }}</div>
+            <div class="logs" :style="`font-size:${this.logsFontSize}pt`">{{ trainLog }}</div>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -67,8 +74,12 @@
 <script>
 import TFOption from '@/components/TFOption'
 import { mapGetters } from 'vuex'
+import { debounce } from 'lodash'
 import command from '../mixins/command'
 import api from '../utils/api'
+// eslint-disable-next-line no-unused-vars
+import SField from '../components/field/Index.vue'
+import * as types from '../components/field/data_types'
 
 export default {
   name: 'Train',
@@ -76,6 +87,15 @@ export default {
   mixins: [command],
   data() {
     return {
+      schema: {
+        type: types.SLIDER,
+        sliderSign: 'pt',
+        options: {
+          max: 30,
+          min: 8,
+          default: 10,
+        },
+      },
       commands: [
         {
           value: 'script_split_data',
@@ -112,6 +132,7 @@ export default {
       trainLog: null,
       interval: null,
       isdisabled: false,
+      logsFontSize: 10,
     }
   },
   computed: {
@@ -120,6 +141,9 @@ export default {
     ]),
   },
   methods: {
+    handleInput: debounce(function handleInputFunction(eventValue) {
+      this.logsFontSize = eventValue
+    }, 300),
     async fetch() {
       await api.getLogFor('training').then((res) => {
         this.trainLog = res
@@ -170,6 +194,7 @@ export default {
 </script>
 <style lang="scss">
 .has-board {
+  position: relative;
   .tab-content {
     height: calc(100vh - 200px);
     border-width: 1px;
@@ -202,5 +227,16 @@ export default {
   height: 100%;
   padding: .5rem;
   white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+.logs-font-size-slider{
+    position: absolute;
+    top: 15px;
+    right: 0px;
+}
+.logs-slider-label{
+  position: absolute;
+  right: 21%;
+  top: 15px;
 }
 </style>

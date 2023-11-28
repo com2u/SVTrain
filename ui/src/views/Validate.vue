@@ -56,9 +56,16 @@
         </div>
       </b-col>
       <b-col cols="9" class="has-board">
+        <div class="logs-slider-label" v-if="true">Logs Font Size</div>
+        <div class="logs-font-size-slider col-5" v-if="true">
+          <s-field
+                :schema="this.schema"
+                @input="handleInput"
+              />
+        </div>
         <b-tabs>
           <b-tab title="Logs" active>
-            <div class="logs">{{ validateLog }}</div>
+            <div class="logs" :style="`font-size:${this.logsFontSize}pt`">{{ validateLog }}</div>
           </b-tab>
           <b-tab title="Last Report" @click="handleLastReportClick">
             <iframe :src="lastReportURL"></iframe>
@@ -71,14 +78,27 @@
 <script>
 import axios from 'axios'
 import { isProduction, getFileServerPath } from '@/utils'
+import { debounce } from 'lodash'
 import command from '../mixins/command'
 import api from '../utils/api'
+import * as types from '../components/field/data_types'
+// eslint-disable-next-line no-unused-vars
+import SField from '../components/field/Index.vue'
 
 export default {
   name: 'Validate',
   mixins: [command],
   data() {
     return {
+      schema: {
+        type: types.SLIDER,
+        sliderSign: 'pt',
+        options: {
+          max: 30,
+          min: 8,
+          default: 10,
+        },
+      },
       commands: [
         {
           value: 'script_validate',
@@ -128,12 +148,16 @@ export default {
       doesFolderExist: { model: { fileExist: false }, result: { fileExist: false }, images: { fileExist: false } },
       isdisabled: false,
       workspace: '',
+      logsFontSize: 10,
     }
   },
   methods: {
     handleLastReportClick() {
       this.fetch()
     },
+    handleInput: debounce(function handleInputFunction(eventValue) {
+      this.logsFontSize = eventValue
+    }, 300),
     async runExport(directExport) {
       const { mode, path, name } = directExport
       if (mode === 'images' && this.isdisabled === false) {
@@ -222,5 +246,16 @@ export default {
   height: 100%;
   padding: .5rem;
   white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+.logs-font-size-slider{
+    position: absolute;
+    top: 15px;
+    right: 0px;
+}
+.logs-slider-label{
+  position: absolute;
+  right: 21%;
+  top: 15px;
 }
 </style>
