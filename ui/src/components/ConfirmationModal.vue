@@ -1,5 +1,6 @@
 <template>
   <b-modal :id="id" title="Confirmation" @ok="confirm" @cancel="cancel">
+    <slot></slot>
     {{ confirmationText || 'Are you sure you?' }}
   </b-modal>
 </template>
