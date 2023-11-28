@@ -153,10 +153,6 @@ export default {
       currentWS: null,
       logsFontSize: 10,
       adminLogs: null,
-      workspacePath: null,
-      currentWS: null,
-      logsFontSize: 10,
-      adminLogs: null,
     }
   },
   components: {
