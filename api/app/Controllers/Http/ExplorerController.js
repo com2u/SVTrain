@@ -1159,7 +1159,11 @@ class ExplorerController {
       logger.error(`ExplorerController.command: Unknown command ${command}`);
       throw new Error(`Unknown command`);
     }
-    const cmdName = Env.get(CONST_PATHS.commandNames[command])
+    const ws = await this.getWorkspace();
+    const wsPath = ws.toString();
+    const configPath = path.join(wsPath, '/TFSettings.json');
+    const cfg = await this.getJsonConfig(configPath);
+    const cmdName = cfg[command] || Env.get(CONST_PATHS.commandNames[command])
     const commandFilePath = path.join(Env.get('COMMAND_FILES_PATH'), cmdName);
     if (!await exists(commandFilePath)) {
       logger.error(`ExplorerController.command: File ${commandFilePath} doesn't exist`);
