@@ -969,18 +969,6 @@ export default {
         include_train: data.ai_report.include_train === false ? 'auto' : data.ai_report.include_train.n_images,
         include_test: data.ai_report.include_test === false ? 'auto' : data.ai_report.include_test.n_images,
         include_validate: data.ai_report.include_validate === false ? 'auto' : data.ai_report.include_validate.n_images,
-        script_training: process.env.SCRIPT_TRAINING,
-        script_test: process.env.SCRIPT_TEST,
-        script_validate: process.env.SCRIPT_VALIDATE,
-        script_training2: process.env.SCRIPT_TRAINING2,
-        script_test2: process.env.SCRIPT_TEST2,
-        script_validate2: process.env.SCRIPT_VALIDATE2,
-        script_stop_training: process.env.SCRIPT_STOP_TRAINING,
-        script_stop_test: process.env.SCRIPT_STOP_TEST,
-        script_stop_validation: process.env.SCRIPT_STOP_VALIDATE,
-        script_report: process.env.SCRIPT_REPORT,
-        script_split_data: process.env.SCRIPT_SPLIT_DATA,
-        script_visualize_heatmap: process.env.SCRIPT_VISUALIZE_HEATMAP,
       }
 
       delete updatedData.ai_report
