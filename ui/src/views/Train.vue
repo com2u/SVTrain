@@ -52,7 +52,7 @@
           </div>
           <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
-        <t-f-option ref="modal" :ws="workspace" />
+        <t-f-option ref="modal" :ws="workspace" :cws="currentWs"/>
       </b-col>
         <b-col cols="9" class="has-board">
          <div class="logs-slider-label" v-if="true">Logs Font Size</div>
