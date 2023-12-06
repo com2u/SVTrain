@@ -5,34 +5,31 @@
     </template>
     <template v-else>
       <template v-for="category in Object.keys(schemas)">
-        <section
-          :key="category"
-          v-if="canEditConfigFullAIUI || limitAIUI.includes(category)"
-          :class="{ expanded: expandedCategory === category }"
-        >
-          <h5
-            @click="
-              expandedCategory = expandedCategory === category ? null : category
-            "
-          >
+        <section :key="category"
+          v-if="((canEditConfigFullAIUI || limitAIUI.includes(category)) && category !== 'Errors') || (category === 'Errors' && errors)"
+          :class="{ expanded: expandedCategory === category }">
+          <h5 @click="
+            expandedCategory = expandedCategory === category ? null : category
+            ">
             <v-icon
-              :name="`arrow-${expandedCategory === category ? 'down' : 'up'}`"
-            />
-            {{ category }}
+              :name="`arrow-${expandedCategory === category ? 'down' : 'up'}`" />
+            {{category === 'Errors'? `The TFSettings of the workspace ${cws.split("/")[1]} are invalid.` : category }}
           </h5>
           <div>
             <template v-for="schema in schemas[category]">
-              <s-field
-                :key="`${schema.field}-${fetchCount}`"
-                :schema="schema"
-                :value="data[schema.field]"
-                @input="(eventValue) => handleInputChange(eventValue, schema)"
-              />
-              <p :key="`${schema.field}`"  :class="{ 'text-danger': !splitStages.isValidated, 'text-primary': splitStages.isValidated }">
-                {{ schema.field === 'split_stages'? splitStages.validationText : ""}}
+              <s-field :key="`${schema.field}-${fetchCount}`" :schema="schema" :value="data[schema.field]"
+                @input="(eventValue) => handleInputChange(eventValue, schema)" />
+              <p :key="`${schema.field}`"
+                :class="{ 'text-danger': !splitStages.isValidated, 'text-primary': splitStages.isValidated }">
+                {{ schema.field === 'split_stages' ? splitStages.validationText : "" }}
               </p>
             </template>
           </div>
+          <template v-if="category === 'Errors' && errors">
+            <div class="errors">
+            {{ errors }}
+          </div>
+          </template>
         </section>
       </template>
     </template>
@@ -59,6 +56,10 @@ export default {
   },
   props: {
     ws: {
+      default: null,
+      type: String,
+    },
+    cws: {
       default: null,
       type: String,
     },
@@ -915,6 +916,7 @@ export default {
             },
           },
         ],
+        Errors: [],
       },
       data: {},
       fields: {
@@ -980,6 +982,7 @@ export default {
       },
       fetchCount: 1,
       editor: null,
+      errors: null,
     }
   },
   methods: {
@@ -1022,47 +1025,60 @@ export default {
       return updatedData
     },
     async loadFile() {
-      const ws = this.ws.split('/').pop()
-      let { data } = await axios.get(
-        `${getFileServerPath()}${ws}/TFSettings.json`,
-      )
-      data = {
-        ...data,
-        group_by_strategy: data.splits_params.group_by_strategy,
-        seed: data.splits_params.seed,
-      }
-      if (Object.keys(data.splits_params.split_stages)) {
-        const splitStagesData = data.splits_params.split_stages
-        const splitStages = {
-          test: splitStagesData.test * 100,
-          train: splitStagesData.train * 100,
-          val: splitStagesData.val * 100,
+      try {
+        const ws = this.ws.split('/').pop()
+        let { data } = await axios.get(
+          `${getFileServerPath()}${ws}/TFSettings.json`,
+        )
+        data = {
+          ...data,
+          group_by_strategy: data.splits_params.group_by_strategy,
+          seed: data.splits_params.seed,
         }
-        data.split_stages = splitStages
-      }
-      delete data.splits_params
 
-      data = this.readAIReportForTFSetting(data)
-      Object.keys(this.fields).forEach((field) => {
-        if (field === 'resize') {
-          if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
-            data[field] = {
-              size: data[field],
+        if (Object.keys(data.splits_params.split_stages)) {
+          const splitStagesData = data.splits_params.split_stages
+          const splitStages = {
+            test: splitStagesData.test * 100,
+            train: splitStagesData.train * 100,
+            val: splitStagesData.val * 100,
+          }
+          data.split_stages = splitStages
+        }
+
+        delete data.splits_params
+
+        data = this.readAIReportForTFSetting(data)
+
+        Object.keys(this.fields).forEach((field) => {
+          if (field === 'resize') {
+            if (
+              data[field] === 'auto'
+          || (Array.isArray(data[field]) && !data[field].length)
+            ) {
+              data[field] = {
+                size: data[field],
+              }
             }
           }
+          this.fields[field] = data[field] || this.fields[field]
+        })
+
+        this.fetchCount += 1
+        this.data = typeof data === 'object' ? data : {}
+
+        if (!this.canEditConfigAIUI) {
+          const container = document.getElementById('wsjsoneditor')
+          const options = {
+            mode: 'code',
+          }
+
+          const editor = new JSONEditor(container, options)
+          this.editor = editor
+          editor.set(this.data)
         }
-        this.fields[field] = data[field] || this.fields[field]
-      })
-      this.fetchCount += 1
-      this.data = typeof data === 'object' ? data : {}
-      if (!this.canEditConfigAIUI) {
-        const container = document.getElementById('wsjsoneditor')
-        const options = {
-          mode: 'code',
-        }
-        const editor = new JSONEditor(container, options)
-        this.editor = editor
-        editor.set(this.data)
+      } catch (error) {
+        this.errors = error.message
       }
     },
     writeAIReportToTFSetting(data) {
