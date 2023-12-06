@@ -48,7 +48,7 @@
       <div class="options">
         <div class="option-progress" title="Percentage Classified">
           <span class="file-nums option-progress-text" data-e2e-testid="file-nums"
-            >{{ totalFiles }} files</span
+            >{{ formatNumberWithCommas(totalFiles) }} files</span
           >
           <span
             class="option-progress-text"
@@ -89,7 +89,7 @@
           <div v-b-tooltip.hover class="icon-wrapper" title="AI Statistic" data-e2e-testid="ai-statistic">
             <b-icon
               icon="bar-chart-fill"
-              :class="canViewStatistics ? 'clickable-icon' : 'gray-icon'"
+              :class="canViewStatistics && hasChildren && depth !== 0 && totalFiles > 0 ? 'clickable-icon' : 'gray-icon'"
               font-scale="1.5"
               @click.stop="showStatistic"
             />
@@ -166,7 +166,7 @@
             </svg>
           </div>
           <div
-            v-if="canSyncDB"
+            v-if="false"
             class="icon-wrapper"
             v-b-tooltip.hover
             title="Convert to Database"
@@ -197,7 +197,9 @@
           </div>
           <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
             <b-icon
-              class="clickable-icon"
+              :class="
+                depth === 0 ? 'clickable-icon' : 'gray-icon'
+              "
               icon="server"
               font-scale="1.5"
               @click.stop="backup()"
@@ -235,9 +237,11 @@
 import { mapGetters } from 'vuex'
 import api from '@/utils/api'
 import EventBus from '../utils/eventbus'
+import utilsMixin from '../mixins/utilsMixin'
 
 export default {
   name: 'WorkspaceFolder',
+  mixins: [utilsMixin],
   props: {
     rawInfo: {
       type: Object,
@@ -272,7 +276,7 @@ export default {
     },
     totalFiles() {
       const totalFiles = this.info.matched + this.info.mismatched
-      return Number.isNaN(totalFiles) ? 0 : totalFiles.toLocaleString()
+      return Number.isNaN(totalFiles) ? 0 : totalFiles
     },
     indent() {
       return { marginLeft: `${this.depth * 50}px` }

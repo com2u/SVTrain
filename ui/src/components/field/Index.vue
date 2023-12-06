@@ -19,7 +19,7 @@
         :min="schema.options.min" :max="schema.options.max"
         :value="temp" :placeholder="schema.options.placeholder" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
       <!--        Json         -->
-      <field-json v-else-if="schema.type === types.JSON || schema.type === types.J_ARRAY" v-model="temp" :schema="schema" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
+      <field-json v-else-if="schema.type === types.JSON || schema.type === types.J_ARRAY" v-model="temp" :schema="schema" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`" @jsonFieldVal="handleInput"/>
       <!--        Select       -->
       <b-form-select expanded :multiple="schema.options.multiple" :id="schema.field" v-else-if="schema.type === types.SELECT" v-model="temp" @change="handleInput" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`">
         <option
@@ -34,8 +34,18 @@
       <b-form-checkbox v-else-if="schema.type === types.BOOLEAN" @change="handleInput" v-model="temp" :id="schema.field" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
       <b-form-tags v-else-if="schema.type === types.T_ARRAY" v-model="temp" :placeholder="schema.options.placeholder" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
       <b-row v-else-if="schema.type === types.SLIDER">
-        <b-col sm="8"><b-form-input type="range" v-model="temp" :min="schema.options.min || 0" :max="schema.options.max || 200" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/></b-col>
-        <b-col><code>{{temp}}%</code></b-col>
+        <b-col :sm="showSliderInputField ? '7' : '8'">
+          <b-form-input type="range" v-model="temp" :min="schema.options.min || 0" :max="schema.options.max || 200" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
+        </b-col>
+        <b-col :sm="showSliderInputField ? '5' : ''">
+          <template v-if="showSliderInputField" class="slider-input-percent-input">
+            <b-form-input class="slider-number-input" type="number" v-model="percent" @input="handleInput" :min="schema.options.min || 0" :max="schema.options.max || 200" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
+      <span class="slider-input-percent-sign">%</span>
+          </template>
+          <template v-else>
+            <code>{{ temp }}{{sliderSign? sliderSign : "%"}}</code>
+          </template>
+        </b-col>
       </b-row>
     </b-col>
   </b-row>
@@ -101,16 +111,20 @@ export default {
     return {
       types,
       temp,
+      percent: (temp / (this.schema.options.max || 200)) * 100,
+      multiValue: [],
+      showSliderInputField: null,
+      sliderSign: null,
     }
   },
   watch: {
     temp: {
-      // eslint-disable-next-line no-unused-vars
-      handler(after, before) {
+      handler(after) {
         this.$emit('input', after)
         if (this.schema.options.onChange) {
           this.schema.options.onChange(after)
         }
+        this.percent = (after / (this.schema.options.max || 200)) * 100
       },
       deep: true,
     },
@@ -124,6 +138,7 @@ export default {
   methods: {
     handleInput(value) {
       this.temp = value
+      this.$emit('input', value)
     },
     toggleAuto() {
       // const fallbackJson = this.schema.type === types.J_ARRAY ? new Array(this.schema.options?.schema?.length || 0).fill(0) : {}
@@ -136,6 +151,10 @@ export default {
       this.$emit('input', this.temp)
     },
   },
+  mounted() {
+    this.showSliderInputField = this.schema.showSliderInputField
+    this.sliderSign = this.schema.sliderSign
+  },
 }
 </script>
 
@@ -145,5 +164,24 @@ code {
 }
 .b-form-tag {
   margin: 0.1rem 0.3rem!important;
+}
+.slider-input-percent-input{
+  position: relative;
+}
+.slider-input-percent-sign{
+  position: absolute;
+  top: 8px;
+  right: 28px;
+  font-weight: bold
+}
+
+.slider-number-input::-webkit-inner-spin-button,
+.slider-number-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.slider-number-input {
+  -moz-appearance: textfield;
 }
 </style>

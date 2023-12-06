@@ -36,9 +36,11 @@
 <script>
 import StatisticTable from './StatisticTable.vue'
 import api from '../utils/api'
+import utilsMixin from '../mixins/utilsMixin'
 
 export default {
   name: 'StatisticPopup',
+  mixins: [utilsMixin],
   components: { StatisticTable },
   data() {
     return {
@@ -63,9 +65,6 @@ export default {
     },
   },
   methods: {
-    formatNumberWithCommas(number) {
-      return number.toLocaleString()
-    },
     convertDecimalUptoTwoDigit(selectionPercentage) {
       return selectionPercentage.toFixed(2)
     },

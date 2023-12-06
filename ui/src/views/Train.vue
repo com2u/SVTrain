@@ -52,15 +52,19 @@
           </div>
           <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
-        <t-f-option ref="modal" :ws="workspace" />
+        <t-f-option ref="modal" :ws="workspace" :cws="currentWs"/>
       </b-col>
-      <b-col cols="9" class="has-board">
+        <b-col cols="9" class="has-board">
+         <div class="logs-slider-label" v-if="true">Logs Font Size</div>
+        <div class="logs-font-size-slider col-5" v-if="true">
+          <s-field
+                :schema="this.schema"
+                @input="handleInput"
+              />
+        </div>
         <b-tabs>
           <b-tab title="Logs" active>
-            <div class="logs">{{ trainLog }}</div>
-          </b-tab>
-          <b-tab v-if="tensorBoard" title="tensorBoard">
-            <iframe :src="tensorBoard"></iframe>
+            <div class="logs" :style="`font-size:${this.logsFontSize}pt`">{{ trainLog }}</div>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -68,12 +72,14 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
-import { getFileServerPath } from '@/utils'
 import TFOption from '@/components/TFOption'
 import { mapGetters } from 'vuex'
+import { debounce } from 'lodash'
 import command from '../mixins/command'
 import api from '../utils/api'
+// eslint-disable-next-line no-unused-vars
+import SField from '../components/field/Index.vue'
+import * as types from '../components/field/data_types'
 
 export default {
   name: 'Train',
@@ -81,6 +87,15 @@ export default {
   mixins: [command],
   data() {
     return {
+      schema: {
+        type: types.SLIDER,
+        sliderSign: 'pt',
+        options: {
+          max: 30,
+          min: 8,
+          default: 10,
+        },
+      },
       commands: [
         {
           value: 'script_split_data',
@@ -115,9 +130,9 @@ export default {
       ],
       doesFolderExist: { images: { fileExist: false } },
       trainLog: null,
-      tensorBoard: null,
       interval: null,
       isdisabled: false,
+      logsFontSize: 10,
     }
   },
   computed: {
@@ -126,18 +141,13 @@ export default {
     ]),
   },
   methods: {
-    async fetch(flag) {
+    handleInput: debounce(function handleInputFunction(eventValue) {
+      this.logsFontSize = eventValue
+    }, 300),
+    async fetch() {
       await api.getLogFor('training').then((res) => {
         this.trainLog = res
       })
-      if (this.workspace && flag) {
-        const ws = this.workspace.split('/').pop()
-        await axios.get(`${getFileServerPath()}${ws}/TFSettings.json`).then(({ data }) => {
-          if (data) {
-            this.tensorBoard = data.LiveViewURL
-          }
-        })
-      }
     },
     async runExport(directExport) {
       const { mode, path, name } = directExport
@@ -169,11 +179,11 @@ export default {
   },
   watch: {
     workspace() {
-      this.fetch(true)
+      this.fetch()
     },
   },
   mounted() {
-    this.fetch(true)
+    this.fetch()
     this.interval = setInterval(this.fetch, 2000)
     this.checkFolderExist()
   },
@@ -184,6 +194,7 @@ export default {
 </script>
 <style lang="scss">
 .has-board {
+  position: relative;
   .tab-content {
     height: calc(100vh - 200px);
     border-width: 1px;
@@ -216,5 +227,16 @@ export default {
   height: 100%;
   padding: .5rem;
   white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+.logs-font-size-slider{
+    position: absolute;
+    top: 15px;
+    right: 0px;
+}
+.logs-slider-label{
+  position: absolute;
+  right: 21%;
+  top: 15px;
 }
 </style>
