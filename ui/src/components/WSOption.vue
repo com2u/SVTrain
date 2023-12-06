@@ -4,6 +4,7 @@
       <section
         :key="category"
         :class="{ expanded: expandedCategory === category }"
+        :data-e2e-testid="`${category.trim()}`"
       >
         <h5
           @click="

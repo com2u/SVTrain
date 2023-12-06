@@ -27,7 +27,7 @@
         New Workspace
       </div>
     </div>
-    <b-modal v-model="notesVisible" ok-title="Save" cancel-title="Back">
+    <b-modal v-model="notesVisible" ok-title="Save" cancel-title="Back" data-e2e-testid="notes-modal">
       <template v-slot:modal-title>Notes for {{ $store.state.notes.folder.name }}</template>
       <div>
         <b-form-textarea
@@ -35,18 +35,20 @@
           v-model="notesContent"
           rows="3"
           max-rows="6"
+          data-e2e-testid="notes-textarea"
         ></b-form-textarea>
       </div>
       <template v-slot:modal-footer>
         <div class="note-footer">
           <div>
-            <b-form-checkbox v-model="notesHighlight" :disabled="!canEditNote">
+            <b-form-checkbox v-model="notesHighlight" :disabled="!canEditNote" data-e2e-testid="notes-checkbox">
               Highlight Note
             </b-form-checkbox>
           </div>
           <div>
             <b-button @click="notesVisible=false" class="btn-cancel">Cancel</b-button>
             <b-button
+              data-e2e-testid="notes-save"
               v-if="canEditNote"
               variant="primary"
               @click="saveNotes">
@@ -56,7 +58,7 @@
         </div>
       </template>
     </b-modal>
-    <b-modal v-model="cfgVisible" ok-title="Save" cancel-title="Back" @shown="onModalShow">
+    <b-modal v-model="cfgVisible" ok-title="Save" cancel-title="Back" @shown="onModalShow" data-e2e-testid="workspace-settings-modal">
       <template v-slot:modal-title>Workspace Settings {{ $store.state.notes.folder.name }}</template>
       <div v-if="editConfigUI">
         <w-s-option ref="ws-option" :value="$store.state.wsconfig.folder.config"></w-s-option>

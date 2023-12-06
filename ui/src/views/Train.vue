@@ -11,8 +11,8 @@
           <div>Workspace: <strong>{{ currentWs }}</strong></div>
           <div v-if="running !== null" v-html="running || 'idle'"></div>
           <b v-else>no info</b>
-          <b-button v-if="editConfigAI" class="mt-2" @click="showModal()">
-            <v-icon name="cogs" />
+          <b-button v-if="editConfigAI" data-e2e-testid="edit-settings" class="mt-2" @click="showModal()">
+            <v-icon name="cogs"/>
             <span class="ml-2">Settings</span>
           </b-button>
           <template v-for="command in commands">
@@ -52,7 +52,7 @@
           </div>
           <pre v-if="false" class="py-4" v-html="logs.training.lastLine"></pre>
         </div>
-        <t-f-option ref="modal" :ws="workspace" />
+        <t-f-option ref="modal" :ws="workspace" :cws="currentWs"/>
       </b-col>
         <b-col cols="9" class="has-board">
          <div class="logs-slider-label" v-if="true">Logs Font Size</div>

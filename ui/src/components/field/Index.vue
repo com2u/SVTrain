@@ -2,7 +2,7 @@
   <!--    Augmentations    -->
   <augmentations-input v-if="schema.type === types.AUGMENTATIONS" :augmentations="temp" @input="handleInput" />
   <b-row v-else class="mb-2">
-    <b-col cols="6" class="mr-auto">
+    <b-col cols="6" class="mr-auto" :data-e2e-testid="`${schema.label.trim().replace(/\s+/g, '')}`">
       <div>{{schema.label}}</div>
       <small v-if="schema.options.help" class="form-text text-muted">{{schema.options.help}}</small>
       <small  v-if="schema.options.hasAuto === true">
@@ -17,11 +17,11 @@
         v-else-if="[types.TEXT, types.NUMBER].includes(schema.type)"
         :type="schema.type" @input="handleInput"
         :min="schema.options.min" :max="schema.options.max"
-        :value="temp" :placeholder="schema.options.placeholder"/>
+        :value="temp" :placeholder="schema.options.placeholder" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
       <!--        Json         -->
-      <field-json v-else-if="schema.type === types.JSON || schema.type === types.J_ARRAY" v-model="temp" :schema="schema" @jsonFieldVal="handleInput"/>
+      <field-json v-else-if="schema.type === types.JSON || schema.type === types.J_ARRAY" v-model="temp" :schema="schema" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`" @jsonFieldVal="handleInput"/>
       <!--        Select       -->
-      <b-form-select expanded :multiple="schema.options.multiple" :id="schema.field" v-else-if="schema.type === types.SELECT" v-model="temp" @change="handleInput">
+      <b-form-select expanded :multiple="schema.options.multiple" :id="schema.field" v-else-if="schema.type === types.SELECT" v-model="temp" @change="handleInput" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`">
         <option
           v-for="option in schema.options.dataset"
           :value="option.value"
@@ -31,15 +31,15 @@
         <option :value="null">________</option>
       </b-form-select>
       <!--        Boolean      -->
-      <b-form-checkbox v-else-if="schema.type === types.BOOLEAN" @change="handleInput" v-model="temp" :id="schema.field"/>
-      <b-form-tags v-else-if="schema.type === types.T_ARRAY" v-model="temp" :placeholder="schema.options.placeholder"/>
+      <b-form-checkbox v-else-if="schema.type === types.BOOLEAN" @change="handleInput" v-model="temp" :id="schema.field" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
+      <b-form-tags v-else-if="schema.type === types.T_ARRAY" v-model="temp" :placeholder="schema.options.placeholder" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
       <b-row v-else-if="schema.type === types.SLIDER">
         <b-col :sm="showSliderInputField ? '7' : '8'">
-          <b-form-input type="range" v-model="temp" :min="schema.options.min || 0" :max="schema.options.max || 200"/>
+          <b-form-input type="range" v-model="temp" :min="schema.options.min || 0" :max="schema.options.max || 200" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
         </b-col>
         <b-col :sm="showSliderInputField ? '5' : ''">
           <template v-if="showSliderInputField" class="slider-input-percent-input">
-            <b-form-input class="slider-number-input" type="number" v-model="percent" @input="handleInput" :min="schema.options.min || 0" :max="schema.options.max || 200"/>
+            <b-form-input class="slider-number-input" type="number" v-model="percent" @input="handleInput" :min="schema.options.min || 0" :max="schema.options.max || 200" :data-e2e-testid="`input${schema.label.trim().replace(/\s+/g, '')}`"/>
       <span class="slider-input-percent-sign">%</span>
           </template>
           <template v-else>

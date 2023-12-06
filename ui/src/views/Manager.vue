@@ -17,18 +17,20 @@
         v-bind:key="folder.path"
       >
         <div class="folder-label">
-          <div class="folder-label-name root-item">
+          <div class="folder-label-name root-item" data-e2e-testid="folder-label-name">
             <div class="rename-input" v-if="renamingWs === folder.path">
               <input
                 v-model="newWsName"
                 ref="renameInput"
                 @keyup.enter="renameWs(folder.path)"
+                data-e2e-testid="rename-input"
               />
               <b-button
                 variant="primary"
                 @click="renameWs(folder.path)"
                 :disabled="!newWsName"
                 style="margin-left: 0.5rem"
+                data-e2e-testid="renamed-workspace-save-button"
               >
                 <b-icon icon="save" />
                 <span> Save</span>
@@ -37,6 +39,7 @@
                 variant="secondary"
                 @click="cancelRename()"
                 style="margin-left: 0.5rem"
+                data-e2e-testid="renamed-workspace-cancel-button"
               >
                 <b-icon icon="x-lg" />
                 <span> Cancel</span>
@@ -62,6 +65,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Rename Workspace"
+                data-e2e-testid="rename-workspace"
               >
                 <v-icon
                   class="clickable-icon"
@@ -74,6 +78,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Duplicate Workspace"
+                data-e2e-testid="duplicate-workspace"
               >
                 <v-icon
                   class="clickable-icon"
@@ -86,6 +91,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Backup Workspace"
+                data-e2e-testid="backup-workspace"
               >
               <b-icon
                   class="clickable-icon"
@@ -98,6 +104,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Delete all workspace images"
+                data-e2e-testid="delete-all-workspace-images"
               >
                 <v-icon
                   label="Delete Images"
@@ -112,6 +119,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Delete Workspace"
+                data-e2e-testid="delete-workspace"
               >
                 <b-icon
                   class="clickable-icon"
@@ -140,8 +148,8 @@
         v-bind:key="backup.path"
       >
         <div class="folder-label">
-          <div class="folder-label-name root-item">
-            <v-icon name="archive"></v-icon>
+          <div class="folder-label-name root-item" :data-e2e-testid="`${backup.name}`">
+            <v-icon name="archive" data-e2e-testid="backup-icon"></v-icon>
             <span
               class="name"
               :style="{
@@ -166,6 +174,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Restore Backup"
+                data-e2e-testid="restore-backup"
               >
                 <v-icon
                   class="clickable-icon"
@@ -178,6 +187,7 @@
                 class="icon-wrapper"
                 v-b-tooltip.hover
                 title="Download Backup"
+                data-e2e-testid="download-backup"
               >
                 <v-icon
                   class="clickable-icon"
@@ -186,7 +196,7 @@
                   @click="downloadBackup(backup.path, humanFileSize(backup.size))"
                 />
               </div>
-              <div class="icon-wrapper" v-b-tooltip.hover title="Delete Backup">
+              <div class="icon-wrapper" v-b-tooltip.hover title="Delete Backup" data-e2e-testid="delete-backup">
                 <b-icon
                   class="clickable-icon"
                   icon="trash"

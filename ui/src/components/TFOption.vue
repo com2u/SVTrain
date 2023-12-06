@@ -5,34 +5,33 @@
     </template>
     <template v-else>
       <template v-for="category in Object.keys(schemas)">
-        <section
-          :key="category"
-          v-if="canEditConfigFullAIUI || limitAIUI.includes(category)"
+        <section :key="category"
+          v-if="((canEditConfigFullAIUI || limitAIUI.includes(category)) && category !== 'Errors') || (category === 'Errors' && errors)"
           :class="{ expanded: expandedCategory === category }"
+          :data-e2e-testid="`${category.trim()}`"
         >
-          <h5
-            @click="
-              expandedCategory = expandedCategory === category ? null : category
-            "
-          >
+          <h5 @click="
+            expandedCategory = expandedCategory === category ? null : category
+            ">
             <v-icon
-              :name="`arrow-${expandedCategory === category ? 'down' : 'up'}`"
-            />
-            {{ category }}
+              :name="`arrow-${expandedCategory === category ? 'down' : 'up'}`" />
+            {{category === 'Errors'? `The TFSettings of the workspace ${cws.split("/")[1]} are invalid.` : category }}
           </h5>
           <div>
             <template v-for="schema in schemas[category]">
-              <s-field
-                :key="`${schema.field}-${fetchCount}`"
-                :schema="schema"
-                :value="data[schema.field]"
-                @input="(eventValue) => handleInputChange(eventValue, schema)"
-              />
-              <p :key="`${schema.field}`"  :class="{ 'text-danger': !splitStages.isValidated, 'text-primary': splitStages.isValidated }">
-                {{ schema.field === 'split_stages'? splitStages.validationText : ""}}
+              <s-field :key="`${schema.field}-${fetchCount}`" :schema="schema" :value="data[schema.field]"
+                @input="(eventValue) => handleInputChange(eventValue, schema)" />
+              <p :key="`${schema.field}`"
+                :class="{ 'text-danger': !splitStages.isValidated, 'text-primary': splitStages.isValidated }">
+                {{ schema.field === 'split_stages' ? splitStages.validationText : "" }}
               </p>
             </template>
           </div>
+          <template v-if="category === 'Errors' && errors">
+            <div class="errors">
+            {{ errors }}
+          </div>
+          </template>
         </section>
       </template>
     </template>
@@ -59,6 +58,10 @@ export default {
   },
   props: {
     ws: {
+      default: null,
+      type: String,
+    },
+    cws: {
       default: null,
       type: String,
     },
@@ -915,6 +918,7 @@ export default {
             },
           },
         ],
+        Errors: [],
       },
       data: {},
       fields: {
@@ -939,18 +943,6 @@ export default {
         network_architecture: '',
         good_class: '',
         log_every_n_steps: 0,
-        script_training: null,
-        script_test: null,
-        script_validate: null,
-        script_training2: null,
-        script_test2: null,
-        script_validate2: null,
-        script_stop_training: null,
-        script_stop_test: null,
-        script_stop_validation: null,
-        script_report: null,
-        script_split_data: null,
-        script_visualize_heatmap: null,
         path_log_training: null,
         path_log_test: null,
         path_log_validate: null,
@@ -980,6 +972,7 @@ export default {
       },
       fetchCount: 1,
       editor: null,
+      errors: null,
     }
   },
   methods: {
@@ -1080,32 +1073,43 @@ export default {
       return updatedData
     },
     async loadFile() {
-      const ws = this.ws.split('/').pop()
-      let { data } = await axios.get(
-        `${getFileServerPath()}${ws}/TFSettings.json`,
-      )
-      data = this.readSplitParameterForTFSetting(data)
-      data = this.readAIReportForTFSetting(data)
-      Object.keys(this.fields).forEach((field) => {
-        if (field === 'resize') {
-          if (data[field] === 'auto' || (Array.isArray(data[field]) && !data[field].length)) {
-            data[field] = {
-              size: data[field],
+      try {
+        const ws = this.ws.split('/').pop()
+        let { data } = await axios.get(
+          `${getFileServerPath()}${ws}/TFSettings.json`,
+        )
+        data = this.readSplitParameterForTFSetting(data)
+        data = this.readAIReportForTFSetting(data)
+
+        Object.keys(this.fields).forEach((field) => {
+          if (field === 'resize') {
+            if (
+              data[field] === 'auto'
+          || (Array.isArray(data[field]) && !data[field].length)
+            ) {
+              data[field] = {
+                size: data[field],
+              }
             }
           }
+          this.fields[field] = data[field] || this.fields[field]
+        })
+
+        this.fetchCount += 1
+        this.data = typeof data === 'object' ? data : {}
+
+        if (!this.canEditConfigAIUI) {
+          const container = document.getElementById('wsjsoneditor')
+          const options = {
+            mode: 'code',
+          }
+
+          const editor = new JSONEditor(container, options)
+          this.editor = editor
+          editor.set(this.data)
         }
-        this.fields[field] = data[field] || this.fields[field]
-      })
-      this.fetchCount += 1
-      this.data = typeof data === 'object' ? data : {}
-      if (!this.canEditConfigAIUI) {
-        const container = document.getElementById('wsjsoneditor')
-        const options = {
-          mode: 'code',
-        }
-        const editor = new JSONEditor(container, options)
-        this.editor = editor
-        editor.set(this.data)
+      } catch (error) {
+        this.errors = error.message
       }
     },
     writeAIReportToTFSetting(data) {

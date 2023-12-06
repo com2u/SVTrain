@@ -1,6 +1,7 @@
 <template>
   <div class="ws-container">
     <div
+      :data-e2e-testid="`workspace-${info.name}`"
       class="folder-label"
       :style="indent"
       :class="wsPath === systemConfig.root + info.path ? 'selected' : ''"
@@ -21,6 +22,7 @@
                 icon="triangle-fill"
                 class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
+                data-e2e-testid="traingle-icon"
               />
               <b-icon
                 v-else
@@ -28,12 +30,14 @@
                 icon="triangle-fill"
                 class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
+                data-e2e-testid="traingle-icon"
               />
             </template>
             <span v-else class="margin-keeper" />
           </template>
         </span>
         <span
+          :data-e2e-testid="`workspace-inner-folder-${info.name}`"
           class="name"
           :style="{
             fontSize: subFolderFontSize,
@@ -43,8 +47,8 @@
       </div>
       <div class="options">
         <div class="option-progress" title="Percentage Classified">
-          <span class="file-nums option-progress-text"
-            >{{ totalFiles }} files</span
+          <span class="file-nums option-progress-text" data-e2e-testid="file-nums"
+            >{{ formatNumberWithCommas(totalFiles) }} files</span
           >
           <span
             class="option-progress-text"
@@ -82,10 +86,10 @@
           ></progress>
         </div>
         <div>
-          <div v-b-tooltip.hover class="icon-wrapper" title="AI Statistic">
+          <div v-b-tooltip.hover class="icon-wrapper" title="AI Statistic" data-e2e-testid="ai-statistic">
             <b-icon
               icon="bar-chart-fill"
-              :class="canViewStatistics ? 'clickable-icon' : 'gray-icon'"
+              :class="canViewStatistics && hasChildren && depth !== 0 && totalFiles > 0 ? 'clickable-icon' : 'gray-icon'"
               font-scale="1.5"
               @click.stop="showStatistic"
             />
@@ -95,6 +99,7 @@
               :icon="info && info.highlight ? 'file-text-fill' : 'file-text'"
               class="svg-icon clickable-icon"
               :class="info.highlight ? 'highlight' : ''"
+              data-e2e-testid="notes"
               @click.stop="showNotes"
             />
           </div>
@@ -103,6 +108,7 @@
             v-if="canSeeConfusionMatrix"
             class="icon-wrapper clickable"
             @click.stop="showConfusionMatrix()"
+            data-e2e-testid="compare-workspaces"
             title="Compare Workspaces"
           >
             <svg
@@ -160,7 +166,7 @@
             </svg>
           </div>
           <div
-            v-if="canSyncDB"
+            v-if="false"
             class="icon-wrapper"
             v-b-tooltip.hover
             title="Convert to Database"
@@ -191,7 +197,9 @@
           </div>
           <div v-if="canBackup" v-b-tooltip.hover class="icon-wrapper" title="Backup Workspace">
             <b-icon
-              class="clickable-icon"
+              :class="
+                depth === 0 ? 'clickable-icon' : 'gray-icon'
+              "
               icon="server"
               font-scale="1.5"
               @click.stop="backup()"
@@ -229,9 +237,11 @@
 import { mapGetters } from 'vuex'
 import api from '@/utils/api'
 import EventBus from '../utils/eventbus'
+import utilsMixin from '../mixins/utilsMixin'
 
 export default {
   name: 'WorkspaceFolder',
+  mixins: [utilsMixin],
   props: {
     rawInfo: {
       type: Object,
@@ -266,7 +276,7 @@ export default {
     },
     totalFiles() {
       const totalFiles = this.info.matched + this.info.mismatched
-      return Number.isNaN(totalFiles) ? 0 : totalFiles.toLocaleString()
+      return Number.isNaN(totalFiles) ? 0 : totalFiles
     },
     indent() {
       return { marginLeft: `${this.depth * 50}px` }
