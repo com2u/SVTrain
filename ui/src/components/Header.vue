@@ -8,7 +8,7 @@
       <div class="nav-container">
         <b-navbar toggleable="lg" type="light" variant="faded">
           <b-navbar-nav :to="{ name: 'WorkSpacePage' }">
-            <b-nav-item class="logo" :to="{ name: 'WorkSpacePage' }">
+            <b-nav-item data-e2e-testid="ejectx-logo" class="logo" :to="{ name: 'WorkSpacePage' }">
               <img src="../assets/logo.png" />
             </b-nav-item>
           </b-navbar-nav>
@@ -86,6 +86,7 @@
               v-b-toggle.drawer-menu
               name="bars"
               class="burger-menu"
+              data-e2e-testid="burger-menu"
             ></v-icon>
           </b-navbar-nav>
         </b-navbar>
@@ -104,6 +105,7 @@
               <b-nav-item
                 class="nav-item-link"
                 v-if="adminPage"
+                data-e2e-testid="admin-page"
                 :to="{ name: 'AdminPage' }"
                 @click="hide"
               >
@@ -143,6 +145,7 @@
               <b-nav-item
                 class="nav-item-link"
                 :to="{ name: 'AboutPage' }"
+                data-e2e-testid="about-license"
                 @click="hide"
               >
                 <v-icon name="info-circle"></v-icon>

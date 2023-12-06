@@ -1,6 +1,7 @@
 <template>
   <div class="ws-container">
     <div
+      :data-e2e-testid="`workspace-${info.name}`"
       class="folder-label"
       :style="indent"
       :class="wsPath === systemConfig.root + info.path ? 'selected' : ''"
@@ -21,6 +22,7 @@
                 icon="triangle-fill"
                 class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
+                data-e2e-testid="traingle-icon"
               />
               <b-icon
                 v-else
@@ -28,12 +30,14 @@
                 icon="triangle-fill"
                 class="option-icon clickable-icon cursor-pointer"
                 @click.stop="toggleShowChildren"
+                data-e2e-testid="traingle-icon"
               />
             </template>
             <span v-else class="margin-keeper" />
           </template>
         </span>
         <span
+          :data-e2e-testid="`workspace-inner-folder-${info.name}`"
           class="name"
           :style="{
             fontSize: subFolderFontSize,
@@ -43,7 +47,7 @@
       </div>
       <div class="options">
         <div class="option-progress" title="Percentage Classified">
-          <span class="file-nums option-progress-text"
+          <span class="file-nums option-progress-text" data-e2e-testid="file-nums"
             >{{ formatNumberWithCommas(totalFiles) }} files</span
           >
           <span
@@ -82,7 +86,7 @@
           ></progress>
         </div>
         <div>
-          <div v-b-tooltip.hover class="icon-wrapper" title="AI Statistic">
+          <div v-b-tooltip.hover class="icon-wrapper" title="AI Statistic" data-e2e-testid="ai-statistic">
             <b-icon
               icon="bar-chart-fill"
               :class="canViewStatistics && hasChildren && depth !== 0 && totalFiles > 0 ? 'clickable-icon' : 'gray-icon'"
@@ -95,6 +99,7 @@
               :icon="info && info.highlight ? 'file-text-fill' : 'file-text'"
               class="svg-icon clickable-icon"
               :class="info.highlight ? 'highlight' : ''"
+              data-e2e-testid="notes"
               @click.stop="showNotes"
             />
           </div>
@@ -103,6 +108,7 @@
             v-if="canSeeConfusionMatrix"
             class="icon-wrapper clickable"
             @click.stop="showConfusionMatrix()"
+            data-e2e-testid="compare-workspaces"
             title="Compare Workspaces"
           >
             <svg

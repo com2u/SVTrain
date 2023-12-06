@@ -2,7 +2,7 @@
   <div class="mt-4">
     <b-row class="mb-2">
       <b-col cols="12" lg="2">
-        <div class="title-container">
+        <div class="title-container" data-e2e-testid="admin-panel">
           <div>
             <h4>Admin Panel</h4>
           </div>
@@ -24,16 +24,16 @@
             </b-button>
           </div>
           <div class="cmd">
-            <b-button class="svtrain-cmd-btn" @click="flag = 'admin_log'">
+            <b-button class="svtrain-cmd-btn" @click="flag = 'admin_log'" data-e2e-testid="show-admin-log">
               <span class="ml-2">Show Admin Logs</span>
             </b-button>
           </div>
           <div class="cmd">
-            <b-button class="svtrain-cmd-btn" @click="flag = 'log'">
+            <b-button class="svtrain-cmd-btn" @click="flag = 'log'" data-e2e-testid="show-audit-trail">
               <span class="ml-2">Show Audit Trail</span>
             </b-button>
           </div>
-          <div class="cmd" @click="downloadLog()">
+          <div class="cmd" @click="downloadLog()" data-e2e-testid="download-audit-trail">
             <b-button class="svtrain-cmd-btn">
               <span class="ml-2">Download Audit Trail</span>
             </b-button>
@@ -78,7 +78,7 @@
             <div v-show="flag === 'admin_log'" :style="`font-size:${this.logsFontSize}pt`" class="logs">
               {{ adminLogs }}
             </div>
-            <div v-show="flag === 'log'"  :style="`font-size:${this.logsFontSize}pt`" class="logs">
+            <div v-show="flag === 'log'"  :style="`font-size:${this.logsFontSize}pt`" class="logs" data-e2e-testid="main-content">
             {{ dataTXT }}
           </div>
           </b-tab>

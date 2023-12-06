@@ -7,7 +7,9 @@
       <template v-for="category in Object.keys(schemas)">
         <section :key="category"
           v-if="((canEditConfigFullAIUI || limitAIUI.includes(category)) && category !== 'Errors') || (category === 'Errors' && errors)"
-          :class="{ expanded: expandedCategory === category }">
+          :class="{ expanded: expandedCategory === category }"
+          :data-e2e-testid="`${category.trim()}`"
+        >
           <h5 @click="
             expandedCategory = expandedCategory === category ? null : category
             ">

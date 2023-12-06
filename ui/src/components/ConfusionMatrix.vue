@@ -9,7 +9,7 @@
             | Unclassified: {{calculated.unclassified}}
           </div>
         </div>
-        <b-table-simple striped :class="{'statistic-table-responsive': false}" class="statistic-table">
+        <b-table-simple striped :class="{'statistic-table-responsive': false}" class="statistic-table" data-e2e-testid="statistic-table">
           <b-thead>
             <b-tr>
               <b-th colspan="2" rowspan="2" class="input-conner"></b-th>
@@ -26,7 +26,7 @@
               </b-td>
               <b-td style="width: 20%" class="header">{{row}}</b-td>
               <b-td v-for="(col, index2) in cols" :key="index2" :class="{'main-diagonal': index1 === index2}">
-                <div v-if="valuesView === 'absolute'">
+                <div v-if="valuesView === 'absolute'" :data-e2e-testid="`table${col}${row}`">
                   <span
                     v-if="matrix[index2][index1] > 0"
                     class="clickable-text"
@@ -37,7 +37,7 @@
                   </span>
                   <span v-else class="gray-text">0</span>
                 </div>
-                <div v-else>
+                <div v-else :data-e2e-testid="`table${col}${row}`">
                   <span
                     v-if="percentageMatrix[index2][index1] > 0"
                     class="clickable-text"
