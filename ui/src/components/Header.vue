@@ -17,7 +17,7 @@
               <ul class="step-progress">
                 <li data-step="Manage">
                   <v-icon
-                    name="bars"
+                    name="list"
                     class="step-icon"
                     style="vertical-align: -0.15em"
                     :class="{

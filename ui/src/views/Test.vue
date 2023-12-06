@@ -17,7 +17,7 @@
                 :class="command.value === 'script_stop_test' ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!!isLoading[command.value] || command.value === 'script_stop_test' && !running || command.value !== 'script_stop_test' && !!running"
                 v-on:click="runCommand(command.value, workspace)">
-                <v-icon v-bind:name="command.value === 'script_stop_test' ? 'stop' : 'play'" />
+                <b-icon :icon="command.value === 'script_stop_test' ? 'stop-circle-fill' : 'file-earmark-play-fill'" />
                 <span class="ml-2">{{ command.label }}</span>
               </b-button>
               <span v-if="isLoading[command.value]">Running...</span>
@@ -32,8 +32,8 @@
                 :class="!doesFolderExist[directExport.mode].fileExist ? 'btn-stop-command' : 'btn-command'"
                 v-bind:disabled="!doesFolderExist[directExport.mode].fileExist || (directExport.mode === 'images' && isdisabled)"
                 v-on:click="runExport(directExport)">
-                <v-icon v-if="!directExport.icon" />
-                <svg-icon v-else :icon-class="directExport.icon"></svg-icon>
+                <b-icon v-if="!directExport.icon" />
+                <b-icon v-else :icon="directExport.icon"></b-icon>
                 <span class="ml-2">{{ directExport.label }}</span>
                 <b-spinner v-if="(directExport.mode === 'images' && isdisabled)" small class="ml-1"
                   label="Spinning"></b-spinner>
@@ -100,7 +100,7 @@ export default {
           mode: 'images',
           name: 'images',
           label: 'Download images',
-          icon: 'ExportImage',
+          icon: 'cloud-arrow-down-fill',
           path: '/test',
         },
       ],
